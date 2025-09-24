@@ -109,6 +109,7 @@
 - **명시적 타입**: 공개 API/유틸은 반환 타입 명시 권장
 - **유니온/제네릭**: 과도한 복잡화 지양, 필요한 만큼만 사용
 - **타입 체크 명령**: `pnpm typecheck`로 CI와 동일한 `tsc --noEmit` 검사를 수행
+- **CI**: `lint-and-typecheck` 워크플로에서 `pnpm lint`, `pnpm typecheck` 자동 실행
 
 ---
 
@@ -160,6 +161,7 @@ export async function GET() {
 - **환경변수**: URL/ANON 키는 `.env`에 설정. 서비스 롤 키 사용 시 절대 클라이언트 노출 금지
 - **RLS**: 개발 단계에서는 완전 허용 정책으로 시작할 수 있으나, 운영 전 반드시 정책 확립
 - **타입 생성(옵션)**: `supabase gen types`를 통해 `lib/database.types.ts` 생성 권장
+- **환경 변수 템플릿**: `.env.example`에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` 정의. 서버 전용 키는 브라우저에 노출 금지
 
 ---
 

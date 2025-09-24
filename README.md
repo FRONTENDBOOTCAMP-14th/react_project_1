@@ -29,7 +29,7 @@ Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼입니�
 
 - 프레임워크: Next.js 14 (App Router), React 18, TypeScript
 - 데이터/인증: Supabase (Postgres, Row Level Security, Auth)
-- 스타일: PureCSS (+ CSS Modules)
+- 스타일: VanillaCSS (+ CSS Modules)
 - 품질도구: ESLint, Prettier
 - 배포: Vercel
 - 패키지: Node LTS, pnpm
@@ -50,7 +50,7 @@ Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼입니�
 ```mermaid
 graph LR
   subgraph Client["Next.js (App Router)"]
-    UI[React UI + PureCSS]
+    UI[React UI + VanillaCSS]
     SSG[SSG/ISR Pages]
     API[Server Actions/Route Handlers]
   end
@@ -164,6 +164,7 @@ graph LR
 - Supabase 프로젝트 생성 및 환경변수
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
 
 ### 설치 및 실행
 
@@ -181,20 +182,22 @@ pnpm dev
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   }
 }
 ```
 
-### 스타일(PureCSS)
+### 스타일
 
-- 전역 스타일은 `app/layout.tsx`에서 `purecss/build/pure-min.css`와 `app/globals.css`를 임포트
+- 전역 스타일은 `app/layout.tsx`에서 `app/globals.css`를 임포트
 - `*.module.css`로 컴포넌트 스타일링
 
-### ESLint/Prettier
+### ESLint/Prettier/CI
 
-- Next.js/TS 권장 설정 + import 정렬
-- Prettier 포맷 일관성 유지
+- `eslint.config.mjs` Flat Config 기반 설정
+- GitHub Actions `.github/workflows/ci.yml`에서 `pnpm lint`, `pnpm typecheck` 자동 실행
+- `pnpm format`으로 Prettier 적용
 
 ---
 

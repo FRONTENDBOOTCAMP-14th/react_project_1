@@ -118,16 +118,27 @@ export async function GET() {
 
 ## 9. 커밋 메시지 (Conventional Commits)
 
-- 형식: `<type>(scope)?: <subject>`
-- type 예시: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`
-- 예: `feat(auth): add email sign-in route`
+- 형식: `<type>(scope)?: <subject>`
+- type 예시: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`
+- 예: `feat(auth): add email sign-in route`
 
 가이드
 
+- **커밋 메세지 + 이슈번호**
+  - **init:**  프로젝트 초기 설정 및 첫 커밋
+  - **feat(\<specification>):**  새로운 기능 추가, 기존 기능 변경, spectification에 어떤 기능 관련인지 넣는다. 혹은 specification을 특정할 수 없으면 생략해도 된다.
+  - **remove :** 파일이나 코드 삭제
+  - **fix:** 버그 수정, 오류 개선
+  - **docs:** README.md, .json 파일 등 문서파일 수정, 라이브러리 설치 관련 문서(문서 관련, 코드 수정 없음)
+  - **style:** CSS 등 사용자 UI 디자인 변경,  코드 형식, 정렬, 주석 등의 변경
+  - **refactor:** 코드 리팩토링(변수 이름 변경)
+  - **test:** 테스트 코드 추가, 삭제, 변경 등 (코드 수정 없음, 테스트 코드에 관련된 모든 변경에 해당)
+  - **ci:** npm 모듈 설치, 빌드 관련 프로세스 변경 .github에 있는 파일 생성 및 변경 등
+  - **chore:** 패키지 매니저 설정할 경우, etc 등
+  - **rename:** 이름 변경
+
 - **영문 소문자**, 명령형 현재 시제
 - 본문 필요 시 한 줄 띄우고 상세 설명
-
----
 
 ## 10. 브랜치 전략
 
@@ -138,7 +149,7 @@ export async function GET() {
 
 예시
 
-```
+```text
 feature/progress-endpoint
 init/nextjs-setup
 ```

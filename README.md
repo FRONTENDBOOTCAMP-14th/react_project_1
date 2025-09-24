@@ -70,7 +70,7 @@ graph LR
 
 ## 디렉터리 구조
 
-```
+```text
 /
 ├─ app/
 │  ├─ (marketing)/
@@ -228,5 +228,5 @@ pnpm dev
 
 ## 로컬 확인
 
-- 앱: http://localhost:3000/
-- 헬스체크: http://localhost:3000/api/health
+- 앱: <http://localhost:3000/>
+- 헬스체크: <http://localhost:3000/api/health>

@@ -27,9 +27,9 @@ Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼입니�
 
 ## 기술 스택
 
-- 프레임워크: Next.js 14 (App Router), React 18, TypeScript
+- 프레임워크: Next.js 15 (App Router), React 19, TypeScript
 - 데이터/인증: Supabase (Postgres, Row Level Security, Auth)
-- 스타일: VanillaCSS (+ CSS Modules)
+- 스타일: VanillaCSS + CSS Modules
 - 품질도구: ESLint, Prettier
 - 배포: Vercel
 - 패키지: Node LTS, pnpm

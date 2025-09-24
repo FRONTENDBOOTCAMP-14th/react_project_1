@@ -1,0 +1,23 @@
+.header {
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffffcc;
+  backdrop-filter: blur(4px);
+}
+.inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font-weight: 700;
+}
+.nav {
+  display: flex;
+  gap: 0.75rem;
+}
+.link {
+  text-decoration: none;
+}

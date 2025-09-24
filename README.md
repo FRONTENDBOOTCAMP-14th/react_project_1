@@ -48,22 +48,22 @@ Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼입니�
 ### 아키텍처 다이어그램
 
 ```mermaid
-flowchart LR
-  subgraph Client [Next.js (App Router)]
+graph LR
+  subgraph Client["Next.js (App Router)"]
     UI[React UI + PureCSS]
     SSG[SSG/ISR Pages]
     API[Server Actions/Route Handlers]
   end
 
-  Supa[Supabase: Auth + Postgres + Storage + RLS]
-  Noti[Notification/Email (Supabase functions or Vercel Cron)]
-  Cal[(Calendar Provider - Optional)]
+  Supa["Supabase: Auth + Postgres + Storage + RLS"]
+  Noti["Notification/Email (Supabase functions or Vercel Cron)"]
+  Cal["Calendar Provider - Optional"]
 
   UI -->|Supabase JS| Supa
   API -->|Row-level SQL/Views| Supa
   API -->|Webhook/Cron| Noti
   UI -->|OAuth/Email| Supa
-  UI -. optional .-> Cal
+  UI -- optional --> Cal
 ```
 
 ---

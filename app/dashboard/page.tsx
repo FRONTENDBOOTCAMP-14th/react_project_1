@@ -1,5 +1,5 @@
-import styles from './page.module.css'
 import Button from '@/components/ui/Button'
+import styles from './page.module.css'
 
 export default function DashboardPage() {
   return (

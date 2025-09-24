@@ -10,7 +10,7 @@ export async function getSession() {
       data: { user },
     } = await sb.auth.getUser()
     return { user }
-  } catch (e) {
+  } catch (_e) {
     return { user: null }
   }
 }

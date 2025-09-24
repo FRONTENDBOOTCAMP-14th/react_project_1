@@ -9,9 +9,7 @@ type ButtonProps = {
 }
 
 export default function Button({ href, children, variant = 'primary' }: ButtonProps) {
-  const className = [styles.button, variant === 'secondary' && styles.secondary]
-    .filter(Boolean)
-    .join(' ')
+  const className = [styles.button, variant === 'secondary' && styles.secondary].filter(Boolean).join(' ')
 
   if (href) {
     return (

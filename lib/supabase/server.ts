@@ -15,5 +15,5 @@ export const supabaseServer = createClient(
       autoRefreshToken: false,
       detectSessionInUrl: false,
     },
-  },
+  }
 )

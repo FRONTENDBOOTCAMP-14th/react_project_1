@@ -1,8 +1,8 @@
 import fonts from '@/app/fonts'
 import Footer from '@/components/common/Footer'
 import Header from '@/components/common/Header'
+import '@/styles/globals.css'
 import type { Metadata } from 'next'
-import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Study Club Tracker',

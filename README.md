@@ -73,6 +73,7 @@ graph LR
 ```text
 /
 ├─ app/
+│  ├─ *.module.css
 │  ├─ (marketing)/
 │  │  └─ page.tsx
 │  ├─ dashboard/
@@ -102,7 +103,11 @@ graph LR
 │  └─ utils.ts
 ├─ styles/
 │  ├─ globals.css
-│  └─ *.module.css
+│  └─ common/
+│     ├─ reset.css
+│     ├─ animation.css
+│     ├─ a11y.css
+│     └─ variable.css
 ├─ scripts/
 ├─ .eslintrc.cjs
 ├─ .prettierrc

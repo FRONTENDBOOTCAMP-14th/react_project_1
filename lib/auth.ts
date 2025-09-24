@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers'
 import { supabaseServer } from '@/lib/supabase/server'
 
 // Minimal auth helpers. Extend with your app's needs.
@@ -7,9 +6,11 @@ export async function getSession() {
   // With RLS, prefer retrieving per-request as needed in server components/route handlers.
   try {
     const sb = supabaseServer
-    const { data: { user } } = await sb.auth.getUser()
+    const {
+      data: { user },
+    } = await sb.auth.getUser()
     return { user }
-  } catch (e) {
+  } catch (_e) {
     return { user: null }
   }
 }

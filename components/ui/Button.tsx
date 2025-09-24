@@ -1,17 +1,16 @@
-import styles from './Button.module.css'
+import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
+import styles from './Button.module.css'
 
-type ButtonProps = {
+interface ButtonProps {
   href?: string
   children: ReactNode
   variant?: 'primary' | 'secondary'
 }
 
 export default function Button({ href, children, variant = 'primary' }: ButtonProps) {
-  const className = [styles.button, variant === 'secondary' && styles.secondary]
-    .filter(Boolean)
-    .join(' ')
+  const className = cn(styles.button, variant === 'secondary' && styles.secondary)
 
   if (href) {
     return (

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
-import './globals.css'
+import fonts from '@/app/fonts'
 import Footer from '@/components/common/Footer'
 import Header from '@/components/common/Header'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Study Club Tracker',
@@ -13,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <body>
         <Header />
-        <div style={{ minHeight: 'calc(100vh - 120px)' }}>
+        <div className={fonts.pretendard.className} style={{ minHeight: 'calc(100vh - 120px)' }}>
           <div>{children}</div>
         </div>
         <Footer />

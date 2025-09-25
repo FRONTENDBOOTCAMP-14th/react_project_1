@@ -68,7 +68,7 @@ graph LR
 
 ---
 
-## 디렉터리 구조
+## 디렉토리 구조
 
 ```text
 /
@@ -117,6 +117,105 @@ graph LR
 
 ---
 
+## 데이터 모델 (ERD & 스키마)
+
+### ERD
+
+```mermaid
+graph LR
+%% Entities
+USER["USER<br/>user_id: UUID PK<br/>provider: VARCHAR NN<br/>provider_id: VARCHAR NN<br/>email: VARCHAR UQ<br/>username: VARCHAR<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+STUDYGOAL["STUDYGOAL<br/>goal_id: UUID PK<br/>owner_id: UUID FK(User.user_id)<br/>title: VARCHAR NN<br/>description: TEXT<br/>is_team: BOOLEAN NN<br/>start_date: DATE NN<br/>end_date: DATE NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+PLAN["PLAN<br/>plan_id: UUID PK<br/>goal_id: UUID FK(StudyGoal.goal_id)<br/>user_id: UUID FK(User.user_id)<br/>plan_type: VARCHAR NN<br/>plan_start: DATE NN<br/>plan_end: DATE NN<br/>description: TEXT<br/>status: VARCHAR NN<br/>notification_sent: BOOLEAN NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+REACTION["REACTION<br/>reaction_id: UUID PK<br/>user_id: UUID FK(User.user_id)<br/>plan_id: UUID FK(Plan.plan_id)<br/>emoji: VARCHAR NN<br/>created_at: TIMESTAMP NN"]
+COMMUNITY["COMMUNITY<br/>club_id: UUID PK<br/>name: VARCHAR UQ NN<br/>description: TEXT<br/>is_public: BOOLEAN NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+COMMUNITYMEMBER["COMMUNITYMEMBER<br/>club_id: UUID PK FK(Community.club_id)<br/>user_id: UUID PK FK(User.user_id)<br/>joined_at: TIMESTAMP NN"]
+
+%% Relationships (labels에 개체/관계/기수성 기입)
+USER -- "owns 1.._ StudyGoal" --> STUDYGOAL
+STUDYGOAL -- "includes 1.._ Plan" --> PLAN
+USER -- "assigned_to 0.._ Plan" --> PLAN
+PLAN -- "receives 0.._ Reaction" --> REACTION
+USER -- "reacts 0.._ Reaction" --> REACTION
+COMMUNITY -- "has 0.._ CommunityMember" --> COMMUNITYMEMBER
+USER -- "joins 0..\* CommunityMember" --> COMMUNITYMEMBER
+```
+
+### 데이터 스키마 테이블
+
+#### User 테이블 (소셜 로그인 전용)
+
+| 컬럼명      | 타입      | 제약조건          | 설명                                         |
+| ----------- | --------- | ----------------- | -------------------------------------------- |
+| user_id     | UUID      | PK                | 사용자 고유 ID                               |
+| provider    | VARCHAR   | Not Null          | 소셜 로그인 공급자명 (예: 'kakao', 'google') |
+| provider_id | VARCHAR   | Not Null          | 소셜 로그인 공급자에서 발급한 고유 사용자 ID |
+| email       | VARCHAR   | Unique, Nullable  | 이메일 (소셜 공급자가 제공 시)               |
+| username    | VARCHAR   | Nullable          | 사용자명 (필요 시)                           |
+| created_at  | TIMESTAMP | Not Null, Default | 생성일                                       |
+| updated_at  | TIMESTAMP | Not Null, Default | 수정일                                       |
+
+#### StudyGoal 테이블
+
+| 컬럼명      | 타입      | 제약조건                | 설명                            |
+| ----------- | --------- | ----------------------- | ------------------------------- |
+| goal_id     | UUID      | PK                      | 목표 고유 ID                    |
+| owner_id    | UUID      | FK(User.user_id)        | 목표 소유자 (개인 또는 팀 리더) |
+| title       | VARCHAR   | Not Null                | 목표명                          |
+| description | TEXT      |                         | 목표 설명                       |
+| is_team     | BOOLEAN   | Not Null, Default false | 팀 목표 여부                    |
+| start_date  | DATE      | Not Null                | 목표 시작일                     |
+| end_date    | DATE      | Not Null                | 목표 종료일                     |
+| created_at  | TIMESTAMP | Not Null, Default       | 생성일                          |
+| updated_at  | TIMESTAMP | Not Null, Default       | 수정일                          |
+
+#### Plan 테이블
+
+| 컬럼명            | 타입      | 제약조건                    | 설명                                              |
+| ----------------- | --------- | --------------------------- | ------------------------------------------------- |
+| plan_id           | UUID      | PK                          | 계획 고유 ID                                      |
+| goal_id           | UUID      | FK(StudyGoal.goal_id)       | 연결된 목표 ID                                    |
+| user_id           | UUID      | FK(User.user_id)            | 담당자 (팀원의 경우 개별 관리 가능)               |
+| plan_type         | VARCHAR   | Not Null                    | 계획 유형 ('weekly', 'daily')                     |
+| plan_start        | DATE      | Not Null                    | 계획 시작일                                       |
+| plan_end          | DATE      | Not Null                    | 계획 종료일                                       |
+| description       | TEXT      |                             | 계획 내용                                         |
+| status            | VARCHAR   | Not Null, Default 'pending' | 진행 상태 ('pending', 'in_progress', 'completed') |
+| notification_sent | BOOLEAN   | Not Null, Default false     | 알림 발송 여부                                    |
+| created_at        | TIMESTAMP | Not Null, Default           | 생성일                                            |
+| updated_at        | TIMESTAMP | Not Null, Default           | 수정일                                            |
+
+#### Reaction 테이블
+
+| 컬럼명      | 타입      | 제약조건          | 설명                               |
+| ----------- | --------- | ----------------- | ---------------------------------- |
+| reaction_id | UUID      | PK                | 리액션 고유 ID                     |
+| user_id     | UUID      | FK(User.user_id)  | 반응 누른 사용자 ID                |
+| plan_id     | UUID      | FK(Plan.plan_id)  | 대상 계획 ID                       |
+| emoji       | VARCHAR   | Not Null          | 이모지 코드 또는 이름 (예: 👍, ❤️) |
+| created_at  | TIMESTAMP | Not Null, Default | 반응 누른 시간                     |
+
+#### Community 테이블
+
+| 컬럼명      | 타입      | 제약조건               | 설명         |
+| ----------- | --------- | ---------------------- | ------------ |
+| club_id     | UUID      | PK                     | 클럽 고유 ID |
+| name        | VARCHAR   | Not Null, Unique       | 클럽 이름    |
+| description | TEXT      |                        | 클럽 소개    |
+| is_public   | BOOLEAN   | Not Null, Default true | 공개 여부    |
+| created_at  | TIMESTAMP | Not Null, Default      | 생성일       |
+| updated_at  | TIMESTAMP | Not Null, Default      | 수정일       |
+
+#### CommunityMember 테이블
+
+| 컬럼명    | 타입      | 제약조건                  | 설명         |
+| --------- | --------- | ------------------------- | ------------ |
+| club_id   | UUID      | FK(Community.club_id), PK | 소속 클럽 ID |
+| user_id   | UUID      | FK(User.user_id), PK      | 회원 ID      |
+| joined_at | TIMESTAMP | Not Null                  | 가입일       |
+
+---
+
 ## 주요 사용자 플로우
 
 - [온보딩/로그인]
@@ -125,7 +224,6 @@ graph LR
   - 개인/팀 목표 생성 → 기간/단위 설정 → 일간 계획 등록
 - [진행률 입력]
   - 일별 학습량 기록 → 목표 대비 누적/일별 그래프 갱신
-- [팀 공유/피드백]
   - 팀 대시보드에서 멤버별 진행률 비교 → 댓글/격려
 - [알림]
   - 미입력/마감 임박/저조 알림 생성
@@ -238,3 +336,7 @@ pnpm dev
 
 - 앱: <http://localhost:3000/>
 - 헬스체크: <http://localhost:3000/api/health>
+
+```
+
+```

@@ -124,9 +124,7 @@
 ### 7.1 응답 스키마
 
 ```ts
-type ApiResponse<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }
+type ApiResponse<T> = { success: true; data: T } | { success: false; error: string }
 ```
 
 ### 7.2 상태 코드 매핑
@@ -191,6 +189,7 @@ export async function GET() {
 - 메인 라인: `develop` (또는 `main`)
 - 기능 브랜치: `feature/<ticket|topic>`
 - 초기화/스캐폴딩: `init/<topic>` (상위 동일명 브랜치 생성 금지 – `init` 단독 브랜치와 충돌 주의)
+- 태스크: `task/<topic>`
 - 긴급 수정: `hotfix/<desc>`
 - 머지 전략: 기능 브랜치는 PR 후 `squash and merge` 기본, 다수 커밋 유지가 필요하면 `rebase and merge` 선택
 - 리뷰 기준: 최소 1인 이상 승인, 셀프 머지 금지

@@ -117,7 +117,6 @@
 
 - **파일 위치**: `app/api/<resource>/route.ts`
 - **HTTP 규칙**: 리소스/HTTP 메서드 일관성 유지 (예: `GET /api/goals`, `POST /api/goals`)
-- **응답 포맷**: JSON `{ success, data?, error? }` 패턴 준수 (동시에 `data`와 `error`를 포함하지 않음)
 - **에러 처리**: `try/catch`로 캐치 후 `NextResponse.json({ success: false, error }, { status })`
 - **보안**: 현재 단계에서 미들웨어 미적용. 운영 전 보안 계층(API Key/Basic/Supabase Auth) 추가 예정
 

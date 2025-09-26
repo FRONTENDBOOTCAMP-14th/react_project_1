@@ -86,7 +86,7 @@ erDiagram
 | provider    | VARCHAR   | NOT NULL                | 소셜 로그인 공급자명 (예: 'kakao', 'google') |
 | provider_id | VARCHAR   | NOT NULL                | 소셜 로그인 공급자에서 발급한 고유 사용자 ID |
 | email       | VARCHAR   | UNIQUE, NULL            | 이메일 (소셜 공급자가 제공 시)               |
-| username    | VARCHAR   | NOT NULL                | 사용자명 (필요 시)                           |
+| username    | VARCHAR   | NOT NULL                | 사용자명 (필요)                              |
 | created_at  | TIMESTAMP | NOT NULL, DEFAULT now() | 생성일                                       |
 | updated_at  | TIMESTAMP | NOT NULL, DEFAULT now() | 수정일 (트리거로 자동 업데이트)              |
 

@@ -64,15 +64,17 @@ erDiagram
 | 컬럼명      | 타입          | 제약조건                | 설명                                         |
 | ----------- | ------------- | ----------------------- | -------------------------------------------- |
 | user_id     | uuid          | PK, DEFAULT auth.uid()  | 사용자 고유 ID                               |
-| provider    | VARCHAR(30)   | NOT NULL                | 소셜 로그인 공급자명 (예: 'kakao', 'google') |
-| provider_id | VARCHAR(100)  | NOT NULL                | 공급자에서 발급한 고유 사용자 ID             |
-| email       | VARCHAR(255)  | UNIQUE, NULL            | 이메일 (소셜 공급자가 제공 시)               |
-| username    | VARCHAR(40)   | NOT NULL                | 사용자명                                     |
+| provider    | VARCHAR       | NOT NULL                | 소셜 로그인 공급자명 (예: 'kakao', 'google') |
+| provider_id | VARCHAR       | NOT NULL                | 공급자에서 발급한 고유 사용자 ID             |
+| email       | VARCHAR       | UNIQUE, NULL            | 이메일 (소셜 공급자가 제공 시)               |
+| username    | VARCHAR       | NOT NULL                | 사용자명                                     |
 | created_at  | TIMESTAMP     | NOT NULL, DEFAULT now() | 생성일                                       |
 | updated_at  | TIMESTAMP     | NOT NULL, DEFAULT now() | 수정일 (트리거로 자동 업데이트)              |
 | deleted_at  | TIMESTAMP     | NULL                    | 소프트 삭제 시각                             |
 
 #### 제약조건 - User 테이블
+
+> `uk_user_provider`와 `uk_user_email` 제약은 공급자 계정과 이메일의 중복 생성을 차단합니다.
 
 ```sql
 CONSTRAINT uk_user_provider UNIQUE (provider, provider_id)
@@ -80,6 +82,8 @@ CONSTRAINT uk_user_email UNIQUE (email)
 ```
 
 #### 인덱스 - User 테이블
+
+> 로그인 공급자와 이메일 기반 검색을 가속하고 활성 사용자만 필터링할 수 있도록 합니다.
 
 ```sql
 CREATE INDEX idx_user_provider ON users (provider, provider_id);
@@ -94,7 +98,7 @@ CREATE INDEX idx_user_active ON users (user_id) WHERE deleted_at IS NULL;
 | goal_id     | uuid          | PK DEFAULT gen_random_uuid() | 목표 고유 ID                     |
 | owner_id    | uuid          | NOT NULL, FK(User.user_id)   | 목표 소유자 (개인 또는 팀 리더)  |
 | club_id     | uuid          | NULL, FK(Community.club_id)  | 연결된 커뮤니티 (팀 목표인 경우) |
-| title       | VARCHAR(100)  | NOT NULL                     | 목표명                           |
+| title       | VARCHAR       | NOT NULL                     | 목표명                           |
 | description | TEXT          | NULL                         | 목표 설명                        |
 | is_team     | BOOLEAN       | NOT NULL, DEFAULT false      | 팀 목표 여부                     |
 | start_date  | DATE          | NOT NULL                     | 목표 시작일                      |
@@ -104,6 +108,8 @@ CREATE INDEX idx_user_active ON users (user_id) WHERE deleted_at IS NULL;
 | deleted_at  | TIMESTAMP     | NULL                         | 소프트 삭제 시각                 |
 
 #### 제약조건 - StudyGoal 테이블
+
+> 기간 검증과 팀 목표 설정을 강제하고 커뮤니티 삭제 시 목표 연결 상태를 정의합니다.
 
 ```sql
 CONSTRAINT chk_goal_dates CHECK (end_date >= start_date)
@@ -116,6 +122,8 @@ CONSTRAINT chk_team_goal_club CHECK (
 ```
 
 #### 인덱스 - StudyGoal 테이블
+
+> 소유자·기간·팀 여부별 조회를 빠르게 처리하고 삭제되지 않은 목표만 효율적으로 제공합니다.
 
 ```sql
 CREATE INDEX idx_goal_owner ON study_goals (owner_id);
@@ -134,17 +142,19 @@ CREATE INDEX idx_goal_active ON study_goals (owner_id)
 | plan_id           | uuid          | PK DEFAULT gen_random_uuid()   | 계획 고유 ID                                      |
 | goal_id           | uuid          | FK(StudyGoal.goal_id) NOT NULL | 연결된 목표 ID                                    |
 | user_id           | uuid          | FK(User.user_id) NOT NULL      | 담당자 (팀원의 경우 개별 관리 가능)               |
-| plan_type         | VARCHAR(20)   | NOT NULL                       | 계획 유형 ('weekly', 'daily')                     |
+| plan_type         | VARCHAR       | NOT NULL                       | 계획 유형 ('weekly', 'daily')                     |
 | plan_start        | DATE          | NOT NULL                       | 계획 시작일                                       |
 | plan_end          | DATE          | NOT NULL                       | 계획 종료일                                       |
 | description       | TEXT          | NULL                           | 계획 내용                                         |
-| status            | VARCHAR(20)   | NOT NULL, DEFAULT 'pending'    | 진행 상태 ('pending', 'in_progress', 'completed') |
+| status            | VARCHAR       | NOT NULL, DEFAULT 'pending'    | 진행 상태 ('pending', 'in_progress', 'completed') |
 | notification_sent | BOOLEAN       | NOT NULL, DEFAULT false        | 알림 발송 여부                                    |
 | created_at        | TIMESTAMP     | NOT NULL, DEFAULT now()        | 생성일                                            |
 | updated_at        | TIMESTAMP     | NOT NULL, DEFAULT now()        | 수정일 (트리거로 자동 업데이트)                   |
 | deleted_at        | TIMESTAMP     | NULL                           | 소프트 삭제 시각                                   |
 
 #### 제약조건 - Plan 테이블
+
+> 계획 기간과 유형, 상태 값을 검증하고 연관 목표·사용자 삭제 시 연쇄 동작을 정의합니다.
 
 ```sql
 CONSTRAINT chk_plan_dates CHECK (plan_end >= plan_start)
@@ -154,9 +164,11 @@ CONSTRAINT fk_plan_goal FOREIGN KEY (goal_id) REFERENCES study_goals(goal_id) ON
 CONSTRAINT fk_plan_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ```
 
-> 소프트 삭제된 계획을 제외하고 동일 사용자·목표·기간 조합의 중복 생성을 막기 위해 부분 유니크 인덱스를 추가합니다.
-
 #### 인덱스 - Plan 테이블
+
+> 기본 인덱스는 목표, 담당자, 기간, 상태 기준 조회를 가속화합니다.
+> 부분 유니크 인덱스는 소프트 삭제된 계획을 제외하고 기간 중복 생성을 차단합니다.
+> 부분 보조 인덱스는 활성 계획과 상태 기반 조회를 최적화합니다.
 
 ```sql
 CREATE INDEX idx_plan_goal ON plans (goal_id);
@@ -184,6 +196,8 @@ CREATE INDEX idx_plan_active ON plans (goal_id)
 
 #### 제약조건 - Reaction 테이블
 
+> 사용자·계획 연결 무결성을 보장하고 사용자별 동일 이모지 중복 입력을 제한합니다.
+
 ```sql
 CONSTRAINT uk_reaction_user_plan UNIQUE (user_id, plan_id, emoji)
 CONSTRAINT fk_reaction_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -191,6 +205,8 @@ CONSTRAINT fk_reaction_plan FOREIGN KEY (plan_id) REFERENCES plans(plan_id) ON D
 ```
 
 #### 인덱스 - Reaction 테이블
+
+> 반응을 계획 또는 사용자 기준으로 집계하고 활성 반응만 효율적으로 조회합니다.
 
 ```sql
 CREATE INDEX idx_reaction_plan ON reactions (plan_id);
@@ -204,7 +220,7 @@ CREATE INDEX idx_reaction_active ON reactions (plan_id)
 | 컬럼명      | 타입          | 제약조건                     | 설명                            |
 | ----------- | ------------- | ---------------------------- | ------------------------------- |
 | club_id     | uuid          | PK DEFAULT gen_random_uuid() | 클럽 고유 ID                    |
-| name        | VARCHAR(100)  | NOT NULL, UNIQUE             | 클럽 이름                       |
+| name        | VARCHAR       | NOT NULL, UNIQUE             | 클럽 이름                       |
 | description | TEXT          | NULL                         | 클럽 소개                       |
 | is_public   | BOOLEAN       | NOT NULL, DEFAULT true       | 공개 여부                       |
 | created_at  | TIMESTAMP     | NOT NULL, DEFAULT now()      | 생성일                          |
@@ -213,11 +229,15 @@ CREATE INDEX idx_reaction_active ON reactions (plan_id)
 
 #### 제약조건 - Community 테이블
 
+> 커뮤니티 이름이 중복되지 않도록 강제하여 고유성을 보장합니다.
+
 ```sql
 CONSTRAINT uk_community_name UNIQUE (name)
 ```
 
 #### 인덱스 - Community 테이블
+
+> 공개 여부와 이름 검색, 활성 커뮤니티 조회를 빠르게 처리합니다.
 
 ```sql
 CREATE INDEX idx_community_public ON communities (is_public);
@@ -232,11 +252,13 @@ CREATE INDEX idx_community_active ON communities (name)
 | --------- | ------------- | ---------------------------------- | ------------------------ |
 | club_id   | uuid          | NOT NULL, FK(communities.club_id)  | 소속 클럽 ID             |
 | user_id   | uuid          | NOT NULL, FK(users.user_id)        | 회원 ID                  |
-| role      | VARCHAR(20)   | NOT NULL, DEFAULT 'member'         | 역할 ('admin', 'member') |
+| role      | VARCHAR       | NOT NULL, DEFAULT 'member'         | 역할 ('admin', 'member') |
 | joined_at | TIMESTAMP     | NOT NULL, DEFAULT now()            | 가입일                   |
 | deleted_at| TIMESTAMP     | NULL                               | 소프트 삭제 시각         |
 
 #### 제약조건 - CommunityMember 테이블
+
+> 복합 PK와 FK로 가입 관계를 보존하고 역할 값 범위를 제한합니다.
 
 ```sql
 CONSTRAINT pk_community_member PRIMARY KEY (club_id, user_id)
@@ -246,6 +268,8 @@ CONSTRAINT chk_member_role CHECK (role IN ('admin', 'member'))
 ```
 
 #### 인덱스 - CommunityMember 테이블
+
+> 회원이나 클럽 기준으로 활성 구성원을 빠르게 조회할 수 있도록 합니다.
 
 ```sql
 CREATE INDEX idx_member_user ON community_members (user_id);

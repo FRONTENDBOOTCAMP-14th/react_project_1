@@ -3,77 +3,24 @@
 ## ERD
 
 ```mermaid
-erDiagram
-    users {
-        uuid user_id PK "DEFAULT auth.uid()"
-        varchar provider "NOT NULL"
-        varchar provider_id "NOT NULL"
-        varchar email "UNIQUE, NULL"
-        varchar username "NOT NULL"
-        timestamp created_at "NOT NULL, DEFAULT now()"
-        timestamp updated_at "NOT NULL, DEFAULT now()"
-    }
+graph LR
+%% Entities
+USER["USER<br/>user_id: UUID PK<br/>provider: VARCHAR NN<br/>provider_id: VARCHAR NN<br/>email: VARCHAR UQ<br/>username: VARCHAR NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+STUDYGOAL["STUDYGOAL<br/>goal_id: UUID PK<br/>owner_id: UUID FK(User.user_id) NN<br/>club_id: UUID FK(Community.club_id)<br/>title: VARCHAR NN<br/>description: TEXT<br/>is_team: BOOLEAN NN<br/>start_date: DATE NN<br/>end_date: DATE NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+PLAN["PLAN<br/>plan_id: UUID PK<br/>goal_id: UUID FK(StudyGoal.goal_id) NN<br/>user_id: UUID FK(User.user_id) NN<br/>plan_type: VARCHAR NN<br/>plan_start: DATE NN<br/>plan_end: DATE NN<br/>description: TEXT<br/>status: VARCHAR NN<br/>notification_sent: BOOLEAN NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+REACTION["REACTION<br/>reaction_id: UUID PK<br/>user_id: UUID FK(User.user_id) NN<br/>plan_id: UUID FK(Plan.plan_id) NN<br/>emoji: VARCHAR NN<br/>created_at: TIMESTAMP NN"]
+COMMUNITY["COMMUNITY<br/>club_id: UUID PK<br/>name: VARCHAR UQ NN<br/>description: TEXT<br/>is_public: BOOLEAN NN<br/>created_at: TIMESTAMP NN<br/>updated_at: TIMESTAMP NN"]
+COMMUNITYMEMBER["COMMUNITYMEMBER<br/>club_id: UUID PK FK(Community.club_id) NN<br/>user_id: UUID PK FK(User.user_id) NN<br/>role: VARCHAR NN<br/>joined_at: TIMESTAMP NN"]
 
-    communities {
-        uuid club_id PK "DEFAULT gen_random_uuid()"
-        varchar name "NOT NULL, UNIQUE"
-        text description "NULL"
-        boolean is_public "NOT NULL, DEFAULT true"
-        timestamp created_at "NOT NULL, DEFAULT now()"
-        timestamp updated_at "NOT NULL, DEFAULT now()"
-    }
-
-    community_members {
-        uuid club_id PK,FK "NOT NULL"
-        uuid user_id PK,FK "NOT NULL"
-        varchar role "NOT NULL, DEFAULT 'member'"
-        timestamp joined_at "NOT NULL, DEFAULT now()"
-    }
-
-    study_goals {
-        uuid goal_id PK "DEFAULT gen_random_uuid()"
-        uuid owner_id FK "NOT NULL"
-        uuid club_id FK "NULL"
-        varchar title "NOT NULL"
-        text description "NULL"
-        boolean is_team "NOT NULL, DEFAULT false"
-        date start_date "NOT NULL"
-        date end_date "NOT NULL"
-        timestamp created_at "NOT NULL, DEFAULT now()"
-        timestamp updated_at "NOT NULL, DEFAULT now()"
-    }
-
-    plans {
-        uuid plan_id PK "DEFAULT gen_random_uuid()"
-        uuid goal_id FK "NOT NULL"
-        uuid user_id FK "NOT NULL"
-        varchar plan_type "NOT NULL"
-        date plan_start "NOT NULL"
-        date plan_end "NOT NULL"
-        text description "NULL"
-        varchar status "NOT NULL, DEFAULT 'pending'"
-        boolean notification_sent "NOT NULL, DEFAULT false"
-        timestamp created_at "NOT NULL, DEFAULT now()"
-        timestamp updated_at "NOT NULL, DEFAULT now()"
-    }
-
-    reactions {
-        uuid reaction_id PK "DEFAULT gen_random_uuid()"
-        uuid user_id FK "NOT NULL"
-        uuid plan_id FK "NOT NULL"
-        varchar emoji "NOT NULL"
-        timestamp created_at "NOT NULL, DEFAULT now()"
-    }
-
-    %% Relationships
-    users ||--o{ community_members : "has"
-    communities ||--o{ community_members : "contains"
-    users ||--o{ study_goals : "owns"
-    communities ||--o{ study_goals : "linked_to"
-    study_goals ||--o{ plans : "contains"
-    users ||--o{ plans : "assigned_to"
-    users ||--o{ reactions : "creates"
-    plans ||--o{ reactions : "receives"
+%% Relationships (labels에 개체/관계/기수성 기입)
+USER -- "owns 1..* StudyGoal" --> STUDYGOAL
+COMMUNITY -- "linked_to 0..* StudyGoal" --> STUDYGOAL
+STUDYGOAL -- "includes 1..* Plan" --> PLAN
+USER -- "assigned_to 0..* Plan" --> PLAN
+PLAN -- "receives 0..* Reaction" --> REACTION
+USER -- "reacts 0..* Reaction" --> REACTION
+COMMUNITY -- "has 0..* CommunityMember" --> COMMUNITYMEMBER
+USER -- "joins 0..* CommunityMember" --> COMMUNITYMEMBER
 ```
 
 ## 데이터 스키마 테이블

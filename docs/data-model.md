@@ -5,70 +5,70 @@
 ```mermaid
 erDiagram
     users {
-        UUID user_id PK
-        VARCHAR provider
-        VARCHAR provider_id
-        VARCHAR email
-        VARCHAR username
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-        TIMESTAMP deleted_at
+        uuid user_id PK
+        varchar provider
+        varchar provider_id
+        varchar email
+        varchar username
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
     
     study_goals {
-        UUID goal_id PK
-        UUID owner_id FK
-        UUID club_id FK
-        VARCHAR title
-        TEXT description
-        BOOLEAN is_team
-        DATE start_date
-        DATE end_date
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-        TIMESTAMP deleted_at
+        uuid goal_id PK
+        uuid owner_id FK
+        uuid club_id FK
+        varchar title
+        text description
+        boolean is_team
+        date start_date
+        date end_date
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
     
     plans {
-        UUID plan_id PK
-        UUID goal_id FK
-        UUID user_id FK
-        VARCHAR plan_type
-        DATE plan_start
-        DATE plan_end
-        TEXT description
-        VARCHAR status
-        BOOLEAN notification_sent
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-        TIMESTAMP deleted_at
+        uuid plan_id PK
+        uuid goal_id FK
+        uuid user_id FK
+        varchar plan_type
+        date plan_start
+        date plan_end
+        text description
+        varchar status
+        boolean notification_sent
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
     
     reactions {
-        UUID reaction_id PK
-        UUID user_id FK
-        UUID plan_id FK
-        TEXT emoji
-        TIMESTAMP created_at
-        TIMESTAMP deleted_at
+        uuid reaction_id PK
+        uuid user_id FK
+        uuid plan_id FK
+        text emoji
+        timestamp created_at
+        timestamp deleted_at
     }
     
     communities {
-        UUID club_id PK
-        VARCHAR name
-        TEXT description
-        BOOLEAN is_public
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-        TIMESTAMP deleted_at
+        uuid club_id PK
+        varchar name
+        text description
+        boolean is_public
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
     
     community_members {
-        UUID club_id FK
-        UUID user_id FK
-        VARCHAR role
-        TIMESTAMP joined_at
-        TIMESTAMP deleted_at
+        uuid club_id FK
+        uuid user_id FK
+        varchar role
+        timestamp joined_at
+        timestamp deleted_at
     }
 
     users ||--o{ study_goals : owns
@@ -89,13 +89,13 @@ erDiagram
 | 컬럼명      | 타입          | 제약조건                | 설명                                         |
 | ----------- | ------------- | ----------------------- | -------------------------------------------- |
 | user_id     | uuid          | PK, DEFAULT auth.uid()  | 사용자 고유 ID                               |
-| provider    | VARCHAR       | NOT NULL                | 소셜 로그인 공급자명 (예: 'kakao', 'google') |
-| provider_id | VARCHAR       | NOT NULL                | 공급자에서 발급한 고유 사용자 ID             |
-| email       | VARCHAR       | UNIQUE, NULL            | 이메일 (소셜 공급자가 제공 시)               |
-| username    | VARCHAR       | NOT NULL                | 사용자명                                     |
-| created_at  | TIMESTAMP     | NOT NULL, DEFAULT now() | 생성일                                       |
-| updated_at  | TIMESTAMP     | NOT NULL, DEFAULT now() | 수정일 (트리거로 자동 업데이트)              |
-| deleted_at  | TIMESTAMP     | NULL                    | 소프트 삭제 시각                             |
+| provider    | varchar       | NOT NULL                | 소셜 로그인 공급자명 (예: 'kakao', 'google') |
+| provider_id | varchar       | NOT NULL                | 공급자에서 발급한 고유 사용자 ID             |
+| email       | varchar       | UNIQUE, NULL            | 이메일 (소셜 공급자가 제공 시)               |
+| username    | varchar       | NOT NULL                | 사용자명                                     |
+| created_at  | timestamp     | NOT NULL, DEFAULT now() | 생성일                                       |
+| updated_at  | timestamp     | NOT NULL, DEFAULT now() | 수정일 (트리거로 자동 업데이트)              |
+| deleted_at  | timestamp     | NULL                    | 소프트 삭제 시각                             |
 
 #### 제약조건 - users 테이블
 
@@ -123,14 +123,14 @@ CREATE INDEX idx_user_active ON users (user_id) WHERE deleted_at IS NULL;
 | goal_id     | uuid          | PK DEFAULT gen_random_uuid() | 목표 고유 ID                     |
 | owner_id    | uuid          | NOT NULL, FK(users.user_id)   | 목표 소유자 (개인 또는 팀 리더)  |
 | club_id     | uuid          | NULL, FK(communities.club_id)  | 연결된 커뮤니티 (팀 목표인 경우) |
-| title       | VARCHAR       | NOT NULL                     | 목표명                           |
-| description | TEXT          | NULL                         | 목표 설명                        |
-| is_team     | BOOLEAN       | NOT NULL, DEFAULT false      | 팀 목표 여부                     |
-| start_date  | DATE          | NOT NULL                     | 목표 시작일                      |
-| end_date    | DATE          | NOT NULL                     | 목표 종료일                      |
-| created_at  | TIMESTAMP     | NOT NULL, DEFAULT now()      | 생성일                           |
-| updated_at  | TIMESTAMP     | NOT NULL, DEFAULT now()      | 수정일 (트리거로 자동 업데이트)  |
-| deleted_at  | TIMESTAMP     | NULL                         | 소프트 삭제 시각                 |
+| title       | varchar       | NOT NULL                     | 목표명                           |
+| description | text          | NULL                         | 목표 설명                        |
+| is_team     | boolean       | NOT NULL, DEFAULT false      | 팀 목표 여부                     |
+| start_date  | date          | NOT NULL                     | 목표 시작일                      |
+| end_date    | date          | NOT NULL                     | 목표 종료일                      |
+| created_at  | timestamp     | NOT NULL, DEFAULT now()      | 생성일                           |
+| updated_at  | timestamp     | NOT NULL, DEFAULT now()      | 수정일 (트리거로 자동 업데이트)  |
+| deleted_at  | timestamp     | NULL                         | 소프트 삭제 시각                 |
 
 #### 제약조건 - study_goals 테이블
 
@@ -167,15 +167,15 @@ CREATE INDEX idx_goal_active ON study_goals (owner_id)
 | plan_id           | uuid          | PK DEFAULT gen_random_uuid()   | 계획 고유 ID                                      |
 | goal_id           | uuid          | FK(study_goals.goal_id) NOT NULL | 연결된 목표 ID                                    |
 | user_id           | uuid          | FK(users.user_id) NOT NULL      | 담당자 (팀원의 경우 개별 관리 가능)               |
-| plan_type         | VARCHAR       | NOT NULL                       | 계획 유형 ('weekly', 'daily')                     |
-| plan_start        | DATE          | NOT NULL                       | 계획 시작일                                       |
-| plan_end          | DATE          | NOT NULL                       | 계획 종료일                                       |
-| description       | TEXT          | NULL                           | 계획 내용                                         |
-| status            | VARCHAR       | NOT NULL, DEFAULT 'pending'    | 진행 상태 ('pending', 'in_progress', 'completed') |
-| notification_sent | BOOLEAN       | NOT NULL, DEFAULT false        | 알림 발송 여부                                    |
-| created_at        | TIMESTAMP     | NOT NULL, DEFAULT now()        | 생성일                                            |
-| updated_at        | TIMESTAMP     | NOT NULL, DEFAULT now()        | 수정일 (트리거로 자동 업데이트)                   |
-| deleted_at        | TIMESTAMP     | NULL                           | 소프트 삭제 시각                                   |
+| plan_type         | varchar       | NOT NULL                       | 계획 유형 ('weekly', 'daily')                     |
+| plan_start        | date          | NOT NULL                       | 계획 시작일                                       |
+| plan_end          | date          | NOT NULL                       | 계획 종료일                                       |
+| description       | text          | NULL                           | 계획 내용                                         |
+| status            | varchar       | NOT NULL, DEFAULT 'pending'    | 진행 상태 ('pending', 'in_progress', 'completed') |
+| notification_sent | boolean       | NOT NULL, DEFAULT false        | 알림 발송 여부                                    |
+| created_at        | timestamp     | NOT NULL, DEFAULT now()        | 생성일                                            |
+| updated_at        | timestamp     | NOT NULL, DEFAULT now()        | 수정일 (트리거로 자동 업데이트)                   |
+| deleted_at        | timestamp     | NULL                           | 소프트 삭제 시각                                   |
 
 #### 제약조건 - plans 테이블
 
@@ -215,9 +215,9 @@ CREATE INDEX idx_plan_active ON plans (goal_id)
 | reaction_id | uuid          | PK DEFAULT gen_random_uuid() | 리액션 고유 ID                      |
 | user_id     | uuid          | NOT NULL, FK(users.user_id)  | 반응 누른 사용자 ID                 |
 | plan_id     | uuid          | NOT NULL, FK(plans.plan_id)  | 대상 계획 ID                        |
-| emoji       | TEXT          | NOT NULL                     | 이모지 코드 또는 이름 (예: 👍, ❤️) |
-| created_at  | TIMESTAMP     | NOT NULL, DEFAULT now()      | 반응 누른 시간                      |
-| deleted_at  | TIMESTAMP     | NULL                         | 소프트 삭제 시각                    |
+| emoji       | text          | NOT NULL                     | 이모지 코드 또는 이름 (예: 👍, ❤️) |
+| created_at  | timestamp     | NOT NULL, DEFAULT now()      | 반응 누른 시간                      |
+| deleted_at  | timestamp     | NULL                         | 소프트 삭제 시각                    |
 
 #### 제약조건 - reactions 테이블
 
@@ -245,12 +245,12 @@ CREATE INDEX idx_reaction_active ON reactions (plan_id)
 | 컬럼명      | 타입          | 제약조건                     | 설명                            |
 | ----------- | ------------- | ---------------------------- | ------------------------------- |
 | club_id     | uuid          | PK DEFAULT gen_random_uuid() | 클럽 고유 ID                    |
-| name        | VARCHAR       | NOT NULL, UNIQUE             | 클럽 이름                       |
-| description | TEXT          | NULL                         | 클럽 소개                       |
-| is_public   | BOOLEAN       | NOT NULL, DEFAULT true       | 공개 여부                       |
-| created_at  | TIMESTAMP     | NOT NULL, DEFAULT now()      | 생성일                          |
-| updated_at  | TIMESTAMP     | NOT NULL, DEFAULT now()      | 수정일 (트리거로 자동 업데이트) |
-| deleted_at  | TIMESTAMP     | NULL                         | 소프트 삭제 시각                |
+| name        | varchar       | NOT NULL, UNIQUE             | 클럽 이름                       |
+| description | text          | NULL                         | 클럽 소개                       |
+| is_public   | boolean       | NOT NULL, DEFAULT true       | 공개 여부                       |
+| created_at  | timestamp     | NOT NULL, DEFAULT now()      | 생성일                          |
+| updated_at  | timestamp     | NOT NULL, DEFAULT now()      | 수정일 (트리거로 자동 업데이트) |
+| deleted_at  | timestamp     | NULL                         | 소프트 삭제 시각                |
 
 #### 제약조건 - communities 테이블
 
@@ -277,9 +277,9 @@ CREATE INDEX idx_community_active ON communities (name)
 | --------- | ------------- | ---------------------------------- | ------------------------ |
 | club_id   | uuid          | NOT NULL, FK(communities.club_id)  | 소속 클럽 ID             |
 | user_id   | uuid          | NOT NULL, FK(users.user_id)        | 회원 ID                  |
-| role      | VARCHAR       | NOT NULL, DEFAULT 'member'         | 역할 ('admin', 'member') |
-| joined_at | TIMESTAMP     | NOT NULL, DEFAULT now()            | 가입일                   |
-| deleted_at| TIMESTAMP     | NULL                               | 소프트 삭제 시각         |
+| role      | varchar       | NOT NULL, DEFAULT 'member'         | 역할 ('admin', 'member') |
+| joined_at | timestamp     | NOT NULL, DEFAULT now()            | 가입일                   |
+| deleted_at| timestamp     | NULL                               | 소프트 삭제 시각         |
 
 #### 제약조건 - community_members 테이블
 

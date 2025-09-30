@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId           String            @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+  provider         String            @db.VarChar
+  providerId       String            @map("provider_id") @db.VarChar
+  email            String?           @db.VarChar
+  username         String            @db.VarChar
+  nickname         String?           @db.VarChar
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime          @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
+  communityMembers CommunityMember[]
+  reactions        Reaction[]
+  studyGoals       StudyGoal[]       @relation("GoalOwner")
+
+  @@index([provider, providerId], map: "idx_user_provider")
+  @@index([email], map: "idx_user_email")
+  @@map("users")
+}
+
+model Community {
+  clubId           String            @id @default(dbgenerated("gen_random_uuid()")) @map("club_id") @db.Uuid
+  name             String            @db.VarChar
+  description      String?
+  isPublic         Boolean           @default(true) @map("is_public")
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime          @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
+  communityMembers CommunityMember[]
+  studyGoals       StudyGoal[]
+
+  @@index([isPublic], map: "idx_community_public")
+  @@index([name], map: "idx_community_name")
+  @@map("communities")
+}
+
+model StudyGoal {
+  goalId      String     @id @default(dbgenerated("gen_random_uuid()")) @map("goal_id") @db.Uuid
+  ownerId     String     @map("owner_id") @db.Uuid
+  clubId      String?    @map("club_id") @db.Uuid
+  title       String     @db.VarChar
+  description String?
+  isTeam      Boolean    @default(false) @map("is_team")
+  startDate   DateTime   @map("start_date") @db.Date
+  endDate     DateTime   @map("end_date") @db.Date
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime   @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt   DateTime?  @map("deleted_at") @db.Timestamp(6)
+  reactions   Reaction[]
+  club        Community? @relation(fields: [clubId], references: [clubId], onUpdate: NoAction, map: "fk_goal_club")
+  owner       User       @relation("GoalOwner", fields: [ownerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_goal_owner")
+
+  @@index([ownerId], map: "idx_goal_owner")
+  @@index([startDate, endDate], map: "idx_goal_dates")
+  @@index([isTeam], map: "idx_goal_team")
+  @@map("study_goals")
+}
+
+model Reaction {
+  reactionId String    @id @default(dbgenerated("gen_random_uuid()")) @map("reaction_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  goalId     String    @map("goal_id") @db.Uuid
+  emoji      String
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamp(6)
+  goal       StudyGoal @relation(fields: [goalId], references: [goalId], onDelete: Cascade, onUpdate: NoAction, map: "fk_reaction_goal")
+  user       User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_reaction_user")
+
+  @@unique([userId, goalId, emoji], map: "uk_reaction_user_goal")
+  @@index([goalId], map: "idx_reaction_goal")
+  @@index([userId], map: "idx_reaction_user")
+  @@map("reactions")
+}
+
+model CommunityMember {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clubId    String    @map("club_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  role      String    @default("member") @db.VarChar
+  joinedAt  DateTime  @default(now()) @map("joined_at") @db.Timestamp(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(6)
+  community Community @relation(fields: [clubId], references: [clubId], onDelete: Cascade, onUpdate: NoAction, map: "fk_member_club")
+  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_member_user")
+
+  @@index([userId], map: "idx_member_user")
+  @@index([clubId], map: "idx_member_club")
+  @@map("community_members")
+}

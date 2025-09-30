@@ -1,17 +1,53 @@
 import Button from '@/components/ui/Button'
 import styles from './page.module.css'
+import prisma from '@/lib/prisma'
+import CommunityForm from './CommunityForm'
+import DeleteButton from './DeleteButton'
+type CommunityListItem = { clubId: string; name: string; description: string | null; isPublic: boolean; createdAt: Date }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const communities: CommunityListItem[] = await prisma.community.findMany({
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'desc' },
+    select: { clubId: true, name: true, description: true, isPublic: true, createdAt: true },
+  })
+
   return (
     <main className={styles.container}>
       <h2 className={styles.title}>대시보드</h2>
-      <p className={styles.subtitle}>개인/팀 진행 상황을 한눈에 확인하세요.</p>
-      <div className={styles.actions}>
-        <Button href="/">홈으로</Button>
-        <Button href="/dashboard" variant="secondary">
-          새로고침
-        </Button>
-      </div>
+      <p className={styles.subtitle}>커뮤니티 CRUD 테스트 UI</p>
+
+      <section style={{ display: 'grid', gap: 16, marginTop: 16 }}>
+        <div className={styles.actions}>
+          <Button href="/">홈으로</Button>
+          <Button href="/dashboard" variant="secondary">새로고침</Button>
+        </div>
+
+        <div style={{ display: 'grid', gap: 12 }}>
+          <h3>커뮤니티 생성</h3>
+          <CommunityForm />
+        </div>
+
+        <div style={{ display: 'grid', gap: 8 }}>
+          <h3>커뮤니티 목록</h3>
+          {communities.length === 0 ? (
+            <p>아직 커뮤니티가 없습니다.</p>
+          ) : (
+            <ul style={{ display: 'grid', gap: 8 }}>
+              {communities.map((c: CommunityListItem) => (
+                <li key={c.clubId} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}>
+                  <div style={{ fontWeight: 700 }}>{c.name}</div>
+                  {c.description && <div style={{ color: '#6b7280' }}>{c.description}</div>}
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>{c.isPublic ? '공개' : '비공개'} · {new Date(c.createdAt).toLocaleString()}</div>
+                  <div style={{ marginTop: 8 }}>
+                    <DeleteButton id={c.clubId} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
     </main>
   )
 }

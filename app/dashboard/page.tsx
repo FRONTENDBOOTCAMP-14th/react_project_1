@@ -3,7 +3,10 @@ import styles from './page.module.css'
 import prisma from '@/lib/prisma'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
-type CommunityListItem = {
+
+export const dynamic = 'force-dynamic'
+
+interface CommunityListItem {
   clubId: string
   name: string
   description: string | null

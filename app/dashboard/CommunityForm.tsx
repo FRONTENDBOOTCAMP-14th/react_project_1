@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Props = {
+interface Props {
   onCreated?: () => void
 }
 

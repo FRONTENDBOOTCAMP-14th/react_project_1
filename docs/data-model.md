@@ -5,39 +5,39 @@
 ```mermaid
 erDiagram
     USER {
-        UUID user_id PK
-        VARCHAR provider
-        VARCHAR provider_id
-        VARCHAR email
-        TIMESTAMP deleted_at
+        uuid user_id PK
+        varchar provider
+        varchar provider_id
+        varchar email
+        timestamp deleted_at
     }
     STUDYGOAL {
-        UUID goal_id PK
-        UUID owner_id FK
-        UUID club_id FK
-        BOOLEAN is_team
-        TIMESTAMP deleted_at
+        uuid goal_id PK
+        uuid owner_id FK
+        uuid club_id FK
+        boolean is_team
+        timestamp deleted_at
     }
     REACTION {
-        UUID reaction_id PK
-        UUID user_id FK
-        UUID goal_id FK
-        TEXT emoji
-        TIMESTAMP deleted_at
+        uuid reaction_id PK
+        uuid user_id FK
+        uuid goal_id FK
+        text emoji
+        timestamp deleted_at
     }
     COMMUNITY {
-        UUID club_id PK
-        VARCHAR name
-        BOOLEAN is_public
-        TIMESTAMP deleted_at
+        uuid club_id PK
+        varchar name
+        boolean is_public
+        timestamp deleted_at
     }
     COMMUNITYMEMBER {
-        UUID id PK
-        UUID club_id FK
-        UUID user_id FK
-        VARCHAR role
-        TIMESTAMP joined_at
-        TIMESTAMP deleted_at
+        uuid id PK
+        uuid club_id FK
+        uuid user_id FK
+        varchar role
+        timestamp joined_at
+        timestamp deleted_at
     }
 
     USER ||--o{ STUDYGOAL : owns
@@ -50,6 +50,7 @@ erDiagram
 ```
 
 ## 데이터 스키마 테이블
+
 ### User 테이블 (소셜 로그인 전용)
 
 | 컬럼명      | 타입      | 제약조건                | 설명                                         |
@@ -59,9 +60,9 @@ erDiagram
 | provider_id | varchar   | NOT NULL                | 공급자에서 발급한 고유 사용자 ID             |
 | email       | varchar   | UNIQUE, NULL            | 이메일 (소셜 공급자가 제공 시)               |
 | username    | varchar   | NOT NULL                | 사용자명                                     |
-| nickname    | varchar   | NULL                    | 표시 이름(선택)                               |
+| nickname    | varchar   | NULL                    | 표시 이름(선택)                              |
 | created_at  | timestamp | NOT NULL, DEFAULT now() | 생성일                                       |
-| updated_at  | timestamp | NOT NULL, DEFAULT now() | 수정일 (트리거로 자동 업데이스트)              |
+| updated_at  | timestamp | NOT NULL, DEFAULT now() | 수정일 (트리거로 자동 업데이스트)            |
 | deleted_at  | timestamp | NULL                    | 소프트 삭제 시각                             |
 
 #### 제약조건 - User 테이블

@@ -1,9 +1,11 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Props = { id: string }
+interface Props {
+  id: string
+}
 
 export default function DeleteButton({ id }: Props) {
   const router = useRouter()

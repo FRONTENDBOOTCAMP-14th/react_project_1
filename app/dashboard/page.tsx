@@ -3,7 +3,14 @@ import styles from './page.module.css'
 import prisma from '@/lib/prisma'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
-type CommunityListItem = { clubId: string; name: string; description: string | null; isPublic: boolean; createdAt: Date }
+export const dynamic = 'force-dynamic'
+interface CommunityListItem {
+  clubId: string
+  name: string
+  description: string | null
+  isPublic: boolean
+  createdAt: Date
+}
 
 export default async function DashboardPage() {
   const communities: CommunityListItem[] = await prisma.community.findMany({
@@ -20,7 +27,9 @@ export default async function DashboardPage() {
       <section style={{ display: 'grid', gap: 16, marginTop: 16 }}>
         <div className={styles.actions}>
           <Button href="/">홈으로</Button>
-          <Button href="/dashboard" variant="secondary">새로고침</Button>
+          <Button href="/dashboard" variant="secondary">
+            새로고침
+          </Button>
         </div>
 
         <div style={{ display: 'grid', gap: 12 }}>
@@ -35,10 +44,15 @@ export default async function DashboardPage() {
           ) : (
             <ul style={{ display: 'grid', gap: 8 }}>
               {communities.map((c: CommunityListItem) => (
-                <li key={c.clubId} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}>
+                <li
+                  key={c.clubId}
+                  style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}
+                >
                   <div style={{ fontWeight: 700 }}>{c.name}</div>
                   {c.description && <div style={{ color: '#6b7280' }}>{c.description}</div>}
-                  <div style={{ fontSize: 12, color: '#6b7280' }}>{c.isPublic ? '공개' : '비공개'} · {new Date(c.createdAt).toLocaleString()}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>
+                    {c.isPublic ? '공개' : '비공개'} · {new Date(c.createdAt).toLocaleString()}
+                  </div>
                   <div style={{ marginTop: 8 }}>
                     <DeleteButton id={c.clubId} />
                   </div>

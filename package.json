@@ -7,9 +7,11 @@
     "dev": "next dev",
     "build": "pnpm format && pnpm lint:fix && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

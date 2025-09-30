@@ -1,0 +1,17 @@
+/* 전역 스타일 */
+
+@import url('common/reset.css');
+@import url('common/animation.css');
+@import url('common/a11y.css');
+@import url('common/variable.css');
+
+html,
+body {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+}

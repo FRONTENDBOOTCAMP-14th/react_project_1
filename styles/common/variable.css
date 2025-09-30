@@ -1,0 +1,27 @@
+:root {
+  --primary-color: #ffffff;
+  --secondary-color: #121212;
+
+  --full-radius: 9999px;
+  --card-radius: 16px;
+  --inner-card-radius: 8px;
+
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+
+  --font-xs: 0.75rem;
+  --font-sm: 1rem;
+  --font-md: 1.25rem;
+  --font-lg: 2rem;
+  --font-xl: 3.5rem;
+  --font-xxl: 5rem;
+
+  --icon-xs: 16px;
+  --icon-sm: 24px;
+  --icon-md: 36px;
+  --icon-lg: 48px;
+  --icon-xl: 64px;
+}

@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, data: created }, { status: 201 })
   } catch (err: any) {
     // Unique violation handling
-    const message = err?.code === 'P2002' ? 'Community name already exists' : err?.message ?? 'Unknown error'
+    const message =
+      err?.code === 'P2002' ? 'Community name already exists' : (err?.message ?? 'Unknown error')
     return NextResponse.json({ ok: false, error: message }, { status: 400 })
   }
 }

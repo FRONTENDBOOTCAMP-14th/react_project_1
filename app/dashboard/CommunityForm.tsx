@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -9,8 +9,8 @@ type Props = {
 
 export default function CommunityForm({ onCreated }: Props) {
   const router = useRouter()
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [isPublic, setIsPublic] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -33,8 +33,8 @@ export default function CommunityForm({ onCreated }: Props) {
       if (!res.ok) throw new Error(data?.error || '생성 실패')
 
       // reset and notify
-      setName("")
-      setDescription("")
+      setName('')
+      setDescription('')
       setIsPublic(true)
       onCreated?.()
       router.refresh()
@@ -53,7 +53,7 @@ export default function CommunityForm({ onCreated }: Props) {
           type="text"
           placeholder="예: FE Study"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           style={{ width: '100%', padding: 8 }}
         />
       </div>
@@ -62,7 +62,7 @@ export default function CommunityForm({ onCreated }: Props) {
         <textarea
           placeholder="커뮤니티 소개를 입력하세요"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={e => setDescription(e.target.value)}
           rows={4}
           style={{ width: '100%', padding: 8 }}
         />
@@ -72,7 +72,7 @@ export default function CommunityForm({ onCreated }: Props) {
           id="is_public"
           type="checkbox"
           checked={isPublic}
-          onChange={(e) => setIsPublic(e.target.checked)}
+          onChange={e => setIsPublic(e.target.checked)}
         />
         <label htmlFor="is_public">공개 커뮤니티</label>
       </div>

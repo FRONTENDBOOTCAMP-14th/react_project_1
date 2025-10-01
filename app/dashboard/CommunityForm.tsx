@@ -1,18 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { supabaseBrowser } from '@/lib/supabase/client'
 
 interface Props {
   onCreated?: () => void
 }
 
-interface Error {
-  message: string
-}
-
 export default function CommunityForm({ onCreated }: Props) {
-  const router = useRouter()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isPublic, setIsPublic] = useState(true)
@@ -22,28 +17,40 @@ export default function CommunityForm({ onCreated }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
     if (!name.trim()) {
       setError('이름을 입력하세요')
       return
     }
+
     setLoading(true)
     try {
-      const res = await fetch('/api/communities', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, is_public: isPublic }),
+      const { error: insertError } = await supabaseBrowser.from('communities').insert({
+        name: name.trim(),
+        description: description.trim() || null,
+        is_public: isPublic,
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || '생성 실패')
 
-      // reset and notify
+      if (insertError) {
+        console.error('[CommunityForm] Insert error:', insertError)
+        // Handle unique constraint violation
+        if (insertError.code === '23505') {
+          setError('이미 존재하는 커뮤니티 이름입니다.')
+        } else {
+          setError(insertError.message || '생성 실패')
+        }
+        return
+      }
+
+      // Reset form and notify
       setName('')
       setDescription('')
       setIsPublic(true)
       onCreated?.()
-      router.refresh()
-    } catch (err: unknown) {
-      setError((err as Error)?.message ?? '알 수 없는 오류')
+    } catch (err) {
+      console.error('[CommunityForm] Unexpected error:', err)
+      const message = err instanceof Error ? err.message : '알 수 없는 오류'
+      setError(message)
     } finally {
       setLoading(false)
     }

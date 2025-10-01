@@ -12,3 +12,9 @@
   display: flex;
   gap: 0.5rem;
 }
+
+.section {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}

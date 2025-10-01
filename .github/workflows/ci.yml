@@ -2,9 +2,6 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches:
-      - develop
 
 jobs:
   lint-and-typecheck:
@@ -32,6 +29,9 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+      - name: Format Check
+        run: pnpm format:check
 
       - name: Typecheck
         run: pnpm typecheck

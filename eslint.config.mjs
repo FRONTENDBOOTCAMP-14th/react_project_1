@@ -302,6 +302,7 @@ const eslintConfig = [
       'package-lock.json',
       'pnpm-lock.yaml',
       'yarn.lock',
+      'database.types.ts',
       'bun.lock',
     ],
   },

@@ -1,7 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Database = {
+export interface Database {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
@@ -17,6 +16,7 @@ export type Database = {
           description: string | null
           is_public: boolean
           name: string
+          tagname: string[]
           updated_at: string
         }
         Insert: {
@@ -26,6 +26,7 @@ export type Database = {
           description?: string | null
           is_public?: boolean
           name: string
+          tagname?: string[]
           updated_at?: string
         }
         Update: {
@@ -35,6 +36,7 @@ export type Database = {
           description?: string | null
           is_public?: boolean
           name?: string
+          tagname?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -217,10 +219,7 @@ export type Database = {
         Relationships: []
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-    Views: {
-      [_ in never]: never
-    }
+    Views: Record<never, never>
     Functions: {
       is_community_admin: {
         Args: { p_club_id: string; p_user_id: string }
@@ -235,14 +234,8 @@ export type Database = {
         Returns: boolean
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-    Enums: {
-      [_ in never]: never
-    }
-    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    Enums: Record<never, never>
+    CompositeTypes: Record<never, never>
   }
 }
 

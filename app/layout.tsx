@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko-KR">
-      <body className={fonts.pretendard.className}>
+      <body className={fonts.pretendard.className} suppressHydrationWarning>
         <Header />
         <div style={{ minHeight: 'calc(100vh - 120px)' }}>
           <div>{children}</div>

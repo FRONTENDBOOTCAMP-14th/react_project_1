@@ -2,7 +2,7 @@ import type { ImgProps } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import styles from './ProfileImage.module.css'
 
-const ProfileImage = ({ src, alt, size = 'big' }: ImgProps & { size?: 'big' | 'small' }) => {
+const ProfileImage = ({ src, alt, size = 'small' }: ImgProps & { size?: 'big' | 'small' }) => {
   return (
     <Image
       src={src}

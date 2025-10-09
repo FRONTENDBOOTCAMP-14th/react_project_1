@@ -1,6 +1,6 @@
+import prisma from '@/lib/prisma'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 
 // GET /api/communities -> list active communities
 export async function GET() {

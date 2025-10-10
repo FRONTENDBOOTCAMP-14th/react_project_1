@@ -1,14 +1,18 @@
+'use client'
+
 import type { ProgressHTMLAttributes } from 'react'
 
 export interface ParticipateRateProps<T> extends ProgressHTMLAttributes<T> {
-  name?: number
+  name?: string
 }
 
 const ParticipateRate = ({ name, value, max }: ParticipateRateProps<HTMLProgressElement>) => {
   return (
     <div>
       {name && <span>{name}</span>}
-      <progress value={value} max={max} />
+      <progress value={value} max={max}>
+        {value}%
+      </progress>
     </div>
   )
 }

@@ -1,6 +1,8 @@
 'use client'
 
 import {
+  AccentButton,
+  AccentLink,
   Dropdown,
   FillButton,
   FillLink,
@@ -33,8 +35,10 @@ export default function Page() {
       <h1>UI Component Test Page</h1>
       <FillButton onClick={() => alert('Button Clicked!')}>로그인</FillButton>
       <StrokeButton onClick={() => alert('Button Clicked!')}>로그인</StrokeButton>
+      <AccentButton onClick={() => alert('Button Clicked!')}>로그인</AccentButton>
       <FillLink href="/">Fill Link</FillLink>
       <StrokeLink href="/">Stroke Link</StrokeLink>
+      <AccentLink href="/">Accent Link</AccentLink>
       <ParticipateRate name="사용자" value={75} max={100} />
 
       <Dropdown

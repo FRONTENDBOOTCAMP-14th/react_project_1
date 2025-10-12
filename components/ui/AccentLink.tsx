@@ -1,10 +1,16 @@
 import type { CustomLinkProps } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import styles from './FillLink.module.css'
+import styles from './AccentLink.module.css'
 
 /**
- * 채워진 링크 컴포넌트
+ * FillLink 컴포넌트에 전달되는 props 타입
+ *
+ * Next.js LinkProps와 a 태그 속성(href 제외)을 결합합니다.
+ */
+
+/**
+ * 액센트 링크 컴포넌트
  *
  * - Next.js Link를 사용하여 클라이언트 라우팅을 제공합니다.
  * - 전달된 className에 컴포넌트 기본 스타일을 합칩니다.
@@ -13,14 +19,14 @@ import styles from './FillLink.module.css'
  * @returns 스타일이 적용된 Link 컴포넌트
  *
  * @example
- * <FillLink href="/">홈으로</FillLink>
+ * <AccentLink href="/">홈으로</AccentLink>
  */
-const FillLink = (props: CustomLinkProps) => {
+const AccentLink = (props: CustomLinkProps) => {
   return (
-    <Link {...props} className={cn(props.className, styles['fill-link'])}>
+    <Link {...props} className={cn(props.className, styles['accent-link'])}>
       {props.children}
     </Link>
   )
 }
 
-export default FillLink
+export default AccentLink

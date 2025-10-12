@@ -1,8 +1,7 @@
 .fill-button {
   display: inline;
   min-width: 64px;
-  min-height: 36px;
-  padding: 8px 8px;
+  padding: 8px;
   justify-content: center;
   align-items: center;
   gap: 10px;

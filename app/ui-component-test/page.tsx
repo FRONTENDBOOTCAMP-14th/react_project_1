@@ -3,6 +3,7 @@
 import {
   AccentButton,
   AccentLink,
+  Checkbox,
   Dropdown,
   FillButton,
   FillLink,
@@ -16,6 +17,8 @@ import styles from './page.module.css'
 export default function Page() {
   const [city, setCity] = useState('')
   const [person, setPerson] = useState('')
+  const [isChecked1, setIsChecked1] = useState(false)
+  const [isChecked2, setIsChecked2] = useState(true)
 
   const cityOptions = [
     { value: 'gomin', label: '고민시' },
@@ -40,6 +43,11 @@ export default function Page() {
       <StrokeLink href="/">Stroke Link</StrokeLink>
       <AccentLink href="/">Accent Link</AccentLink>
       <ParticipateRate name="사용자" value={75} max={100} />
+
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <Checkbox checked={isChecked1} onChange={setIsChecked1} />
+        <Checkbox checked={isChecked2} onChange={setIsChecked2} />
+      </div>
 
       <Dropdown
         options={cityOptions}

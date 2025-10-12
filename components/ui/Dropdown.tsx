@@ -29,14 +29,14 @@ interface DropdownProps {
  * 사용자가 여러 옵션 중 하나를 선택할 수 있는 드롭다운 UI 컴포넌트입니다.
  * 클릭 시 옵션 목록이 나타나며, 배경 클릭으로 닫을 수 있습니다.
  *
- * @param {DropdownProps} props - 드롭다운 컴포넌트 props
- * @param {DropdownOption[]} props.options - 선택 가능한 옵션 목록
- * @param {string} [props.value] - 현재 선택된 값
- * @param {(value: string) => void} [props.onChange] - 옵션 선택 시 호출되는 콜백 함수
- * @param {string} [props.placeholder='선택하세요'] - 선택되지 않았을 때 표시할 플레이스홀더 텍스트
- * @param {string} [props.className] - 추가 CSS 클래스명
+ * @param props - 드롭다운 컴포넌트 props
+ * @param props.options - 선택 가능한 옵션 목록
+ * @param props.value - 현재 선택된 값
+ * @param props.onChange - 옵션 선택 시 호출되는 콜백 함수
+ * @param props.placeholder - 선택되지 않았을 때 표시할 플레이스홀더 텍스트
+ * @param props.className - 추가 CSS 클래스명
  *
- * @returns {JSX.Element} 드롭다운 컴포넌트
+ * @returns 드롭다운 컴포넌트
  *
  * @example
  * ```tsx
@@ -70,7 +70,7 @@ export default function Dropdown({
    * 옵션 선택 핸들러
    * 선택된 옵션의 값을 onChange 콜백으로 전달하고 드롭다운을 닫습니다.
    *
-   * @param {string} optionValue - 선택된 옵션의 값
+   * @param optionValue - 선택된 옵션의 값
    */
   const handleSelect = (optionValue: string) => {
     onChange?.(optionValue)

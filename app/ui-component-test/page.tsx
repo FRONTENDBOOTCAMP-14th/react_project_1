@@ -1,6 +1,13 @@
 'use client'
 
-import { Dropdown, FillButton, FillLink, ParticipateRate } from '@/components/ui'
+import {
+  Dropdown,
+  FillButton,
+  FillLink,
+  ParticipateRate,
+  StrokeButton,
+  StrokeLink,
+} from '@/components/ui'
 import { useState } from 'react'
 import styles from './page.module.css'
 
@@ -25,7 +32,9 @@ export default function Page() {
     <div className={styles['ui-component-test']}>
       <h1>UI Component Test Page</h1>
       <FillButton onClick={() => alert('Button Clicked!')}>로그인</FillButton>
+      <StrokeButton onClick={() => alert('Button Clicked!')}>로그인</StrokeButton>
       <FillLink href="/">Fill Link</FillLink>
+      <StrokeLink href="/">Stroke Link</StrokeLink>
       <ParticipateRate name="사용자" value={75} max={100} />
 
       <Dropdown

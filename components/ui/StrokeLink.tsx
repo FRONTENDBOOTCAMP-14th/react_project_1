@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import type { LinkProps } from 'next/link'
 import Link from 'next/link'
 import type { AnchorHTMLAttributes } from 'react'
-import styles from './FillLink.module.css'
+import styles from './StrokeLink.module.css'
 
 /**
  * FillLink 컴포넌트에 전달되는 props 타입
@@ -12,7 +12,7 @@ import styles from './FillLink.module.css'
 interface FillLinkProps extends LinkProps, Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {}
 
 /**
- * 채워진 링크 컴포넌트
+ * 스트로크크 링크 컴포넌트
  *
  * - Next.js Link를 사용하여 클라이언트 라우팅을 제공합니다.
  * - 전달된 className에 컴포넌트 기본 스타일을 합칩니다.
@@ -21,14 +21,14 @@ interface FillLinkProps extends LinkProps, Omit<AnchorHTMLAttributes<HTMLAnchorE
  * @returns 스타일이 적용된 Link 컴포넌트
  *
  * @example
- * <FillLink href="/">홈으로</FillLink>
+ * <StrokeLink href="/">홈으로</StrokeLink>
  */
-const FillLink = (props: FillLinkProps) => {
+const StrokeLink = (props: FillLinkProps) => {
   return (
-    <Link {...props} className={cn(props.className, styles['fill-link'])}>
+    <Link {...props} className={cn(props.className, styles['stroke-link'])}>
       {props.children}
     </Link>
   )
 }
 
-export default FillLink
+export default StrokeLink

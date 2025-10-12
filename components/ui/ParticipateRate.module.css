@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.label {
+  font-size: var(--font-sm);
+  color: var(--secondary-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.progressBar {
+  flex: 1;
+  height: 24px;
+  background-color: var(--etc-color-3);
+  border-radius: var(--full-radius);
+  overflow: hidden;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--third-color);
+  border-radius: var(--full-radius);
+}

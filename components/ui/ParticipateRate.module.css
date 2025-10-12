@@ -1,7 +1,7 @@
 .container {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -14,7 +14,7 @@
 
 .progressBar {
   flex: 1;
-  height: 24px;
+  height: 12px;
   background-color: var(--etc-color-3);
   border-radius: var(--full-radius);
   overflow: hidden;

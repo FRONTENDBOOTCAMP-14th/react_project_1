@@ -78,3 +78,22 @@
   justify-content: center;
   cursor: pointer;
 }
+
+/* Icon hover: swap to active asset */
+.default-icon {
+  display: block;
+}
+.active-icon {
+  display: none;
+}
+.icon-button:hover .default-icon {
+  display: none;
+}
+.icon-button:hover .active-icon {
+  display: block;
+}
+
+/* Back button simple hover feedback */
+.back:hover {
+  opacity: 0.8;
+}

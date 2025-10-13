@@ -17,7 +17,7 @@ export default function LoginPage() {
   return (
     <main className={styles.container}>
       <Image
-        src="/svg/_logo.svg"
+        src="/svg/logo.svg"
         alt="로고"
         width={96}
         height={96}
@@ -31,7 +31,7 @@ export default function LoginPage() {
         className={styles['kakao-button']}
         onClick={() => signIn('kakao', { callbackUrl: '/' })}
       >
-        <Image src="/svg/_kakaoSimbol.svg" alt="카카오 심볼" width={24} height={24} priority />
+        <Image src="/svg/kakao-symbol.svg" alt="카카오 심볼" width={24} height={24} priority />
         카카오톡으로 시작하기
       </button>
     </main>

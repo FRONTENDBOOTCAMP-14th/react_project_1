@@ -38,7 +38,8 @@ export default function Header({ title = '' }: HeaderProps) {
             {/* Left: Hamburger */}
             <div className={styles['left-group']}>
               <button type="button" aria-label="메뉴 열기" className={styles['icon-button']}>
-                <Image src="/svg/_menuHam.svg" alt="메뉴" width={50} height={50} priority />
+                <Image className={styles['default-icon']} src="/svg/menu-ham.svg" alt="메뉴" width={50} height={50} priority />
+                <Image className={styles['active-icon']} src="/svg/menu-ham-active.svg" alt="메뉴 활성" width={50} height={50} priority />
               </button>
             </div>
             {/* Center: empty on home */}
@@ -46,7 +47,8 @@ export default function Header({ title = '' }: HeaderProps) {
             {/* Right: Alarm + Profile */}
             <div className={styles['right-group']}>
               <button type="button" aria-label="알림" className={styles['icon-button']}>
-                <Image src="/svg/_alarm.svg" alt="알림" width={50} height={50} priority />
+                <Image className={styles['default-icon']} src="/svg/alarm.svg" alt="알림" width={50} height={50} priority />
+                <Image className={styles['active-icon']} src="/svg/alarm-active.svg" alt="알림 활성" width={50} height={50} priority />
               </button>
               <button
                 type="button"
@@ -57,7 +59,8 @@ export default function Header({ title = '' }: HeaderProps) {
                   else router.push('/login')
                 }}
               >
-                <Image src="/svg/_profile.svg" alt="프로필" width={50} height={50} priority />
+                <Image className={styles['default-icon']} src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
+                <Image className={styles['active-icon']} src="/svg/profile-active.svg" alt="프로필 활성" width={50} height={50} priority />
               </button>
             </div>
           </>
@@ -71,7 +74,7 @@ export default function Header({ title = '' }: HeaderProps) {
                 onClick={() => router.back()}
                 className={styles.back}
               >
-                <Image src="/svg/_headerArrow.svg" alt="뒤로가기" width={24} height={24} priority />
+                <Image src="/svg/header-arrow.svg" alt="뒤로가기" width={24} height={24} priority />
               </button>
             </div>
             {/* Center: Title */}

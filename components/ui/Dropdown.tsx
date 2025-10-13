@@ -53,13 +53,13 @@ interface DropdownProps {
  * />
  * ```
  */
-export default function Dropdown({
+const Dropdown = ({
   options,
   value,
   onChange,
   placeholder = '선택하세요',
   className,
-}: DropdownProps) {
+}: DropdownProps) => {
   // 드롭다운 열림/닫힘 상태 관리
   const [isOpen, setIsOpen] = useState(false)
 
@@ -131,3 +131,5 @@ export default function Dropdown({
     </div>
   )
 }
+
+export default Dropdown

@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import styles from './Header.module.css'
+import { useSession } from 'next-auth/react'
 
 type HeaderProps = {
   title?: string
@@ -11,6 +12,7 @@ export default function Header({ title = '' }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const isHome = pathname === '/'
+  const { status } = useSession()
 
   // Derive a display title from pathname if prop is not provided
   const getTitleFromPathname = (path: string): string => {
@@ -34,23 +36,26 @@ export default function Header({ title = '' }: HeaderProps) {
         {isHome ? (
           <>
             {/* Left: Hamburger */}
-            <div className={styles.leftGroup}>
-              <button type="button" aria-label="메뉴 열기" className={styles.iconButton}>
+            <div className={styles['left-group']}>
+              <button type="button" aria-label="메뉴 열기" className={styles['icon-button']}>
                 <Image src="/svg/_menuHam.svg" alt="메뉴" width={50} height={50} priority />
               </button>
             </div>
             {/* Center: empty on home */}
             <div className={styles.center} />
             {/* Right: Alarm + Profile */}
-            <div className={styles.rightGroup}>
-              <button type="button" aria-label="알림" className={styles.iconButton}>
+            <div className={styles['right-group']}>
+              <button type="button" aria-label="알림" className={styles['icon-button']}>
                 <Image src="/svg/_alarm.svg" alt="알림" width={50} height={50} priority />
               </button>
               <button
                 type="button"
                 aria-label="프로필"
-                className={styles.iconButton}
-                onClick={() => router.push('/login')}
+                className={styles['icon-button']}
+                onClick={() => {
+                  if (status === 'authenticated') router.push('/profile')
+                  else router.push('/login')
+                }}
               >
                 <Image src="/svg/_profile.svg" alt="프로필" width={50} height={50} priority />
               </button>
@@ -59,7 +64,7 @@ export default function Header({ title = '' }: HeaderProps) {
         ) : (
           <>
             {/* Left: Back button */}
-            <div className={styles.leftGroup}>
+            <div className={styles['left-group']}>
               <button
                 type="button"
                 aria-label="뒤로가기"
@@ -74,7 +79,7 @@ export default function Header({ title = '' }: HeaderProps) {
               {displayTitle && <h1 className={styles.title}>{displayTitle}</h1>}
             </div>
             {/* Right: empty on inner pages */}
-            <div className={styles.rightGroup} />
+            <div className={styles['right-group']} />
           </>
         )}
       </div>

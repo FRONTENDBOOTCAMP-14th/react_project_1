@@ -48,11 +48,16 @@
 }
 
 /* Home layout groups */
-.leftGroup,
-.rightGroup {
+.left-group,
+.right-group {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+/* Align right group to the right edge of its grid column */
+.right-group {
+  justify-self: end;
 }
 
 /* Center column for title */
@@ -63,7 +68,7 @@
 }
 
 /* Generic icon button (hamburger, alarm, profile) */
-.iconButton {
+.icon-button {
   appearance: none;
   background: none;
   border: 0;

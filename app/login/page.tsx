@@ -10,26 +10,30 @@ export default function LoginPage() {
   const search = useSearchParams()
   const step = search.get('step')
 
-  const handleKakaoStart = async () => {
-    // TODO: 여기에 카카오 OAuth 시작 로직을 연결하세요.
-    // 예: router.push('/api/auth/kakao') 또는 SDK 호출
-    await signIn('kakao', { callbackUrl: '/' })
-  }
-
   if (step === 'register') {
     return <RegisterForm />
   }
 
   return (
     <main className={styles.container}>
-      <a
-        href="/api/auth/signin/kakao?callbackUrl=/"
+      <Image
+        src="/svg/_logo.svg"
+        alt="로고"
+        width={96}
+        height={96}
+        priority
+        style={{ marginBottom: 24 }}
+      />
+      <h1 className={styles['brand-title']}>토끼노트</h1>
+      <button
+        type="button"
         aria-label="카카오톡으로 시작하기"
         className={styles['kakao-button']}
+        onClick={() => signIn('kakao', { callbackUrl: '/' })}
       >
         <Image src="/svg/_kakaoSimbol.svg" alt="카카오 심볼" width={24} height={24} priority />
         카카오톡으로 시작하기
-      </a>
+      </button>
     </main>
   )
 }
@@ -51,9 +55,6 @@ function RegisterForm() {
   )
   const [nicknameStatus, setNicknameStatus] = React.useState<
     'idle' | 'checking' | 'available' | 'taken'
-  >('idle')
-  const [usernameStatus, setUsernameStatus] = React.useState<
-    'idle' | 'checking' | 'exists' | 'clear'
   >('idle')
 
   const checkEmail = async (): Promise<boolean> => {
@@ -104,36 +105,16 @@ function RegisterForm() {
     }
   }
 
-  const checkUsername = async (): Promise<boolean> => {
-    // 정책상 중복 허용. 존재 여부만 안내
-    if (!username) {
-      setUsernameStatus('idle')
-      return false
-    }
-    setUsernameStatus('checking')
-    try {
-      const res = await fetch(
-        `/api/login-kakao/check-username?username=${encodeURIComponent(username)}`
-      )
-      const json = await res.json()
-      if (json?.count && json.count > 0) {
-        setUsernameStatus('exists')
-      } else {
-        setUsernameStatus('clear')
-      }
-      return true
-    } catch {
-      setUsernameStatus('idle')
-      return false
-    }
-  }
-
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async ev => {
     ev.preventDefault()
     setLoading(true)
     setErrors({})
     try {
       if (!providerId) throw new Error('providerId 가 없습니다.')
+      if (!username) {
+        setErrors({ form: '이름을 입력하세요.' })
+        return
+      }
       if (!email) {
         setErrors({ email: '이메일을 입력하세요.' })
         return
@@ -243,33 +224,25 @@ function RegisterForm() {
               value={username}
               onChange={e => {
                 setUsername(e.target.value)
-                setUsernameStatus('idle')
               }}
               placeholder="이름"
               required
             />
-            <button
-              type="button"
-              onClick={checkUsername}
-              disabled={!username || usernameStatus === 'checking'}
-              className={styles['check-button']}
-            >
-              {usernameStatus === 'checking' ? '확인중…' : '중복확인'}
-            </button>
           </div>
-          {usernameStatus === 'exists' && (
-            <span className={styles['note-text']}>동일 이름이 존재합니다(중복 허용).</span>
-          )}
-          {usernameStatus === 'clear' && (
-            <span className={styles['success-text']}>사용 가능한 이름입니다.</span>
-          )}
         </label>
 
         {errors.form && <div className={styles['error-text']}>{errors.form}</div>}
 
         <button
           type="submit"
-          disabled={loading || emailStatus !== 'available' || nicknameStatus !== 'available'}
+          disabled={
+            loading ||
+            !email ||
+            !nickname ||
+            !username ||
+            emailStatus !== 'available' ||
+            nicknameStatus !== 'available'
+          }
           className={styles['submit-button']}
         >
           {loading ? '가입 중...' : '가입하기'}

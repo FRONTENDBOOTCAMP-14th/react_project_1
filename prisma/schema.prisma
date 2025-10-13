@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-  userId           String            @id @default(dbgenerated("auth.uid()")) @map("user_id") @db.Uuid
+  userId           String            @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
   provider         String            @db.VarChar
   providerId       String            @map("provider_id") @db.VarChar
   email            String?           @db.VarChar

@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import styles from './Header.module.css'
 import { useSession } from 'next-auth/react'
 
-type HeaderProps = {
+interface HeaderProps {
   title?: string
 }
 
@@ -22,7 +22,7 @@ export default function Header({ title = '' }: HeaderProps) {
     try {
       const decoded = decodeURIComponent(last.replace(/-/g, ' '))
       // Capitalize first letter only for basic Latin letters; leave others (e.g., Korean) as-is
-      return decoded.replace(/^[a-z]/, (m) => m.toUpperCase())
+      return decoded.replace(/^[a-z]/, m => m.toUpperCase())
     } catch {
       return last
     }
@@ -38,8 +38,22 @@ export default function Header({ title = '' }: HeaderProps) {
             {/* Left: Hamburger */}
             <div className={styles['left-group']}>
               <button type="button" aria-label="메뉴 열기" className={styles['icon-button']}>
-                <Image className={styles['default-icon']} src="/svg/menu-ham.svg" alt="메뉴" width={50} height={50} priority />
-                <Image className={styles['active-icon']} src="/svg/menu-ham-active.svg" alt="메뉴 활성" width={50} height={50} priority />
+                <Image
+                  className={styles['default-icon']}
+                  src="/svg/menu-ham.svg"
+                  alt="메뉴"
+                  width={50}
+                  height={50}
+                  priority
+                />
+                <Image
+                  className={styles['active-icon']}
+                  src="/svg/menu-ham-active.svg"
+                  alt="메뉴 활성"
+                  width={50}
+                  height={50}
+                  priority
+                />
               </button>
             </div>
             {/* Center: empty on home */}
@@ -47,8 +61,22 @@ export default function Header({ title = '' }: HeaderProps) {
             {/* Right: Alarm + Profile */}
             <div className={styles['right-group']}>
               <button type="button" aria-label="알림" className={styles['icon-button']}>
-                <Image className={styles['default-icon']} src="/svg/alarm.svg" alt="알림" width={50} height={50} priority />
-                <Image className={styles['active-icon']} src="/svg/alarm-active.svg" alt="알림 활성" width={50} height={50} priority />
+                <Image
+                  className={styles['default-icon']}
+                  src="/svg/alarm.svg"
+                  alt="알림"
+                  width={50}
+                  height={50}
+                  priority
+                />
+                <Image
+                  className={styles['active-icon']}
+                  src="/svg/alarm-active.svg"
+                  alt="알림 활성"
+                  width={50}
+                  height={50}
+                  priority
+                />
               </button>
               <button
                 type="button"
@@ -59,8 +87,22 @@ export default function Header({ title = '' }: HeaderProps) {
                   else router.push('/login')
                 }}
               >
-                <Image className={styles['default-icon']} src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
-                <Image className={styles['active-icon']} src="/svg/profile-active.svg" alt="프로필 활성" width={50} height={50} priority />
+                <Image
+                  className={styles['default-icon']}
+                  src="/svg/profile.svg"
+                  alt="프로필"
+                  width={50}
+                  height={50}
+                  priority
+                />
+                <Image
+                  className={styles['active-icon']}
+                  src="/svg/profile-active.svg"
+                  alt="프로필 활성"
+                  width={50}
+                  height={50}
+                  priority
+                />
               </button>
             </div>
           </>

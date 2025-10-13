@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { exchangeToken, getKakaoUserInfo } from '@/lib/oauth/kakao'
 import { findByProviderId } from '@/lib/repositories/user'
 
@@ -49,6 +50,9 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: 'callback_failed', detail: e?.message }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: 'callback_failed', detail: e?.message },
+      { status: 500 }
+    )
   }
 }

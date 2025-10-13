@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createUser, isEmailTaken, isNicknameTaken } from '@/lib/repositories/user'
 
 export async function POST(req: NextRequest) {
@@ -39,8 +40,14 @@ export async function POST(req: NextRequest) {
     const user = await createUser({ provider, providerId, email, username, nickname })
 
     // TODO: 세션 발급/로그인 상태 설정(NextAuth 또는 커스텀)
-    return NextResponse.json({ ok: true, user: { userId: user.userId, username: user.username, nickname: user.nickname } })
+    return NextResponse.json({
+      ok: true,
+      user: { userId: user.userId, username: user.username, nickname: user.nickname },
+    })
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: 'register_failed', detail: e?.message }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: 'register_failed', detail: e?.message },
+      { status: 500 }
+    )
   }
 }

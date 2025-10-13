@@ -1,4 +1,4 @@
-type TokenResponse = {
+interface TokenResponse {
   access_token: string
   token_type: string
   refresh_token?: string
@@ -45,5 +45,5 @@ export async function getKakaoUserInfo(accessToken: string) {
     throw new Error(`kakao me error: ${res.status} ${t}`)
   }
   const json = await res.json()
-  return json as any
+  return json
 }

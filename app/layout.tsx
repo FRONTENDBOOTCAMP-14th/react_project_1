@@ -5,7 +5,7 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'LearnHub',
+  title: '토끼노트',
   description: '스터디 진행 관리/커뮤니티 플랫폼',
 }
 

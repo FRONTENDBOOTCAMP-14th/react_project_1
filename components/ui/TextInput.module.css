@@ -1,0 +1,30 @@
+.text-input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--secondary-color);
+  border-radius: var(--radius-sm, 8px);
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-sm);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.text-input:focus {
+  outline: none;
+}
+
+.text-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.text-input--error {
+  border-color: var(--error-color, #ef4444);
+}
+
+.text-input--error:focus {
+  border-color: var(--error-color, #ef4444);
+}

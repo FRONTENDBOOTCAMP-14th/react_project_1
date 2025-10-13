@@ -1,0 +1,17 @@
+.accent-link {
+  display: inline;
+  padding: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-family);
+  font-size: var(--font-sm);
+  box-shadow: 0 1px 2.4px 0 var(--accent-color);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}

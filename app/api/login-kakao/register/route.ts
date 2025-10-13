@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const provider = 'kakao'
     const providerId = String(body.providerId || '')
-    const email = (body.email ?? null) as string | null
+    const email = (body.email ?? '').trim()
     const username = (body.username as string) || (providerId ? `kakao_${providerId}` : '')
     const nickname = (body.nickname ?? null) as string | null
 
@@ -15,6 +15,9 @@ export async function POST(req: NextRequest) {
     }
     if (!username) {
       return NextResponse.json({ ok: false, error: 'missing_username' }, { status: 400 })
+    }
+    if (!email) {
+      return NextResponse.json({ ok: false, error: 'missing_email' }, { status: 400 })
     }
 
     // 이메일 중복 체크(활성 사용자 기준)

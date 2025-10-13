@@ -1,9 +1,10 @@
-"use client"
+'use client'
 
 import React from 'react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import styles from './page.module.css'
 
 export default function LoginPage() {
   const search = useSearchParams()
@@ -20,35 +21,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: 'calc(100dvh - 56px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-      }}
-    >
+    <main className={styles.container}>
       <a
         href="/api/auth/signin/kakao?callbackUrl=/"
         aria-label="카카오톡으로 시작하기"
-        style={{
-          width: '100%',
-          maxWidth: 360,
-          height: 48,
-          border: '1px solid #e5e7eb',
-          borderRadius: 8,
-          background: '#FEE500',
-          color: '#191600',
-          fontSize: 16,
-          fontWeight: 600,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          textDecoration: 'none',
-        }}
+        className={styles['kakao-button']}
       >
         <Image src="/svg/_kakaoSimbol.svg" alt="카카오 심볼" width={24} height={24} priority />
         카카오톡으로 시작하기
@@ -63,33 +40,116 @@ function RegisterForm() {
   const providerId = search.get('providerId') || ''
   const emailFromQuery = search.get('email') || ''
   const [email, setEmail] = React.useState(emailFromQuery)
-  const [username, setUsername] = React.useState(providerId ? `kakao_${providerId}` : '')
+  const [username, setUsername] = React.useState('')
   const [nickname, setNickname] = React.useState('')
-  const [errors, setErrors] = React.useState<{ email?: string; nickname?: string; form?: string }>({})
+  const [errors, setErrors] = React.useState<{ email?: string; nickname?: string; form?: string }>(
+    {}
+  )
   const [loading, setLoading] = React.useState(false)
+  const [emailStatus, setEmailStatus] = React.useState<'idle' | 'checking' | 'available' | 'taken'>(
+    emailFromQuery ? 'idle' : 'idle'
+  )
+  const [nicknameStatus, setNicknameStatus] = React.useState<
+    'idle' | 'checking' | 'available' | 'taken'
+  >('idle')
+  const [usernameStatus, setUsernameStatus] = React.useState<
+    'idle' | 'checking' | 'exists' | 'clear'
+  >('idle')
 
-  const checkEmail = async () => {
-    setErrors((e) => ({ ...e, email: undefined }))
-    if (!email) return
-    const res = await fetch(`/api/login-kakao/check-email?email=${encodeURIComponent(email)}`)
-    const json = await res.json()
-    if (json?.taken) setErrors((e) => ({ ...e, email: '이미 사용 중인 이메일입니다.' }))
+  const checkEmail = async (): Promise<boolean> => {
+    setErrors(e => ({ ...e, email: undefined }))
+    if (!email) {
+      setEmailStatus('idle')
+      return false
+    }
+    setEmailStatus('checking')
+    try {
+      const res = await fetch(`/api/login-kakao/check-email?email=${encodeURIComponent(email)}`)
+      const json = await res.json()
+      if (json?.taken) {
+        setEmailStatus('taken')
+        setErrors(e => ({ ...e, email: '이미 사용 중인 이메일입니다.' }))
+        return false
+      }
+      setEmailStatus('available')
+      return true
+    } catch {
+      setEmailStatus('idle')
+      return false
+    }
   }
 
-  const checkNickname = async () => {
-    setErrors((e) => ({ ...e, nickname: undefined }))
-    if (!nickname) return
-    const res = await fetch(`/api/login-kakao/check-nickname?nickname=${encodeURIComponent(nickname)}`)
-    const json = await res.json()
-    if (json?.taken) setErrors((e) => ({ ...e, nickname: '이미 사용 중인 닉네임입니다.' }))
+  const checkNickname = async (): Promise<boolean> => {
+    setErrors(e => ({ ...e, nickname: undefined }))
+    if (!nickname) {
+      setNicknameStatus('idle')
+      return false
+    }
+    setNicknameStatus('checking')
+    try {
+      const res = await fetch(
+        `/api/login-kakao/check-nickname?nickname=${encodeURIComponent(nickname)}`
+      )
+      const json = await res.json()
+      if (json?.taken) {
+        setNicknameStatus('taken')
+        setErrors(e => ({ ...e, nickname: '이미 사용 중인 닉네임입니다.' }))
+        return false
+      }
+      setNicknameStatus('available')
+      return true
+    } catch {
+      setNicknameStatus('idle')
+      return false
+    }
   }
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (ev) => {
+  const checkUsername = async (): Promise<boolean> => {
+    // 정책상 중복 허용. 존재 여부만 안내
+    if (!username) {
+      setUsernameStatus('idle')
+      return false
+    }
+    setUsernameStatus('checking')
+    try {
+      const res = await fetch(
+        `/api/login-kakao/check-username?username=${encodeURIComponent(username)}`
+      )
+      const json = await res.json()
+      if (json?.count && json.count > 0) {
+        setUsernameStatus('exists')
+      } else {
+        setUsernameStatus('clear')
+      }
+      return true
+    } catch {
+      setUsernameStatus('idle')
+      return false
+    }
+  }
+
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = async ev => {
     ev.preventDefault()
     setLoading(true)
     setErrors({})
     try {
       if (!providerId) throw new Error('providerId 가 없습니다.')
+      if (!email) {
+        setErrors({ email: '이메일을 입력하세요.' })
+        return
+      }
+      {
+        const ok = await checkEmail()
+        if (!ok) return
+      }
+      if (!nickname) {
+        setErrors({ nickname: '닉네임을 입력하세요.' })
+        return
+      }
+      {
+        const ok = await checkNickname()
+        if (!ok) return
+      }
       const res = await fetch('/api/login-kakao/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,67 +172,105 @@ function RegisterForm() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: 'calc(100dvh - 56px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-      }}
-    >
-      <form onSubmit={onSubmit} style={{ width: '100%', maxWidth: 420, display: 'grid', gap: 12 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700 }}>회원가입</h1>
+    <main className={styles.container}>
+      <form onSubmit={onSubmit} className={styles.form}>
+        <h1 className={styles['label-title']}>회원가입</h1>
 
-        <label style={{ display: 'grid', gap: 6 }}>
-          <span style={{ fontSize: 14, color: '#374151' }}>이메일(선택)</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={checkEmail}
-            placeholder="email@example.com"
-            style={{ height: 40, border: '1px solid #e5e7eb', borderRadius: 8, padding: '0 12px' }}
-          />
-          {errors.email && <span style={{ color: '#dc2626', fontSize: 12 }}>{errors.email}</span>}
+        <label className={styles.label}>
+          <span className={styles['label-title']}>이메일(필수)</span>
+          <div className={styles['input-row']}>
+            <input
+              className={styles.input}
+              type="email"
+              value={email}
+              onChange={e => {
+                setEmail(e.target.value)
+                setEmailStatus('idle')
+              }}
+              onBlur={checkEmail}
+              placeholder="email@example.com"
+              required
+            />
+            <button
+              type="button"
+              onClick={checkEmail}
+              disabled={!email || emailStatus === 'checking'}
+              className={styles['check-button']}
+            >
+              {emailStatus === 'checking' ? '확인중…' : '중복확인'}
+            </button>
+          </div>
+          {emailStatus === 'available' && !errors.email && (
+            <span className={styles['success-text']}>사용 가능한 이메일입니다.</span>
+          )}
+          {errors.email && <span className={styles['error-text']}>{errors.email}</span>}
         </label>
 
-        <label style={{ display: 'grid', gap: 6 }}>
-          <span style={{ fontSize: 14, color: '#374151' }}>닉네임(필수)</span>
-          <input
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onBlur={checkNickname}
-            placeholder="닉네임을 입력하세요"
-            required
-            style={{ height: 40, border: '1px solid #e5e7eb', borderRadius: 8, padding: '0 12px' }}
-          />
-          {errors.nickname && <span style={{ color: '#dc2626', fontSize: 12 }}>{errors.nickname}</span>}
+        <label className={styles.label}>
+          <span className={styles['label-title']}>닉네임(필수)</span>
+          <div className={styles['input-row']}>
+            <input
+              className={styles.input}
+              value={nickname}
+              onChange={e => {
+                setNickname(e.target.value)
+                setNicknameStatus('idle')
+              }}
+              onBlur={checkNickname}
+              placeholder="닉네임을 입력하세요"
+              required
+            />
+            <button
+              type="button"
+              onClick={checkNickname}
+              disabled={!nickname || nicknameStatus === 'checking'}
+              className={styles['check-button']}
+            >
+              {nicknameStatus === 'checking' ? '확인중…' : '중복확인'}
+            </button>
+          </div>
+          {nicknameStatus === 'available' && !errors.nickname && (
+            <span className={styles['success-text']}>사용 가능한 닉네임입니다.</span>
+          )}
+          {errors.nickname && <span className={styles['error-text']}>{errors.nickname}</span>}
         </label>
 
-        <label style={{ display: 'grid', gap: 6 }}>
-          <span style={{ fontSize: 14, color: '#374151' }}>아이디(선택)</span>
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="아이디(중복 허용)"
-            style={{ height: 40, border: '1px solid #e5e7eb', borderRadius: 8, padding: '0 12px' }}
-          />
+        <label className={styles.label}>
+          <span className={styles['label-title']}>이름(필수)</span>
+          <div className={styles['input-row']}>
+            <input
+              className={styles.input}
+              value={username}
+              onChange={e => {
+                setUsername(e.target.value)
+                setUsernameStatus('idle')
+              }}
+              placeholder="이름"
+              required
+            />
+            <button
+              type="button"
+              onClick={checkUsername}
+              disabled={!username || usernameStatus === 'checking'}
+              className={styles['check-button']}
+            >
+              {usernameStatus === 'checking' ? '확인중…' : '중복확인'}
+            </button>
+          </div>
+          {usernameStatus === 'exists' && (
+            <span className={styles['note-text']}>동일 이름이 존재합니다(중복 허용).</span>
+          )}
+          {usernameStatus === 'clear' && (
+            <span className={styles['success-text']}>사용 가능한 이름입니다.</span>
+          )}
         </label>
 
-        {errors.form && <div style={{ color: '#dc2626', fontSize: 12 }}>{errors.form}</div>}
+        {errors.form && <div className={styles['error-text']}>{errors.form}</div>}
 
         <button
           type="submit"
-          disabled={loading}
-          style={{
-            height: 44,
-            borderRadius: 8,
-            background: '#111827',
-            color: 'white',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
+          disabled={loading || emailStatus !== 'available' || nicknameStatus !== 'available'}
+          className={styles['submit-button']}
         >
           {loading ? '가입 중...' : '가입하기'}
         </button>

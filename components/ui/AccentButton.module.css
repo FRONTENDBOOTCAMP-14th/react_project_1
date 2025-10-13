@@ -10,7 +10,8 @@
   text-align: center;
   text-decoration: none;
   font-family: var(--font-family);
-  font-size: var(--font-md);
+  font-size: var(--font-sm);
+  box-shadow: 0 1px 2.4px 0 var(--accent-color);
   font-style: normal;
   font-weight: 600;
   line-height: normal;

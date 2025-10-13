@@ -7,12 +7,16 @@ import {
   Dropdown,
   FillButton,
   FillLink,
+  IconLink,
   ParticipateRate,
   StrokeButton,
   StrokeLink,
 } from '@/components/ui'
 import { useState } from 'react'
 import styles from './page.module.css'
+import TextInput from '@/components/ui/TextInput'
+import IconButton from '@/components/ui/IconButton'
+import Image from 'next/image'
 
 export default function Page() {
   const [city, setCity] = useState('')
@@ -42,6 +46,20 @@ export default function Page() {
       <FillLink href="/">Fill Link</FillLink>
       <StrokeLink href="/">Stroke Link</StrokeLink>
       <AccentLink href="/">Accent Link</AccentLink>
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <IconButton onClick={() => alert('Button Clicked!')}>
+          <Image src="/kakao-talk.svg" alt="" width={40} height={40} />
+        </IconButton>
+        <IconLink href="/">
+          <Image src="/kakao-talk.svg" alt="" width={40} height={40} />
+        </IconLink>
+        <IconButton onClick={() => alert('Button Clicked!')}>
+          <Image src="/kakao-talk.svg" alt="" width={120} height={120} />
+        </IconButton>
+        <IconLink href="/">
+          <Image src="/kakao-talk.svg" alt="" width={120} height={120} />
+        </IconLink>
+      </div>
       <ParticipateRate name="사용자" value={75} max={100} />
 
       <div style={{ display: 'flex', gap: '16px' }}>
@@ -61,6 +79,8 @@ export default function Page() {
         onChange={setPerson}
         placeholder="사람을 선택하세요"
       />
+
+      <TextInput placeholder="이름을 입력하세요" />
     </div>
   )
 }

@@ -89,7 +89,7 @@ const Dropdown = ({
       >
         <span className={styles.label}>{selectedOption?.label || placeholder}</span>
         <svg
-          className={cn(styles.icon, isOpen && styles.iconOpen)}
+          className={cn(styles.icon, isOpen && styles['icon-open'])}
           width="24"
           height="24"
           viewBox="0 0 24 24"
@@ -116,7 +116,7 @@ const Dropdown = ({
                 {/* 개별 옵션 버튼 */}
                 <button
                   type="button"
-                  className={cn(styles.option, value === option.value && styles.optionActive)}
+                  className={cn(styles.option, value === option.value && styles['option-active'])}
                   onClick={() => handleSelect(option.value)}
                   role="option"
                   aria-selected={value === option.value}

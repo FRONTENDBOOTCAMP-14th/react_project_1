@@ -4,12 +4,6 @@ import Link from 'next/link'
 import styles from './AccentLink.module.css'
 
 /**
- * FillLink 컴포넌트에 전달되는 props 타입
- *
- * Next.js LinkProps와 a 태그 속성(href 제외)을 결합합니다.
- */
-
-/**
  * 액센트 링크 컴포넌트
  *
  * - Next.js Link를 사용하여 클라이언트 라우팅을 제공합니다.

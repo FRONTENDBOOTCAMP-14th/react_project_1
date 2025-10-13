@@ -43,15 +43,15 @@ const Checkbox = ({ label, checked, onChange, className, ...rest }: CheckboxProp
   }
 
   return (
-    <label className={cn(styles.checkboxWrapper, className)}>
+    <label className={cn(styles['checkbox-wrapper'], className)}>
       <input
         type="checkbox"
         checked={checked}
         onChange={handleChange}
-        className={styles.hiddenCheckbox}
+        className={styles['hidden-checkbox']}
         {...rest}
       />
-      <span className={cn(styles.customCheckbox, checked && styles.checked)}>
+      <span className={cn(styles['custom-checkbox'], checked && styles.checked)}>
         {checked && (
           <svg
             width="24"
@@ -59,7 +59,7 @@ const Checkbox = ({ label, checked, onChange, className, ...rest }: CheckboxProp
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className={styles.checkIcon}
+            className={styles['check-icon']}
           >
             <path
               d="M5 13L9 17L19 7"

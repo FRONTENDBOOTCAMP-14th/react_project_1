@@ -7,6 +7,8 @@ export type { DropdownOption } from './Dropdown'
 
 export { default as FillButton } from './FillButton'
 export { default as FillLink } from './FillLink'
+export { default as IconLink } from './IconLink'
+export { default as IconButton } from './IconButton'
 export { default as ParticipateRate } from './ParticipateRate'
 export { default as StrokeButton } from './StrokeButton'
 export { default as StrokeLink } from './StrokeLink'

@@ -1,0 +1,17 @@
+.stroke-link {
+  display: inline;
+  padding: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--third-color);
+  box-shadow: 0 1px 2.4px 0 var(--third-color);
+  color: var(--third-color);
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-family);
+  font-size: var(--font-sm);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}

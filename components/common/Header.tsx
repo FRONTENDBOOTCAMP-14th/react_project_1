@@ -19,6 +19,18 @@ export default function Header({ title = '' }: HeaderProps) {
     if (!path || path === '/') return ''
     const parts = path.split('/').filter(Boolean)
     const last = parts[parts.length - 1] || ''
+
+    // If the last segment is a number (likely an ID), use the parent segment instead
+    if (/^\d+$/.test(last) && parts.length > 1) {
+      const parent = parts[parts.length - 2]
+      try {
+        const decoded = decodeURIComponent(parent.replace(/-/g, ' '))
+        return decoded.replace(/^[a-z]/, m => m.toUpperCase())
+      } catch {
+        return parent
+      }
+    }
+
     try {
       const decoded = decodeURIComponent(last.replace(/-/g, ' '))
       // Capitalize first letter only for basic Latin letters; leave others (e.g., Korean) as-is

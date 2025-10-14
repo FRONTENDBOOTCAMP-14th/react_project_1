@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <StudyProfile id={id as string} />
-      <p>StudyProfile {id}</p>
+      <p>리액트를 연습하는 스터디 입니다.</p>
     </>
   )
 }

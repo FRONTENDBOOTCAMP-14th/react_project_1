@@ -14,17 +14,18 @@ export default function Header({ title = '' }: HeaderProps) {
   const isHome = pathname === '/'
   const { status } = useSession()
 
-  // Derive a display title from pathname if prop is not provided
+  // pathname에서 제목을 추출하려면 프롭스가 제공되지 않은 경우에 사용됩니다.
   const getTitleFromPathname = (path: string): string => {
     if (!path || path === '/') return ''
     const parts = path.split('/').filter(Boolean)
     const last = parts[parts.length - 1] || ''
 
-    // If the last segment is a number (likely an ID), use the parent segment instead
+    // 마지막 세그먼트가 숫자일 경우 (거의 ID임), 부모 세그먼트를 대신 사용합니다.
     if (/^\d+$/.test(last) && parts.length > 1) {
       const parent = parts[parts.length - 2]
       try {
         const decoded = decodeURIComponent(parent.replace(/-/g, ' '))
+        // 기본 Latin 문자의 첫 번째 알파벳을 대문자로 변경합니다.
         return decoded.replace(/^[a-z]/, m => m.toUpperCase())
       } catch {
         return parent
@@ -33,7 +34,7 @@ export default function Header({ title = '' }: HeaderProps) {
 
     try {
       const decoded = decodeURIComponent(last.replace(/-/g, ' '))
-      // Capitalize first letter only for basic Latin letters; leave others (e.g., Korean) as-is
+      // 기본 Latin 문자의 첫 번째 알파벳을 대문자로 변경합니다.
       return decoded.replace(/^[a-z]/, m => m.toUpperCase())
     } catch {
       return last

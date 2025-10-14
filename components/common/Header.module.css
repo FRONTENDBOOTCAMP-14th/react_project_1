@@ -2,14 +2,17 @@
   border-bottom: 1px solid #e2e8f0;
   background: #ffffffcc;
   backdrop-filter: blur(4px);
+  height: 50px;
 }
 .inner {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0.75rem 1rem;
-  display: flex;
+  padding: 0rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
+  height: 50px;
 }
 .brand {
   font-weight: 700;
@@ -20,4 +23,77 @@
 }
 .link {
   text-decoration: none;
+}
+
+/* Back button used in Header.tsx */
+.back {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Page title used in Header.tsx */
+.title {
+  margin: 0;
+  padding: 0 0.25rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Home layout groups */
+.left-group,
+.right-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Align right group to the right edge of its grid column */
+.right-group {
+  justify-self: end;
+}
+
+/* Center column for title */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Generic icon button (hamburger, alarm, profile) */
+.icon-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Icon hover: swap to active asset */
+.default-icon {
+  display: block;
+}
+.active-icon {
+  display: none;
+}
+.icon-button:hover .default-icon {
+  display: none;
+}
+.icon-button:hover .active-icon {
+  display: block;
+}
+
+/* Back button simple hover feedback */
+.back:hover {
+  opacity: 0.8;
 }

@@ -3,6 +3,7 @@ import Footer from '@/components/common/Footer'
 import Header from '@/components/common/Header'
 import '@/styles/globals.css'
 import type { Metadata } from 'next'
+import Providers from './providers'
 
 export const metadata: Metadata = {
   title: '토끼노트',
@@ -13,11 +14,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko-KR">
       <body className={fonts.pretendard.className}>
-        <Header />
-        <div style={{ minHeight: 'calc(100vh - 120px)' }}>
-          <div>{children}</div>
-        </div>
-        <Footer />
+        <Providers>
+          <Header />
+          <div style={{ minHeight: 'calc(100vh - 120px)' }}>
+            <div>{children}</div>
+          </div>
+          <Footer />
+        </Providers>
       </body>
     </html>
   )

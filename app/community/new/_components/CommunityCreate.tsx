@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Dropdown from '@/components/ui/Dropdown'
-import TagInput from '@/app/community/new/_components/TagInput'
+// import Dropdown from '@/components/ui/Dropdown'
+// import TagInput from '@/app/community/new/_components/TagInput'
 import FillButton from '@/components/ui/FillButton'
 
-const CommunityCreate = () => {
+export default function CommunityCreate() {
   const [studyName, setStudyName] = useState<string>('')
   const [studyRegion, setStudyRegion] = useState<string>('')
   const [studyDescription, setStudyDescription] = useState<string>('')
@@ -27,9 +27,6 @@ const CommunityCreate = () => {
     console.log('폼 데이터:', formData)
     // API 호출 등 제출 로직
   }
-}
-
-export default function CommunityCreate() {
   return (
     <form onSubmit={handleSubmit}>
       <section>
@@ -46,10 +43,7 @@ export default function CommunityCreate() {
         />
 
         <h2 className="sr-only">스터디지역</h2>
-        <Dropdown>
-          value={studyRegion}
-          onChange={setStudyRegion}
-        </Dropdown>
+        {/* <Dropdown options={options} value={studyRegion} onChange={setStudyRegion} /> */}
 
         <h2 className="sr-only">스터디설명</h2>
         <label htmlFor="study-description">스터디설명</label>
@@ -63,7 +57,7 @@ export default function CommunityCreate() {
         />
 
         <h2 className="sr-only">관련태그</h2>
-        <TagInput value={studyTags} onChange={setStudyTags} />
+        {/* <TagInput value={studyTags} onChange={setStudyTags} /> */}
       </section>
 
       <section>

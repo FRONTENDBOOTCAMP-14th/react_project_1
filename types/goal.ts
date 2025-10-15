@@ -1,0 +1,86 @@
+/**
+ * StudyGoal 타입 정의
+ * Prisma StudyGoal 모델 기반
+ */
+export interface StudyGoal {
+  goalId: string
+  ownerId: string
+  clubId: string | null
+  title: string
+  description: string | null
+  isTeam: boolean
+  startDate: Date | string
+  endDate: Date | string
+  createdAt: Date | string
+  updatedAt: Date | string
+  deletedAt?: Date | string | null
+}
+
+/**
+ * StudyGoal 생성 요청 타입
+ */
+export interface CreateStudyGoalRequest {
+  ownerId: string
+  clubId?: string | null
+  title: string
+  description?: string | null
+  isTeam?: boolean
+  startDate: Date | string
+  endDate: Date | string
+}
+
+/**
+ * StudyGoal 업데이트 요청 타입
+ */
+export interface UpdateStudyGoalRequest {
+  title?: string
+  description?: string | null
+  isTeam?: boolean
+  startDate?: Date | string
+  endDate?: Date | string
+}
+
+/**
+ * StudyGoal 조회 쿼리 파라미터 타입
+ */
+export interface StudyGoalQueryParams {
+  clubId?: string
+  isTeam?: boolean
+  ownerId?: string
+}
+
+/**
+ * API 응답 타입 - 단일 목표
+ */
+export interface StudyGoalResponse {
+  success: boolean
+  data?: StudyGoal
+  error?: string
+  message?: string
+}
+
+/**
+ * API 응답 타입 - 목표 리스트
+ */
+export interface StudyGoalListResponse {
+  success: boolean
+  data?: StudyGoal[]
+  count?: number
+  error?: string
+  message?: string
+}
+
+/**
+ * 목표와 관련 정보를 포함한 확장 타입
+ */
+export interface StudyGoalWithRelations extends StudyGoal {
+  owner?: {
+    userId: string
+    username: string
+    email: string
+  }
+  club?: {
+    clubId: string
+    name: string
+  } | null
+}

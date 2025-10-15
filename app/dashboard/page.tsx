@@ -3,6 +3,7 @@ import styles from './page.module.css'
 import prisma from '@/lib/prisma'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,12 +51,22 @@ export default async function DashboardPage() {
                   key={c.clubId}
                   style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}
                 >
-                  <div style={{ fontWeight: 700 }}>{c.name}</div>
+                  <Link
+                    href={`/community/${c.clubId}`}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <div style={{ fontWeight: 700, cursor: 'pointer', color: '#2563eb' }}>
+                      {c.name}
+                    </div>
+                  </Link>
                   {c.description && <div style={{ color: '#6b7280' }}>{c.description}</div>}
                   <div style={{ fontSize: 12, color: '#6b7280' }}>
                     {c.isPublic ? '공개' : '비공개'} · {new Date(c.createdAt).toLocaleString()}
                   </div>
-                  <div style={{ marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <Button href={`/community/${c.clubId}`} variant="secondary">
+                      상세보기
+                    </Button>
                     <DeleteButton id={c.clubId} />
                   </div>
                 </li>

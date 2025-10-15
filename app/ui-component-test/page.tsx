@@ -48,16 +48,16 @@ export default function Page() {
       <AccentLink href="/">Accent Link</AccentLink>
       <div style={{ display: 'flex', gap: '16px' }}>
         <IconButton onClick={() => alert('Button Clicked!')}>
-          <Image src="/kakao-talk.svg" alt="" width={40} height={40} />
+          <Image src="/svg/logo.svg" alt="" width={40} height={40} />
         </IconButton>
         <IconLink href="/">
-          <Image src="/kakao-talk.svg" alt="" width={40} height={40} />
+          <Image src="/svg/logo.svg" alt="" width={40} height={40} />
         </IconLink>
         <IconButton onClick={() => alert('Button Clicked!')}>
-          <Image src="/kakao-talk.svg" alt="" width={120} height={120} />
+          <Image src="/svg/logo.svg" alt="" width={120} height={120} />
         </IconButton>
         <IconLink href="/">
-          <Image src="/kakao-talk.svg" alt="" width={120} height={120} />
+          <Image src="/svg/logo.svg" alt="" width={120} height={120} />
         </IconLink>
       </div>
       <ParticipateRate name="사용자" value={75} max={100} />

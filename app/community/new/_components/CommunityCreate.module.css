@@ -4,14 +4,45 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: var(--third-color);
 }
 
 .title {
+  display: flex;
   font-size: var(--font-sm);
+  background-color: blue;
   /* font-weight: var(); */
 }
 
+.wrapper {
+  list-style-type: none;
+  background-color: darkcyan;
+  /* layout에 css 스타일 부르고 삭제 */
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .studyName {
-  background-color: green;
+  display: flex;
+  justify-content: row;
+  align-items: center;
+  gap: var(--spacing-sm);
+
+  input {
+    height: var(--font-lg);
+    border-radius: 6px;
+    padding-left: var(--spacing-xs);
+  }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+
+  svg {
+    width: var(--icon-xs);
+    margin: 0 var(--spacing-sm);
+    fill: var(--spacing-sm);
+    stroke-width: 1;
+  }
 }

@@ -37,12 +37,12 @@ export default function CommunityCreate() {
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <section>
-        <ul>
-          <li className={studyName}>
+        <ul className={styles.wrapper}>
+          <li className={styles.studyName}>
             <h2 className="sr-only">스터디명</h2>
-            <label htmlFor="study-name" className={styles.title}>
-              <User size={16} className="--secondary-color" />
-              이름
+            <label htmlFor="study-name" className={styles.label}>
+              <User />
+              모임명
             </label>
             <input
               type="text"
@@ -57,8 +57,8 @@ export default function CommunityCreate() {
 
           <li>
             <h2 className="sr-only">스터디지역</h2>
-            <label className={styles.title}>
-              <MapPin size={16} className={styles.title} />
+            <label>
+              <MapPin size={16} />
               지역
             </label>
             <Dropdown
@@ -77,8 +77,8 @@ export default function CommunityCreate() {
 
           <li>
             <h2 className="sr-only">스터디설명</h2>
-            <label htmlFor="study-description" className={styles.title}>
-              <ClipboardList size={16} className="--secondary-color" />
+            <label htmlFor="study-description">
+              <ClipboardList size={16} />
               설명
             </label>
             <textarea
@@ -93,8 +93,8 @@ export default function CommunityCreate() {
 
           <li>
             <h2 className="sr-only">관련태그</h2>
-            <label htmlFor="study-tag" className={styles.title}>
-              <Tag size={16} className="--secondary-color" />
+            <label htmlFor="study-tag">
+              <Tag size={16} />
               태그
             </label>
             <input

@@ -1,37 +1,43 @@
 'use client'
 
 import { useState } from 'react'
-// import Dropdown from '@/components/ui/Dropdown'
+import Dropdown from '@/components/ui/Dropdown'
 // import TagInput from '@/app/community/new/_components/TagInput'
 import FillButton from '@/components/ui/FillButton'
+import ImageUploader from '@/app/community/new/_components/ImageUploader'
 
 export default function CommunityCreate() {
   const [studyName, setStudyName] = useState<string>('')
-  const [studyRegion, setStudyRegion] = useState<string>('')
+
+  const [studyRegion, setStudyRegion] = useState('')
+  const options = [
+    { value: 'option1', label: '옵션 1' },
+    { value: 'option2', label: '옵션 2' },
+  ]
   const [studyDescription, setStudyDescription] = useState<string>('')
   const [studyTags, setStudyTags] = useState<string>('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const formData = {
-      studyName,
-      studyRegion,
-      studyDescription,
-      studyTags: studyTags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag),
-    }
+    //   const formData = {
+    //     studyName,
+    //     studyRegion,
+    //     studyDescription,
+    //     studyTags: studyTags
+    //       .split(',')
+    //       .map(tag => tag.trim())
+    //       .filter(tag => tag),
+    //   }
 
-    console.log('폼 데이터:', formData)
-    // API 호출 등 제출 로직
+    //   console.log('폼 데이터:', formData)
+    //   // API 호출 등 제출 로직
   }
   return (
     <form onSubmit={handleSubmit}>
       <section>
         <h2 className="sr-only">스터디명</h2>
-        <label htmlFor="study-name">스터디명</label>
+        <label htmlFor="study-name">이름</label>
         <input
           type="text"
           id="study-name"
@@ -43,7 +49,19 @@ export default function CommunityCreate() {
         />
 
         <h2 className="sr-only">스터디지역</h2>
-        {/* <Dropdown options={options} value={studyRegion} onChange={setStudyRegion} /> */}
+        <label htmlFor="study-name">지역</label>
+        <Dropdown
+          options={options}
+          value={studyRegion}
+          onChange={setStudyRegion}
+          placeholder="선택하세요"
+        />
+        <Dropdown
+          options={options}
+          value={studyRegion}
+          onChange={setStudyRegion}
+          placeholder="선택하세요"
+        />
 
         <h2 className="sr-only">스터디설명</h2>
         <label htmlFor="study-description">스터디설명</label>

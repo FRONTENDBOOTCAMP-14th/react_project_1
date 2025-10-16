@@ -4,6 +4,7 @@ import { Checkbox, StrokeButton } from '@/components/ui'
 import { useEffect, useState, useOptimistic, useTransition, useCallback } from 'react'
 import type { StudyGoal } from '@/types/goal'
 import type { Round } from '@/types/round'
+import { toast } from 'sonner'
 import styles from './RoundCard.module.css'
 
 interface RoundCardProps {
@@ -124,6 +125,7 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
     })
 
     try {
+      toast.loading('목표를 업데이트 중입니다...')
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'PATCH',
         headers: {
@@ -145,9 +147,13 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
         ...prev,
         [type]: prev[type].map(goal => (goal.goalId === goalId ? { ...goal, isComplete } : goal)),
       }))
+      toast.dismiss()
+      toast.success('목표를 업데이트했습니다.')
     } catch (err) {
       console.error('Failed to toggle complete:', err)
       await fetchGoals()
+      toast.dismiss()
+      toast.error('목표를 업데이트하는데 실패했습니다.')
     }
   }
 

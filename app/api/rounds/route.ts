@@ -11,6 +11,8 @@
  */
 
 import prisma from '@/lib/prisma'
+import { roundSelect, activeRoundWhere } from '@/lib/quaries'
+import type { CreateRoundRequest } from '@/types/round'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -29,33 +31,39 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const clubId = searchParams.get('clubId')
 
-    const whereClause: {
-      deletedAt: null
-      clubId?: string
-    } = {
-      deletedAt: null,
+    // 페이지네이션 파라미터
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
+    const skip = (page - 1) * limit
+
+    // where 절 구성
+    const whereClause = {
+      ...activeRoundWhere,
+      ...(clubId && { clubId }),
     }
 
-    if (clubId) {
-      whereClause.clubId = clubId
-    }
-
-    const rounds = await prisma.round.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        roundId: true,
-        clubId: true,
-        roundNumber: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    // 병렬 조회: 데이터 + 전체 갯수
+    const [rounds, total] = await Promise.all([
+      prisma.round.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: roundSelect,
+      }),
+      prisma.round.count({ where: whereClause }),
+    ])
 
     return NextResponse.json({
       success: true,
       data: rounds,
       count: rounds.length,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     })
   } catch (error) {
     console.error('Error fetching rounds:', error)
@@ -87,12 +95,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { clubId, roundNumber } = body as {
-      clubId?: string
-      roundNumber?: number
-    }
+    const body = (await request.json()) as CreateRoundRequest
+    const { clubId, roundNumber } = body
 
+    // 필수 값 검증
     if (!clubId) {
       return NextResponse.json(
         {
@@ -104,18 +110,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // roundNumber 유효성 검증
+    if (roundNumber !== undefined && (roundNumber < 1 || !Number.isInteger(roundNumber))) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'roundNumber must be a positive integer',
+        },
+        { status: 400 }
+      )
+    }
+
+    // clubId 존재 확인
+    const club = await prisma.community.findFirst({
+      where: { clubId, deletedAt: null },
+      select: { clubId: true },
+    })
+
+    if (!club) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Community not found',
+        },
+        { status: 404 }
+      )
+    }
+
     const newRound = await prisma.round.create({
       data: {
         clubId,
-        roundNumber: roundNumber || 1,
+        roundNumber: roundNumber ?? 1,
       },
-      select: {
-        roundId: true,
-        clubId: true,
-        roundNumber: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: roundSelect,
     })
 
     return NextResponse.json(

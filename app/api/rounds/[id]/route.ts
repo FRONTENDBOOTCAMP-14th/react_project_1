@@ -8,6 +8,8 @@
  */
 
 import prisma from '@/lib/prisma'
+import { roundSelect, roundDetailSelect } from '@/lib/quaries'
+import type { UpdateRoundRequest } from '@/types/round'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -18,32 +20,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params
 
-    const round = await prisma.round.findUnique({
+    // findFirst로 소프트 삭제 조건 적용 (findUnique는 단일 필드만 가능)
+    const round = await prisma.round.findFirst({
       where: {
         roundId: id,
         deletedAt: null,
       },
-      select: {
-        roundId: true,
-        clubId: true,
-        roundNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        community: {
-          select: {
-            clubId: true,
-            name: true,
-          },
-        },
-        studyGoals: {
-          where: { deletedAt: null },
-          select: {
-            goalId: true,
-            title: true,
-            isComplete: true,
-          },
-        },
-      },
+      select: roundDetailSelect,
     })
 
     if (!round) {
@@ -70,16 +53,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const body = await request.json()
+    const body = (await request.json()) as UpdateRoundRequest
 
-    const existingRound = await prisma.round.findUnique({
-      where: { roundId: id, deletedAt: null },
-    })
-
-    if (!existingRound) {
-      return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
-    }
-
+    // 동적 업데이트 데이터 구성
     const updateData: {
       roundNumber?: number
       updatedAt: Date
@@ -87,21 +63,39 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updatedAt: new Date(),
     }
 
-    if (body.roundNumber !== undefined) updateData.roundNumber = body.roundNumber
+    if (body.roundNumber !== undefined) {
+      // roundNumber 유효성 검증
+      if (body.roundNumber < 1 || !Number.isInteger(body.roundNumber)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'roundNumber must be a positive integer',
+          },
+          { status: 400 }
+        )
+      }
+      updateData.roundNumber = body.roundNumber
+    }
 
-    const updatedRound = await prisma.round.update({
-      where: { roundId: id },
-      data: updateData,
-      select: {
-        roundId: true,
-        clubId: true,
-        roundNumber: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    // 업데이트 실행 (race condition 방지: where에 deletedAt 조건 포함)
+    try {
+      const updatedRound = await prisma.round.update({
+        where: {
+          roundId: id,
+          deletedAt: null,
+        },
+        data: updateData,
+        select: roundSelect,
+      })
 
-    return NextResponse.json({ success: true, data: updatedRound })
+      return NextResponse.json({ success: true, data: updatedRound })
+    } catch (error: unknown) {
+      // Prisma P2025: Record not found
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+        return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
+      }
+      throw error
+    }
   } catch (error) {
     console.error('Error updating round:', error)
     return NextResponse.json(
@@ -125,23 +119,27 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    const existingRound = await prisma.round.findUnique({
-      where: { roundId: id, deletedAt: null },
-    })
+    // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
+    try {
+      await prisma.round.update({
+        where: {
+          roundId: id,
+          deletedAt: null,
+        },
+        data: { deletedAt: new Date() },
+      })
 
-    if (!existingRound) {
-      return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
+      return NextResponse.json({
+        success: true,
+        message: 'Round deleted successfully',
+      })
+    } catch (error: unknown) {
+      // Prisma P2025: Record not found
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+        return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
+      }
+      throw error
     }
-
-    await prisma.round.update({
-      where: { roundId: id },
-      data: { deletedAt: new Date() },
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Round deleted successfully',
-    })
   } catch (error) {
     console.error('Error deleting round:', error)
     return NextResponse.json(

@@ -55,3 +55,44 @@ export const goalDetailSelect = {
 export const activeGoalWhere = {
   deletedAt: null,
 } satisfies Prisma.StudyGoalWhereInput
+
+/**
+ * Round 기본 Select (목록 조회용)
+ */
+export const roundSelect = {
+  roundId: true,
+  clubId: true,
+  roundNumber: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.RoundSelect
+
+/**
+ * Round 상세 Select (관계 포함)
+ */
+export const roundDetailSelect = {
+  ...roundSelect,
+  community: {
+    select: {
+      clubId: true,
+      name: true,
+    },
+  },
+  studyGoals: {
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      goalId: true,
+      title: true,
+      isComplete: true,
+    },
+  },
+} satisfies Prisma.RoundSelect
+
+/**
+ * 활성 회차 조건 (소프트 삭제 제외)
+ */
+export const activeRoundWhere = {
+  deletedAt: null,
+} satisfies Prisma.RoundWhereInput

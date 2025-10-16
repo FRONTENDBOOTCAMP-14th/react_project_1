@@ -2,6 +2,9 @@
  * Round 타입 정의
  * Prisma Round 모델 기반
  */
+
+import type { PaginationInfo } from '@/lib/types'
+
 export interface Round {
   roundId: string
   clubId: string
@@ -50,6 +53,7 @@ export interface RoundListResponse {
   success: boolean
   data?: Round[]
   count?: number
+  pagination?: PaginationInfo
   error?: string
   message?: string
 }

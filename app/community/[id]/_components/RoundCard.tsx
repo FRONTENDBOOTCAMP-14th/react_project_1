@@ -4,10 +4,11 @@ import { LoadingState, ErrorState } from '@/components/common'
 import type { Round } from '@/types/round'
 import type { WithClubId, WithTeamLeaderPermission } from '@/types/common'
 import styles from './RoundCard.module.css'
-import { useRoundData, useGoalsData, useGoalToggle } from '@/lib/hooks'
+import { useRoundData, useGoalsData } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import GoalsSection from './GoalsSection'
 import { MESSAGES } from '@/constants'
+import { useGoalToggle } from '../_hooks/useGoalToggle'
 
 /**
  * RoundCard 컴포넌트에 전달되는 속성

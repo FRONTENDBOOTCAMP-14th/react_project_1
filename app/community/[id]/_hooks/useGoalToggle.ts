@@ -69,8 +69,6 @@ export const useGoalToggle = (
         }
 
         // 3. API 성공: 베이스 상태 업데이트 생략
-        // 낙관적 업데이트가 이미 UI에 반영되어 있으므로 추가 업데이트 불필요
-        // 서버 상태는 다음 refetch 시점(페이지 재진입, 새로고침 등)에 자동 동기화
         toast.dismiss()
         toast.success('목표를 업데이트했습니다.')
       } catch (err) {

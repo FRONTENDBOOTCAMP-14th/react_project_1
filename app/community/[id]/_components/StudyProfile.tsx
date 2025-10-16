@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { memo } from 'react'
 import type { ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/types/community'
@@ -8,6 +9,7 @@ import { MapPin, Users } from 'lucide-react'
 import { useCommunityData } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
+import { UI_CONSTANTS, MESSAGES } from '@/constants'
 
 /**
  * StudyProfile 컴포넌트에 전달되는 속성
@@ -20,21 +22,23 @@ interface StudyProfileProps {
 /**
  * 커뮤니티 프로필 이미지 컴포넌트 (순수 컴포넌트)
  */
-function ProfileImage({ alt, src = '/images/example.jpg' }: { alt: string; src?: string }) {
+const ProfileImage = memo(({ alt, src = '/images/example.jpg' }: { alt: string; src?: string }) => {
+  const size = UI_CONSTANTS.IMAGE_SIZE.PROFILE_THUMBNAIL
+
   return (
     <div className={styles['image-container']}>
       <Image
         src={src}
         alt={alt}
-        width={90}
-        height={90}
+        width={size}
+        height={size}
         className={styles.image}
-        sizes="90px"
+        sizes={`${size}px`}
         priority
       />
     </div>
   )
-}
+})
 
 /**
  * 정보 행 컴포넌트에 전달되는 속성
@@ -49,14 +53,14 @@ interface InfoRowProps {
 /**
  * 정보 행 컴포넌트 (순수 컴포넌트)
  */
-function InfoRow({ icon, text }: InfoRowProps) {
+const InfoRow = memo(({ icon, text }: InfoRowProps) => {
   return (
     <section className={styles['info-row']} aria-label={text}>
       {icon}
       <p>{text}</p>
     </section>
   )
-}
+})
 
 /**
  * 커뮤니티 정보 컴포넌트에 전달되는 속성
@@ -69,18 +73,21 @@ interface ProfileInfoProps {
 /**
  * 커뮤니티 정보 컴포넌트 (순수 컴포넌트)
  */
-function ProfileInfo({ community }: ProfileInfoProps) {
+const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
+  const iconSize = UI_CONSTANTS.ICON_SIZE.SMALL
+  const memberCount = community._count?.communityMembers || 0
+
   return (
     <div className={styles['profile-info']}>
       <p className={styles['community-name']}>{community.name}</p>
-      <InfoRow icon={<MapPin size={16} aria-hidden="true" />} text="종로구" />
+      <InfoRow icon={<MapPin size={iconSize} aria-hidden="true" />} text="종로구" />
       <InfoRow
-        icon={<Users size={16} aria-hidden="true" />}
-        text={`멤버: ${community._count?.communityMembers || 0}명`}
+        icon={<Users size={iconSize} aria-hidden="true" />}
+        text={MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}
       />
     </div>
   )
-}
+})
 
 /**
  * 커뮤니티 콘텐츠 컴포넌트에 전달되는 속성
@@ -93,17 +100,17 @@ interface CommunityContentProps {
 /**
  * 커뮤니티 콘텐츠 컴포넌트 (순수 컴포넌트)
  */
-function CommunityContent({ community }: CommunityContentProps) {
+const CommunityContent = memo(({ community }: CommunityContentProps) => {
   return (
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
         <ProfileImage alt={`${community.name} 커뮤니티 프로필 이미지`} />
         <ProfileInfo community={community} />
       </article>
-      <p className={styles.description}>{community.description || '설명이 없습니다.'}</p>
+      <p className={styles.description}>{community.description || MESSAGES.EMPTY.NO_DESCRIPTION}</p>
     </div>
   )
-}
+})
 
 /**
  * 커뮤니티 프로필 메인 컴포넌트
@@ -115,14 +122,14 @@ export default function StudyProfile({ id }: StudyProfileProps) {
 
   return renderWithLoading(
     loading,
-    <LoadingState message="커뮤니티 정보를 불러오는 중..." />,
+    <LoadingState message={MESSAGES.LOADING.COMMUNITY} />,
     renderWithError(
       error,
-      <ErrorState message={error || '커뮤니티를 찾을 수 없습니다.'} />,
+      <ErrorState message={error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND} />,
       community ? (
         <CommunityContent community={community} />
       ) : (
-        <ErrorState message="커뮤니티를 찾을 수 없습니다." />
+        <ErrorState message={MESSAGES.ERROR.COMMUNITY_NOT_FOUND} />
       )
     )
   )

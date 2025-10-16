@@ -6,7 +6,9 @@
       "@/lib/*": ["lib/*"],
       "@/app/*": ["app/*"],
       "@/styles/*": ["styles/*"],
-      "@/types/*": ["types/*"]
+      "@/types/*": ["types/*"],
+      "@/constants": ["constants"],
+      "@/constants/*": ["constants/*"]
     },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],

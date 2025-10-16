@@ -1,11 +1,13 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import StudyProfile from './_components/StudyProfile'
 import RoundCard from './_components/RoundCard'
 import styles from './page.module.css'
 import { AccentLink } from '@/components/ui'
+import { ErrorState } from '@/components/common'
+import { ROUTES, MESSAGES } from '@/constants'
 
 /**
  * 공지 링크 컴포넌트에 전달되는 속성
@@ -24,11 +26,11 @@ interface NotificationLinkProps {
 function NotificationLink({ clubId, message }: NotificationLinkProps) {
   return (
     <Link
-      href={`/community/notification/${clubId}`}
+      href={ROUTES.COMMUNITY.NOTIFICATION(clubId)}
       className={styles['notification-link']}
       aria-label="커뮤니티 공지로 이동"
     >
-      <span className={styles['notification-label']}>공지</span> {message}
+      <span className={styles['notification-label']}>{MESSAGES.LABEL.NOTIFICATION}</span> {message}
     </Link>
   )
 }
@@ -47,8 +49,8 @@ interface AddRoundLinkProps {
  */
 function AddRoundLink({ clubId }: AddRoundLinkProps) {
   return (
-    <AccentLink href={`/community/round/${clubId}`} aria-label="라운드 추가하기">
-      라운드 추가
+    <AccentLink href={ROUTES.COMMUNITY.ROUND(clubId)} aria-label="라운드 추가하기">
+      {MESSAGES.ACTION.ADD_ROUND}
     </AccentLink>
   )
 }
@@ -82,13 +84,18 @@ function CommunityContent({ clubId }: CommunityContentProps) {
  */
 export default function Page() {
   const params = useParams()
+  const router = useRouter()
   const idParam = params?.id
   const clubId = Array.isArray(idParam) ? idParam[0] : idParam
 
   if (!clubId) {
     return (
       <div className={styles.container}>
-        <p>유효한 커뮤니티 ID가 없습니다.</p>
+        <ErrorState
+          message={MESSAGES.ERROR.INVALID_COMMUNITY_ID}
+          actionLabel={MESSAGES.ACTION.BACK_TO_LIST}
+          onAction={() => router.push(ROUTES.COMMUNITY.LIST)}
+        />
       </div>
     )
   }

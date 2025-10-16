@@ -171,9 +171,7 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
 
   if (error) {
     return (
-      <section
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}
-      >
+      <section className={styles['error-section']}>
         <p className="error">{error}</p>
         <StrokeButton onClick={fetchGoals} type="button">
           다시 시도
@@ -183,7 +181,7 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
   }
 
   return (
-    <section style={{ width: '100%', gap: '1rem' }}>
+    <section className={styles['goals-section']}>
       <div className={styles['goals-container']}>
         <div className={styles['goals-header']}>
           <p>그룹목표</p>

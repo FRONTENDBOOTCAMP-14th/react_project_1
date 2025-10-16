@@ -70,11 +70,11 @@ export default function StudyProfile({ id }: { id: string }) {
         </div>
         <div className={styles['profile-info']}>
           <p className={styles['community-name']}>{community.name}</p>
-          <section style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <section className={styles['info-row']}>
             <MapPin size={16} />
             <p>종로구</p>
           </section>
-          <section style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <section className={styles['info-row']}>
             <Users size={16} />
             <p>멤버: {community._count?.communityMembers || 0}명</p>
           </section>

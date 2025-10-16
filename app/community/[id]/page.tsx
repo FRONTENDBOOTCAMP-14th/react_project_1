@@ -5,6 +5,7 @@ import StudyProfile from './_components/StudyProfile'
 import Link from 'next/link'
 import RoundCard from './_components/RoundCard'
 import styles from './page.module.css'
+import { AccentLink } from '@/components/ui'
 
 export default function Page() {
   const { id } = useParams()
@@ -17,6 +18,7 @@ export default function Page() {
         <Link href={`/community/notification/${clubId}`} className={styles['notification-link']}>
           <span className={styles['notification-label']}>공지</span> 노트북 대여는 불가합니다
         </Link>
+        <AccentLink href={`/community/round/${clubId}`}>라운드 추가</AccentLink>
         <RoundCard clubId={clubId} />
       </div>
     </div>

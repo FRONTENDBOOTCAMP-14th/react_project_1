@@ -3,6 +3,7 @@
 import { Checkbox, StrokeButton } from '@/components/ui'
 import { useEffect, useState } from 'react'
 import type { StudyGoal } from '@/types/goal'
+import type { Round } from '@/types/round'
 import styles from './RoundCard.module.css'
 
 interface RoundCardProps {
@@ -11,28 +12,51 @@ interface RoundCardProps {
 }
 
 export default function RoundCard({ clubId, isTeamLeader }: RoundCardProps) {
+  const [currentRound, setCurrentRound] = useState<Round | null>(null)
+
+  useEffect(() => {
+    const fetchCurrentRound = async () => {
+      try {
+        const response = await fetch(`/api/rounds?clubId=${clubId}`)
+        const data = await response.json()
+        if (data.success && data.data && data.data.length > 0) {
+          setCurrentRound(data.data[0])
+        }
+      } catch (error) {
+        console.error('Failed to fetch round:', error)
+      }
+    }
+
+    fetchCurrentRound()
+  }, [clubId])
+
   return (
     <article className={styles['round-card-wrapper']}>
-      <RoundCardHeader />
-      <RoundCardBody clubId={clubId} isTeamLeader={isTeamLeader} />
+      <RoundCardHeader round={currentRound} />
+      <RoundCardBody clubId={clubId} roundId={currentRound?.roundId} isTeamLeader={isTeamLeader} />
     </article>
   )
 }
 
-function RoundCardHeader() {
+interface RoundCardHeaderProps {
+  round: Round | null
+}
+
+function RoundCardHeader({ round }: RoundCardHeaderProps) {
   return (
     <header>
-      <p>4회차</p>
+      <p>{round ? `${round.roundNumber}회차` : '회차 정보 없음'}</p>
     </header>
   )
 }
 
 interface RoundCardBodyProps {
   clubId: string
+  roundId?: string
   isTeamLeader?: boolean
 }
 
-function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
+function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
   const [teamGoals, setTeamGoals] = useState<StudyGoal[]>([])
   const [personalGoals, setPersonalGoals] = useState<StudyGoal[]>([])
   const [loading, setLoading] = useState(true)
@@ -68,7 +92,35 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
     }
 
     fetchGoals()
-  }, [clubId])
+  }, [clubId, roundId])
+
+  const handleToggleComplete = async (goalId: string, isComplete: boolean) => {
+    try {
+      const response = await fetch(`/api/goals/${goalId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isComplete }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // 로컬 상태 업데이트
+        setTeamGoals(prev =>
+          prev.map(goal => (goal.goalId === goalId ? { ...goal, isComplete } : goal))
+        )
+        setPersonalGoals(prev =>
+          prev.map(goal => (goal.goalId === goalId ? { ...goal, isComplete } : goal))
+        )
+      } else {
+        console.error('Failed to update goal:', data.error)
+      }
+    } catch (err) {
+      console.error('Failed to toggle complete:', err)
+    }
+  }
 
   if (loading) {
     return (
@@ -95,10 +147,13 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
             <StrokeButton className={styles['add-button']}>+</StrokeButton>
           ) : null}
         </div>
-        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', flexDirection: 'column' }}>
+        <div className={styles['goals-list']}>
           {teamGoals.map(goal => (
             <div key={goal.goalId} className={styles['goal-card']}>
-              <Checkbox />
+              <Checkbox
+                checked={goal.isComplete}
+                onChange={() => handleToggleComplete(goal.goalId, !goal.isComplete)}
+              />
               <p>{goal.title}</p>
             </div>
           ))}
@@ -108,10 +163,13 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
       <div className={styles['goals-container']}>
         <p>개인목표</p>
         <StrokeButton className={styles['add-button-with-margin']}>+</StrokeButton>
-        <div style={{ display: 'flex', gap: '1rem', padding: '1rem' }}>
+        <div className={styles['goals-list-row']}>
           {personalGoals.map(goal => (
             <div key={goal.goalId} className={styles['goal-card']}>
-              <Checkbox />
+              <Checkbox
+                checked={goal.isComplete}
+                onChange={() => handleToggleComplete(goal.goalId, !goal.isComplete)}
+              />
               <p>{goal.title}</p>
             </div>
           ))}

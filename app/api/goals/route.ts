@@ -19,7 +19,9 @@ import type { NextRequest } from 'next/server'
  * - 목표 목록을 조회합니다.
  * - 쿼리 파라미터
  *   - clubId?: string        특정 커뮤니티(클럽) ID로 필터
+ *   - roundId?: string       특정 회차 ID로 필터
  *   - isTeam?: 'true'|'false' 팀 목표 여부로 필터
+ *   - isComplete?: 'true'|'false' 완료 여부로 필터
  *   - ownerId?: string       소유자(생성자) ID로 필터
  *
  * 응답
@@ -31,14 +33,18 @@ export async function GET(request: NextRequest) {
     // URLSearchParams에서 필터 파라미터 추출
     const searchParams = request.nextUrl.searchParams
     const clubId = searchParams.get('clubId')
+    const roundId = searchParams.get('roundId')
     const isTeam = searchParams.get('isTeam')
+    const isComplete = searchParams.get('isComplete')
     const ownerId = searchParams.get('ownerId')
 
     // 동적 where 절 구성 (소프트 삭제 제외 조건 포함)
     const whereClause: {
       deletedAt: null
       clubId?: string
+      roundId?: string
       isTeam?: boolean
+      isComplete?: boolean
       ownerId?: string
     } = {
       deletedAt: null,
@@ -49,9 +55,19 @@ export async function GET(request: NextRequest) {
       whereClause.clubId = clubId
     }
 
+    // roundId 필터 적용
+    if (roundId) {
+      whereClause.roundId = roundId
+    }
+
     // isTeam 필터 적용 ('true'/'false' 문자열을 boolean으로 변환)
     if (isTeam !== null && isTeam !== undefined) {
       whereClause.isTeam = isTeam === 'true'
+    }
+
+    // isComplete 필터 적용
+    if (isComplete !== null && isComplete !== undefined) {
+      whereClause.isComplete = isComplete === 'true'
     }
 
     // ownerId 필터 적용
@@ -104,9 +120,11 @@ export async function GET(request: NextRequest) {
  * {
  *   "ownerId": "사용자ID(필수)",
  *   "clubId": "클럽ID(선택, 없으면 null)",
+ *   "roundId": "회차ID(선택, 없으면 null)",
  *   "title": "제목(필수)",
  *   "description": "설명(선택, 없으면 null)",
  *   "isTeam": true,               // 팀 목표 여부(기본값 false)
+ *   "isComplete": false,          // 완료 여부(기본값 false)
  *   "startDate": "2025-10-01",    // ISO 날짜 문자열(필수)
  *   "endDate": "2025-12-31"       // ISO 날짜 문자열(필수)
  * }
@@ -120,15 +138,18 @@ export async function POST(request: NextRequest) {
   try {
     // 요청 바디 파싱
     const body = await request.json()
-    const { ownerId, clubId, title, description, isTeam, startDate, endDate } = body as {
-      ownerId?: string
-      clubId?: string | null
-      title?: string
-      description?: string | null
-      isTeam?: boolean
-      startDate?: string | Date
-      endDate?: string | Date
-    }
+    const { ownerId, clubId, roundId, title, description, isTeam, isComplete, startDate, endDate } =
+      body as {
+        ownerId?: string
+        clubId?: string | null
+        roundId?: string | null
+        title?: string
+        description?: string | null
+        isTeam?: boolean
+        isComplete?: boolean
+        startDate?: string | Date
+        endDate?: string | Date
+      }
 
     // 필수 값 검증
     if (!ownerId || !title || !startDate || !endDate) {
@@ -151,9 +172,11 @@ export async function POST(request: NextRequest) {
       data: {
         ownerId,
         clubId: clubId || null,
+        roundId: roundId || null,
         title,
         description: description || null,
         isTeam: isTeam || false,
+        isComplete: isComplete || false,
         startDate: start,
         endDate: end,
       },
@@ -161,9 +184,11 @@ export async function POST(request: NextRequest) {
         goalId: true,
         ownerId: true,
         clubId: true,
+        roundId: true,
         title: true,
         description: true,
         isTeam: true,
+        isComplete: true,
         startDate: true,
         endDate: true,
         createdAt: true,

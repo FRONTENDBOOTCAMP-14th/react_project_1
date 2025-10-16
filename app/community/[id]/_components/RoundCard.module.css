@@ -39,3 +39,18 @@
 .goal-description {
   font-size: var(--font-xs);
 }
+
+.goals-list {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  flex-direction: column;
+  background-color: var(--etc-color-4);
+  border-radius: var(--inner-card-radius);
+}
+
+.goals-list-row {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}

@@ -41,9 +41,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         goalId: true,
         ownerId: true,
         clubId: true,
+        roundId: true,
         title: true,
         description: true,
         isTeam: true,
+        isComplete: true,
         startDate: true,
         endDate: true,
         createdAt: true,
@@ -59,6 +61,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           select: {
             clubId: true,
             name: true,
+          },
+        },
+        round: {
+          select: {
+            roundId: true,
+            roundNumber: true,
+            createdAt: true,
           },
         },
       },
@@ -94,6 +103,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  *   - title?: string
  *   - description?: string | null
  *   - isTeam?: boolean
+ *   - isComplete?: boolean
+ *   - roundId?: string | null
  *   - startDate?: string | Date(ISO 문자열 또는 Date)
  *   - endDate?: string | Date(ISO 문자열 또는 Date)
  *
@@ -121,6 +132,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       title?: string
       description?: string | null
       isTeam?: boolean
+      isComplete?: boolean
+      roundId?: string | null
       startDate?: Date
       endDate?: Date
       updatedAt: Date
@@ -132,6 +145,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
     if (body.isTeam !== undefined) updateData.isTeam = body.isTeam
+    if (body.isComplete !== undefined) updateData.isComplete = body.isComplete
+    if (body.roundId !== undefined) updateData.roundId = body.roundId
     if (body.startDate !== undefined) updateData.startDate = new Date(body.startDate)
     if (body.endDate !== undefined) updateData.endDate = new Date(body.endDate)
 
@@ -143,9 +158,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         goalId: true,
         ownerId: true,
         clubId: true,
+        roundId: true,
         title: true,
         description: true,
         isTeam: true,
+        isComplete: true,
         startDate: true,
         endDate: true,
         createdAt: true,

@@ -23,12 +23,6 @@
   padding: 0.25rem;
 }
 
-.add-button-with-margin {
-  font-size: var(--font-md);
-  padding: 0.25rem;
-  margin-bottom: 0.5rem;
-}
-
 .goal-card {
   padding: 1rem;
   border-radius: var(--inner-card-radius);
@@ -48,13 +42,6 @@
   flex-direction: column;
   background-color: var(--etc-color-3);
   border-radius: var(--inner-card-radius);
-}
-
-.error-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
 }
 
 .goals-section {

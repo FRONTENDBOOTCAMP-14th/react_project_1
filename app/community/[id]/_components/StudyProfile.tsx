@@ -2,18 +2,8 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-
-interface Community {
-  clubId: string
-  name: string
-  description: string | null
-  isPublic: boolean
-  createdAt: string
-  tagname?: string[]
-  _count?: {
-    communityMembers: number
-  }
-}
+import styles from './StudyProfile.module.css'
+import type { Community } from '@/types/community'
 
 export default function StudyProfile({ id }: { id: string }) {
   const [community, setCommunity] = useState<Community | null>(null)
@@ -66,41 +56,28 @@ export default function StudyProfile({ id }: { id: string }) {
   if (error || !community) {
     return (
       <article>
-        <p style={{ color: 'red' }}>{error || '커뮤니티를 찾을 수 없습니다.'}</p>
+        <p className="error">{error || '커뮤니티를 찾을 수 없습니다.'}</p>
       </article>
     )
   }
 
   return (
-    <article>
-      <Image src="/images/study.png" alt="study" width={100} height={100} />
-      <section>
-        <h2>{community.name}</h2>
-        <p>{community.description || '설명이 없습니다.'}</p>
-      </section>
-      <section>
-        <p>{community.isPublic ? '공개' : '비공개'}</p>
-        {community.tagname && community.tagname.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-            {community.tagname.map((tag, index) => (
-              <span
-                key={index}
-                style={{
-                  padding: '0.25rem 0.5rem',
-                  backgroundColor: '#f0f0f0',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                }}
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </section>
-      <section>
-        <p>멤버: {community._count?.communityMembers || 0}명</p>
-      </section>
-    </article>
+    <div className={styles['profile-wrapper']}>
+      <article className={styles['profile-header']}>
+        <div className={styles['image-container']}>
+          <Image src="/images/example.jpg" alt="" width={90} height={90} className={styles.image} />
+        </div>
+        <div className={styles['profile-info']}>
+          <p className={styles['community-name']}>{community.name}</p>
+          <section>
+            <p>{community.isPublic ? '공개' : '비공개'}</p>
+          </section>
+          <section>
+            <p>멤버: {community._count?.communityMembers || 0}명</p>
+          </section>
+        </div>
+      </article>
+      <p className={styles.description}>{community.description || '설명이 없습니다.'}</p>
+    </div>
   )
 }

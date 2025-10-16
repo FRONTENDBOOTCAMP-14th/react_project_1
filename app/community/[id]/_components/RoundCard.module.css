@@ -1,0 +1,41 @@
+.round-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.goals-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.add-button {
+  font-size: var(--font-md);
+  padding: 0.25rem;
+}
+
+.add-button-with-margin {
+  font-size: var(--font-md);
+  padding: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.goal-card {
+  padding: 1rem;
+  border-radius: var(--inner-card-radius);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.goal-description {
+  font-size: var(--font-xs);
+}

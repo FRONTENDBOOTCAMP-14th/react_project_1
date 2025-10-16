@@ -1,8 +1,9 @@
 'use client'
 
-import { StrokeButton } from '@/components/ui'
+import { Checkbox, StrokeButton } from '@/components/ui'
 import { useEffect, useState } from 'react'
 import type { StudyGoal } from '@/types/goal'
+import styles from './RoundCard.module.css'
 
 interface RoundCardProps {
   clubId: string
@@ -11,7 +12,7 @@ interface RoundCardProps {
 
 export default function RoundCard({ clubId, isTeamLeader }: RoundCardProps) {
   return (
-    <article>
+    <article className={styles['round-card-wrapper']}>
       <RoundCardHeader />
       <RoundCardBody clubId={clubId} isTeamLeader={isTeamLeader} />
     </article>
@@ -21,7 +22,7 @@ export default function RoundCard({ clubId, isTeamLeader }: RoundCardProps) {
 function RoundCardHeader() {
   return (
     <header>
-      <p>RoundCardHeader</p>
+      <p>4회차</p>
     </header>
   )
 }
@@ -80,55 +81,41 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
   if (error) {
     return (
       <section>
-        <p style={{ color: 'red' }}>{error}</p>
+        <p className="error">{error}</p>
       </section>
     )
   }
 
   return (
-    <section>
-      <div style={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <section style={{ width: '100%', gap: '1rem' }}>
+      <div className={styles['goals-container']}>
+        <div className={styles['goals-header']}>
           <p>그룹목표</p>
           {teamGoals.length === 0 && isTeamLeader ? (
-            <StrokeButton style={{ fontSize: '1.5rem', padding: '0.25rem' }}>+</StrokeButton>
+            <StrokeButton className={styles['add-button']}>+</StrokeButton>
           ) : null}
         </div>
-        {teamGoals.map(goal => (
-          <div
-            key={goal.goalId}
-            style={{
-              padding: '1rem',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <h3>{goal.title}</h3>
-            <p style={{ fontSize: '0.875rem' }}>{goal.description}</p>
-          </div>
-        ))}
+        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', flexDirection: 'column' }}>
+          {teamGoals.map(goal => (
+            <div key={goal.goalId} className={styles['goal-card']}>
+              <Checkbox />
+              <p>{goal.title}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', width: '50%', marginTop: '1.5rem' }}>
+      <div className={styles['goals-container']}>
         <p>개인목표</p>
-        <StrokeButton style={{ fontSize: '1.5rem', padding: '0.25rem', marginBottom: '0.5rem' }}>
-          +
-        </StrokeButton>
-        {personalGoals.map(goal => (
-          <div
-            key={goal.goalId}
-            style={{
-              padding: '1rem',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <h4>{goal.title}</h4>
-            <p style={{ fontSize: '0.875rem' }}>{goal.description}</p>
-          </div>
-        ))}
+        <StrokeButton className={styles['add-button-with-margin']}>+</StrokeButton>
+        <div style={{ display: 'flex', gap: '1rem', padding: '1rem' }}>
+          {personalGoals.map(goal => (
+            <div key={goal.goalId} className={styles['goal-card']}>
+              <Checkbox />
+              <p>{goal.title}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

@@ -6,9 +6,11 @@ export interface StudyGoal {
   goalId: string
   ownerId: string
   clubId: string | null
+  roundId?: string | null
   title: string
   description: string | null
   isTeam: boolean
+  isComplete: boolean
   startDate: Date | string
   endDate: Date | string
   createdAt: Date | string
@@ -22,9 +24,11 @@ export interface StudyGoal {
 export interface CreateStudyGoalRequest {
   ownerId: string
   clubId?: string | null
+  roundId?: string | null
   title: string
   description?: string | null
   isTeam?: boolean
+  isComplete?: boolean
   startDate: Date | string
   endDate: Date | string
 }
@@ -36,6 +40,8 @@ export interface UpdateStudyGoalRequest {
   title?: string
   description?: string | null
   isTeam?: boolean
+  isComplete?: boolean
+  roundId?: string | null
   startDate?: Date | string
   endDate?: Date | string
 }
@@ -45,7 +51,9 @@ export interface UpdateStudyGoalRequest {
  */
 export interface StudyGoalQueryParams {
   clubId?: string
+  roundId?: string
   isTeam?: boolean
+  isComplete?: boolean
   ownerId?: string
 }
 
@@ -82,5 +90,10 @@ export interface StudyGoalWithRelations extends StudyGoal {
   club?: {
     clubId: string
     name: string
+  } | null
+  round?: {
+    roundId: string
+    roundNumber: number
+    createdAt: Date | string
   } | null
 }

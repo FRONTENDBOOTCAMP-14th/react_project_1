@@ -4,19 +4,12 @@ import prisma from '@/lib/prisma'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
 import Link from 'next/link'
+import type { CommunityWithDate } from '@/types/community'
 
 export const dynamic = 'force-dynamic'
 
-interface CommunityListItem {
-  clubId: string
-  name: string
-  description: string | null
-  isPublic: boolean
-  createdAt: Date
-}
-
 export default async function DashboardPage() {
-  const communities: CommunityListItem[] = await prisma.community.findMany({
+  const communities: CommunityWithDate[] = await prisma.community.findMany({
     where: { deletedAt: null },
     orderBy: { createdAt: 'desc' },
     select: { clubId: true, name: true, description: true, isPublic: true, createdAt: true },
@@ -46,7 +39,7 @@ export default async function DashboardPage() {
             <p>아직 커뮤니티가 없습니다.</p>
           ) : (
             <ul style={{ display: 'grid', gap: 8 }}>
-              {communities.map((c: CommunityListItem) => (
+              {communities.map((c: CommunityWithDate) => (
                 <li
                   key={c.clubId}
                   style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}

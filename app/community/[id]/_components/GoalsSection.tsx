@@ -25,9 +25,9 @@ export interface GoalsSectionProps {
    */
   isTeamLeader?: boolean
   /**
-   * 목표 추가 핸들러
+   * 목표 추가 핸들러 (새 목표 저장 시)
    */
-  onAddGoal?: () => void
+  onAddGoal?: (title: string, isTeam: boolean) => Promise<void>
 }
 
 /**
@@ -50,7 +50,7 @@ function GoalsSection({
         isTeam={true}
         showAddButton={!!isTeamLeader}
         emptyMessage={MESSAGES.EMPTY.TEAM_GOALS}
-        onAddGoal={onAddGoal}
+        onAddGoal={onAddGoal ? async title => onAddGoal(title, true) : undefined}
       />
       <GoalsContainer
         title="개인목표"
@@ -59,7 +59,7 @@ function GoalsSection({
         isTeam={false}
         showAddButton={true}
         emptyMessage={MESSAGES.EMPTY.PERSONAL_GOALS}
-        onAddGoal={onAddGoal}
+        onAddGoal={onAddGoal ? async title => onAddGoal(title, false) : undefined}
       />
     </section>
   )

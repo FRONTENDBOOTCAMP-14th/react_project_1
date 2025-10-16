@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { StrokeButton } from '@/components/ui'
 import type { StudyGoal } from '@/types/goal'
 import GoalItem from './GoalItem'
@@ -31,9 +31,9 @@ export interface GoalsListProps {
    */
   emptyMessage: string
   /**
-   * 목표 추가 핸들러
+   * 목표 추가 핸들러 (새 목표 저장 시)
    */
-  onAddGoal?: () => void
+  onAddGoal?: (title: string) => Promise<void>
 }
 
 /**
@@ -48,17 +48,61 @@ function GoalsList({
   emptyMessage,
   onAddGoal,
 }: GoalsListProps) {
+  const [isAdding, setIsAdding] = useState(false)
+
+  const handleAddClick = () => {
+    setIsAdding(true)
+  }
+
+  const handleSave = async (title: string) => {
+    if (onAddGoal) {
+      await onAddGoal(title)
+      setIsAdding(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setIsAdding(false)
+  }
+
+  // 빈 목표 객체 (편집용)
+  const emptyGoal: StudyGoal = {
+    goalId: 'temp-new-goal',
+    ownerId: '',
+    clubId: null,
+    roundId: null,
+    title: '',
+    description: null,
+    isTeam,
+    isComplete: false,
+    startDate: new Date(),
+    endDate: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+
   return (
     <div className={styles['goals-list']} role="list">
       {showAddButton && onAddGoal && (
         <StrokeButton
           className={styles['add-button']}
-          onClick={onAddGoal}
+          onClick={handleAddClick}
           type="button"
           aria-label="목표 추가"
+          disabled={isAdding}
         >
           +
         </StrokeButton>
+      )}
+      {isAdding && (
+        <GoalItem
+          goal={emptyGoal}
+          onToggle={async () => {}}
+          isTeam={isTeam}
+          isEditing={true}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
       )}
       {renderWithEmpty(
         isGoalsEmpty(goals),

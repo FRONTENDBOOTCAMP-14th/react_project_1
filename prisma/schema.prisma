@@ -69,6 +69,7 @@ model StudyGoal {
   @@index([isTeam], map: "idx_goal_team")
   @@index([roundId], map: "idx_goal_round")
   @@index([isComplete], map: "idx_goal_complete")
+  @@index([clubId], map: "idx_goal_club")
   @@map("study_goals")
 }
 

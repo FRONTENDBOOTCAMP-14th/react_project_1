@@ -32,9 +32,9 @@ export interface GoalsContainerProps {
    */
   emptyMessage: string
   /**
-   * 목표 추가 핸들러
+   * 목표 추가 핸들러 (새 목표 저장 시)
    */
-  onAddGoal?: () => void
+  onAddGoal?: (title: string) => Promise<void>
 }
 
 /**

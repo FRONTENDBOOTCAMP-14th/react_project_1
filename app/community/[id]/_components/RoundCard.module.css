@@ -54,3 +54,63 @@
   width: 100%;
   gap: var(--spacing-sm);
 }
+
+/* RoundsList 컴포넌트 스타일 */
+.rounds-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--etc-color-2);
+}
+
+/* GoalItem 편집 모드 스타일 */
+.goal-input {
+  flex: 1;
+  border: 1px solid var(--etc-color-3);
+  border-radius: var(--inner-card-radius);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-sm);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.goal-input:focus {
+  border-color: var(--primary-color);
+}
+
+.goal-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.goal-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: var(--inner-card-radius);
+  transition: background-color 0.2s;
+  color: var(--etc-color-2);
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: var(--etc-color-3);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

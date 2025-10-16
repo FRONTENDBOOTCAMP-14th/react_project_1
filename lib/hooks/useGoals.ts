@@ -25,9 +25,10 @@ interface UseGoalsData {
 /**
  * 목표 데이터를 병렬로 가져오는 커스텀 훅
  * @param clubId - 클럽 ID
+ * @param roundId - 라운드 ID (선택, 없으면 전체 목표 조회)
  * @returns 목표 데이터, 로딩 상태, 에러, 재조회 함수
  */
-export const useGoals = (clubId: string): UseGoalsData => {
+export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
   const [goals, setGoals] = useState<GoalsState>({ team: [], personal: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -37,10 +38,19 @@ export const useGoals = (clubId: string): UseGoalsData => {
       setLoading(true)
       setError(null)
 
+      // 쿼리 파라미터 구성
+      const params: { clubId: string; isTeam: boolean; roundId?: string } = {
+        clubId,
+        isTeam: true,
+      }
+      if (roundId) {
+        params.roundId = roundId
+      }
+
       // 병렬 호출로 성능 최적화
       const [teamResponse, personalResponse] = await Promise.all([
-        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ clubId, isTeam: true })),
-        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ clubId, isTeam: false })),
+        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS(params)),
+        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ ...params, isTeam: false })),
       ])
 
       const [teamData, personalData] = await Promise.all([
@@ -58,7 +68,7 @@ export const useGoals = (clubId: string): UseGoalsData => {
     } finally {
       setLoading(false)
     }
-  }, [clubId])
+  }, [clubId, roundId])
 
   /**
    * 새로운 목표 생성

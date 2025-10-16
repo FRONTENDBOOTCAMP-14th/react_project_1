@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import StudyProfile from './_components/StudyProfile'
-import RoundCard from './_components/RoundCard'
+import RoundsList from './_components/RoundsList'
 import styles from './page.module.css'
 import { AccentLink } from '@/components/ui'
 import { ErrorState } from '@/components/common'
@@ -65,7 +65,7 @@ interface CommunityContentProps {
 
 /**
  * 커뮤니티 콘텐츠 컴포넌트
- * 프로필, 공지, 라운드 카드 등 커뮤니티 상세 정보를 구성합니다.
+ * 프로필, 공지, 라운드 목록 등 커뮤니티 상세 정보를 구성합니다.
  */
 function CommunityContent({ clubId }: CommunityContentProps) {
   return (
@@ -73,7 +73,7 @@ function CommunityContent({ clubId }: CommunityContentProps) {
       <StudyProfile id={clubId} />
       <NotificationLink clubId={clubId} message="노트북 대여는 불가합니다" />
       <AddRoundLink clubId={clubId} />
-      <RoundCard clubId={clubId} />
+      <RoundsList clubId={clubId} />
     </div>
   )
 }

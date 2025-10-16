@@ -22,6 +22,13 @@ export const MESSAGES = {
     CREATING_COMMUNITY_ERROR: '커뮤니티 생성 중 오류가 발생했습니다.',
     UPDATING_COMMUNITY_ERROR: '커뮤니티 수정 중 오류가 발생했습니다.',
     DELETING_COMMUNITY_ERROR: '커뮤니티 삭제 중 오류가 발생했습니다.',
+    FAILED_TO_LOAD_ROUNDS: '라운드 정보를 불러오는데 실패했습니다.',
+    FAILED_TO_CREATE_ROUND: '라운드 생성에 실패했습니다.',
+    FAILED_TO_UPDATE_ROUND: '라운드 수정에 실패했습니다.',
+    FAILED_TO_DELETE_ROUND: '라운드 삭제에 실패했습니다.',
+    CREATING_ROUND_ERROR: '라운드 생성 중 오류가 발생했습니다.',
+    UPDATING_ROUND_ERROR: '라운드 수정 중 오류가 발생했습니다.',
+    DELETING_ROUND_ERROR: '라운드 삭제 중 오류가 발생했습니다.',
   },
 
   LOADING: {

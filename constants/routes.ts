@@ -36,6 +36,15 @@ export const API_ENDPOINTS = {
     BY_ID: (clubId: string) => `/api/communities/${clubId}`,
     DELETE_BY_ID: (clubId: string) => `/api/communities?id=${clubId}`,
   },
+  ROUNDS: {
+    BASE: '/api/rounds',
+    BY_ID: (roundId: string) => `/api/rounds/${roundId}`,
+    WITH_PARAMS: (params: { clubId?: string }) => {
+      const searchParams = new URLSearchParams()
+      if (params.clubId) searchParams.append('clubId', params.clubId)
+      return `/api/rounds?${searchParams.toString()}`
+    },
+  },
 } as const
 
 /**

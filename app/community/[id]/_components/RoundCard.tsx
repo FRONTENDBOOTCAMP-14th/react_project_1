@@ -122,6 +122,10 @@ function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
     }
   }
 
+  const handleAddGoal = () => {
+    console.log('Add goal clicked')
+  }
+
   if (loading) {
     return (
       <section>
@@ -143,36 +147,48 @@ function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
       <div className={styles['goals-container']}>
         <div className={styles['goals-header']}>
           <p>그룹목표</p>
-          {teamGoals.length === 0 && isTeamLeader ? (
-            <StrokeButton className={styles['add-button']}>+</StrokeButton>
+          {isTeamLeader ? (
+            <StrokeButton className={styles['add-button']} onClick={handleAddGoal}>
+              +
+            </StrokeButton>
           ) : null}
         </div>
         <div className={styles['goals-list']}>
-          {teamGoals.map(goal => (
-            <div key={goal.goalId} className={styles['goal-card']}>
-              <Checkbox
-                checked={goal.isComplete}
-                onChange={() => handleToggleComplete(goal.goalId, !goal.isComplete)}
-              />
-              <p>{goal.title}</p>
-            </div>
-          ))}
+          {teamGoals.length > 0 ? (
+            teamGoals.map(goal => (
+              <div key={goal.goalId} className={styles['goal-card']}>
+                <Checkbox
+                  checked={goal.isComplete}
+                  onChange={() => handleToggleComplete(goal.goalId, !goal.isComplete)}
+                />
+                <p>{goal.title}</p>
+              </div>
+            ))
+          ) : (
+            <p className={styles['goal-card']}>그룹목표가 없습니다.</p>
+          )}
         </div>
       </div>
 
       <div className={styles['goals-container']}>
         <p>개인목표</p>
-        <StrokeButton className={styles['add-button-with-margin']}>+</StrokeButton>
-        <div className={styles['goals-list-row']}>
-          {personalGoals.map(goal => (
-            <div key={goal.goalId} className={styles['goal-card']}>
-              <Checkbox
-                checked={goal.isComplete}
-                onChange={() => handleToggleComplete(goal.goalId, !goal.isComplete)}
-              />
-              <p>{goal.title}</p>
-            </div>
-          ))}
+        <StrokeButton className={styles['add-button-with-margin']} onClick={handleAddGoal}>
+          +
+        </StrokeButton>
+        <div className={styles['goals-list']}>
+          {personalGoals.length > 0 ? (
+            personalGoals.map(goal => (
+              <div key={goal.goalId} className={styles['goal-card']}>
+                <Checkbox
+                  checked={goal.isComplete}
+                  onChange={() => handleToggleComplete(goal.goalId, !goal.isComplete)}
+                />
+                <p>{goal.title}</p>
+              </div>
+            ))
+          ) : (
+            <p className={styles['goal-card']}>개인목표가 없습니다.</p>
+          )}
         </div>
       </div>
     </section>

@@ -37,7 +37,7 @@ export interface CheckboxProps
  * />
  * ```
  */
-const Checkbox = ({ label, checked, onChange, className, ...rest }: CheckboxProps) => {
+const Checkbox = ({ label, checked = false, onChange, className, ...rest }: CheckboxProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.checked)
   }

@@ -8,7 +8,6 @@ interface GoalsState {
 
 interface UseGoalsDataResult {
   goals: GoalsState
-  setGoals: React.Dispatch<React.SetStateAction<GoalsState>>
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
@@ -17,7 +16,7 @@ interface UseGoalsDataResult {
 /**
  * 목표 데이터를 병렬로 가져오는 커스텀 훅
  * @param clubId - 클럽 ID
- * @returns 목표 데이터, 상태 업데이트 함수, 로딩 상태, 에러, 재조회 함수
+ * @returns 목표 데이터, 로딩 상태, 에러, 재조회 함수
  */
 export const useGoalsData = (clubId: string): UseGoalsDataResult => {
   const [goals, setGoals] = useState<GoalsState>({ team: [], personal: [] })
@@ -56,5 +55,5 @@ export const useGoalsData = (clubId: string): UseGoalsDataResult => {
     fetchGoals()
   }, [fetchGoals])
 
-  return { goals, setGoals, loading, error, refetch: fetchGoals }
+  return { goals, loading, error, refetch: fetchGoals }
 }

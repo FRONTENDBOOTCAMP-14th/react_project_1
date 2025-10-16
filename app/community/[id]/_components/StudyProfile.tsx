@@ -1,86 +1,129 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/types/community'
 import { MapPin, Users } from 'lucide-react'
+import { useCommunityData } from '@/lib/hooks'
+import { renderWithLoading, renderWithError } from '@/lib/utils'
+import { LoadingState, ErrorState } from '@/components/common'
 
-export default function StudyProfile({ id }: { id: string }) {
-  const [community, setCommunity] = useState<Community | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+/**
+ * StudyProfile 컴포넌트에 전달되는 속성
+ */
+interface StudyProfileProps {
+  /** 커뮤니티 ID */
+  id: string
+}
 
-  useEffect(() => {
-    const fetchCommunity = async () => {
-      try {
-        setLoading(true)
-        setError(null)
+/**
+ * 커뮤니티 프로필 이미지 컴포넌트 (순수 컴포넌트)
+ */
+function ProfileImage({ alt, src = '/images/example.jpg' }: { alt: string; src?: string }) {
+  return (
+    <div className={styles['image-container']}>
+      <Image
+        src={src}
+        alt={alt}
+        width={90}
+        height={90}
+        className={styles.image}
+        sizes="90px"
+        priority
+      />
+    </div>
+  )
+}
 
-        // 특정 커뮤니티 단건 조회 API 호출
-        const apiUrl = `/api/communities/${id}`
-        console.log('호출할 API URL:', apiUrl)
-        console.log('요청할 clubId:', id)
+/**
+ * 정보 행 컴포넌트에 전달되는 속성
+ */
+interface InfoRowProps {
+  /** 왼쪽 아이콘 */
+  icon: ReactNode
+  /** 텍스트 내용 */
+  text: string
+}
 
-        const response = await fetch(apiUrl)
-        const data = await response.json()
+/**
+ * 정보 행 컴포넌트 (순수 컴포넌트)
+ */
+function InfoRow({ icon, text }: InfoRowProps) {
+  return (
+    <section className={styles['info-row']} aria-label={text}>
+      {icon}
+      <p>{text}</p>
+    </section>
+  )
+}
 
-        console.log('API 응답:', data)
-        console.log('HTTP 상태 코드:', response.status)
+/**
+ * 커뮤니티 정보 컴포넌트에 전달되는 속성
+ */
+interface ProfileInfoProps {
+  /** 커뮤니티 데이터 */
+  community: Community
+}
 
-        if (data.ok && data.data) {
-          console.log('커뮤니티 데이터:', data.data)
-          setCommunity(data.data)
-        } else {
-          console.error('API 에러:', data.error)
-          setError(data.error || '커뮤니티 정보를 불러올 수 없습니다.')
-        }
-      } catch (err) {
-        console.error('Failed to fetch community:', err)
-        setError('커뮤니티 정보를 불러오는데 실패했습니다.')
-      } finally {
-        setLoading(false)
-      }
-    }
+/**
+ * 커뮤니티 정보 컴포넌트 (순수 컴포넌트)
+ */
+function ProfileInfo({ community }: ProfileInfoProps) {
+  return (
+    <div className={styles['profile-info']}>
+      <p className={styles['community-name']}>{community.name}</p>
+      <InfoRow icon={<MapPin size={16} aria-hidden="true" />} text="종로구" />
+      <InfoRow
+        icon={<Users size={16} aria-hidden="true" />}
+        text={`멤버: ${community._count?.communityMembers || 0}명`}
+      />
+    </div>
+  )
+}
 
-    fetchCommunity()
-  }, [id])
+/**
+ * 커뮤니티 콘텐츠 컴포넌트에 전달되는 속성
+ */
+interface CommunityContentProps {
+  /** 커뮤니티 데이터 */
+  community: Community
+}
 
-  if (loading) {
-    return (
-      <article>
-        <p>로딩 중...</p>
-      </article>
-    )
-  }
-
-  if (error || !community) {
-    return (
-      <article>
-        <p className="error">{error || '커뮤니티를 찾을 수 없습니다.'}</p>
-      </article>
-    )
-  }
-
+/**
+ * 커뮤니티 콘텐츠 컴포넌트 (순수 컴포넌트)
+ */
+function CommunityContent({ community }: CommunityContentProps) {
   return (
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
-        <div className={styles['image-container']}>
-          <Image src="/images/example.jpg" alt="" width={90} height={90} className={styles.image} />
-        </div>
-        <div className={styles['profile-info']}>
-          <p className={styles['community-name']}>{community.name}</p>
-          <section className={styles['info-row']}>
-            <MapPin size={16} />
-            <p>종로구</p>
-          </section>
-          <section className={styles['info-row']}>
-            <Users size={16} />
-            <p>멤버: {community._count?.communityMembers || 0}명</p>
-          </section>
-        </div>
+        <ProfileImage alt={`${community.name} 커뮤니티 프로필 이미지`} />
+        <ProfileInfo community={community} />
       </article>
       <p className={styles.description}>{community.description || '설명이 없습니다.'}</p>
     </div>
+  )
+}
+
+/**
+ * 커뮤니티 프로필 메인 컴포넌트
+ * - 커스텀 훅으로 데이터 fetching/상태 관리
+ * - 선언적 조건부 렌더링
+ */
+export default function StudyProfile({ id }: StudyProfileProps) {
+  const { community, loading, error } = useCommunityData(id)
+
+  return renderWithLoading(
+    loading,
+    <LoadingState message="커뮤니티 정보를 불러오는 중..." />,
+    renderWithError(
+      error,
+      <ErrorState message={error || '커뮤니티를 찾을 수 없습니다.'} />,
+      community ? (
+        <CommunityContent community={community} />
+      ) : (
+        <ErrorState message="커뮤니티를 찾을 수 없습니다." />
+      )
+    )
   )
 }

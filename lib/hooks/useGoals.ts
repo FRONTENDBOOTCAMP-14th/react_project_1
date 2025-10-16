@@ -1,31 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { StudyGoal } from '@/types/goal'
+import type { StudyGoal, CreateGoalInput, UpdateGoalInput } from '@/types/goal'
+import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 
 interface GoalsState {
   team: StudyGoal[]
   personal: StudyGoal[]
-}
-
-interface CreateGoalInput {
-  ownerId: string
-  clubId?: string | null
-  roundId?: string | null
-  title: string
-  description?: string | null
-  isTeam?: boolean
-  isComplete?: boolean
-  startDate: string | Date
-  endDate: string | Date
-}
-
-interface UpdateGoalInput {
-  title?: string
-  description?: string | null
-  isTeam?: boolean
-  isComplete?: boolean
-  roundId?: string | null
-  startDate?: string | Date
-  endDate?: string | Date
 }
 
 interface UseGoalsData {
@@ -60,8 +39,8 @@ export const useGoals = (clubId: string): UseGoalsData => {
 
       // 병렬 호출로 성능 최적화
       const [teamResponse, personalResponse] = await Promise.all([
-        fetch(`/api/goals?clubId=${clubId}&isTeam=true`),
-        fetch(`/api/goals?clubId=${clubId}&isTeam=false`),
+        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ clubId, isTeam: true })),
+        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ clubId, isTeam: false })),
       ])
 
       const [teamData, personalData] = await Promise.all([
@@ -75,7 +54,7 @@ export const useGoals = (clubId: string): UseGoalsData => {
       })
     } catch (err) {
       console.error('Failed to fetch goals:', err)
-      setError('목표를 불러오는데 실패했습니다.')
+      setError(MESSAGES.ERROR.FAILED_TO_LOAD_GOALS)
     } finally {
       setLoading(false)
     }
@@ -89,11 +68,9 @@ export const useGoals = (clubId: string): UseGoalsData => {
   const createGoal = useCallback(
     async (input: CreateGoalInput) => {
       try {
-        const response = await fetch('/api/goals', {
+        const response = await fetch(API_ENDPOINTS.GOALS.BASE, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
         })
 
@@ -104,10 +81,10 @@ export const useGoals = (clubId: string): UseGoalsData => {
           await fetchGoals()
           return { success: true, data: result.data }
         }
-        return { success: false, error: result.error || '목표 생성에 실패했습니다.' }
+        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_GOAL }
       } catch (err) {
         console.error('Failed to create goal:', err)
-        return { success: false, error: '목표 생성 중 오류가 발생했습니다.' }
+        return { success: false, error: MESSAGES.ERROR.CREATING_GOAL_ERROR }
       }
     },
     [fetchGoals]
@@ -122,11 +99,9 @@ export const useGoals = (clubId: string): UseGoalsData => {
   const updateGoal = useCallback(
     async (goalId: string, input: UpdateGoalInput) => {
       try {
-        const response = await fetch(`/api/goals/${goalId}`, {
+        const response = await fetch(API_ENDPOINTS.GOALS.BY_ID(goalId), {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
         })
 
@@ -137,10 +112,10 @@ export const useGoals = (clubId: string): UseGoalsData => {
           await fetchGoals()
           return { success: true, data: result.data }
         }
-        return { success: false, error: result.error || '목표 수정에 실패했습니다.' }
+        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_GOAL }
       } catch (err) {
         console.error('Failed to update goal:', err)
-        return { success: false, error: '목표 수정 중 오류가 발생했습니다.' }
+        return { success: false, error: MESSAGES.ERROR.UPDATING_GOAL_ERROR }
       }
     },
     [fetchGoals]
@@ -154,7 +129,7 @@ export const useGoals = (clubId: string): UseGoalsData => {
   const deleteGoal = useCallback(
     async (goalId: string) => {
       try {
-        const response = await fetch(`/api/goals/${goalId}`, {
+        const response = await fetch(API_ENDPOINTS.GOALS.BY_ID(goalId), {
           method: 'DELETE',
         })
 
@@ -165,10 +140,10 @@ export const useGoals = (clubId: string): UseGoalsData => {
           await fetchGoals()
           return { success: true }
         }
-        return { success: false, error: result.error || '목표 삭제에 실패했습니다.' }
+        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_GOAL }
       } catch (err) {
         console.error('Failed to delete goal:', err)
-        return { success: false, error: '목표 삭제 중 오류가 발생했습니다.' }
+        return { success: false, error: MESSAGES.ERROR.DELETING_GOAL_ERROR }
       }
     },
     [fetchGoals]

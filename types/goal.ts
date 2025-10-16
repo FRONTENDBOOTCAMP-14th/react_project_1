@@ -22,6 +22,34 @@ export interface StudyGoal {
 }
 
 /**
+ * 목표 생성을 위한 입력 데이터 타입
+ */
+export interface CreateGoalInput {
+  ownerId: string
+  clubId?: string | null
+  roundId?: string | null
+  title: string
+  description?: string | null
+  isTeam?: boolean
+  isComplete?: boolean
+  startDate: string | Date
+  endDate: string | Date
+}
+
+/**
+ * 목표 수정을 위한 입력 데이터 타입 (부분 업데이트)
+ */
+export interface UpdateGoalInput {
+  title?: string
+  description?: string | null
+  isTeam?: boolean
+  isComplete?: boolean
+  roundId?: string | null
+  startDate?: string | Date
+  endDate?: string | Date
+}
+
+/**
  * StudyGoal 생성 요청 타입
  */
 export interface CreateStudyGoalRequest {

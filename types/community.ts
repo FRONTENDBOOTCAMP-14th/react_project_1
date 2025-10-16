@@ -25,3 +25,21 @@ export interface Community extends CommunityBase {
 export interface CommunityWithDate extends Omit<CommunityBase, 'createdAt'> {
   createdAt: Date
 }
+
+/**
+ * 커뮤니티 생성을 위한 입력 데이터 타입
+ */
+export interface CreateCommunityInput {
+  name: string
+  description?: string | null
+  isPublic?: boolean
+}
+
+/**
+ * 커뮤니티 수정을 위한 입력 데이터 타입 (부분 업데이트)
+ */
+export interface UpdateCommunityInput {
+  name?: string
+  description?: string | null
+  isPublic?: boolean
+}

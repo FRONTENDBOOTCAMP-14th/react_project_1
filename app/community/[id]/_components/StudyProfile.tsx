@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/types/community'
 import { MapPin, Users } from 'lucide-react'
-import { useCommunityData } from '@/lib/hooks'
+import { useCommunity } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES } from '@/constants'
@@ -118,7 +118,7 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
  * - 선언적 조건부 렌더링
  */
 export default function StudyProfile({ id }: StudyProfileProps) {
-  const { community, loading, error } = useCommunityData(id)
+  const { community, loading, error } = useCommunity(id)
 
   return renderWithLoading(
     loading,

@@ -10,6 +10,18 @@ export const MESSAGES = {
     FAILED_TO_LOAD_GOALS: '목표를 불러오는데 실패했습니다.',
     FAILED_TO_LOAD_COMMUNITY: '커뮤니티 정보를 불러오는데 실패했습니다.',
     NETWORK_ERROR: '네트워크 오류가 발생했습니다.',
+    FAILED_TO_CREATE_GOAL: '목표 생성에 실패했습니다.',
+    FAILED_TO_UPDATE_GOAL: '목표 수정에 실패했습니다.',
+    FAILED_TO_DELETE_GOAL: '목표 삭제에 실패했습니다.',
+    CREATING_GOAL_ERROR: '목표 생성 중 오류가 발생했습니다.',
+    UPDATING_GOAL_ERROR: '목표 수정 중 오류가 발생했습니다.',
+    DELETING_GOAL_ERROR: '목표 삭제 중 오류가 발생했습니다.',
+    FAILED_TO_CREATE_COMMUNITY: '커뮤니티 생성에 실패했습니다.',
+    FAILED_TO_UPDATE_COMMUNITY: '커뮤니티 수정에 실패했습니다.',
+    FAILED_TO_DELETE_COMMUNITY: '커뮤니티 삭제에 실패했습니다.',
+    CREATING_COMMUNITY_ERROR: '커뮤니티 생성 중 오류가 발생했습니다.',
+    UPDATING_COMMUNITY_ERROR: '커뮤니티 수정 중 오류가 발생했습니다.',
+    DELETING_COMMUNITY_ERROR: '커뮤니티 삭제 중 오류가 발생했습니다.',
   },
 
   LOADING: {

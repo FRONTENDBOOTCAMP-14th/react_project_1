@@ -2,6 +2,9 @@
  * StudyGoal 타입 정의
  * Prisma StudyGoal 모델 기반
  */
+
+import type { PaginationInfo } from '@/lib/types'
+
 export interface StudyGoal {
   goalId: string
   ownerId: string
@@ -74,6 +77,7 @@ export interface StudyGoalListResponse {
   success: boolean
   data?: StudyGoal[]
   count?: number
+  pagination?: PaginationInfo
   error?: string
   message?: string
 }

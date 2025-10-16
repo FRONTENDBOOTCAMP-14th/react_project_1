@@ -11,6 +11,7 @@
  */
 
 import prisma from '@/lib/prisma'
+import { goalSelect, activeGoalWhere } from '@/lib/quaries'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -30,73 +31,52 @@ import type { NextRequest } from 'next/server'
  */
 export async function GET(request: NextRequest) {
   try {
-    // URLSearchParams에서 필터 파라미터 추출
     const searchParams = request.nextUrl.searchParams
+
+    // 필터 파라미터
     const clubId = searchParams.get('clubId')
     const roundId = searchParams.get('roundId')
     const isTeam = searchParams.get('isTeam')
     const isComplete = searchParams.get('isComplete')
     const ownerId = searchParams.get('ownerId')
 
-    // 동적 where 절 구성 (소프트 삭제 제외 조건 포함)
-    const whereClause: {
-      deletedAt: null
-      clubId?: string
-      roundId?: string
-      isTeam?: boolean
-      isComplete?: boolean
-      ownerId?: string
-    } = {
-      deletedAt: null,
+    // 페이지네이션 파라미터
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
+    const skip = (page - 1) * limit
+
+    // where 절 구성
+    const whereClause = {
+      ...activeGoalWhere,
+      ...(clubId && { clubId }),
+      ...(roundId && { roundId }),
+      ...(isTeam !== null && { isTeam: isTeam === 'true' }),
+      ...(isComplete !== null && { isComplete: isComplete === 'true' }),
+      ...(ownerId && { ownerId }),
     }
 
-    // clubId 필터 적용
-    if (clubId) {
-      whereClause.clubId = clubId
-    }
-
-    // roundId 필터 적용
-    if (roundId) {
-      whereClause.roundId = roundId
-    }
-
-    // isTeam 필터 적용 ('true'/'false' 문자열을 boolean으로 변환)
-    if (isTeam !== null && isTeam !== undefined) {
-      whereClause.isTeam = isTeam === 'true'
-    }
-
-    // isComplete 필터 적용
-    if (isComplete !== null && isComplete !== undefined) {
-      whereClause.isComplete = isComplete === 'true'
-    }
-
-    // ownerId 필터 적용
-    if (ownerId) {
-      whereClause.ownerId = ownerId
-    }
-
-    // 최신 생성 순으로 목록 조회
-    const goals = await prisma.studyGoal.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        goalId: true,
-        ownerId: true,
-        clubId: true,
-        title: true,
-        description: true,
-        isTeam: true,
-        startDate: true,
-        endDate: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    // 병렬 조회: 데이터 + 전체 갯수
+    const [goals, total] = await Promise.all([
+      prisma.studyGoal.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: goalSelect,
+      }),
+      prisma.studyGoal.count({ where: whereClause }),
+    ])
 
     return NextResponse.json({
       success: true,
       data: goals,
       count: goals.length,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     })
   } catch (error) {
     // 서버 내부 오류 처리

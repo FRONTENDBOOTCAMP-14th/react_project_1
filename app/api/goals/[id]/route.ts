@@ -13,6 +13,7 @@
  */
 
 import prisma from '@/lib/prisma'
+import { goalDetailSelect } from '@/lib/quaries'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -31,46 +32,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params
 
-    // deletedAt이 null인(활성) 단건만 조회
-    const goal = await prisma.studyGoal.findUnique({
+    // findFirst로 소프트 삭제 조건 적용 (findUnique는 단일 필드만 가능)
+    const goal = await prisma.studyGoal.findFirst({
       where: {
         goalId: id,
         deletedAt: null,
       },
-      select: {
-        goalId: true,
-        ownerId: true,
-        clubId: true,
-        roundId: true,
-        title: true,
-        description: true,
-        isTeam: true,
-        isComplete: true,
-        startDate: true,
-        endDate: true,
-        createdAt: true,
-        updatedAt: true,
-        owner: {
-          select: {
-            userId: true,
-            username: true,
-            email: true,
-          },
-        },
-        club: {
-          select: {
-            clubId: true,
-            name: true,
-          },
-        },
-        round: {
-          select: {
-            roundId: true,
-            roundNumber: true,
-            createdAt: true,
-          },
-        },
-      },
+      select: goalDetailSelect,
     })
 
     // 존재하지 않거나 소프트 삭제된 경우
@@ -204,26 +172,27 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    // 1) 대상 존재 확인(소프트 삭제 제외)
-    const existingGoal = await prisma.studyGoal.findUnique({
-      where: { goalId: id, deletedAt: null },
-    })
+    // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
+    try {
+      await prisma.studyGoal.update({
+        where: {
+          goalId: id,
+          deletedAt: null,
+        },
+        data: { deletedAt: new Date() },
+      })
 
-    if (!existingGoal) {
-      return NextResponse.json({ success: false, error: 'Goal not found' }, { status: 404 })
+      return NextResponse.json({
+        success: true,
+        message: 'Goal deleted successfully',
+      })
+    } catch (error: unknown) {
+      // Prisma P2025: Record not found
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+        return NextResponse.json({ success: false, error: 'Goal not found' }, { status: 404 })
+      }
+      throw error
     }
-
-    // 2) 소프트 삭제 수행
-    await prisma.studyGoal.update({
-      where: { goalId: id },
-      data: { deletedAt: new Date() },
-    })
-
-    // 성공 응답
-    return NextResponse.json({
-      success: true,
-      message: 'Goal deleted successfully',
-    })
   } catch (error) {
     // 예외 처리(로깅 포함)
     console.error('Error deleting goal:', error)

@@ -37,8 +37,8 @@ model Community {
   deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
   tagname          String[]          @default([]) @db.VarChar
   communityMembers CommunityMember[]
-  studyGoals       StudyGoal[]
   rounds           Round[]
+  studyGoals       StudyGoal[]
 
   @@index([isPublic], map: "idx_community_public")
   @@index([name], map: "idx_community_name")
@@ -49,16 +49,16 @@ model StudyGoal {
   goalId      String     @id @default(dbgenerated("gen_random_uuid()")) @map("goal_id") @db.Uuid
   ownerId     String     @map("owner_id") @db.Uuid
   clubId      String?    @map("club_id") @db.Uuid
-  roundId     String?    @map("round_id") @db.Uuid
   title       String     @db.VarChar
   description String?
   isTeam      Boolean    @default(false) @map("is_team")
-  isComplete  Boolean    @default(false) @map("is_complete")
   startDate   DateTime   @map("start_date") @db.Date
   endDate     DateTime   @map("end_date") @db.Date
   createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt   DateTime   @default(now()) @map("updated_at") @db.Timestamp(6)
   deletedAt   DateTime?  @map("deleted_at") @db.Timestamp(6)
+  roundId     String?    @map("round_id") @db.Uuid
+  isComplete  Boolean    @default(false) @map("is_complete")
   reactions   Reaction[]
   club        Community? @relation(fields: [clubId], references: [clubId], onUpdate: NoAction, map: "fk_goal_club")
   owner       User       @relation("GoalOwner", fields: [ownerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_goal_owner")

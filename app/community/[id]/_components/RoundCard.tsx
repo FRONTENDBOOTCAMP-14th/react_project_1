@@ -4,7 +4,7 @@ import { LoadingState, ErrorState } from '@/components/common'
 import type { Round } from '@/types/round'
 import type { WithClubId, WithTeamLeaderPermission } from '@/types/common'
 import styles from './RoundCard.module.css'
-import { useRoundData, useGoalsData } from '@/lib/hooks'
+import { useRoundData, useGoals } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import GoalsSection from './GoalsSection'
 import { MESSAGES } from '@/constants'
@@ -78,7 +78,7 @@ const handleAddGoal = (): void => {
  * @param props - RoundCardBodyProps
  */
 function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
-  const { goals, loading, error, refetch } = useGoalsData(clubId)
+  const { goals, loading, error, refetch } = useGoals(clubId)
   const { optimisticGoals, handleToggleComplete } = useGoalToggle(goals, refetch)
 
   return renderWithLoading(

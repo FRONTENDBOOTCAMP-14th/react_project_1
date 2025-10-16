@@ -1,3 +1,3 @@
 export { useCommunityData } from './useCommunityData'
-export { useGoalsData } from './useGoalsData'
+export { useGoals } from './useGoals'
 export { useRoundData } from './useRoundData'

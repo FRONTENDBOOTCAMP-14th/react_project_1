@@ -20,15 +20,21 @@
 
 .add-button {
   font-size: var(--font-md);
-  padding: 0.25rem;
+  padding: var(--spacing-xxs);
 }
 
 .goal-card {
-  padding: 1rem;
+  padding: var(--spacing-sm);
   border-radius: var(--inner-card-radius);
   display: flex;
-  gap: var(--spacing-sm);
   align-items: center;
+  justify-content: space-between;
+}
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .goal-description {
@@ -37,8 +43,8 @@
 
 .goals-list {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
   flex-direction: column;
   background-color: var(--etc-color-3);
   border-radius: var(--inner-card-radius);
@@ -46,5 +52,5 @@
 
 .goals-section {
   width: 100%;
-  gap: 1rem;
+  gap: var(--spacing-sm);
 }

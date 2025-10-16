@@ -31,12 +31,14 @@ export interface GoalItemProps {
 function GoalItem({ goal, onToggle, isTeam }: GoalItemProps) {
   return (
     <div className={styles['goal-card']}>
-      <Checkbox
-        checked={goal.isComplete}
-        onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
-        aria-label={`${goal.title} 완료 표시`}
-      />
-      <p className={styles['goal-description']}>{goal.title}</p>
+      <div className={styles['goal-item']}>
+        <Checkbox
+          checked={goal.isComplete}
+          onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
+          aria-label={`${goal.title} 완료 표시`}
+        />
+        <p className={styles['goal-description']}>{goal.title}</p>
+      </div>
     </div>
   )
 }

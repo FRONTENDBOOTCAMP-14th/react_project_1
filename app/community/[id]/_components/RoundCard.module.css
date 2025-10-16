@@ -34,10 +34,11 @@
   border-radius: var(--inner-card-radius);
   display: flex;
   gap: var(--spacing-sm);
+  align-items: center;
 }
 
 .goal-description {
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
 }
 
 .goals-list {

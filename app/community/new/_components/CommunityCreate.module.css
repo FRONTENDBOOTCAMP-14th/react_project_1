@@ -1,3 +1,17 @@
-form {
-  background-color: pink;
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--third-color);
+}
+
+.title {
+  font-size: var(--font-sm);
+  /* font-weight: var(); */
+}
+
+.studyName {
+  background-color: green;
 }

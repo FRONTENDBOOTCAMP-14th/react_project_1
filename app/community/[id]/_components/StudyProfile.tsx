@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/types/community'
+import { MapPin, Users } from 'lucide-react'
 
 export default function StudyProfile({ id }: { id: string }) {
   const [community, setCommunity] = useState<Community | null>(null)
@@ -69,10 +70,12 @@ export default function StudyProfile({ id }: { id: string }) {
         </div>
         <div className={styles['profile-info']}>
           <p className={styles['community-name']}>{community.name}</p>
-          <section>
-            <p>{community.isPublic ? '공개' : '비공개'}</p>
+          <section style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <MapPin size={16} />
+            <p>종로구</p>
           </section>
-          <section>
+          <section style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Users size={16} />
             <p>멤버: {community._count?.communityMembers || 0}명</p>
           </section>
         </div>

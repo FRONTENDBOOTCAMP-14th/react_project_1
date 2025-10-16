@@ -1,7 +1,7 @@
 'use client'
 
 import { Checkbox, StrokeButton } from '@/components/ui'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useOptimistic } from 'react'
 import type { StudyGoal } from '@/types/goal'
 import type { Round } from '@/types/round'
 import styles from './RoundCard.module.css'
@@ -13,6 +13,8 @@ interface RoundCardProps {
 
 export default function RoundCard({ clubId, isTeamLeader }: RoundCardProps) {
   const [currentRound, setCurrentRound] = useState<Round | null>(null)
+  const [optimisticRound, setOptimisticRound] = useOptimistic<Round | null>(null)
+  const [optimisticGoals, setOptimisticGoals] = useOptimistic<StudyGoal[]>([])
 
   useEffect(() => {
     const fetchCurrentRound = async () => {
@@ -148,7 +150,7 @@ function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
         <div className={styles['goals-header']}>
           <p>그룹목표</p>
           {isTeamLeader ? (
-            <StrokeButton className={styles['add-button']} onClick={handleAddGoal}>
+            <StrokeButton className={styles['add-button']} onClick={handleAddGoal} type="button">
               +
             </StrokeButton>
           ) : null}
@@ -172,7 +174,11 @@ function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
 
       <div className={styles['goals-container']}>
         <p>개인목표</p>
-        <StrokeButton className={styles['add-button-with-margin']} onClick={handleAddGoal}>
+        <StrokeButton
+          className={styles['add-button-with-margin']}
+          onClick={handleAddGoal}
+          type="button"
+        >
           +
         </StrokeButton>
         <div className={styles['goals-list']}>

@@ -186,12 +186,12 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
         <div className={styles['goals-header']}>
           <p>그룹목표</p>
         </div>
-        {isTeamLeader ? (
-          <StrokeButton className={styles['add-button']} onClick={handleAddGoal} type="button">
-            +
-          </StrokeButton>
-        ) : null}
         <div className={styles['goals-list']}>
+          {isTeamLeader ? (
+            <StrokeButton className={styles['add-button']} onClick={handleAddGoal} type="button">
+              +
+            </StrokeButton>
+          ) : null}
           {optimisticGoals.team.length > 0 ? (
             optimisticGoals.team.map(goal => (
               <div key={goal.goalId} className={styles['goal-card']}>
@@ -213,10 +213,10 @@ function RoundCardBody({ clubId, isTeamLeader }: RoundCardBodyProps) {
         <div className={styles['goals-header']}>
           <p>개인목표</p>
         </div>
-        <StrokeButton className={styles['add-button']} onClick={handleAddGoal} type="button">
-          +
-        </StrokeButton>
         <div className={styles['goals-list']}>
+          <StrokeButton className={styles['add-button']} onClick={handleAddGoal} type="button">
+            +
+          </StrokeButton>
           {optimisticGoals.personal.length > 0 ? (
             optimisticGoals.personal.map(goal => (
               <div key={goal.goalId} className={styles['goal-card']}>

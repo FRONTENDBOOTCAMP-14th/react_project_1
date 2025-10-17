@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
   try {
     // 요청 바디 파싱
     const body = await request.json()
+
     const { ownerId, clubId, roundId, title, description, isTeam, isComplete, startDate, endDate } =
       body as {
         ownerId?: string
@@ -148,18 +149,20 @@ export async function POST(request: NextRequest) {
     const end = new Date(endDate)
 
     // 목표 생성
+    const createData = {
+      ownerId,
+      clubId: clubId || null,
+      roundId: roundId || null,
+      title,
+      description: description || null,
+      isTeam: isTeam || false,
+      isComplete: isComplete || false,
+      startDate: start,
+      endDate: end,
+    }
+
     const newGoal = await prisma.studyGoal.create({
-      data: {
-        ownerId,
-        clubId: clubId || null,
-        roundId: roundId || null,
-        title,
-        description: description || null,
-        isTeam: isTeam || false,
-        isComplete: isComplete || false,
-        startDate: start,
-        endDate: end,
-      },
+      data: createData,
       select: {
         goalId: true,
         ownerId: true,
@@ -185,7 +188,17 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     // 서버 내부 오류 처리
-    console.error('Error creating goal:', error)
+    console.error('POST /api/goals - Error creating goal:', error)
+
+    // Prisma 에러 상세 정보
+    if (error && typeof error === 'object') {
+      console.error('Error details:', {
+        code: (error as any).code,
+        meta: (error as any).meta,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+
     return NextResponse.json(
       {
         success: false,

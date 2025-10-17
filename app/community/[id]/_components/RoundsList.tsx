@@ -17,7 +17,7 @@ interface RoundsListProps extends WithClubId, WithTeamLeaderPermission {}
  * useRounds 훅을 사용하여 전체 라운드 목록을 가져와 각 라운드를 RoundCard로 렌더링합니다.
  * @param props - RoundsListProps
  */
-export default function RoundsList({ clubId, isTeamLeader = false }: RoundsListProps) {
+export default function RoundsList({ clubId, isTeamLeader }: RoundsListProps) {
   const { rounds, loading, error, refetch } = useRounds(clubId)
 
   // 로딩 상태

@@ -53,7 +53,9 @@ interface RoundCardHeaderProps {
 function RoundCardHeader({ round }: RoundCardHeaderProps) {
   return (
     <header aria-label="회차 정보">
-      <p>{round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}</p>
+      <p className={styles['round-number']}>
+        {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
+      </p>
     </header>
   )
 }
@@ -96,15 +98,21 @@ function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
     const endDate = new Date()
     endDate.setMonth(endDate.getMonth() + 1) // 1개월 후
 
-    await createGoal({
+    const goalData = {
       ownerId: userId,
-      clubId,
+      clubId: clubId || null,
       roundId: roundId || null,
       title,
       isTeam,
       startDate: now,
       endDate,
-    })
+    }
+
+    const result = await createGoal(goalData)
+
+    if (!result.success) {
+      toast.error(result.error || '목표 생성에 실패했습니다')
+    }
   }
 
   return renderWithLoading(

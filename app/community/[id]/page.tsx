@@ -1,108 +1,35 @@
-'use client'
-
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import StudyProfile from './_components/StudyProfile'
-import RoundsList from './_components/RoundsList'
+import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
+import { checkIsTeamLeader } from '@/lib/auth/permissions'
+import CommunityContent from './_components/CommunityContent'
 import styles from './page.module.css'
-import { AccentLink } from '@/components/ui'
-import { ErrorState } from '@/components/common'
-import { ROUTES, MESSAGES } from '@/constants'
+import { ROUTES } from '@/constants'
 
 /**
- * 공지 링크 컴포넌트에 전달되는 속성
+ * 커뮤니티 상세 페이지 (서버 컴포넌트)
+ * - 서버에서 사용자 인증 상태 확인
+ * - 서버에서 팀장 권한 확인
+ * - 확인된 권한을 클라이언트 컴포넌트에 전달
  */
-interface NotificationLinkProps {
-  /** 커뮤니티 식별자 */
-  clubId: string
-  /** 공지 메시지 */
-  message: string
-}
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id: clubId } = await params
 
-/**
- * 공지 링크 컴포넌트
- * 커뮤니티 공지 페이지로 이동하는 링크를 렌더링합니다.
- */
-function NotificationLink({ clubId, message }: NotificationLinkProps) {
-  return (
-    <Link
-      href={ROUTES.COMMUNITY.NOTIFICATION(clubId)}
-      className={styles['notification-link']}
-      aria-label="커뮤니티 공지로 이동"
-    >
-      <span className={styles['notification-label']}>{MESSAGES.LABEL.NOTIFICATION}</span> {message}
-    </Link>
-  )
-}
-
-/**
- * 라운드 추가 링크 컴포넌트에 전달되는 속성
- */
-interface AddRoundLinkProps {
-  /** 커뮤니티 식별자 */
-  clubId: string
-}
-
-/**
- * 라운드 추가 링크 컴포넌트
- * 라운드를 추가할 수 있는 페이지로 이동합니다.
- */
-function AddRoundLink({ clubId }: AddRoundLinkProps) {
-  return (
-    <AccentLink href={ROUTES.COMMUNITY.ROUND(clubId)} aria-label="라운드 추가하기">
-      {MESSAGES.ACTION.ADD_ROUND}
-    </AccentLink>
-  )
-}
-
-/**
- * 커뮤니티 콘텐츠 컴포넌트에 전달되는 속성
- */
-interface CommunityContentProps {
-  /** 커뮤니티 식별자 */
-  clubId: string
-}
-
-/**
- * 커뮤니티 콘텐츠 컴포넌트
- * 프로필, 공지, 라운드 목록 등 커뮤니티 상세 정보를 구성합니다.
- */
-function CommunityContent({ clubId }: CommunityContentProps) {
-  return (
-    <div className={styles['content-wrapper']}>
-      <StudyProfile id={clubId} />
-      <NotificationLink clubId={clubId} message="노트북 대여는 불가합니다" />
-      <AddRoundLink clubId={clubId} />
-      <RoundsList clubId={clubId} />
-    </div>
-  )
-}
-
-/**
- * 커뮤니티 상세 페이지
- * URL 파라미터에서 clubId를 추출해 하위 컴포넌트로 전달합니다.
- */
-export default function Page() {
-  const params = useParams()
-  const router = useRouter()
-  const idParam = params?.id
-  const clubId = Array.isArray(idParam) ? idParam[0] : idParam
-
+  // clubId 유효성 검증
   if (!clubId) {
-    return (
-      <div className={styles.container}>
-        <ErrorState
-          message={MESSAGES.ERROR.INVALID_COMMUNITY_ID}
-          actionLabel={MESSAGES.ACTION.BACK_TO_LIST}
-          onAction={() => router.push(ROUTES.COMMUNITY.LIST)}
-        />
-      </div>
-    )
+    redirect(ROUTES.COMMUNITY.LIST)
   }
+
+  // 서버에서 세션 확인
+  const session = await getServerSession(authOptions)
+  const userId = (session as any)?.userId
+
+  // 서버에서 팀장 권한 확인
+  const isTeamLeader = await checkIsTeamLeader(userId, clubId)
 
   return (
     <div className={styles.container}>
-      <CommunityContent clubId={clubId} />
+      <CommunityContent clubId={clubId} isTeamLeader={isTeamLeader} />
     </div>
   )
 }

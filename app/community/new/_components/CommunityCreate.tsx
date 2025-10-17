@@ -1,15 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { User, MapPin, Tag, ClipboardList } from 'lucide-react'
+import { User, MapPin, Tag, ClipboardList } from 'lucide-react' //  루시드 아이콘
 
 import Dropdown from '@/components/ui/Dropdown'
 // import TagInput from '@/app/community/new/_components/TagInput'
-//import FillButton from '@/components/ui/FillButton'
+import FieldInput from '@/app/community/new/_components/FieldInput'
 import styles from './CommunityCreate.module.css'
 
 export default function CommunityCreate() {
-  const [studyName, setStudyName] = useState<string>('')
+  const [studyName, setStudyName] = useState('')
   const [studyRegion, setStudyRegion] = useState('')
   const options = [
     { value: 'option1', label: '옵션 1' },
@@ -40,39 +40,39 @@ export default function CommunityCreate() {
         <ul className={styles.wrapper}>
           <li className={styles.studyName}>
             <h2 className="sr-only">스터디명</h2>
-            <label htmlFor="study-name" className={styles.label}>
-              <User />
-              모임명
-            </label>
-            <input
-              type="text"
+            <FieldInput
               id="study-name"
-              name="studyName"
+              label="모임명"
+              icon={<User size={16} />}
               value={studyName}
               onChange={e => setStudyName(e.target.value)}
               placeholder="스터디명을 입력하세요"
               required
+              type="text"
+              className={styles.input}
             />
           </li>
 
-          <li>
+          <li className={styles.li}>
             <h2 className="sr-only">스터디지역</h2>
-            <label>
+            <label htmlFor="study-region" className={styles.label}>
               <MapPin size={16} />
               지역
             </label>
-            <Dropdown
-              options={options}
-              value={studyRegion}
-              onChange={setStudyRegion}
-              placeholder="선택하세요"
-            />
-            <Dropdown
-              options={options}
-              value={studyRegion}
-              onChange={setStudyRegion}
-              placeholder="선택하세요"
-            />
+            <div className={styles.region}>
+              <Dropdown
+                options={options}
+                value={studyRegion}
+                onChange={setStudyRegion}
+                placeholder="선택하세요"
+              />
+              <Dropdown
+                options={options}
+                value={studyRegion}
+                onChange={setStudyRegion}
+                placeholder="선택하세요"
+              />
+            </div>
           </li>
 
           <li>

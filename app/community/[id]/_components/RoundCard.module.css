@@ -98,6 +98,12 @@
   gap: var(--spacing-xs);
 }
 
+.round-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .round-number {
   font-size: var(--font-lg);
   font-weight: var(--font-weight-bold);

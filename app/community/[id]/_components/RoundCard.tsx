@@ -91,7 +91,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) 
 
   return (
     <header aria-label="회차 정보">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className={styles['round-header-container']}>
         <p className={styles['round-number']}>
           {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
         </p>

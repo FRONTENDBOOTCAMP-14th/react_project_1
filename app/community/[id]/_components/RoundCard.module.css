@@ -6,7 +6,8 @@
 
   background-color: var(--primary-color);
   box-shadow: 0 0 16px 4px var(--shadow-color);
-  border-radius: var(--card-radius) var(--card-radius) 0 0;
+  border-radius: var(--card-radius);
+  margin-bottom: var(--spacing-lg);
 }
 
 .goals-container {

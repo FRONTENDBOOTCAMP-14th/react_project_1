@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import type { InputHTMLAttributes } from 'react'
 import styles from './Checkbox.module.css'
+import { X } from 'lucide-react'
 
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'onChange'> {
@@ -12,6 +13,8 @@ export interface CheckboxProps
   checked?: boolean
   /** 체크 상태 변경 핸들러 */
   onChange?: (checked: boolean) => void
+  /** 체크박스 disabled */
+  disabled?: boolean
 }
 
 /**
@@ -37,7 +40,14 @@ export interface CheckboxProps
  * />
  * ```
  */
-const Checkbox = ({ label, checked = false, onChange, className, ...rest }: CheckboxProps) => {
+const Checkbox = ({
+  label,
+  checked = false,
+  disabled = false,
+  onChange,
+  className,
+  ...rest
+}: CheckboxProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.checked)
   }
@@ -48,11 +58,14 @@ const Checkbox = ({ label, checked = false, onChange, className, ...rest }: Chec
         type="checkbox"
         checked={checked}
         onChange={handleChange}
+        disabled={disabled}
         className={styles['hidden-checkbox']}
         {...rest}
       />
       <span className={cn(styles['custom-checkbox'], checked && styles.checked)}>
-        {checked && (
+        {disabled ? (
+          <X size={20} color="var(--etc-color-3)" strokeWidth={3} />
+        ) : (
           <svg
             width="24"
             height="24"

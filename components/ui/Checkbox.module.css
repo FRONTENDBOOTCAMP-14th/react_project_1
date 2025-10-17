@@ -6,6 +6,10 @@
   user-select: none;
 }
 
+.checkbox-wrapper:has(.hidden-checkbox:disabled) {
+  cursor: not-allowed;
+}
+
 .hidden-checkbox {
   position: absolute;
   opacity: 0;
@@ -21,7 +25,19 @@
   height: 24px;
   border-radius: 4px;
   background-color: var(--etc-color-4);
-  /* transition: background-color 0.2s ease; */
+  transition: background-color 0.2s ease;
+}
+
+.custom-checkbox:hover {
+  opacity: 0.8;
+}
+
+.hidden-checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.custom-checkbox:hover .check-icon {
+  color: var(--primary-color);
 }
 
 .custom-checkbox.checked {

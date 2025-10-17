@@ -10,9 +10,10 @@ import { MESSAGES } from '@/constants'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
-import { IconButton, Popover, type PopoverAction } from '@/components/ui'
+import { Popover, type PopoverAction } from '@/components/ui'
 import { EllipsisVertical, MapPin } from 'lucide-react'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
+import type { CustomSession } from '@/lib/types'
 
 /**
  * RoundCard 컴포넌트에 전달되는 속성
@@ -148,7 +149,7 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
    * @param isTeam - 그룹 목표 여부
    */
   const handleAddGoal = async (title: string, isTeam: boolean): Promise<void> => {
-    const userId = (session as any)?.userId
+    const userId = (session as CustomSession)?.userId
     if (!userId) {
       toast.error('로그인이 필요합니다')
       return

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { Community, CreateCommunityInput, UpdateCommunityInput } from '@/types/community'
+import type { Community, CreateCommunityInput, UpdateCommunityInput } from '@/lib/types/community'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 
 interface UseCommunityResult {

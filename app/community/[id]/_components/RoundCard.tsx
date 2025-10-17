@@ -1,7 +1,7 @@
 'use client'
 
 import { LoadingState, ErrorState } from '@/components/common'
-import type { Round } from '@/types/round'
+import type { Round } from '@/lib/types/round'
 import styles from './RoundCard.module.css'
 import { useGoals } from '@/lib/hooks'
 import { renderWithLoading, renderWithError, formatDateRange } from '@/lib/utils'

@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
 import Link from 'next/link'
-import type { CommunityWithDate } from '@/types/community'
+import type { CommunityWithDate } from '@/lib/types/community'
 
 export const dynamic = 'force-dynamic'
 

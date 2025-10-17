@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { StudyGoal } from '@/types/goal'
+import type { StudyGoal } from '@/lib/types/goal'
 import { toast } from 'sonner'
 
 interface GoalsState {

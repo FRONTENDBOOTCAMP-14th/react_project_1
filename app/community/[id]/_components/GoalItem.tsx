@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useEffect } from 'react'
 import { Checkbox } from '@/components/ui'
-import type { StudyGoal } from '@/types/goal'
+import type { StudyGoal } from '@/lib/types/goal'
 import styles from './RoundCard.module.css'
 import { Check, X } from 'lucide-react'
 

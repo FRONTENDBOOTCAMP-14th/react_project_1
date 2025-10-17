@@ -1,6 +1,6 @@
 import { memo, useState } from 'react'
 import { StrokeButton } from '@/components/ui'
-import type { StudyGoal } from '@/types/goal'
+import type { StudyGoal } from '@/lib/types/goal'
 import GoalItem from './GoalItem'
 import styles from './RoundCard.module.css'
 import { renderWithEmpty } from '@/lib/utils'

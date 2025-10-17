@@ -6,7 +6,7 @@
       "@/lib/*": ["lib/*"],
       "@/app/*": ["app/*"],
       "@/styles/*": ["styles/*"],
-      "@/types/*": ["types/*"],
+      "@/types/*": ["lib/types/*"],
       "@/constants": ["constants"],
       "@/constants/*": ["constants/*"]
     },

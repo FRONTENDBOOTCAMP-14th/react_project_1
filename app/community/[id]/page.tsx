@@ -22,7 +22,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   // 서버에서 세션 확인
   const session = await getServerSession(authOptions)
-  const userId = (session as any)?.userId
+  const userId = session?.userId
 
   // 서버에서 팀장 권한 확인
   const isTeamLeader = await checkIsTeamLeader(userId, clubId)

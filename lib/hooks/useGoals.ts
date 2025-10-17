@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { StudyGoal, CreateGoalInput, UpdateGoalInput } from '@/types/goal'
+import type { StudyGoal, CreateGoalInput, UpdateGoalInput } from '@/lib/types/goal'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 
 interface GoalsState {

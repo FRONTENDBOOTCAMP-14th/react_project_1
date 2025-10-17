@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { Round, CreateRoundRequest, UpdateRoundRequest } from '@/types/round'
+import type { Round, CreateRoundRequest, UpdateRoundRequest } from '@/lib/types/round'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 
 interface UseRoundsResult {

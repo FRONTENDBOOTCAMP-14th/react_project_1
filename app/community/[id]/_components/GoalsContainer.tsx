@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import type { StudyGoal } from '@/types/goal'
+import type { StudyGoal } from '@/lib/types/goal'
 import GoalsList from './GoalsList'
 import styles from './RoundCard.module.css'
 

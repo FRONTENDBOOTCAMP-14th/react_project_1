@@ -9,7 +9,7 @@
 
 import prisma from '@/lib/prisma'
 import { roundSelect, roundDetailSelect } from '@/lib/quaries'
-import type { UpdateRoundRequest } from '@/types/round'
+import type { UpdateRoundRequest } from '@/lib/types/round'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

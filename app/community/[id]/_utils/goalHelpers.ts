@@ -1,4 +1,4 @@
-import type { StudyGoal } from '@/types/goal'
+import type { StudyGoal } from '@/lib/types/goal'
 
 /**
  * 목표 배열에서 특정 목표의 완료 상태를 업데이트하는 순수 함수

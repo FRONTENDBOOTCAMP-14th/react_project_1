@@ -12,7 +12,7 @@
 
 import prisma from '@/lib/prisma'
 import { roundSelect, activeRoundWhere } from '@/lib/quaries'
-import type { CreateRoundRequest } from '@/types/round'
+import type { CreateRoundRequest } from '@/lib/types/round'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

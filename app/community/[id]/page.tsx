@@ -5,6 +5,7 @@ import { checkIsTeamLeader } from '@/lib/auth/permissions'
 import CommunityContent from './_components/CommunityContent'
 import styles from './page.module.css'
 import { ROUTES } from '@/constants'
+import type { CustomSession } from '@/lib/types'
 
 /**
  * 커뮤니티 상세 페이지 (서버 컴포넌트)
@@ -22,7 +23,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   // 서버에서 세션 확인
   const session = await getServerSession(authOptions)
-  const userId = session?.userId
+  const userId = (session as CustomSession)?.userId
 
   // 서버에서 팀장 권한 확인
   const isTeamLeader = await checkIsTeamLeader(userId, clubId)

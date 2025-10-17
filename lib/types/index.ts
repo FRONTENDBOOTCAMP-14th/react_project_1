@@ -1,3 +1,4 @@
+import type { Session } from 'next-auth'
 import type { LinkProps } from 'next/link'
 import type { AnchorHTMLAttributes } from 'react'
 
@@ -15,6 +16,10 @@ export interface PaginationInfo {
   limit: number
   total: number
   totalPages: number
+}
+
+export interface CustomSession extends Session {
+  userId?: string
 }
 
 export * from './common'

@@ -17,6 +17,10 @@
   height: 0;
 }
 
+.hidden-checkbox:focus-visible + .custom-checkbox {
+  outline: 1px solid var(--secondary-color);
+}
+
 .custom-checkbox {
   display: flex;
   align-items: center;

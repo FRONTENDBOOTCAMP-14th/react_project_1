@@ -63,6 +63,9 @@ export const roundSelect = {
   roundId: true,
   clubId: true,
   roundNumber: true,
+  startDate: true,
+  endDate: true,
+  location: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.RoundSelect

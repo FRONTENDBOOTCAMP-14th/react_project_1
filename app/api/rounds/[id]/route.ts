@@ -58,6 +58,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     // 동적 업데이트 데이터 구성
     const updateData: {
       roundNumber?: number
+      startDate?: Date | null
+      endDate?: Date | null
+      location?: string | null
       updatedAt: Date
     } = {
       updatedAt: new Date(),
@@ -75,6 +78,32 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         )
       }
       updateData.roundNumber = body.roundNumber
+    }
+
+    // 날짜 필드 처리
+    if (body.startDate !== undefined) {
+      updateData.startDate = body.startDate ? new Date(body.startDate) : null
+    }
+
+    if (body.endDate !== undefined) {
+      updateData.endDate = body.endDate ? new Date(body.endDate) : null
+    }
+
+    // 날짜 유효성 검증
+    if (updateData.startDate && updateData.endDate) {
+      if (updateData.startDate > updateData.endDate) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'startDate must be before or equal to endDate',
+          },
+          { status: 400 }
+        )
+      }
+    }
+
+    if (body.location !== undefined) {
+      updateData.location = body.location || null
     }
 
     // 업데이트 실행 (race condition 방지: where에 deletedAt 조건 포함)

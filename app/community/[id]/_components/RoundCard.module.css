@@ -2,6 +2,11 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding: var(--spacing-md);
+
+  background-color: var(--primary-color);
+  box-shadow: 0 0 16px 4px var(--shadow-color);
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
 .goals-container {
@@ -59,7 +64,6 @@
 .rounds-list-container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
 }
 
 .empty-state {
@@ -96,6 +100,26 @@
 .round-number {
   font-size: var(--font-lg);
   font-weight: var(--font-weight-bold);
+}
+
+.round-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-sm);
+  color: var(--etc-color-2);
+}
+
+.round-date {
+  margin: 0;
+}
+
+.round-location {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .action-button {

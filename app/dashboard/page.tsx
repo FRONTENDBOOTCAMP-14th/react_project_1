@@ -9,6 +9,7 @@ import type { CommunityWithDate } from '@/types/community'
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+  // TODO: Prisma -> 페이지네이션 및 스킵 기능 추가 확인
   const communities: CommunityWithDate[] = await prisma.community.findMany({
     where: { deletedAt: null },
     orderBy: { createdAt: 'desc' },

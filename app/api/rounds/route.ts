@@ -85,7 +85,10 @@ export async function GET(request: NextRequest) {
  * 요청 Body 예시
  * {
  *   "clubId": "커뮤니티ID(필수)",
- *   "roundNumber": 1  // 회차 번호(선택, 기본값 1)
+ *   "roundNumber": 1,  // 회차 번호(선택, 기본값 1)
+ *   "startDate": "2025-10-20T14:00:00Z",  // 시작 일시(선택)
+ *   "endDate": "2025-10-20T18:00:00Z",    // 종료 일시(선택)
+ *   "location": "서울 강남구 스터디카페"  // 장소(선택)
  * }
  *
  * 응답
@@ -96,7 +99,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as CreateRoundRequest
-    const { clubId, roundNumber } = body
+    const { clubId, roundNumber, startDate, endDate, location } = body
 
     // 필수 값 검증
     if (!clubId) {
@@ -137,10 +140,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 날짜 유효성 검증
+    if (startDate && endDate) {
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      if (start > end) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'startDate must be before or equal to endDate',
+          },
+          { status: 400 }
+        )
+      }
+    }
+
     const newRound = await prisma.round.create({
       data: {
         clubId,
         roundNumber: roundNumber ?? 1,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        location: location || null,
       },
       select: roundSelect,
     })

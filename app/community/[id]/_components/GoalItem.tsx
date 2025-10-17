@@ -27,6 +27,12 @@ export interface GoalItemProps {
    * 편집 모드 (새 목표 추가 시)
    */
   isEditing?: boolean
+
+  /**
+   * 팀장 여부
+   */
+  isTeamLeader?: boolean
+
   /**
    * 저장 콜백
    */
@@ -41,7 +47,15 @@ export interface GoalItemProps {
  * 개별 목표 아이템 컴포넌트 (순수 컴포넌트)
  * @param props - GoalItemProps
  */
-function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel }: GoalItemProps) {
+function GoalItem({
+  goal,
+  onToggle,
+  isTeam,
+  isEditing = false,
+  isTeamLeader,
+  onSave,
+  onCancel,
+}: GoalItemProps) {
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -121,6 +135,7 @@ function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel 
           checked={goal.isComplete}
           onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
           aria-label={`${goal.title} 완료 표시`}
+          disabled={!isTeamLeader && isTeam}
         />
         <p className={styles['goal-description']}>{goal.title}</p>
       </div>

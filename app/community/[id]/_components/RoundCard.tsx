@@ -4,14 +4,14 @@ import { LoadingState, ErrorState } from '@/components/common'
 import type { Round } from '@/types/round'
 import styles from './RoundCard.module.css'
 import { useGoals } from '@/lib/hooks'
-import { renderWithLoading, renderWithError } from '@/lib/utils'
+import { renderWithLoading, renderWithError, formatDateRange } from '@/lib/utils'
 import GoalsSection from './GoalsSection'
 import { MESSAGES } from '@/constants'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { IconButton, Popover, type PopoverAction } from '@/components/ui'
-import { EllipsisVertical } from 'lucide-react'
+import { EllipsisVertical, MapPin } from 'lucide-react'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
 
 /**
@@ -103,6 +103,20 @@ function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) 
           actions={popoverActions}
         />
       </div>
+      {(round?.startDate || round?.endDate || round?.location) && (
+        <div className={styles['round-info']}>
+          {(round?.startDate || round?.endDate) && (
+            <p className={styles['round-date']}>
+              {formatDateRange(round.startDate, round.endDate)}
+            </p>
+          )}
+          {round?.location && (
+            <p className={styles['round-location']}>
+              <MapPin /> {round.location}
+            </p>
+          )}
+        </div>
+      )}
     </header>
   )
 }

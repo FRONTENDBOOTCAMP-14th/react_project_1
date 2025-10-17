@@ -111,10 +111,14 @@ model Round {
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt   DateTime    @default(now()) @map("updated_at") @db.Timestamp(6)
   deletedAt   DateTime?   @map("deleted_at") @db.Timestamp(6)
+  startDate   DateTime?   @map("start_date") @db.Timestamp(6)
+  endDate     DateTime?   @map("end_date") @db.Timestamp(6)
+  location    String?     @db.VarChar
   community   Community   @relation(fields: [clubId], references: [clubId], onDelete: Cascade, onUpdate: NoAction, map: "fk_round_club")
   studyGoals  StudyGoal[]
 
   @@index([clubId], map: "idx_round_club")
   @@index([createdAt], map: "idx_round_created")
+  @@index([startDate, endDate], map: "idx_round_dates")
   @@map("rounds")
 }

@@ -9,6 +9,9 @@ export interface Round {
   roundId: string
   clubId: string
   roundNumber: number
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  location?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   deletedAt?: Date | string | null
@@ -20,6 +23,9 @@ export interface Round {
 export interface CreateRoundRequest {
   clubId: string
   roundNumber?: number
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  location?: string | null
 }
 
 /**
@@ -27,6 +33,9 @@ export interface CreateRoundRequest {
  */
 export interface UpdateRoundRequest {
   roundNumber?: number
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  location?: string | null
 }
 
 /**

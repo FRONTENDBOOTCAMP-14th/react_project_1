@@ -2,7 +2,6 @@
 
 import { LoadingState, ErrorState } from '@/components/common'
 import type { Round } from '@/types/round'
-import type { WithClubId, WithTeamLeaderPermission } from '@/types/common'
 import styles from './RoundCard.module.css'
 import { useGoals } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
@@ -11,15 +10,26 @@ import { MESSAGES } from '@/constants'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
+import { IconButton, Popover, type PopoverAction } from '@/components/ui'
+import { EllipsisVertical } from 'lucide-react'
+import { useCommunityStore } from '../_hooks/useCommunityStore'
 
 /**
  * RoundCard 컴포넌트에 전달되는 속성
  */
-interface RoundCardProps extends WithClubId, WithTeamLeaderPermission {
+interface RoundCardProps {
   /**
    * 표시할 라운드 정보
    */
   round: Round | null
+  /**
+   * 라운드 카드가 열려있는지 여부
+   */
+  isOpen: boolean
+  /**
+   * 라운드 카드 열림/닫힘 토글 핸들러
+   */
+  onToggleOpen: () => void
 }
 
 /**
@@ -27,11 +37,11 @@ interface RoundCardProps extends WithClubId, WithTeamLeaderPermission {
  * 라운드 정보를 보여주고, 라운드에 속한 목표(그룹/개인)를 렌더링합니다.
  * @param props - RoundCardProps
  */
-export default function RoundCard({ round, clubId, isTeamLeader = false }: RoundCardProps) {
+export default function RoundCard({ round, isOpen = false, onToggleOpen }: RoundCardProps) {
   return (
     <article className={styles['round-card-wrapper']} aria-label="회차 카드">
-      <RoundCardHeader round={round} />
-      <RoundCardBody clubId={clubId} roundId={round?.roundId} isTeamLeader={isTeamLeader} />
+      <RoundCardHeader round={round} isOpen={isOpen} onToggleOpen={onToggleOpen} />
+      <RoundCardBody roundId={round?.roundId} isOpen={isOpen} />
     </article>
   )
 }
@@ -44,18 +54,55 @@ interface RoundCardHeaderProps {
    * 현재 라운드 정보 (없을 수 있음)
    */
   round: Round | null
+  /**
+   * 라운드 카드가 열려있는지 여부
+   */
+  isOpen: boolean
+  /**
+   * 라운드 카드 열림/닫힘 토글 핸들러
+   */
+  onToggleOpen: () => void
 }
 
 /**
- * 라운드 헤더 컴포넌트 (순수 컴포넌트)
+ * 라운드 헤더 컴포넌트
  * @param props - RoundCardHeaderProps
  */
-function RoundCardHeader({ round }: RoundCardHeaderProps) {
+function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) {
+  const popoverActions: PopoverAction[] = [
+    {
+      id: 'toggle',
+      label: isOpen ? '접기' : '펼치기',
+      onClick: onToggleOpen,
+    },
+    {
+      id: 'edit',
+      label: '수정',
+      onClick: () => {},
+    },
+    {
+      id: 'delete',
+      label: '삭제',
+      onClick: () => {},
+      isDanger: true,
+    },
+  ]
+
   return (
     <header aria-label="회차 정보">
-      <p className={styles['round-number']}>
-        {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
-      </p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <p className={styles['round-number']}>
+          {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
+        </p>
+        <Popover
+          trigger={
+            <IconButton className={styles['more-button']} aria-label="회차 더보기">
+              <EllipsisVertical />
+            </IconButton>
+          }
+          actions={popoverActions}
+        />
+      </div>
     </header>
   )
 }
@@ -63,11 +110,15 @@ function RoundCardHeader({ round }: RoundCardHeaderProps) {
 /**
  * 라운드 카드 본문 컴포넌트에 전달되는 속성
  */
-interface RoundCardBodyProps extends WithClubId, WithTeamLeaderPermission {
+interface RoundCardBodyProps {
   /**
    * 현재 라운드 식별자 (선택)
    */
   roundId?: string
+  /**
+   * 라운드 카드가 열려있는지 여부
+   */
+  isOpen: boolean
 }
 
 /**
@@ -76,9 +127,12 @@ interface RoundCardBodyProps extends WithClubId, WithTeamLeaderPermission {
  * - 선언적 조건부 렌더링
  * @param props - RoundCardBodyProps
  */
-function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
+function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
+  // 전역 상태에서 커뮤니티 컴텍스트 가져오기
+  const clubId = useCommunityStore(state => state.clubId)
+  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
   const { data: session } = useSession()
-  const { goals, loading, error, refetch, createGoal } = useGoals(clubId, roundId)
+  const { goals, loading, error, refetch, createGoal } = useGoals(clubId || '', roundId)
   const { optimisticGoals, handleToggleComplete } = useGoalToggle(goals, refetch)
 
   /**
@@ -127,6 +181,7 @@ function RoundCardBody({ clubId, roundId, isTeamLeader }: RoundCardBodyProps) {
         onToggle={handleToggleComplete}
         isTeamLeader={isTeamLeader}
         onAddGoal={roundId ? handleAddGoal : undefined}
+        isOpen={isOpen}
       />
     )
   )

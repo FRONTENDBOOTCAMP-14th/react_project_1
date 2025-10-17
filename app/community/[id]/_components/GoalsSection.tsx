@@ -28,6 +28,10 @@ export interface GoalsSectionProps {
    * 목표 추가 핸들러 (새 목표 저장 시)
    */
   onAddGoal?: (title: string, isTeam: boolean) => Promise<void>
+  /**
+   * 목표 섹션의 열림/닫힘 상태
+   */
+  isOpen?: boolean
 }
 
 /**
@@ -40,28 +44,31 @@ function GoalsSection({
   onToggle,
   isTeamLeader,
   onAddGoal,
+  isOpen,
 }: GoalsSectionProps) {
   return (
-    <section className={styles['goals-section']} aria-label="목표 섹션">
-      <GoalsContainer
-        title="그룹목표"
-        goals={teamGoals}
-        onToggle={onToggle}
-        isTeam={true}
-        showAddButton={!!isTeamLeader}
-        emptyMessage={MESSAGES.EMPTY.TEAM_GOALS}
-        onAddGoal={onAddGoal ? async title => onAddGoal(title, true) : undefined}
-      />
-      <GoalsContainer
-        title="개인목표"
-        goals={personalGoals}
-        onToggle={onToggle}
-        isTeam={false}
-        showAddButton={true}
-        emptyMessage={MESSAGES.EMPTY.PERSONAL_GOALS}
-        onAddGoal={onAddGoal ? async title => onAddGoal(title, false) : undefined}
-      />
-    </section>
+    isOpen && (
+      <section className={styles['goals-section']} aria-label="목표 섹션">
+        <GoalsContainer
+          title="그룹목표"
+          goals={teamGoals}
+          onToggle={onToggle}
+          isTeam={true}
+          showAddButton={!!isTeamLeader}
+          emptyMessage={MESSAGES.EMPTY.TEAM_GOALS}
+          onAddGoal={onAddGoal ? async title => onAddGoal(title, true) : undefined}
+        />
+        <GoalsContainer
+          title="개인목표"
+          goals={personalGoals}
+          onToggle={onToggle}
+          isTeam={false}
+          showAddButton={true}
+          emptyMessage={MESSAGES.EMPTY.PERSONAL_GOALS}
+          onAddGoal={onAddGoal ? async title => onAddGoal(title, false) : undefined}
+        />
+      </section>
+    )
   )
 }
 

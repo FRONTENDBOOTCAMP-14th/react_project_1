@@ -1,11 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import StudyProfile from './StudyProfile'
 import RoundsList from './RoundsList'
 import styles from '../page.module.css'
 import { AccentLink } from '@/components/ui'
 import { ROUTES, MESSAGES } from '@/constants'
+import { useCommunityStore } from '../_hooks/useCommunityStore'
 
 /**
  * 공지 링크 컴포넌트에 전달되는 속성
@@ -66,14 +68,22 @@ interface CommunityContentProps {
 /**
  * 커뮤니티 콘텐츠 컴포넌트 (클라이언트 컴포넌트)
  * 프로필, 공지, 라운드 목록 등 커뮤니티 상세 정보를 구성합니다.
+ * 서버에서 받은 데이터로 전역 상태를 초기화합니다.
  */
 export default function CommunityContent({ clubId, isTeamLeader }: CommunityContentProps) {
+  const initializeCommunity = useCommunityStore(state => state.initializeCommunity)
+
+  // 서버에서 받은 데이터로 전역 상태 초기화
+  useEffect(() => {
+    initializeCommunity(clubId, isTeamLeader)
+  }, [clubId, isTeamLeader, initializeCommunity])
+
   return (
     <div className={styles['content-wrapper']}>
       <StudyProfile id={clubId} />
       <NotificationLink clubId={clubId} message="노트북 대여는 불가합니다" />
       <AddRoundLink clubId={clubId} />
-      <RoundsList clubId={clubId} isTeamLeader={isTeamLeader} />
+      <RoundsList />
     </div>
   )
 }

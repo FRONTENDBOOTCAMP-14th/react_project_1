@@ -1,0 +1,79 @@
+.popover {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--third-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  min-width: 120px;
+  background-color: var(--primary-color);
+  border: 1px solid var(--etc-color-3);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+}
+
+.menu-right {
+  right: 0;
+}
+
+.menu-left {
+  left: 0;
+}
+
+.action {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  font-size: var(--font-sm);
+  color: var(--secondary-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.action:hover:not(.action-disabled) {
+  background-color: var(--etc-color-3);
+}
+
+.action-danger {
+  color: var(--danger-color, #ef4444);
+}
+
+.action-danger:hover:not(.action-disabled) {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.action-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -43,7 +43,7 @@ export const MESSAGES = {
   },
 
   ACTION: {
-    ADD_ROUND: '라운드 추가',
+    ADD_ROUND: '회차 추가',
     ADD_GOAL: '목표 추가',
     BACK_TO_LIST: '목록으로 돌아가기',
     RETRY: '다시 시도',

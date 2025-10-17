@@ -28,15 +28,15 @@
 
 .menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + var(--spacing-xxs));
   min-width: 120px;
   background-color: var(--primary-color);
   border: 1px solid var(--etc-color-3);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: var(--inner-card-radius);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 100;
   list-style: none;
-  padding: 4px 0;
+  padding: var(--spacing-xs);
   margin: 0;
 }
 
@@ -51,7 +51,7 @@
 .action {
   display: block;
   width: 100%;
-  padding: 10px 16px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   text-align: left;
   background-color: transparent;
   border: none;
@@ -65,11 +65,11 @@
 }
 
 .action-danger {
-  color: var(--danger-color, #ef4444);
+  color: var(--error-color);
 }
 
 .action-danger:hover:not(.action-disabled) {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: var(--error-color);
 }
 
 .action-disabled {

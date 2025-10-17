@@ -94,14 +94,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) 
         <p className={styles['round-number']}>
           {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
         </p>
-        <Popover
-          trigger={
-            <IconButton className={styles['more-button']} aria-label="회차 더보기">
-              <EllipsisVertical />
-            </IconButton>
-          }
-          actions={popoverActions}
-        />
+        <Popover trigger={<EllipsisVertical />} actions={popoverActions} />
       </div>
       {(round?.startDate || round?.endDate || round?.location) && (
         <div className={styles['round-info']}>

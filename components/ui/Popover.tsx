@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import styles from './Popover.module.css'
+import IconButton from '@/components/ui/IconButton'
 
 /**
  * 팝오버 메뉴 액션 아이템 타입
@@ -131,12 +132,10 @@ export default function Popover({ trigger, actions, className, align = 'right' }
 
   return (
     <div className={cn(styles.popover, className)} ref={popoverRef}>
-      <div
+      <IconButton
         onClick={handleTriggerClick}
         className={styles.trigger}
-        role="button"
-        tabIndex={0}
-        onKeyDown={e => {
+        onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
             handleTriggerClick()
@@ -146,7 +145,7 @@ export default function Popover({ trigger, actions, className, align = 'right' }
         aria-haspopup="menu"
       >
         {trigger}
-      </div>
+      </IconButton>
 
       {isOpen && (
         <>

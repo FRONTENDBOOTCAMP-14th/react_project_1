@@ -10,8 +10,8 @@ import { MESSAGES } from '@/constants'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
-import { Popover, type PopoverAction } from '@/components/ui'
-import { EllipsisVertical, MapPin } from 'lucide-react'
+import { IconButton, Popover, type PopoverAction } from '@/components/ui'
+import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
 import type { CustomSession } from '@/lib/types'
 
@@ -72,11 +72,6 @@ interface RoundCardHeaderProps {
 function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) {
   const popoverActions: PopoverAction[] = [
     {
-      id: 'toggle',
-      label: isOpen ? '접기' : '펼치기',
-      onClick: onToggleOpen,
-    },
-    {
       id: 'edit',
       label: '수정',
       onClick: () => {},
@@ -92,9 +87,14 @@ function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) 
   return (
     <header aria-label="회차 정보">
       <div className={styles['round-header-container']}>
-        <p className={styles['round-number']}>
-          {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
-        </p>
+        <div className={styles['round-header']}>
+          <p className={styles['round-number']}>
+            {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
+          </p>
+          <IconButton type="button" onClick={onToggleOpen} aria-expanded={isOpen}>
+            {isOpen ? <ChevronUp /> : <ChevronDown />}
+          </IconButton>
+        </div>
         <Popover trigger={<EllipsisVertical />} actions={popoverActions} />
       </div>
       {(round?.startDate || round?.endDate || round?.location) && (

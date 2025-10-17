@@ -3,6 +3,9 @@ import { Checkbox } from '@/components/ui'
 import type { StudyGoal } from '@/lib/types/goal'
 import styles from './RoundCard.module.css'
 import { Check, X } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import type { CustomSession } from '@/lib/types'
+import { useCommunityStore } from '../_hooks/useCommunityStore'
 
 /**
  * 개별 목표 아이템 컴포넌트에 전달되는 속성
@@ -29,11 +32,6 @@ export interface GoalItemProps {
   isEditing?: boolean
 
   /**
-   * 팀장 여부
-   */
-  isTeamLeader?: boolean
-
-  /**
    * 저장 콜백
    */
   onSave?: (title: string) => Promise<void>
@@ -47,15 +45,10 @@ export interface GoalItemProps {
  * 개별 목표 아이템 컴포넌트 (순수 컴포넌트)
  * @param props - GoalItemProps
  */
-function GoalItem({
-  goal,
-  onToggle,
-  isTeam,
-  isEditing = false,
-  isTeamLeader,
-  onSave,
-  onCancel,
-}: GoalItemProps) {
+function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel }: GoalItemProps) {
+  const { data: session } = useSession()
+  const userId = (session as CustomSession)?.userId
+  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -135,7 +128,7 @@ function GoalItem({
           checked={goal.isComplete}
           onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
           aria-label={`${goal.title} 완료 표시`}
-          disabled={!isTeamLeader && isTeam}
+          disabled={!userId || (!isTeamLeader && isTeam)}
         />
         <p className={styles['goal-description']}>{goal.title}</p>
       </div>

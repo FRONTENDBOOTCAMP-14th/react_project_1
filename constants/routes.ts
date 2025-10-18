@@ -9,6 +9,7 @@ export const ROUTES = {
     DETAIL: (clubId: string) => `/community/${clubId}`,
     NOTIFICATION: (clubId: string) => `/community/notification/${clubId}`,
     ROUND: (clubId: string) => `/community/round/${clubId}`,
+    MEMBERS: (clubId: string) => `/community/member/${clubId}`,
   },
   GOAL: {
     CREATE: '/goal/create',

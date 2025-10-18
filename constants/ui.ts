@@ -17,9 +17,9 @@ export const UI_CONSTANTS = {
    * 아이콘 크기
    */
   ICON_SIZE: {
-    SMALL: 16,
-    MEDIUM: 20,
-    LARGE: 24,
+    SMALL: 20,
+    MEDIUM: 40,
+    LARGE: 80,
   },
 
   /**

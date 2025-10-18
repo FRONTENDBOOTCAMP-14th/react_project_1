@@ -9,8 +9,8 @@ import { Ellipsis, MapPin, Users } from 'lucide-react'
 import { useCommunity } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
-import { UI_CONSTANTS, MESSAGES } from '@/constants'
-import { StrokeButton, Popover, type PopoverAction, IconButton, IconLink } from '@/components/ui'
+import { UI_CONSTANTS, MESSAGES, ROUTES } from '@/constants'
+import { StrokeButton, Popover, type PopoverAction, IconLink } from '@/components/ui'
 
 /**
  * StudyProfile 컴포넌트에 전달되는 속성
@@ -83,14 +83,8 @@ const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
       <p className={styles['community-name']}>{community.name}</p>
       <InfoRow icon={<MapPin size={iconSize} aria-hidden="true" />} text="종로구" />
       <IconLink
-        href="#"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--spacing-xs)',
-          textDecoration: 'none',
-          color: 'inherit',
-        }}
+        className={styles['members-count']}
+        href={ROUTES.COMMUNITY.MEMBERS(community.clubId)}
         aria-label={MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}
       >
         <Users size={iconSize} aria-hidden="true" />

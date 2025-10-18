@@ -81,7 +81,6 @@ export default function FieldInput({
       {type === 'textarea' ? (
         <textarea
           id={id}
-          name={id}
           value={value}
           onChange={onChange}
           placeholder={placeholder}

@@ -1,36 +1,52 @@
 .form {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  width: 100%;
+  gap: var(--spacing-sm);
 }
 
-.title {
+.form > section {
+  width: 100%;
+}
+
+.ul {
+  width: 100%;
   display: flex;
-  font-size: var(--font-sm);
-  background-color: blue;
-  /* font-weight: var(); */
-}
-
-.wrapper {
+  flex-direction: column;
   list-style-type: none;
-  background-color: darkcyan;
-  margin: 0; /* layout에 css 스타일 부르고 삭제 */
-  padding: 0; /* layout에 css 스타일 부르고 삭제 */
-  border: 0; /* layout에 css 스타일 부르고 삭제 */
+  gap: var(--spacing-sm);
+  padding: 0;
+  margin: 0;
 }
 
-.region {
+.li {
   display: flex;
-  justify-content: row;
-  align-items: center;
+  align-items: flex-start;
+  width: 100%;
   gap: var(--spacing-sm);
 }
 
 .label {
+  flex: 0 0 80px;
+  min-height: 36px;
   display: flex;
   align-items: center;
-  margin: 0 var(--spacing-xs);
   gap: var(--spacing-sm);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.region {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: var(--spacing-sm);
+  background-color: red;
+}
+
+.submit {
+  display: flex;
+  flex-direction: column;
 }

@@ -3,6 +3,7 @@ import Header from '@/components/common/Header'
 import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import Providers from './providers'
+import styles from './layout.module.css'
 
 export const metadata: Metadata = {
   title: '토끼노트',
@@ -15,8 +16,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={fonts.pretendard.className}>
         <Providers>
           <Header />
-          <div style={{ minHeight: 'calc(100vh - 120px)' }}>
-            <div>{children}</div>
+          <div className={styles.container}>
+            <div className={styles.content}>{children}</div>
           </div>
         </Providers>
       </body>

@@ -10,7 +10,7 @@ import { useCommunity } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES } from '@/constants'
-import { FillButton, Popover, type PopoverAction } from '@/components/ui'
+import { StrokeButton, Popover, type PopoverAction, IconButton, IconLink } from '@/components/ui'
 
 /**
  * StudyProfile 컴포넌트에 전달되는 속성
@@ -82,10 +82,20 @@ const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
     <div className={styles['profile-info']}>
       <p className={styles['community-name']}>{community.name}</p>
       <InfoRow icon={<MapPin size={iconSize} aria-hidden="true" />} text="종로구" />
-      <InfoRow
-        icon={<Users size={iconSize} aria-hidden="true" />}
-        text={MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}
-      />
+      <IconLink
+        href="#"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--spacing-xs)',
+          textDecoration: 'none',
+          color: 'inherit',
+        }}
+        aria-label={MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}
+      >
+        <Users size={iconSize} aria-hidden="true" />
+        <span>{MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}</span>
+      </IconLink>
     </div>
   )
 })
@@ -134,7 +144,7 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
         <p className={styles.description}>
           {community.description || MESSAGES.EMPTY.NO_DESCRIPTION}
         </p>
-        <FillButton>가입하기</FillButton>
+        <StrokeButton>가입하기</StrokeButton>
       </div>
     </div>
   )

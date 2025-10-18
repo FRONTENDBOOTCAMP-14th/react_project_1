@@ -17,7 +17,7 @@
 
 .profile-header {
   display: flex;
-  gap: var(--spacing-md);
+  justify-content: space-between;
 }
 
 .profile-info {

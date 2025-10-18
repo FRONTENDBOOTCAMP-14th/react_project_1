@@ -58,6 +58,8 @@
   font-size: var(--font-sm);
   color: var(--secondary-color);
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: var(--inner-card-radius);
 }
 
 .action:hover:not(.action-disabled) {
@@ -69,7 +71,7 @@
 }
 
 .action-danger:hover:not(.action-disabled) {
-  background-color: var(--error-color);
+  background-color: var(--etc-color-3);
 }
 
 .action-disabled {

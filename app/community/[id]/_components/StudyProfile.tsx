@@ -5,11 +5,12 @@ import { memo } from 'react'
 import type { ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/lib/types/community'
-import { MapPin, Users } from 'lucide-react'
+import { Ellipsis, MapPin, Users } from 'lucide-react'
 import { useCommunity } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES } from '@/constants'
+import { FillButton, Popover, type PopoverAction } from '@/components/ui'
 
 /**
  * StudyProfile 컴포넌트에 전달되는 속성
@@ -101,13 +102,40 @@ interface CommunityContentProps {
  * 커뮤니티 콘텐츠 컴포넌트 (순수 컴포넌트)
  */
 const CommunityContent = memo(({ community }: CommunityContentProps) => {
+  const actions: PopoverAction[] = [
+    {
+      id: 'edit',
+      label: '정보 편집',
+      onClick: () => {
+        console.log('정보 편집')
+      },
+    },
+    {
+      id: 'delete',
+      label: '삭제',
+      isDanger: true,
+      onClick: () => {
+        console.log('삭제')
+      },
+    },
+  ]
   return (
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
-        <ProfileImage alt={`${community.name} 커뮤니티 프로필 이미지`} />
-        <ProfileInfo community={community} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+          <ProfileImage alt={`${community.name} 커뮤니티 프로필 이미지`} />
+          <ProfileInfo community={community} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Popover trigger={<Ellipsis />} actions={actions} />
+        </div>
       </article>
-      <p className={styles.description}>{community.description || MESSAGES.EMPTY.NO_DESCRIPTION}</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+        <p className={styles.description}>
+          {community.description || MESSAGES.EMPTY.NO_DESCRIPTION}
+        </p>
+        <FillButton>가입하기</FillButton>
+      </div>
     </div>
   )
 })

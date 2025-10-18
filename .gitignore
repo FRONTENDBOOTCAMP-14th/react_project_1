@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 
 # Local Docker assets
 .docker/
+
+# macOS system files
+.DS_Store

@@ -1,0 +1,13 @@
+# robots.txt for next.js application
+
+User-agent: *
+Disallow: /api/auth/login
+Disallow: /api/auth/register
+Disallow: /api/auth/refresh
+Disallow: /api/auth/logout
+Disallow: /api/auth/me
+Disallow: /api/auth/update
+Disallow: /api/auth/delete
+Disallow: /api/auth/reset-password
+
+# Sitemap: https://study-club-tracker.com/sitemap.xml

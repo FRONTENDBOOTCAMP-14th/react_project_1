@@ -1,0 +1,68 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+.logoContainer {
+  margin-bottom: 2rem;
+}
+
+.calendarContainer {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+}
+
+.dayBox {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 16px;
+  color: #a4a4a4;
+}
+
+.selectedDay {
+  color: #3468c0;
+}
+
+.countBox {
+  width: 40px;
+  height: 40px;
+  margin-top: 8px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fdaaaa;
+  border: 2px solid #fdaaaa;
+}
+
+.carouselContainer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px;
+}
+
+.carouselItem {
+  width: 185px;
+  height: 301px;
+  border: 1px solid #ccc;
+  scroll-snap-align: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

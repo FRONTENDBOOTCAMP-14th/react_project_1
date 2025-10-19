@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
+// TODO: 불필요 -> 삭제 고려
 // Public client for browser usage
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

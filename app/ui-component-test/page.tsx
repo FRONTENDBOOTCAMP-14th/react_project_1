@@ -40,24 +40,30 @@ export default function Page() {
   return (
     <div className={styles['ui-component-test']}>
       <h1>UI Component Test Page</h1>
-      <FillButton onClick={() => alert('Button Clicked!')}>로그인</FillButton>
-      <StrokeButton onClick={() => alert('Button Clicked!')}>로그인</StrokeButton>
-      <AccentButton onClick={() => alert('Button Clicked!')}>로그인</AccentButton>
+      <FillButton type="button" onClick={() => alert('Button Clicked!')}>
+        로그인
+      </FillButton>
+      <StrokeButton type="button" onClick={() => alert('Button Clicked!')}>
+        로그인
+      </StrokeButton>
+      <AccentButton type="button" onClick={() => alert('Button Clicked!')}>
+        로그인
+      </AccentButton>
       <FillLink href="/">Fill Link</FillLink>
       <StrokeLink href="/">Stroke Link</StrokeLink>
       <AccentLink href="/">Accent Link</AccentLink>
       <div style={{ display: 'flex', gap: '16px' }}>
-        <IconButton onClick={() => alert('Button Clicked!')}>
-          <Image src="/kakao-talk.svg" alt="" width={40} height={40} />
+        <IconButton type="button" onClick={() => alert('Button Clicked!')}>
+          <Image src="/svg/logo.svg" alt="" width={40} height={40} />
         </IconButton>
         <IconLink href="/">
-          <Image src="/kakao-talk.svg" alt="" width={40} height={40} />
+          <Image src="/svg/logo.svg" alt="" width={40} height={40} />
         </IconLink>
-        <IconButton onClick={() => alert('Button Clicked!')}>
-          <Image src="/kakao-talk.svg" alt="" width={120} height={120} />
+        <IconButton type="button" onClick={() => alert('Button Clicked!')}>
+          <Image src="/svg/logo.svg" alt="" width={120} height={120} />
         </IconButton>
         <IconLink href="/">
-          <Image src="/kakao-talk.svg" alt="" width={120} height={120} />
+          <Image src="/svg/logo.svg" alt="" width={120} height={120} />
         </IconLink>
       </div>
       <ParticipateRate name="사용자" value={75} max={100} />

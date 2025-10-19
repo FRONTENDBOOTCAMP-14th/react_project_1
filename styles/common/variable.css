@@ -8,11 +8,13 @@
   --etc-color-3: #f9f9f9;
   --etc-color-4: #d9d9d9;
   --accent-color: #3468c0;
+  --shadow-color: rgba(18, 18, 18, 0.1);
 
   --full-radius: 9999px;
   --card-radius: 16px;
   --inner-card-radius: 8px;
 
+  --spacing-xxs: 4px;
   --spacing-xs: 8px;
   --spacing-sm: 16px;
   --spacing-md: 24px;
@@ -25,6 +27,11 @@
   --font-lg: 2rem;
   --font-xl: 3.5rem;
   --font-xxl: 5rem;
+
+  --font-weight-light: 200;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
 
   --icon-xs: 16px;
   --icon-sm: 24px;

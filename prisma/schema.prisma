@@ -37,6 +37,7 @@ model Community {
   deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
   tagname          String[]          @default([]) @db.VarChar
   communityMembers CommunityMember[]
+  rounds           Round[]
   studyGoals       StudyGoal[]
 
   @@index([isPublic], map: "idx_community_public")
@@ -56,13 +57,19 @@ model StudyGoal {
   createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt   DateTime   @default(now()) @map("updated_at") @db.Timestamp(6)
   deletedAt   DateTime?  @map("deleted_at") @db.Timestamp(6)
+  roundId     String?    @map("round_id") @db.Uuid
+  isComplete  Boolean    @default(false) @map("is_complete")
   reactions   Reaction[]
   club        Community? @relation(fields: [clubId], references: [clubId], onUpdate: NoAction, map: "fk_goal_club")
   owner       User       @relation("GoalOwner", fields: [ownerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_goal_owner")
+  round       Round?     @relation(fields: [roundId], references: [roundId], onUpdate: NoAction, map: "fk_goal_round")
 
   @@index([ownerId], map: "idx_goal_owner")
   @@index([startDate, endDate], map: "idx_goal_dates")
   @@index([isTeam], map: "idx_goal_team")
+  @@index([roundId], map: "idx_goal_round")
+  @@index([isComplete], map: "idx_goal_complete")
+  @@index([clubId], map: "idx_goal_club")
   @@map("study_goals")
 }
 
@@ -95,4 +102,23 @@ model CommunityMember {
   @@index([userId], map: "idx_member_user")
   @@index([clubId], map: "idx_member_club")
   @@map("community_members")
+}
+
+model Round {
+  roundId     String      @id @default(dbgenerated("gen_random_uuid()")) @map("round_id") @db.Uuid
+  clubId      String      @map("club_id") @db.Uuid
+  roundNumber Int         @default(1) @map("round_number")
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime    @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt   DateTime?   @map("deleted_at") @db.Timestamp(6)
+  startDate   DateTime?   @map("start_date") @db.Timestamp(6)
+  endDate     DateTime?   @map("end_date") @db.Timestamp(6)
+  location    String?     @db.VarChar
+  community   Community   @relation(fields: [clubId], references: [clubId], onDelete: Cascade, onUpdate: NoAction, map: "fk_round_club")
+  studyGoals  StudyGoal[]
+
+  @@index([clubId], map: "idx_round_club")
+  @@index([createdAt], map: "idx_round_created")
+  @@index([startDate, endDate], map: "idx_round_dates")
+  @@map("rounds")
 }

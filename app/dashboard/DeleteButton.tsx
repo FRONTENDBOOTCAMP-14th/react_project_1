@@ -29,10 +29,19 @@ export default function DeleteButton({ id }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
-      <button onClick={onDelete} disabled={loading} style={{ padding: '6px 10px', fontSize: 12 }}>
+      <button
+        onClick={onDelete}
+        type="button"
+        disabled={loading}
+        style={{ padding: '6px 10px', fontSize: 12 }}
+      >
         {loading ? '삭제 중...' : '삭제'}
       </button>
-      {error && <span style={{ color: 'crimson', fontSize: 12 }}>{error}</span>}
+      {error && (
+        <span role="alert" style={{ color: 'crimson', fontSize: 12 }}>
+          {error}
+        </span>
+      )}
     </div>
   )
 }

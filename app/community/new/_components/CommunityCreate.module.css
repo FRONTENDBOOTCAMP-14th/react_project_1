@@ -30,6 +30,7 @@
 .label {
   flex: 0 0 80px;
   min-height: 36px;
+  margin: 0 var(--spacing-xs);
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -42,8 +43,7 @@
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  gap: var(--spacing-sm);
-  background-color: red;
+  gap: var(--spacing-xxs);
 }
 
 .submit {

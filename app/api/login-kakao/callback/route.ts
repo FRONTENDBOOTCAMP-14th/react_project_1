@@ -10,7 +10,10 @@ export async function GET(req: NextRequest) {
   const error = searchParams.get('error')
 
   if (error) {
-    return NextResponse.json({ success: false, error, message: 'Authorization failed' }, { status: 400 })
+    return NextResponse.json(
+      { success: false, error, message: 'Authorization failed' },
+      { status: 400 }
+    )
   }
   if (!code) {
     return NextResponse.json({ success: false, error: 'missing_code' }, { status: 400 })

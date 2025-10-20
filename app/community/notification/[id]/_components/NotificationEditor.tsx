@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Check, X } from 'lucide-react'
-import { Checkbox } from '@/components/ui'
+import { Checkbox, TextInput, FillButton, StrokeButton } from '@/components/ui'
 import styles from './NotificationEditor.module.css'
 
 interface NotificationEditorProps {
@@ -53,6 +53,11 @@ export default function NotificationEditor({
     }
   }
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    handleSave()
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       onCancel()
@@ -64,13 +69,15 @@ export default function NotificationEditor({
   }
 
   return (
-    <div className={styles.editor} onKeyDown={handleKeyDown}>
+    <form className={styles.editor} onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
       <div className={styles.header}>
-        <input
+        <label htmlFor="notification-title">제목</label>
+        <TextInput
           ref={titleInputRef}
+          id="notification-title"
           type="text"
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
           placeholder="공지사항 제목을 입력하세요"
           className={styles['title-input']}
           disabled={isSaving}
@@ -79,7 +86,9 @@ export default function NotificationEditor({
       </div>
 
       <div className={styles.body}>
+        <label htmlFor="notification-content">내용</label>
         <textarea
+          id="notification-content"
           value={content}
           onChange={e => setContent(e.target.value)}
           placeholder="공지사항 내용을 입력하세요"
@@ -94,17 +103,16 @@ export default function NotificationEditor({
         <Checkbox label="상단 고정" checked={isPinned} onChange={setIsPinned} disabled={isSaving} />
 
         <div className={styles.actions}>
-          <button
-            type="button"
-            onClick={handleSave}
+          <FillButton
+            type="submit"
             disabled={!title.trim() || isSaving}
             className={styles['save-button']}
             aria-label="저장"
           >
             <Check size={16} />
             <span>저장</span>
-          </button>
-          <button
+          </FillButton>
+          <StrokeButton
             type="button"
             onClick={onCancel}
             disabled={isSaving}
@@ -113,9 +121,9 @@ export default function NotificationEditor({
           >
             <X size={16} />
             <span>취소</span>
-          </button>
+          </StrokeButton>
         </div>
       </div>
-    </div>
+    </form>
   )
 }

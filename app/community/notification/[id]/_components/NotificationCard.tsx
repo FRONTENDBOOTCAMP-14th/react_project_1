@@ -1,6 +1,9 @@
+import { memo, useCallback } from 'react'
 import type { Notification } from '@/lib/types/notification'
 import { Pin, Trash2 } from 'lucide-react'
+import { IconButton } from '@/components/ui'
 import styles from './NotificationCard.module.css'
+import { formatDate } from '@/lib/utils'
 
 interface NotificationCardProps {
   notification: Notification
@@ -11,8 +14,9 @@ interface NotificationCardProps {
 
 /**
  * 공지사항 카드 컴포넌트
+ * 메모이제이션을 통해 불필요한 리렌더링 방지
  */
-export default function NotificationCard({
+function NotificationCard({
   notification,
   onDelete,
   onTogglePin,
@@ -20,22 +24,13 @@ export default function NotificationCard({
 }: NotificationCardProps) {
   const { notificationId, title, content, isPinned, createdAt } = notification
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     onDelete(notificationId)
-  }
+  }, [notificationId, onDelete])
 
-  const handleTogglePin = () => {
+  const handleTogglePin = useCallback(() => {
     onTogglePin(notificationId, isPinned)
-  }
-
-  const formatDate = (date: Date | string) => {
-    const d = new Date(date)
-    return d.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
+  }, [notificationId, isPinned, onTogglePin])
 
   return (
     <div className={`${styles.card} ${isPinned ? styles.pinned : ''}`}>
@@ -52,22 +47,16 @@ export default function NotificationCard({
 
         {isTeamLeader && (
           <div className={styles.actions}>
-            <button
+            <IconButton
               onClick={handleTogglePin}
-              className={styles['action-button']}
               title={isPinned ? '고정 해제' : '상단 고정'}
               aria-label={isPinned ? '고정 해제' : '상단 고정'}
             >
               <Pin size={16} className={isPinned ? styles.active : ''} />
-            </button>
-            <button
-              onClick={handleDelete}
-              className={styles['action-button']}
-              title="삭제"
-              aria-label="삭제"
-            >
+            </IconButton>
+            <IconButton onClick={handleDelete} title="삭제" aria-label="삭제">
               <Trash2 size={16} />
-            </button>
+            </IconButton>
           </div>
         )}
       </div>
@@ -86,3 +75,5 @@ export default function NotificationCard({
     </div>
   )
 }
+
+export default memo(NotificationCard)

@@ -6,14 +6,10 @@
 .add-button {
   display: block;
   position: absolute;
+  padding: var(--spacing-xs);
   top: -60px;
   right: 0;
-  background: none;
-  border: none;
   cursor: pointer;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-sm);
-  font-weight: var(--font-weight-medium);
   transition: opacity 0.2s;
 }
 

@@ -53,17 +53,8 @@
 
 .action-button {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: none;
-  border: none;
-  border-radius: 6px;
   color: var(--etc-color-2);
   cursor: pointer;
-  transition: all 0.2s;
 }
 
 .action-button:hover {

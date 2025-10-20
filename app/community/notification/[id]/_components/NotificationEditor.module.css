@@ -71,19 +71,9 @@
 .cancel-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: none;
-  border-radius: 6px;
-  font-size: var(--font-sm);
-  font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all 0.2s;
-}
-
-.save-button {
-  background: var(--accent-color);
-  color: var(--primary-color);
+  padding: var(--spacing-xs);
 }
 
 .save-button:hover:not(:disabled) {
@@ -95,11 +85,6 @@
   background: var(--etc-color-4);
   color: var(--etc-color-2);
   cursor: not-allowed;
-}
-
-.cancel-button {
-  background: var(--etc-color-3);
-  color: var(--etc-color-2);
 }
 
 .cancel-button:hover:not(:disabled) {

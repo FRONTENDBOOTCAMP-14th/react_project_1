@@ -8,7 +8,9 @@ import { useCommunityStore } from '../../../[id]/_hooks/useCommunityStore'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNotifications } from '@/lib/hooks'
+import { StrokeButton } from '@/components/ui'
 import styles from './NotificationContainer.module.css'
+import { useSmartPin } from '../_hooks'
 
 export default function NotificationContainer({ clubId }: { clubId: string }) {
   const { data: session } = useSession()
@@ -25,6 +27,8 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
     deleteNotification,
     togglePin,
   } = useNotifications({ clubId })
+
+  const { smartTogglePin } = useSmartPin({ pinnedNotifications, togglePin })
 
   const handleAddClick = () => {
     if (!userId) {
@@ -44,24 +48,22 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
       return
     }
 
-    // 고정 공지사항을 생성하려는 경우, 기존 고정 공지사항 먼저 해제
-    if (isPinned && pinnedNotifications.length > 0) {
-      const existingPinned = pinnedNotifications[0]
-      const unpinResult = await togglePin(existingPinned.notificationId, true)
-      if (!unpinResult.success) {
-        toast.error('기존 고정 공지사항 해제에 실패했습니다')
-        return
-      }
-    }
-
     const result = await createNotification({
       authorId: userId,
       title,
       content,
-      isPinned,
+      isPinned: false, // 먼저 고정하지 않고 생성
     })
 
     if (result.success) {
+      // 생성 후 고정이 필요한 경우 스마트 토글 사용
+      if (isPinned && result.data) {
+        const pinResult = await smartTogglePin(result.data.notificationId, false)
+        if (!pinResult.success) {
+          toast.error(pinResult.error || '고정 설정에 실패했습니다')
+          return
+        }
+      }
       toast.success('공지사항이 작성되었습니다')
       setIsEditing(false)
     } else {
@@ -85,23 +87,7 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
   }
 
   const handleTogglePin = async (notificationId: string, currentPinned: boolean) => {
-    // 고정하려는 경우 (false → true)
-    if (!currentPinned) {
-      // 이미 고정된 다른 공지사항이 있는지 확인
-      const existingPinned = pinnedNotifications.find(n => n.notificationId !== notificationId)
-
-      if (existingPinned) {
-        // 기존 고정 공지사항 먼저 해제
-        const unpinResult = await togglePin(existingPinned.notificationId, true)
-        if (!unpinResult.success) {
-          toast.error('기존 고정 공지사항 해제에 실패했습니다')
-          return
-        }
-      }
-    }
-
-    // 현재 공지사항 고정/해제
-    const result = await togglePin(notificationId, currentPinned)
+    const result = await smartTogglePin(notificationId, currentPinned)
     if (result.success) {
       toast.success(currentPinned ? '고정 해제되었습니다' : '상단에 고정되었습니다')
     } else {
@@ -116,14 +102,14 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
   return (
     <div className={styles.container}>
       {/* 쓰기 버튼 */}
-      <button
+      <StrokeButton
         className={styles['add-button']}
         onClick={handleAddClick}
         disabled={!isTeamLeader || isEditing}
         title={!isTeamLeader ? '팀장 권한이 필요합니다' : '공지사항 작성'}
       >
         쓰기
-      </button>
+      </StrokeButton>
 
       {/* 공지사항 목록 */}
       <div className={styles.content}>

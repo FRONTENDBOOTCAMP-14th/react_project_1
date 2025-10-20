@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { exchangeToken, getKakaoUserInfo } from '@/lib/oauth/kakao'
 import { findByProviderId } from '@/lib/repositories/user'
+import { getErrorMessage } from '@/lib/errors'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -9,17 +10,17 @@ export async function GET(req: NextRequest) {
   const error = searchParams.get('error')
 
   if (error) {
-    return NextResponse.json({ ok: false, error, message: 'Authorization failed' }, { status: 400 })
+    return NextResponse.json({ success: false, error, message: 'Authorization failed' }, { status: 400 })
   }
   if (!code) {
-    return NextResponse.json({ ok: false, error: 'missing_code' }, { status: 400 })
+    return NextResponse.json({ success: false, error: 'missing_code' }, { status: 400 })
   }
 
   const clientId = process.env.KAKAO_CLIENT_ID
   const redirectUri = process.env.KAKAO_REDIRECT_URI
   const clientSecret = process.env.KAKAO_CLIENT_SECRET
   if (!clientId || !redirectUri) {
-    return NextResponse.json({ ok: false, error: 'server_misconfig' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'server_misconfig' }, { status: 500 })
   }
 
   try {
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
 
     // 미가입: 프런트에서 회원가입 페이지로 연결할 수 있도록 최소 정보 반환
     return NextResponse.json({
-      ok: true,
+      success: true,
       needsRegistration: true,
       data: {
         provider,
@@ -49,9 +50,9 @@ export async function GET(req: NextRequest) {
         suggestedUsername: `kakao_${providerId}`,
       },
     })
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json(
-      { ok: false, error: 'callback_failed', detail: e?.message },
+      { success: false, error: 'callback_failed', detail: getErrorMessage(e, 'Unknown error') },
       { status: 500 }
     )
   }

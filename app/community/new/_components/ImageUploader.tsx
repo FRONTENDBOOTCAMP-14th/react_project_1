@@ -4,6 +4,8 @@ import { IconButton } from '@/components/ui'
 import { Camera } from 'lucide-react'
 import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 import styles from './ImageUploader.module.css'
+import { toast } from 'sonner'
+import Image from 'next/image'
 
 /**
  * 이미지 업로드 컴포넌트
@@ -16,24 +18,19 @@ import styles from './ImageUploader.module.css'
  * @returns {JSX.Element} 선택한 이미지 업로드 컴포넌트
  *
  * @example
- * <ImageUploader onImageChange={(file) => console.log(file)} />
+ * <ImageUploader />
  */
 
-interface ImageUploaderProps {
-  onImageChange?: (file: File | null) => void
-}
-
-export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
-  console.log(onImageChange)
+export default function ImageUploader() {
   // 기능은 추가중
   const handleThumbnailClick = () => {
     // 이미지 삭제
-    console.log('썸네일 클릭 - 삭제')
+    toast('썸네일 클릭 - 삭제')
   }
 
   const handleUploadClick = () => {
     // 파일 선택
-    console.log('업로드 버튼 클릭')
+    toast('업로드 버튼 클릭')
   }
 
   return (
@@ -42,7 +39,13 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
 
       {/* 이미지 썸네일 영역 */}
       <div className={styles.imageContainer} onClick={handleThumbnailClick}>
-        <img src={DefaultImg.src} alt="스터디 대표 이미지" className={styles.image} />
+        <Image
+          src={DefaultImg.src}
+          alt="스터디 대표 이미지"
+          className={styles.image}
+          width={150}
+          height={150}
+        />
 
         {/* 업로드 버튼 */}
         <div className={styles.button}>

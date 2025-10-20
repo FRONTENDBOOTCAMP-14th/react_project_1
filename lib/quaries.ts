@@ -99,3 +99,43 @@ export const roundDetailSelect = {
 export const activeRoundWhere = {
   deletedAt: null,
 } satisfies Prisma.RoundWhereInput
+
+/**
+ * Notification 기본 Select (목록 조회용)
+ */
+export const notificationSelect = {
+  notificationId: true,
+  clubId: true,
+  authorId: true,
+  title: true,
+  content: true,
+  isPinned: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.NotificationSelect
+
+/**
+ * Notification 상세 Select (관계 포함)
+ */
+export const notificationDetailSelect = {
+  ...notificationSelect,
+  community: {
+    select: {
+      clubId: true,
+      name: true,
+    },
+  },
+  author: {
+    select: {
+      userId: true,
+      username: true,
+    },
+  },
+} satisfies Prisma.NotificationSelect
+
+/**
+ * 활성 공지사항 조건 (소프트 삭제 제외)
+ */
+export const activeNotificationWhere = {
+  deletedAt: null,
+} satisfies Prisma.NotificationWhereInput

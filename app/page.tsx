@@ -52,6 +52,14 @@ export default function HomePage() {
           </div>
         </div>
       )}
+      <div className={styles.footerContainer}>
+        <h2>추천 스터디</h2>
+        <div className={styles.recommendContainer}>
+          <div className={styles.recommendItem}>스터디 A</div>
+          <div className={styles.recommendItem}>스터디 B</div>
+          <div className={styles.recommendItem}>스터디 C</div>
+        </div>
+      </div>
     </main>
   )
 }

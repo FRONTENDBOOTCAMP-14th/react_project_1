@@ -4,8 +4,12 @@ import { IconButton } from '@/components/ui'
 import { Camera } from 'lucide-react'
 import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 import styles from './ImageUploader.module.css'
-import Image from 'next/image'
 import { toast } from 'sonner'
+import Image from 'next/image'
+
+interface ImageUploaderProps {
+  onImageChange?: (file: File | null) => void
+}
 
 /**
  * 이미지 업로드 컴포넌트
@@ -13,13 +17,18 @@ import { toast } from 'sonner'
  * - 사용자가 이미지를 선택하는 컴포넌트 입니다.
  * - 썸네일 클릭 시 이미지를 삭제하고, 업로드 버튼으로 이미지를 선택합니다.
  *
+ * @param {Object} props - 컴포넌트 props
+ * @param {(file: File | null) => void} [onImageChange] - 이미지 선택 시 호출되는 콜백 함수
+ * @returns 선택한 이미지 업로드 컴포넌트
+ *
  * @example
  * <ImageUploader />
  */
-
-export default function ImageUploader() {
-  const handleThumbnailClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation()
+export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
+  // 추후 삭제후 기능 추가해주세요
+  const _onImageChange = onImageChange || (() => {})
+  // 기능은 추가중
+  const handleThumbnailClick = () => {
     // 이미지 삭제
     toast('썸네일 클릭 - 삭제')
   }

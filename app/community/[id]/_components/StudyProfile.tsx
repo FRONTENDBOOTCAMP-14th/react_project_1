@@ -11,6 +11,7 @@ import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES, ROUTES } from '@/constants'
 import { StrokeButton, Popover, type PopoverAction, IconLink } from '@/components/ui'
+import { toast } from 'sonner'
 
 /**
  * StudyProfile 컴포넌트에 전달되는 속성
@@ -111,7 +112,7 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
       id: 'edit',
       label: '정보 편집',
       onClick: () => {
-        console.log('정보 편집')
+        toast('정보 편집')
       },
     },
     {
@@ -119,7 +120,7 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
       label: '삭제',
       isDanger: true,
       onClick: () => {
-        console.log('삭제')
+        toast('삭제')
       },
     },
   ]

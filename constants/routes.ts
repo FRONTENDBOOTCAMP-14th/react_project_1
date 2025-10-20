@@ -46,6 +46,23 @@ export const API_ENDPOINTS = {
       return `/api/rounds?${searchParams.toString()}`
     },
   },
+  NOTIFICATIONS: {
+    BASE: '/api/notifications',
+    BY_ID: (notificationId: string) => `/api/notifications/${notificationId}`,
+    WITH_PARAMS: (params: {
+      clubId: string
+      isPinned?: boolean
+      page?: number
+      limit?: number
+    }) => {
+      const searchParams = new URLSearchParams()
+      searchParams.append('clubId', params.clubId)
+      if (params.isPinned !== undefined) searchParams.append('isPinned', String(params.isPinned))
+      if (params.page) searchParams.append('page', String(params.page))
+      if (params.limit) searchParams.append('limit', String(params.limit))
+      return `/api/notifications?${searchParams.toString()}`
+    },
+  },
 } as const
 
 /**

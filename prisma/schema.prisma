@@ -19,6 +19,7 @@ model User {
   updatedAt        DateTime          @default(now()) @map("updated_at") @db.Timestamp(6)
   deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
   communityMembers CommunityMember[]
+  notifications    Notification[]
   reactions        Reaction[]
   studyGoals       StudyGoal[]       @relation("GoalOwner")
 
@@ -37,6 +38,7 @@ model Community {
   deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
   tagname          String[]          @default([]) @db.VarChar
   communityMembers CommunityMember[]
+  notifications    Notification[]
   rounds           Round[]
   studyGoals       StudyGoal[]
 
@@ -121,4 +123,22 @@ model Round {
   @@index([createdAt], map: "idx_round_created")
   @@index([startDate, endDate], map: "idx_round_dates")
   @@map("rounds")
+}
+
+model Notification {
+  notificationId String    @id @default(dbgenerated("gen_random_uuid()")) @map("notification_id") @db.Uuid
+  clubId         String    @map("club_id") @db.Uuid
+  authorId       String?   @map("author_id") @db.Uuid
+  title          String    @db.VarChar
+  content        String?
+  isPinned       Boolean   @default(false) @map("is_pinned")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamp(6)
+  author         User?     @relation(fields: [authorId], references: [userId], onUpdate: NoAction, map: "fk_notification_author")
+  community      Community @relation(fields: [clubId], references: [clubId], onDelete: Cascade, onUpdate: NoAction, map: "fk_notification_club")
+
+  @@index([clubId], map: "idx_notification_club")
+  @@index([authorId], map: "idx_notification_author")
+  @@map("notifications")
 }

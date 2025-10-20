@@ -48,6 +48,16 @@ erDiagram
         timestamp created_at
         timestamp deleted_at
     }
+    NOTIFICATION {
+        uuid notification_id PK
+        uuid club_id FK
+        uuid author_id FK
+        varchar title
+        text content
+        boolean is_pinned
+        timestamp created_at
+        timestamp deleted_at
+    }
 
     USER ||--o{ STUDYGOAL : owns
     STUDYGOAL ||--o{ REACTION : receives
@@ -59,6 +69,8 @@ erDiagram
     COMMUNITY ||--o{ ROUND : has_rounds
     ROUND ||--o{ STUDYGOAL : contains
     STUDYGOAL }o--|| ROUND : belongs_to
+    COMMUNITY ||--o{ NOTIFICATION : has_notifications
+    USER ||--o{ NOTIFICATION : writes
 ```
 
 ## 데이터 스키마 테이블
@@ -277,5 +289,42 @@ CONSTRAINT fk_round_club FOREIGN KEY (club_id) REFERENCES communities(club_id) O
 CREATE INDEX idx_round_club ON rounds (club_id);
 CREATE INDEX idx_round_created ON rounds (created_at);
 CREATE INDEX idx_round_active ON rounds (club_id, deleted_at)
+    WHERE deleted_at IS NULL;
+```
+
+### Notification 테이블
+
+| 컬럼명          | 타입      | 제약조건                          | 설명                            |
+| --------------- | --------- | --------------------------------- | ------------------------------- |
+| notification_id | uuid      | PK DEFAULT gen_random_uuid()      | 공지사항 고유 ID                |
+| club_id         | uuid      | NOT NULL, FK(communities.club_id) | 소속 커뮤니티 ID                |
+| author_id       | uuid      | NULL, FK(users.user_id)           | 작성자 ID (작성자 삭제 시 NULL) |
+| title           | varchar   | NOT NULL                          | 공지사항 제목                   |
+| content         | text      | NULL                              | 공지사항 내용                   |
+| is_pinned       | boolean   | NOT NULL, DEFAULT false           | 상단 고정 여부                  |
+| created_at      | timestamp | NOT NULL, DEFAULT now()           | 생성일                          |
+| updated_at      | timestamp | NOT NULL, DEFAULT now()           | 수정일 (트리거로 자동 업데이트) |
+| deleted_at      | timestamp | NULL                              | 소프트 삭제 시각                |
+
+#### 제약조건 - Notification 테이블
+
+> 커뮤니티 삭제 시 공지사항도 함께 삭제되고 작성자 삭제 시 공지사항은 유지되도록 설정합니다.
+
+```sql
+CONSTRAINT pk_notification PRIMARY KEY (notification_id)
+CONSTRAINT fk_notification_club FOREIGN KEY (club_id) REFERENCES communities(club_id) ON DELETE CASCADE
+CONSTRAINT fk_notification_author FOREIGN KEY (author_id) REFERENCES users(user_id) ON DELETE SET NULL
+```
+
+#### 인덱스 - Notification 테이블
+
+> 커뮤니티별 공지사항 조회, 고정 공지사항 우선 정렬, 활성 공지사항 조회를 효율적으로 처리합니다.
+
+```sql
+CREATE INDEX idx_notification_club ON notifications (club_id);
+CREATE INDEX idx_notification_author ON notifications (author_id);
+CREATE INDEX idx_notification_pinned ON notifications (club_id, is_pinned, created_at DESC)
+    WHERE deleted_at IS NULL;
+CREATE INDEX idx_notification_active ON notifications (club_id, created_at DESC)
     WHERE deleted_at IS NULL;
 ```

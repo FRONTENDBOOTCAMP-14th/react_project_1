@@ -29,6 +29,13 @@ export const MESSAGES = {
     CREATING_ROUND_ERROR: '라운드 생성 중 오류가 발생했습니다.',
     UPDATING_ROUND_ERROR: '라운드 수정 중 오류가 발생했습니다.',
     DELETING_ROUND_ERROR: '라운드 삭제 중 오류가 발생했습니다.',
+    FAILED_TO_LOAD_NOTIFICATIONS: '공지사항을 불러오는데 실패했습니다.',
+    FAILED_TO_CREATE_NOTIFICATION: '공지사항 생성에 실패했습니다.',
+    FAILED_TO_UPDATE_NOTIFICATION: '공지사항 수정에 실패했습니다.',
+    FAILED_TO_DELETE_NOTIFICATION: '공지사항 삭제에 실패했습니다.',
+    CREATING_NOTIFICATION_ERROR: '공지사항 생성 중 오류가 발생했습니다.',
+    UPDATING_NOTIFICATION_ERROR: '공지사항 수정 중 오류가 발생했습니다.',
+    DELETING_NOTIFICATION_ERROR: '공지사항 삭제 중 오류가 발생했습니다.',
   },
 
   LOADING: {

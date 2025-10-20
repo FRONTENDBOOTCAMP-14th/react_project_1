@@ -16,11 +16,13 @@ import { toast } from 'sonner'
  * @example
  * <ImageUploader />
  */
-
-export default function ImageUploader() {
-  const handleThumbnailClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation()
+export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
+  // 추후 삭제후 기능 추가해주세요
+  const _onImageChange = onImageChange || (() => {})
+  // 기능은 추가중
+  const handleThumbnailClick = () => {
     // 이미지 삭제
+    toast('썸네일 클릭 - 삭제')
     toast('썸네일 클릭 - 삭제')
   }
 

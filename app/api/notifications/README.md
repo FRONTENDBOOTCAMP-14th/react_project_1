@@ -12,11 +12,11 @@
 
 #### Query Parameters
 
-| 파라미터 | 타입    | 필수 | 설명                      |
-| -------- | ------- | ---- | ------------------------- |
-| clubId   | string  | ✅   | 커뮤니티 ID               |
-| isPinned | boolean | ❌   | 고정 공지사항만 조회      |
-| page     | number  | ❌   | 페이지 번호 (기본값: 1)   |
+| 파라미터 | 타입    | 필수 | 설명                       |
+| -------- | ------- | ---- | -------------------------- |
+| clubId   | string  | ✅   | 커뮤니티 ID                |
+| isPinned | boolean | ❌   | 고정 공지사항만 조회       |
+| page     | number  | ❌   | 페이지 번호 (기본값: 1)    |
 | limit    | number  | ❌   | 페이지당 개수 (기본값: 20) |
 
 #### Response
@@ -54,14 +54,10 @@ const response = await fetch('/api/notifications?clubId=club-uuid-here')
 const data = await response.json()
 
 // 고정 공지사항만 조회
-const pinnedResponse = await fetch(
-  '/api/notifications?clubId=club-uuid-here&isPinned=true'
-)
+const pinnedResponse = await fetch('/api/notifications?clubId=club-uuid-here&isPinned=true')
 
 // 페이지네이션
-const pageResponse = await fetch(
-  '/api/notifications?clubId=club-uuid-here&page=2&limit=10'
-)
+const pageResponse = await fetch('/api/notifications?clubId=club-uuid-here&page=2&limit=10')
 ```
 
 ---
@@ -84,13 +80,13 @@ const pageResponse = await fetch(
 }
 ```
 
-| 필드     | 타입    | 필수 | 설명                             |
-| -------- | ------- | ---- | -------------------------------- |
-| clubId   | string  | ✅   | 커뮤니티 ID                      |
-| authorId | string  | ✅   | 작성자 ID                        |
-| title    | string  | ✅   | 공지사항 제목                    |
-| content  | string  | ❌   | 공지사항 내용                    |
-| isPinned | boolean | ❌   | 상단 고정 여부 (기본값: false)   |
+| 필드     | 타입    | 필수 | 설명                           |
+| -------- | ------- | ---- | ------------------------------ |
+| clubId   | string  | ✅   | 커뮤니티 ID                    |
+| authorId | string  | ✅   | 작성자 ID                      |
+| title    | string  | ✅   | 공지사항 제목                  |
+| content  | string  | ❌   | 공지사항 내용                  |
+| isPinned | boolean | ❌   | 상단 고정 여부 (기본값: false) |
 
 #### Response
 

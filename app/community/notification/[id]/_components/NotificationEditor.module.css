@@ -88,7 +88,7 @@
 }
 
 .cancel-button:hover:not(:disabled) {
-  background: var(--etc-color-4);
+  opacity: 0.7;
 }
 
 .cancel-button:disabled {

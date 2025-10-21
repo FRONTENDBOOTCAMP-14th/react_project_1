@@ -58,7 +58,6 @@
 }
 
 .action-button:hover {
-  background: var(--etc-color-3);
   color: var(--secondary-color);
 }
 

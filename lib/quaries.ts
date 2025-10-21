@@ -139,3 +139,43 @@ export const notificationDetailSelect = {
 export const activeNotificationWhere = {
   deletedAt: null,
 } satisfies Prisma.NotificationWhereInput
+
+/**
+ * CommunityMember 기본 Select (목록 조회용)
+ */
+export const memberSelect = {
+  id: true,
+  clubId: true,
+  userId: true,
+  role: true,
+  joinedAt: true,
+} satisfies Prisma.CommunityMemberSelect
+
+/**
+ * CommunityMember 상세 Select (관계 포함)
+ */
+export const memberDetailSelect = {
+  ...memberSelect,
+  community: {
+    select: {
+      clubId: true,
+      name: true,
+      description: true,
+    },
+  },
+  user: {
+    select: {
+      userId: true,
+      username: true,
+      email: true,
+      nickname: true,
+    },
+  },
+} satisfies Prisma.CommunityMemberSelect
+
+/**
+ * 활성 멤버 조건 (소프트 삭제 제외)
+ */
+export const activeMemberWhere = {
+  deletedAt: null,
+} satisfies Prisma.CommunityMemberWhereInput

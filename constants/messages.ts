@@ -39,6 +39,14 @@ export const MESSAGES = {
     CREATING_NOTIFICATION_ERROR: '공지사항 생성 중 오류가 발생했습니다.',
     UPDATING_NOTIFICATION_ERROR: '공지사항 수정 중 오류가 발생했습니다.',
     DELETING_NOTIFICATION_ERROR: '공지사항 삭제 중 오류가 발생했습니다.',
+    MEMBER_NOT_FOUND: '멤버를 찾을 수 없습니다.',
+    MEMBER_ALREADY_EXISTS: '이미 커뮤니티 멤버입니다.',
+    FAILED_TO_LOAD_MEMBERS: '멤버 목록을 불러오는데 실패했습니다.',
+    FAILED_TO_CREATE_MEMBER: '멤버 추가에 실패했습니다.',
+    FAILED_TO_UPDATE_MEMBER: '멤버 정보 수정에 실패했습니다.',
+    FAILED_TO_DELETE_MEMBER: '멤버 삭제에 실패했습니다.',
+    USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
+    INVALID_ROLE: '유효하지 않은 역할입니다.',
   },
 
   LOADING: {

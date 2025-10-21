@@ -62,6 +62,25 @@ export const API_ENDPOINTS = {
       return `/api/notifications?${searchParams.toString()}`
     },
   },
+  MEMBERS: {
+    BASE: '/api/members',
+    BY_ID: (memberId: string) => `/api/members/${memberId}`,
+    WITH_PARAMS: (params: {
+      clubId?: string
+      userId?: string
+      role?: string
+      page?: number
+      limit?: number
+    }) => {
+      const searchParams = new URLSearchParams()
+      if (params.clubId) searchParams.append('clubId', params.clubId)
+      if (params.userId) searchParams.append('userId', params.userId)
+      if (params.role) searchParams.append('role', params.role)
+      if (params.page) searchParams.append('page', String(params.page))
+      if (params.limit) searchParams.append('limit', String(params.limit))
+      return `/api/members?${searchParams.toString()}`
+    },
+  },
 } as const
 
 /**

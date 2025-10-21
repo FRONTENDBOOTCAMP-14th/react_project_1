@@ -1,0 +1,30 @@
+/* 인디케이터 */
+.indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--etc-color-4);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator:hover {
+  background-color: var(--etc-color-2);
+  transform: scale(1.2);
+}
+
+.indicator-active {
+  width: 24px;
+  border-radius: var(--full-radius);
+  background-color: var(--accent-color);
+}

@@ -1,14 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
 import { Carousel, CarouselItem } from '@/components/ui'
 
 export default function HomePage() {
-  const [selectedDate, setSelectedDate] = useState<number | null>(null)
-
   const today = new Date()
+  const [selectedDate, setSelectedDate] = useState<number | null>(today.getDate())
+
+  // 반응형 itemsPerView 상태
+  const [itemsPerView, setItemsPerView] = useState(3)
+
+  // 화면 크기에 따른 itemsPerView 계산
+  useEffect(() => {
+    const updateItemsPerView = () => {
+      const width = window.innerWidth
+      if (width < 600) {
+        setItemsPerView(1)
+      } else if (width < 800) {
+        setItemsPerView(2)
+      } else {
+        setItemsPerView(3)
+      }
+    }
+
+    // 초기 설정
+    updateItemsPerView()
+
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', updateItemsPerView)
+
+    // 정리 함수
+    return () => window.removeEventListener('resize', updateItemsPerView)
+  }, [])
+
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(today)
     date.setDate(today.getDate() + i)
@@ -46,59 +72,10 @@ export default function HomePage() {
       {selectedDate && (
         <div className={styles['carousel-container']}>
           <p>{selectedDate}일 스터디 목록</p>
-          <Carousel showNavigation showIndicators virtualScroll itemsPerView={3}>
+          <Carousel showNavigation showIndicators itemsPerView={itemsPerView}>
             <CarouselItem>스터디 A</CarouselItem>
             <CarouselItem>스터디 B</CarouselItem>
             <CarouselItem>스터디 C</CarouselItem>
-            <CarouselItem>스터디 D</CarouselItem>
-            <CarouselItem>스터디 E</CarouselItem>
-            <CarouselItem>스터디 F</CarouselItem>
-            <CarouselItem>스터디 G</CarouselItem>
-            <CarouselItem>스터디 H</CarouselItem>
-            <CarouselItem>스터디 I</CarouselItem>
-            <CarouselItem>스터디 J</CarouselItem>
-            <CarouselItem>스터디 K</CarouselItem>
-            <CarouselItem>스터디 L</CarouselItem>
-            <CarouselItem>스터디 M</CarouselItem>
-            <CarouselItem>스터디 N</CarouselItem>
-            <CarouselItem>스터디 O</CarouselItem>
-            <CarouselItem>스터디 P</CarouselItem>
-            <CarouselItem>스터디 Q</CarouselItem>
-            <CarouselItem>스터디 R</CarouselItem>
-            <CarouselItem>스터디 S</CarouselItem>
-            <CarouselItem>스터디 T</CarouselItem>
-            <CarouselItem>스터디 U</CarouselItem>
-            <CarouselItem>스터디 V</CarouselItem>
-            <CarouselItem>스터디 W</CarouselItem>
-            <CarouselItem>스터디 X</CarouselItem>
-            <CarouselItem>스터디 Y</CarouselItem>
-            <CarouselItem>스터디 Z</CarouselItem>
-            <CarouselItem>스터디 AA</CarouselItem>
-            <CarouselItem>스터디 AB</CarouselItem>
-            <CarouselItem>스터디 AC</CarouselItem>
-            <CarouselItem>스터디 AD</CarouselItem>
-            <CarouselItem>스터디 AE</CarouselItem>
-            <CarouselItem>스터디 AF</CarouselItem>
-            <CarouselItem>스터디 AG</CarouselItem>
-            <CarouselItem>스터디 AH</CarouselItem>
-            <CarouselItem>스터디 AI</CarouselItem>
-            <CarouselItem>스터디 AJ</CarouselItem>
-            <CarouselItem>스터디 AK</CarouselItem>
-            <CarouselItem>스터디 AL</CarouselItem>
-            <CarouselItem>스터디 AM</CarouselItem>
-            <CarouselItem>스터디 AN</CarouselItem>
-            <CarouselItem>스터디 AO</CarouselItem>
-            <CarouselItem>스터디 AP</CarouselItem>
-            <CarouselItem>스터디 AQ</CarouselItem>
-            <CarouselItem>스터디 AR</CarouselItem>
-            <CarouselItem>스터디 AS</CarouselItem>
-            <CarouselItem>스터디 AT</CarouselItem>
-            <CarouselItem>스터디 AU</CarouselItem>
-            <CarouselItem>스터디 AV</CarouselItem>
-            <CarouselItem>스터디 AW</CarouselItem>
-            <CarouselItem>스터디 AX</CarouselItem>
-            <CarouselItem>스터디 AY</CarouselItem>
-            <CarouselItem>스터디 AZ</CarouselItem>
           </Carousel>
         </div>
       )}

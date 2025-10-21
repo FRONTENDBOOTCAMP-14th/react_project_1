@@ -110,13 +110,11 @@ const Carousel = ({
     })
   }
 
-  // 아이템 개수 계산
+  // 아이템 개수 계산 (children에서 직접 계산)
   useEffect(() => {
-    if (containerRef.current) {
-      const count = containerRef.current.children.length
-      setItemCount(count)
-    }
-  }, [children, containerRef])
+    const count = Array.isArray(children) ? children.length : 1
+    setItemCount(count)
+  }, [children])
 
   return (
     <div
@@ -150,13 +148,20 @@ const Carousel = ({
         aria-live={autoPlay ? 'polite' : 'off'}
         aria-atomic="false"
       >
-        {virtualScroll
-          ? // 가상 스크롤링: 보이는 아이템만 렌더링
-            Array.isArray(children)
-            ? (children as React.ReactElement[]).map((child, index) =>
-                isItemVisible(index) ? child : null
+        {virtualScroll && Array.isArray(children)
+          ? // 가상 스크롤링: 보이는 아이템만 display, 나머지는 hidden
+            (children as React.ReactElement[]).map((child, index) => {
+              const isVisible = isItemVisible(index)
+              return (
+                <div
+                  key={index}
+                  style={{ display: isVisible ? 'contents' : 'none' }}
+                  data-carousel-item
+                >
+                  {child}
+                </div>
               )
-            : children
+            })
           : children}
       </div>
 
@@ -165,6 +170,7 @@ const Carousel = ({
         <CarouselIndicators
           itemCount={itemCount}
           currentIndex={currentIndex}
+          itemsPerView={itemsPerView}
           onIndicatorClick={handleIndicatorClick}
         />
       )}

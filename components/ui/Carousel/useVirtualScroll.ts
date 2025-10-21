@@ -23,15 +23,17 @@ export function useVirtualScroll({
   enabled,
   itemsPerView = 3,
 }: UseVirtualScrollProps): UseVirtualScrollReturn {
-  // 초기 범위를 화면에 보이는 만큼만 설정
+  // 초기 범위를 화면에 보이는 만큼만 설정 (최소 itemsPerView + 2개는 보이도록)
   const [visibleRange, setVisibleRange] = useState({
     start: 0,
-    end: enabled ? Math.min(itemCount, itemsPerView + 2) : itemCount,
+    end: enabled ? Math.max(itemsPerView + 2, Math.min(itemCount, itemsPerView + 2)) : itemCount,
   })
   const observerRef = useRef<IntersectionObserver | null>(null)
 
   // itemsPerView 변경 시 visibleRange 업데이트
   useEffect(() => {
+    if (itemCount === 0) return // itemCount가 0이면 업데이트 안 함
+
     setVisibleRange({
       start: 0,
       end: enabled ? Math.min(itemCount, itemsPerView + 2) : itemCount,

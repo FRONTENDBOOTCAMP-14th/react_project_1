@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
-import { Carousel, CarouselItem } from '@/components/ui'
+import { Carousel, CarouselItem, IconLink } from '@/components/ui'
 
 export default function HomePage() {
   const today = new Date()
@@ -52,7 +52,15 @@ export default function HomePage() {
   return (
     <main className={styles.main}>
       <div className={styles['logo-container']}>
-        <Image src="/svg/logo.svg" alt="Study Club Tracker 로고" width={40} height={40} priority />
+        <IconLink style={{ display: 'flex', justifySelf: 'center' }} href="/">
+          <Image
+            src="/svg/logo.svg"
+            alt="Study Club Tracker 로고"
+            width={40}
+            height={40}
+            priority
+          />
+        </IconLink>
       </div>
 
       <div className={styles['calendar-container']}>
@@ -73,9 +81,18 @@ export default function HomePage() {
         <div className={styles['carousel-container']}>
           <p>{selectedDate}일 스터디 목록</p>
           <Carousel showNavigation showIndicators itemsPerView={itemsPerView}>
-            <CarouselItem>스터디 A</CarouselItem>
-            <CarouselItem>스터디 B</CarouselItem>
-            <CarouselItem>스터디 C</CarouselItem>
+            <CarouselItem>
+              <div className={styles['carousel-item']}>스터디 A</div>
+            </CarouselItem>
+            <CarouselItem>
+              <div className={styles['carousel-item']}>스터디 B</div>
+            </CarouselItem>
+            <CarouselItem>
+              <div className={styles['carousel-item']}>스터디 C</div>
+            </CarouselItem>
+            <CarouselItem>
+              <div className={styles['carousel-item']}>스터디 D</div>
+            </CarouselItem>
           </Carousel>
         </div>
       )}

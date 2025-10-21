@@ -1,10 +1,7 @@
 .main {
   display: flex;
   flex-direction: column;
-}
-
-.logo-container {
-  margin-bottom: 2rem;
+  gap: var(--spacing-lg);
 }
 
 .calendar-container {
@@ -31,8 +28,7 @@
 .count-box {
   width: 40px;
   height: 40px;
-  margin-top: 8px;
-  border-radius: 8px;
+  border-radius: var(--inner-card-radius);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,25 +37,16 @@
 }
 
 .carousel-container {
-  margin-top: 20px;
   text-align: center;
 }
 
-.carousel {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding: 8px;
-}
-
 .carousel-item {
-  width: 185px;
-  height: 301px;
+  width: 180px;
+  height: 300px;
   border: 1px solid var(--etc-color-2);
-  scroll-snap-align: center;
   flex-shrink: 0;
   display: flex;
+  justify-self: center;
   align-items: center;
   justify-content: center;
 }

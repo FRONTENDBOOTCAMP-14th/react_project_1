@@ -7,7 +7,6 @@ import './animations.css'
 import { cn } from '@/lib/utils'
 import { useCarouselScroll } from './useCarouselScroll'
 import { useCarouselAutoPlay } from './useCarouselAutoPlay'
-import { useVirtualScroll } from './useVirtualScroll'
 import CarouselNavigation from './CarouselNavigation'
 import CarouselIndicators from './CarouselIndicators'
 
@@ -36,8 +35,6 @@ export interface CarouselProps {
   showIndicators?: boolean
   /** 터치/제스처 지원 여부 (기본값: true) */
   enableTouch?: boolean
-  /** 가상 스크롤링 활성화 (아이템 100개 이상 권장, 기본값: false) */
-  virtualScroll?: boolean
   /** 애니메이션 효과 (기본값: 'slide') */
   effect?: CarouselEffect
   /** 추가 CSS 클래스 */
@@ -68,7 +65,6 @@ const Carousel = ({
   showNavigation = true,
   showIndicators = true,
   enableTouch = true,
-  virtualScroll = false,
   effect = 'slide',
   className,
 }: CarouselProps) => {
@@ -93,14 +89,6 @@ const Carousel = ({
     scrollTo,
     scrollToIndex,
     pauseOnHover,
-  })
-
-  // 가상 스크롤링
-  const { isItemVisible } = useVirtualScroll({
-    itemCount,
-    containerRef,
-    enabled: virtualScroll,
-    itemsPerView: typeof itemsPerView === 'number' ? itemsPerView : 3,
   })
 
   // useTransition을 활용한 인디케이터 클릭 최적화
@@ -148,21 +136,7 @@ const Carousel = ({
         aria-live={autoPlay ? 'polite' : 'off'}
         aria-atomic="false"
       >
-        {virtualScroll && Array.isArray(children)
-          ? // 가상 스크롤링: 보이는 아이템만 display, 나머지는 hidden
-            (children as React.ReactElement[]).map((child, index) => {
-              const isVisible = isItemVisible(index)
-              return (
-                <div
-                  key={index}
-                  style={{ display: isVisible ? 'contents' : 'none' }}
-                  data-carousel-item
-                >
-                  {child}
-                </div>
-              )
-            })
-          : children}
+        {children}
       </div>
 
       {/* 인디케이터 */}

@@ -9,12 +9,12 @@ interface UseCommunityResult {
   refetch: () => Promise<void>
   createCommunity: (
     input: CreateCommunityInput
-  ) => Promise<{ ok: boolean; data?: Community; error?: string }>
+  ) => Promise<{ success: boolean; data?: Community; error?: string }>
   updateCommunity: (
     clubId: string,
     input: UpdateCommunityInput
-  ) => Promise<{ ok: boolean; data?: Community; error?: string }>
-  deleteCommunity: (clubId: string) => Promise<{ ok: boolean; error?: string }>
+  ) => Promise<{ success: boolean; data?: Community; error?: string }>
+  deleteCommunity: (clubId: string) => Promise<{ success: boolean; error?: string }>
 }
 
 /**
@@ -35,7 +35,7 @@ export const useCommunity = (id: string): UseCommunityResult => {
       const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(id))
       const data = await response.json()
 
-      if (data.ok && data.data) {
+      if (data.success && data.data) {
         setCommunity(data.data)
       } else {
         setError(data.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND)
@@ -63,13 +63,13 @@ export const useCommunity = (id: string): UseCommunityResult => {
 
       const result = await response.json()
 
-      if (result.ok) {
-        return { ok: true, data: result.data }
+      if (result.success) {
+        return { success: true, data: result.data }
       }
-      return { ok: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_COMMUNITY }
+      return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_COMMUNITY }
     } catch (err) {
       console.error('Failed to create community:', err)
-      return { ok: false, error: MESSAGES.ERROR.CREATING_COMMUNITY_ERROR }
+      return { success: false, error: MESSAGES.ERROR.CREATING_COMMUNITY_ERROR }
     }
   }, [])
 
@@ -90,17 +90,17 @@ export const useCommunity = (id: string): UseCommunityResult => {
 
         const result = await response.json()
 
-        if (result.ok) {
+        if (result.success) {
           // 현재 조회 중인 커뮤니티면 상태 업데이트
           if (clubId === id) {
             await fetchCommunity()
           }
-          return { ok: true, data: result.data }
+          return { success: true, data: result.data }
         }
-        return { ok: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_COMMUNITY }
+        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_COMMUNITY }
       } catch (err) {
         console.error('Failed to update community:', err)
-        return { ok: false, error: MESSAGES.ERROR.UPDATING_COMMUNITY_ERROR }
+        return { success: false, error: MESSAGES.ERROR.UPDATING_COMMUNITY_ERROR }
       }
     },
     [id, fetchCommunity]
@@ -119,13 +119,13 @@ export const useCommunity = (id: string): UseCommunityResult => {
 
       const result = await response.json()
 
-      if (result.ok) {
-        return { ok: true }
+      if (result.success) {
+        return { success: true }
       }
-      return { ok: false, error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_COMMUNITY }
+      return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_COMMUNITY }
     } catch (err) {
       console.error('Failed to delete community:', err)
-      return { ok: false, error: MESSAGES.ERROR.DELETING_COMMUNITY_ERROR }
+      return { success: false, error: MESSAGES.ERROR.DELETING_COMMUNITY_ERROR }
     }
   }, [])
 

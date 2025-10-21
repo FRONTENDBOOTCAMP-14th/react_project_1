@@ -13,8 +13,10 @@
 import prisma from '@/lib/prisma'
 import { roundSelect, activeRoundWhere } from '@/lib/quaries'
 import type { CreateRoundRequest } from '@/lib/types/round'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
+import { MESSAGES } from '@/constants/messages'
+import type { PaginationInfo } from '@/lib/types'
 
 /**
  * GET /api/rounds
@@ -54,27 +56,21 @@ export async function GET(request: NextRequest) {
       prisma.round.count({ where: whereClause }),
     ])
 
-    return NextResponse.json({
-      success: true,
+    const pagination: PaginationInfo = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    }
+
+    return createSuccessResponse({
       data: rounds,
       count: rounds.length,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination,
     })
   } catch (error) {
     console.error('Error fetching rounds:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch rounds',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_LOAD_ROUNDS, 500)
   }
 }
 
@@ -103,25 +99,12 @@ export async function POST(request: NextRequest) {
 
     // 필수 값 검증
     if (!clubId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields',
-          required: ['clubId'],
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Missing required fields: clubId', 400)
     }
 
     // roundNumber 유효성 검증
     if (roundNumber !== undefined && (roundNumber < 1 || !Number.isInteger(roundNumber))) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'roundNumber must be a positive integer',
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('roundNumber must be a positive integer', 400)
     }
 
     // clubId 존재 확인
@@ -131,13 +114,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!club) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Community not found',
-        },
-        { status: 404 }
-      )
+      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 
     // 날짜 유효성 검증
@@ -145,13 +122,7 @@ export async function POST(request: NextRequest) {
       const start = new Date(startDate)
       const end = new Date(endDate)
       if (start > end) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'startDate must be before or equal to endDate',
-          },
-          { status: 400 }
-        )
+        return createErrorResponse('startDate must be before or equal to endDate', 400)
       }
     }
 
@@ -166,22 +137,9 @@ export async function POST(request: NextRequest) {
       select: roundSelect,
     })
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: newRound,
-      },
-      { status: 201 }
-    )
+    return createSuccessResponse(newRound, 201)
   } catch (error) {
     console.error('Error creating round:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create round',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_CREATE_ROUND, 500)
   }
 }

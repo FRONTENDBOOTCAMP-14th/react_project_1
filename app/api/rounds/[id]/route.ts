@@ -10,8 +10,9 @@
 import prisma from '@/lib/prisma'
 import { roundSelect, roundDetailSelect } from '@/lib/quaries'
 import type { UpdateRoundRequest } from '@/lib/types/round'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
+import { hasErrorCode } from '@/lib/errors'
 
 /**
  * GET /api/rounds/[id]
@@ -30,20 +31,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })
 
     if (!round) {
-      return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
+      return createErrorResponse('Round not found', 404)
     }
 
-    return NextResponse.json({ success: true, data: round })
+    return createSuccessResponse(round)
   } catch (error) {
     console.error('Error fetching round:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch round',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to fetch round: ${message}`, 500)
   }
 }
 
@@ -69,13 +64,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.roundNumber !== undefined) {
       // roundNumber 유효성 검증
       if (body.roundNumber < 1 || !Number.isInteger(body.roundNumber)) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'roundNumber must be a positive integer',
-          },
-          { status: 400 }
-        )
+        return createErrorResponse('roundNumber must be a positive integer', 400)
       }
       updateData.roundNumber = body.roundNumber
     }
@@ -92,13 +81,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     // 날짜 유효성 검증
     if (updateData.startDate && updateData.endDate) {
       if (updateData.startDate > updateData.endDate) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'startDate must be before or equal to endDate',
-          },
-          { status: 400 }
-        )
+        return createErrorResponse('startDate must be before or equal to endDate', 400)
       }
     }
 
@@ -117,24 +100,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         select: roundSelect,
       })
 
-      return NextResponse.json({ success: true, data: updatedRound })
+      return createSuccessResponse(updatedRound)
     } catch (error: unknown) {
       // Prisma P2025: Record not found
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
-        return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
+      if (hasErrorCode(error, 'P2025')) {
+        return createErrorResponse('Round not found', 404)
       }
       throw error
     }
   } catch (error) {
     console.error('Error updating round:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to update round',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to update round: ${message}`, 500)
   }
 }
 
@@ -158,26 +135,17 @@ export async function DELETE(
         data: { deletedAt: new Date() },
       })
 
-      return NextResponse.json({
-        success: true,
-        message: 'Round deleted successfully',
-      })
+      return createSuccessResponse({ message: 'Round deleted successfully' })
     } catch (error: unknown) {
       // Prisma P2025: Record not found
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
-        return NextResponse.json({ success: false, error: 'Round not found' }, { status: 404 })
+      if (hasErrorCode(error, 'P2025')) {
+        return createErrorResponse('Round not found', 404)
       }
       throw error
     }
   } catch (error) {
     console.error('Error deleting round:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to delete round',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to delete round: ${message}`, 500)
   }
 }

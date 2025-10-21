@@ -30,7 +30,7 @@ export default function CommunityForm({ onCreated }: Props) {
         body: JSON.stringify({ name, description, is_public: isPublic }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || '생성 실패')
+      if (!data.success) throw new Error(data?.error || '생성 실패')
 
       // reset and notify
       setName('')

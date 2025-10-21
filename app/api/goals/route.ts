@@ -12,8 +12,10 @@
 
 import prisma from '@/lib/prisma'
 import { goalSelect, activeGoalWhere } from '@/lib/quaries'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
+import { MESSAGES } from '@/constants/messages'
+import type { PaginationInfo } from '@/lib/types'
 
 /**
  * GET /api/goals
@@ -67,28 +69,22 @@ export async function GET(request: NextRequest) {
       prisma.studyGoal.count({ where: whereClause }),
     ])
 
-    return NextResponse.json({
-      success: true,
+    const pagination: PaginationInfo = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    }
+
+    return createSuccessResponse({
       data: goals,
       count: goals.length,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination,
     })
   } catch (error) {
     // 서버 내부 오류 처리
     console.error('Error fetching goals:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch goals',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_LOAD_GOALS, 500)
   }
 }
 
@@ -134,14 +130,7 @@ export async function POST(request: NextRequest) {
 
     // 필수 값 검증
     if (!ownerId || !title || !startDate || !endDate) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields',
-          required: ['ownerId', 'title', 'startDate', 'endDate'],
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Missing required fields: ownerId, title, startDate, endDate', 400)
     }
 
     // 날짜 변환(문자열 → Date)
@@ -179,33 +168,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: newGoal,
-      },
-      { status: 201 }
-    )
+    return createSuccessResponse(newGoal, 201)
   } catch (error) {
     // 서버 내부 오류 처리
     console.error('POST /api/goals - Error creating goal:', error)
-
-    // Prisma 에러 상세 정보
-    if (error && typeof error === 'object') {
-      console.error('Error details:', {
-        code: (error as any).code,
-        meta: (error as any).meta,
-        message: error instanceof Error ? error.message : 'Unknown error',
-      })
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create goal',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_CREATE_GOAL, 500)
   }
 }

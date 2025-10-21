@@ -10,8 +10,9 @@
 import prisma from '@/lib/prisma'
 import { notificationSelect, notificationDetailSelect } from '@/lib/quaries'
 import type { UpdateNotificationRequest } from '@/lib/types/notification'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
+import { hasErrorCode } from '@/lib/errors'
 
 /**
  * GET /api/notifications/[id]
@@ -30,20 +31,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })
 
     if (!notification) {
-      return NextResponse.json({ success: false, error: 'Notification not found' }, { status: 404 })
+      return createErrorResponse('Notification not found', 404)
     }
 
-    return NextResponse.json({ success: true, data: notification })
+    return createSuccessResponse(notification)
   } catch (error) {
     console.error('Error fetching notification:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch notification',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to fetch notification: ${message}`, 500)
   }
 }
 
@@ -68,10 +63,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.title !== undefined) {
       const trimmedTitle = body.title.trim()
       if (!trimmedTitle) {
-        return NextResponse.json(
-          { success: false, error: 'Title cannot be empty' },
-          { status: 400 }
-        )
+        return createErrorResponse('Title cannot be empty', 400)
       }
       updateData.title = trimmedTitle
     }
@@ -95,27 +87,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         select: notificationSelect,
       })
 
-      return NextResponse.json({ success: true, data: updatedNotification })
+      return createSuccessResponse(updatedNotification)
     } catch (error: unknown) {
       // Prisma P2025: Record not found
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
-        return NextResponse.json(
-          { success: false, error: 'Notification not found' },
-          { status: 404 }
-        )
+      if (hasErrorCode(error, 'P2025')) {
+        return createErrorResponse('Notification not found', 404)
       }
       throw error
     }
   } catch (error) {
     console.error('Error updating notification:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to update notification',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to update notification: ${message}`, 500)
   }
 }
 
@@ -139,29 +122,17 @@ export async function DELETE(
         data: { deletedAt: new Date() },
       })
 
-      return NextResponse.json({
-        success: true,
-        message: 'Notification deleted successfully',
-      })
+      return createSuccessResponse({ message: 'Notification deleted successfully' })
     } catch (error: unknown) {
       // Prisma P2025: Record not found
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
-        return NextResponse.json(
-          { success: false, error: 'Notification not found' },
-          { status: 404 }
-        )
+      if (hasErrorCode(error, 'P2025')) {
+        return createErrorResponse('Notification not found', 404)
       }
       throw error
     }
   } catch (error) {
     console.error('Error deleting notification:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to delete notification',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to delete notification: ${message}`, 500)
   }
 }

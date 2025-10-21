@@ -35,7 +35,6 @@ export const API_ENDPOINTS = {
   COMMUNITIES: {
     BASE: '/api/communities',
     BY_ID: (clubId: string) => `/api/communities/${clubId}`,
-    DELETE_BY_ID: (clubId: string) => `/api/communities?id=${clubId}`,
   },
   ROUNDS: {
     BASE: '/api/rounds',

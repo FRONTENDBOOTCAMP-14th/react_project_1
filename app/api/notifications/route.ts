@@ -13,8 +13,10 @@
 import prisma from '@/lib/prisma'
 import { notificationSelect, activeNotificationWhere } from '@/lib/quaries'
 import type { CreateNotificationRequest } from '@/lib/types/notification'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
+import { MESSAGES } from '@/constants/messages'
+import type { PaginationInfo } from '@/lib/types'
 
 /**
  * GET /api/notifications
@@ -36,13 +38,7 @@ export async function GET(request: NextRequest) {
 
     // clubId는 필수
     if (!clubId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'clubId is required',
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('clubId is required', 400)
     }
 
     // 페이지네이션 파라미터
@@ -72,27 +68,22 @@ export async function GET(request: NextRequest) {
       prisma.notification.count({ where: whereClause }),
     ])
 
-    return NextResponse.json({
-      success: true,
+    const pagination: PaginationInfo = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    }
+
+    return createSuccessResponse({
       data: notifications,
       count: notifications.length,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination,
     })
   } catch (error) {
     console.error('Error fetching notifications:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch notifications',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to fetch notifications: ${message}`, 500)
   }
 }
 
@@ -122,26 +113,13 @@ export async function POST(request: NextRequest) {
 
     // 필수 값 검증
     if (!clubId || !authorId || !title) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields',
-          required: ['clubId', 'authorId', 'title'],
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Missing required fields: clubId, authorId, title', 400)
     }
 
     // 제목 길이 검증
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Title cannot be empty',
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Title cannot be empty', 400)
     }
 
     // clubId 존재 확인
@@ -151,13 +129,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!club) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Community not found',
-        },
-        { status: 404 }
-      )
+      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 
     // authorId 존재 확인
@@ -167,13 +139,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!author) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Author not found',
-        },
-        { status: 404 }
-      )
+      return createErrorResponse('Author not found', 404)
     }
 
     const newNotification = await prisma.notification.create({
@@ -187,22 +153,9 @@ export async function POST(request: NextRequest) {
       select: notificationSelect,
     })
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: newNotification,
-      },
-      { status: 201 }
-    )
+    return createSuccessResponse(newNotification, 201)
   } catch (error) {
     console.error('Error creating notification:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create notification',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_CREATE_NOTIFICATION, 500)
   }
 }

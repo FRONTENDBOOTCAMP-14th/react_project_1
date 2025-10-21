@@ -7,8 +7,11 @@ export const MESSAGES = {
   ERROR: {
     INVALID_COMMUNITY_ID: '유효한 커뮤니티 ID가 없습니다.',
     COMMUNITY_NOT_FOUND: '커뮤니티를 찾을 수 없습니다.',
+    COMMUNITY_NAME_REQUIRED: '커뮤니티 이름은 필수입니다.',
+    COMMUNITY_NAME_EXISTS: '이미 존재하는 커뮤니티 이름입니다.',
     FAILED_TO_LOAD_GOALS: '목표를 불러오는데 실패했습니다.',
     FAILED_TO_LOAD_COMMUNITY: '커뮤니티 정보를 불러오는데 실패했습니다.',
+    FAILED_TO_FETCH_COMMUNITIES: '커뮤니티 목록을 불러오는데 실패했습니다.',
     NETWORK_ERROR: '네트워크 오류가 발생했습니다.',
     FAILED_TO_CREATE_GOAL: '목표 생성에 실패했습니다.',
     FAILED_TO_UPDATE_GOAL: '목표 수정에 실패했습니다.',

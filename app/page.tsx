@@ -46,7 +46,7 @@ export default function HomePage() {
       {selectedDate && (
         <div className={styles['carousel-container']}>
           <p>{selectedDate}일 스터디 목록</p>
-          <Carousel showNavigation showIndicators>
+          <Carousel showNavigation showIndicators virtualScroll itemsPerView={3}>
             <CarouselItem>스터디 A</CarouselItem>
             <CarouselItem>스터디 B</CarouselItem>
             <CarouselItem>스터디 C</CarouselItem>

@@ -54,7 +54,7 @@
 
 - **위치**: 각 컴포넌트/페이지 옆에 `*.module.css` (colocation)
 - **클래스 네이밍**: 로컬 스코프이므로 **간결한 이름** 사용
-  - 블록/요소/상태 느낌을 살린 단순 패턴 권장: `container`, `title`, `subtitle`, `actions`, `isActive` 등
+  - 블록/요소/상태 느낌을 살린 단순 패턴 권장: `container`, `title`, `subtitle`, `actions`, `is-active` 등
   - 변형은 별도 클래스 조합: `<div className={`${styles.card} ${styles.danger}`}/>`
 - **토큰/전역 유틸**: 전역 색/간격 등은 `styles/tokens.css`에 CSS 변수로 정의하고, 필요한 항목만 `app/globals.css`에서 import
   - 네이밍 규칙: `--color-<name>`, `--space-<step>`, `--font-<usage>` 등 기능 중심으로 구성
@@ -83,7 +83,7 @@
 .secondary {
   /* 변형 */
 }
-.isLoading {
+.is-loading {
   /* 상태 */
 }
 ```

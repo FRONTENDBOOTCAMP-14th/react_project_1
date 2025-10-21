@@ -1,5 +1,15 @@
 export { default as AccentButton } from './AccentButton'
 export { default as AccentLink } from './AccentLink'
+export {
+  Carousel,
+  CarouselItem,
+  CarouselNavigation,
+  CarouselIndicators,
+  useCarouselScroll,
+  useCarouselAutoPlay,
+  useVirtualScroll,
+} from './Carousel'
+export type { CarouselProps, CarouselItemProps, CarouselEffect } from './Carousel'
 export { default as Checkbox } from './Checkbox'
 export type { CheckboxProps } from './Checkbox'
 export { default as Dropdown } from './Dropdown'

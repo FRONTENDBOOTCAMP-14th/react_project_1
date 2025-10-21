@@ -11,7 +11,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { memberSelect, activeMemberWhere } from '@/lib/quaries'
+import { memberDetailSelect, activeMemberWhere } from '@/lib/quaries'
 import type { CreateMemberRequest } from '@/lib/types/member'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         orderBy: { joinedAt: 'desc' },
-        select: memberSelect,
+        select: memberDetailSelect,
       }),
       prisma.communityMember.count({ where: whereClause }),
     ])
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         userId,
         role,
       },
-      select: memberSelect,
+      select: memberDetailSelect,
     })
 
     return createSuccessResponse(newMember, 201)

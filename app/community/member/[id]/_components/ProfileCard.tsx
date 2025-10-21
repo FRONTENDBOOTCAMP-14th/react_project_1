@@ -33,8 +33,6 @@ export default function ProfileCard({ member }: ProfileCardProps) {
   // 역할별 CSS 클래스
   const getRoleBadgeClass = () => {
     switch (member.role) {
-      case 'owner':
-        return `${styles['role-badge']} ${styles['role-owner']}`
       case 'admin':
         return `${styles['role-badge']} ${styles['role-admin']}`
       default:

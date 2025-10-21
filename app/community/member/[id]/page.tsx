@@ -27,13 +27,15 @@ interface Member {
 
 interface MembersResponse {
   success: boolean
-  data: Member[]
-  count: number
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
+  data: {
+    data: Member[]
+    count: number
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+    }
   }
 }
 
@@ -79,7 +81,8 @@ export default async function MemberPage({ params, searchParams }: MemberPagePro
     )
   }
 
-  const members = result.data
+  // API 응답 구조: { success: true, data: { data: [], count, pagination } }
+  const members = result.data.data
 
   // 검색어가 있으면 클라이언트 사이드 필터링
   const filteredMembers = search

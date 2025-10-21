@@ -47,17 +47,12 @@
   border-radius: var(--spacing-xxs);
 }
 
-.role-owner {
+.role-admin {
   background-color: var(--accent-color);
   color: var(--primary-color);
 }
 
-.role-admin {
+.role-member {
   background-color: var(--secondary-color);
   color: var(--primary-color);
-}
-
-.role-member {
-  background-color: var(--gray-200);
-  color: var(--gray-700);
 }

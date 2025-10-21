@@ -5,7 +5,7 @@
 /**
  * 멤버 역할 타입
  */
-export type MemberRole = 'owner' | 'admin' | 'member'
+export type MemberRole = 'admin' | 'member'
 
 /**
  * 멤버 생성 요청

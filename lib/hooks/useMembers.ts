@@ -54,7 +54,7 @@ interface UseMembersResult {
   deleteMember: (memberId: string) => Promise<{ success: boolean; error?: string }>
   updateRole: (
     memberId: string,
-    newRole: 'owner' | 'admin' | 'member'
+    newRole: 'admin' | 'member'
   ) => Promise<{ success: boolean; error?: string }>
 }
 
@@ -266,7 +266,7 @@ export const useMembers = ({
    * @returns 수정 결과
    */
   const updateRole = useCallback(
-    async (memberId: string, newRole: 'owner' | 'admin' | 'member') => {
+    async (memberId: string, newRole: 'admin' | 'member') => {
       return updateMember(memberId, { role: newRole })
     },
     [updateMember]

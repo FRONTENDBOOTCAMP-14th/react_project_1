@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  *
  * 요청 Body
  * {
- *   "role": "admin"  // owner, admin, member 중 하나
+ *   "role": "admin"  // admin, member 중 하나
  * }
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -59,7 +59,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // 역할 검증
     if (body.role) {
-      const validRoles = ['owner', 'admin', 'member']
+      const validRoles = ['admin', 'member']
       if (!validRoles.includes(body.role)) {
         return createErrorResponse(MESSAGES.ERROR.INVALID_ROLE, 400)
       }

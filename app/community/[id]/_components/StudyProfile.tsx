@@ -127,15 +127,15 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
   return (
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+        <div className={styles['header-left']}>
           <ProfileImage alt={`${community.name} 커뮤니티 프로필 이미지`} />
           <ProfileInfo community={community} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className={styles['header-right']}>
           <Popover trigger={<Ellipsis />} actions={actions} />
         </div>
       </article>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+      <div className={styles['description-row']}>
         <p className={styles.description}>
           {community.description || MESSAGES.EMPTY.NO_DESCRIPTION}
         </p>

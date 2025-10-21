@@ -49,3 +49,20 @@
   gap: 0.5rem;
   align-items: center;
 }
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.description-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}

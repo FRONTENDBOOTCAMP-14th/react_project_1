@@ -10,6 +10,16 @@
   --accent-color: #3468c0;
   --shadow-color: rgba(18, 18, 18, 0.1);
 
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
   --full-radius: 9999px;
   --card-radius: 16px;
   --inner-card-radius: 8px;

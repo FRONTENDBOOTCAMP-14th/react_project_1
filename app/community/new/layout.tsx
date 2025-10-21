@@ -1,6 +1,7 @@
 import fonts from '@/app/fonts'
 import '@/styles/globals.css'
 import type { Metadata } from 'next'
+import styles from './layout.module.css'
 
 export const metadata: Metadata = {
   title: '토끼노트',
@@ -11,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko-KR">
       <body className={fonts.pretendard.className}>
-        <div style={{ minHeight: 'calc(100vh - 120px)' }}>
+        <div className={styles['main-wrapper']}>
           <div>{children}</div>
         </div>
       </body>

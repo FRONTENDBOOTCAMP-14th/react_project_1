@@ -113,7 +113,7 @@ export const useCommunity = (id: string): UseCommunityResult => {
    */
   const deleteCommunity = useCallback(async (clubId: string) => {
     try {
-      const response = await fetch(API_ENDPOINTS.COMMUNITIES.DELETE_BY_ID(clubId), {
+      const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(clubId), {
         method: 'DELETE',
       })
 

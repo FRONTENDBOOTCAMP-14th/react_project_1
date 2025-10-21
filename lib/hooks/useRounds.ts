@@ -35,12 +35,14 @@ export const useRounds = (clubId: string): UseRoundsResult => {
       setError(null)
 
       const response = await fetch(API_ENDPOINTS.ROUNDS.WITH_PARAMS({ clubId }))
-      const data = await response.json()
+      const result = await response.json()
 
-      if (data.success && data.data) {
-        setRounds(data.data)
+      if (result.success && result.data) {
+        // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
+        const roundsList = Array.isArray(result.data) ? result.data : result.data.data
+        setRounds(roundsList || [])
         // 첫 번째 라운드를 현재 라운드로 설정
-        setCurrentRound(data.data.length > 0 ? data.data[0] : null)
+        setCurrentRound(roundsList && roundsList.length > 0 ? roundsList[0] : null)
       } else {
         setRounds([])
         setCurrentRound(null)

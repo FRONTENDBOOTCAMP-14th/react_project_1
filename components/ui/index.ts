@@ -7,7 +7,6 @@ export {
   CarouselIndicators,
   useCarouselScroll,
   useCarouselAutoPlay,
-  useVirtualScroll,
 } from './Carousel'
 export type { CarouselProps, CarouselItemProps, CarouselEffect } from './Carousel'
 export { default as Checkbox } from './Checkbox'

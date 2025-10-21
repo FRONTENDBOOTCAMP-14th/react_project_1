@@ -33,7 +33,8 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
     toast('썸네일 클릭 - 삭제')
   }
 
-  const handleUploadClick = () => {
+  const handleUploadClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
     // 파일 선택
     toast('업로드 버튼 클릭')
   }

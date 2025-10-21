@@ -1,10 +1,10 @@
 .fill-link {
   display: inline;
   min-width: 64px;
-  padding: 8px;
+  padding: var(--spacing-xxs);
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-xxs);
   flex-shrink: 0;
   border-radius: 5px;
   background: var(--third-color);

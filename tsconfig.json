@@ -5,7 +5,10 @@
       "@/components/*": ["components/*"],
       "@/lib/*": ["lib/*"],
       "@/app/*": ["app/*"],
-      "@/styles/*": ["styles/*"]
+      "@/styles/*": ["styles/*"],
+      "@/types/*": ["lib/types/*"],
+      "@/constants": ["constants"],
+      "@/constants/*": ["constants/*"]
     },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],

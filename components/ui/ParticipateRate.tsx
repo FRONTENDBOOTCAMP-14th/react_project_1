@@ -37,13 +37,13 @@ const ParticipateRate = ({ name, value, max = 100, className }: ParticipateRateP
     <div className={cn(styles.container, className)}>
       {name && <span className={styles.label}>{name}</span>}
       <div
-        className={styles.progressBar}
+        className={styles['progress-bar']}
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}
         aria-valuemax={max}
       >
-        <div className={styles.progressFill} style={{ width: `${percentage}%` }} />
+        <div className={styles['progress-fill']} style={{ width: `${percentage}%` }} />
       </div>
     </div>
   )

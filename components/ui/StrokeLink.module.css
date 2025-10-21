@@ -1,6 +1,6 @@
 .stroke-link {
   display: inline;
-  padding: 8px;
+  padding: var(--spacing-xxs);
   justify-content: center;
   align-items: center;
   border-radius: var(--radius-sm, 8px);
@@ -8,6 +8,7 @@
   box-shadow: 0 1px 2.4px 0 var(--third-color);
   color: var(--third-color);
   text-align: center;
+  gap: var(--spacing-xxs);
   text-decoration: none;
   font-family: var(--font-family);
   font-size: var(--font-sm);

@@ -15,7 +15,9 @@ erDiagram
         uuid goal_id PK
         uuid owner_id FK
         uuid club_id FK
+        uuid round_id FK
         boolean is_team
+        boolean is_complete
         timestamp deleted_at
     }
     REACTION {
@@ -39,6 +41,23 @@ erDiagram
         timestamp joined_at
         timestamp deleted_at
     }
+    ROUND {
+        uuid round_id PK
+        uuid club_id FK
+        integer round_number
+        timestamp created_at
+        timestamp deleted_at
+    }
+    NOTIFICATION {
+        uuid notification_id PK
+        uuid club_id FK
+        uuid author_id FK
+        varchar title
+        text content
+        boolean is_pinned
+        timestamp created_at
+        timestamp deleted_at
+    }
 
     USER ||--o{ STUDYGOAL : owns
     STUDYGOAL ||--o{ REACTION : receives
@@ -47,6 +66,11 @@ erDiagram
     STUDYGOAL }o--|| COMMUNITY : optional_club
     COMMUNITY ||--o{ COMMUNITYMEMBER : has
     USER ||--o{ COMMUNITYMEMBER : joins
+    COMMUNITY ||--o{ ROUND : has_rounds
+    ROUND ||--o{ STUDYGOAL : contains
+    STUDYGOAL }o--|| ROUND : belongs_to
+    COMMUNITY ||--o{ NOTIFICATION : has_notifications
+    USER ||--o{ NOTIFICATION : writes
 ```
 
 ## 데이터 스키마 테이블
@@ -96,9 +120,11 @@ CREATE INDEX idx_user_active ON users (user_id) WHERE deleted_at IS NULL;
 | goal_id     | uuid      | PK DEFAULT gen_random_uuid() | 목표 고유 ID                     |
 | owner_id    | uuid      | NOT NULL, FK(User.user_id)   | 목표 소유자 (개인 또는 팀 리더)  |
 | club_id     | uuid      | NULL, FK(Community.club_id)  | 연결된 커뮤니티 (팀 목표인 경우) |
+| round_id    | uuid      | NULL, FK(Round.round_id)     | 소속 회차 ID (선택적)            |
 | title       | varchar   | NOT NULL                     | 목표명                           |
 | description | text      | NULL                         | 목표 설명                        |
 | is_team     | boolean   | NOT NULL, DEFAULT false      | 팀 목표 여부                     |
+| is_complete | boolean   | NOT NULL, DEFAULT false      | 목표 완료 여부                   |
 | start_date  | date      | NOT NULL                     | 목표 시작일                      |
 | end_date    | date      | NOT NULL                     | 목표 종료일                      |
 | created_at  | timestamp | NOT NULL, DEFAULT now()      | 생성일                           |
@@ -113,6 +139,7 @@ CREATE INDEX idx_user_active ON users (user_id) WHERE deleted_at IS NULL;
 CONSTRAINT chk_goal_dates CHECK (end_date >= start_date)
 CONSTRAINT fk_goal_owner FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE
 CONSTRAINT fk_goal_club FOREIGN KEY (club_id) REFERENCES communities(club_id) ON DELETE SET NULL
+CONSTRAINT fk_goal_round FOREIGN KEY (round_id) REFERENCES rounds(round_id) ON DELETE SET NULL
 CONSTRAINT chk_team_goal_club CHECK (
     (is_team = false AND club_id IS NULL) OR
     (is_team = true AND club_id IS NOT NULL)
@@ -127,6 +154,8 @@ CONSTRAINT chk_team_goal_club CHECK (
 CREATE INDEX idx_goal_owner ON study_goals (owner_id);
 CREATE INDEX idx_goal_dates ON study_goals (start_date, end_date);
 CREATE INDEX idx_goal_team ON study_goals (is_team);
+CREATE INDEX idx_goal_round ON study_goals (round_id);
+CREATE INDEX idx_goal_complete ON study_goals (is_complete);
 CREATE INDEX idx_goal_owner_team ON study_goals (owner_id, is_team)
     WHERE deleted_at IS NULL;
 CREATE INDEX idx_goal_active ON study_goals (owner_id)
@@ -229,5 +258,73 @@ CREATE INDEX idx_member_club ON community_members (club_id);
 CREATE INDEX idx_member_active ON community_members (club_id)
     WHERE deleted_at IS NULL;
 CREATE UNIQUE INDEX uk_member_active ON community_members (club_id, user_id)
+    WHERE deleted_at IS NULL;
+```
+
+### Round 테이블
+
+| 컬럼명       | 타입      | 제약조건                          | 설명                            |
+| ------------ | --------- | --------------------------------- | ------------------------------- |
+| round_id     | uuid      | PK DEFAULT gen_random_uuid()      | 회차 고유 ID                    |
+| club_id      | uuid      | NOT NULL, FK(communities.club_id) | 소속 커뮤니티 ID                |
+| round_number | integer   | NOT NULL, DEFAULT 1               | 회차 번호                       |
+| created_at   | timestamp | NOT NULL, DEFAULT now()           | 생성일                          |
+| updated_at   | timestamp | NOT NULL, DEFAULT now()           | 수정일 (트리거로 자동 업데이트) |
+| deleted_at   | timestamp | NULL                              | 소프트 삭제 시각                |
+
+#### 제약조건 - Round 테이블
+
+> 커뮤니티 삭제 시 회차도 함께 삭제되도록 CASCADE 설정합니다.
+
+```sql
+CONSTRAINT pk_round PRIMARY KEY (round_id)
+CONSTRAINT fk_round_club FOREIGN KEY (club_id) REFERENCES communities(club_id) ON DELETE CASCADE
+```
+
+#### 인덱스 - Round 테이블
+
+> 커뮤니티별 회차 조회와 생성 시간 기반 정렬, 활성 회차 조회를 효율적으로 처리합니다.
+
+```sql
+CREATE INDEX idx_round_club ON rounds (club_id);
+CREATE INDEX idx_round_created ON rounds (created_at);
+CREATE INDEX idx_round_active ON rounds (club_id, deleted_at)
+    WHERE deleted_at IS NULL;
+```
+
+### Notification 테이블
+
+| 컬럼명          | 타입      | 제약조건                          | 설명                            |
+| --------------- | --------- | --------------------------------- | ------------------------------- |
+| notification_id | uuid      | PK DEFAULT gen_random_uuid()      | 공지사항 고유 ID                |
+| club_id         | uuid      | NOT NULL, FK(communities.club_id) | 소속 커뮤니티 ID                |
+| author_id       | uuid      | NULL, FK(users.user_id)           | 작성자 ID (작성자 삭제 시 NULL) |
+| title           | varchar   | NOT NULL                          | 공지사항 제목                   |
+| content         | text      | NULL                              | 공지사항 내용                   |
+| is_pinned       | boolean   | NOT NULL, DEFAULT false           | 상단 고정 여부                  |
+| created_at      | timestamp | NOT NULL, DEFAULT now()           | 생성일                          |
+| updated_at      | timestamp | NOT NULL, DEFAULT now()           | 수정일 (트리거로 자동 업데이트) |
+| deleted_at      | timestamp | NULL                              | 소프트 삭제 시각                |
+
+#### 제약조건 - Notification 테이블
+
+> 커뮤니티 삭제 시 공지사항도 함께 삭제되고 작성자 삭제 시 공지사항은 유지되도록 설정합니다.
+
+```sql
+CONSTRAINT pk_notification PRIMARY KEY (notification_id)
+CONSTRAINT fk_notification_club FOREIGN KEY (club_id) REFERENCES communities(club_id) ON DELETE CASCADE
+CONSTRAINT fk_notification_author FOREIGN KEY (author_id) REFERENCES users(user_id) ON DELETE SET NULL
+```
+
+#### 인덱스 - Notification 테이블
+
+> 커뮤니티별 공지사항 조회, 고정 공지사항 우선 정렬, 활성 공지사항 조회를 효율적으로 처리합니다.
+
+```sql
+CREATE INDEX idx_notification_club ON notifications (club_id);
+CREATE INDEX idx_notification_author ON notifications (author_id);
+CREATE INDEX idx_notification_pinned ON notifications (club_id, is_pinned, created_at DESC)
+    WHERE deleted_at IS NULL;
+CREATE INDEX idx_notification_active ON notifications (club_id, created_at DESC)
     WHERE deleted_at IS NULL;
 ```

@@ -1,0 +1,44 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.add-button {
+  display: block;
+  position: absolute;
+  padding: var(--spacing-xs);
+  top: -60px;
+  right: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.add-button:hover {
+  opacity: 0.7;
+}
+
+.add-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.message {
+  text-align: center;
+  padding: var(--spacing-sm);
+  color: var(--etc-color-2);
+  font-size: var(--font-sm);
+}
+
+.error {
+  text-align: center;
+  padding: var(--spacing-sm);
+  color: var(--error-color);
+  border-radius: var(--inner-card-radius);
+  font-size: var(--font-sm);
+}

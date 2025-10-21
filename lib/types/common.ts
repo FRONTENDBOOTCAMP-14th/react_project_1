@@ -56,3 +56,34 @@ export interface WithRetry {
  * 기본 컨테이너 Props
  */
 export interface BaseContainerProps extends WithClubId, WithTeamLeaderPermission {}
+
+/**
+ * 지역 정보 타입
+ */
+export interface Region {
+  name: string
+  subArea: string[]
+}
+
+/**
+ * NextAuth 관련 타입들
+ */
+export interface KakaoProfile {
+  id?: string | number
+  kakao_account?: {
+    email?: string
+  }
+}
+
+export interface ExtendedToken {
+  userId?: string
+  username?: string
+  nickname?: string | null
+}
+
+/**
+ * 에러 타입
+ */
+export type ErrorWithMessage = Error & {
+  message: string
+}

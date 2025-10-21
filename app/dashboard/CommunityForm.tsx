@@ -38,8 +38,8 @@ export default function CommunityForm({ onCreated }: Props) {
       setIsPublic(true)
       onCreated?.()
       router.refresh()
-    } catch (err: any) {
-      setError(err?.message ?? '알 수 없는 오류')
+    } catch (err: unknown) {
+      setError((err as Error)?.message ?? '알 수 없는 오류')
     } finally {
       setLoading(false)
     }

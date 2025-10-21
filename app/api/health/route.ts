@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { createSuccessResponse } from '@/lib/utils/response'
 
 export const dynamic = 'force-static'
 
 export async function GET() {
-  return NextResponse.json({ status: 'ok', time: new Date().toISOString() })
+  return createSuccessResponse({ time: new Date().toISOString() })
 }

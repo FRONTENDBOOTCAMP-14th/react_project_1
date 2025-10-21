@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from 'next-auth'
 import KakaoProvider from 'next-auth/providers/kakao'
 import prisma from '@/lib/prisma'
+import type { KakaoProfile, ExtendedToken, CustomSession } from '@/lib/types'
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
@@ -13,8 +14,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === 'kakao') {
-        const providerId = String((profile as any)?.id ?? account.providerAccountId)
-        const email = (profile as any)?.kakao_account?.email ?? user?.email ?? null
+        const providerId = String((profile as KakaoProfile)?.id ?? account.providerAccountId)
+        const email = (profile as KakaoProfile)?.kakao_account?.email ?? user?.email ?? null
         const existing = await prisma.user.findFirst({
           where: { provider: 'kakao', providerId, deletedAt: null },
         })
@@ -27,23 +28,23 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, account, profile }) {
       if (account?.provider === 'kakao') {
-        const providerId = String((profile as any)?.id ?? account.providerAccountId)
+        const providerId = String((profile as KakaoProfile)?.id ?? account.providerAccountId)
         const existing = await prisma.user.findFirst({
           where: { provider: 'kakao', providerId, deletedAt: null },
         })
         if (existing) {
-          ;(token as any).userId = existing.userId
-          ;(token as any).username = existing.username
-          ;(token as any).nickname = existing.nickname
+          ;(token as ExtendedToken).userId = existing.userId
+          ;(token as ExtendedToken).username = existing.username
+          ;(token as ExtendedToken).nickname = existing.nickname
         }
       }
       return token
     },
     async session({ session, token }) {
-      if ((token as any)?.userId) {
-        ;(session as any).userId = (token as any).userId
+      if ((token as ExtendedToken)?.userId) {
+        ;(session as CustomSession).userId = (token as ExtendedToken).userId
         if (session.user) {
-          session.user.name = ((token as any).nickname as string | undefined) ?? session.user.name
+          session.user.name = (token as ExtendedToken).nickname ?? session.user.name
         }
       }
       return session

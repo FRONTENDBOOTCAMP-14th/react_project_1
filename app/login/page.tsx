@@ -40,7 +40,7 @@ export default function LoginPage() {
 
 function RegisterForm() {
   const search = useSearchParams()
-  const provider = search.get('provider') || 'kakao'
+  const _provider = search.get('provider') || 'kakao'
   const providerId = search.get('providerId') || ''
   const emailFromQuery = search.get('email') || ''
   const [email, setEmail] = React.useState(emailFromQuery)

@@ -4,10 +4,11 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import DeleteAccountButton from '@/app/profile/DeleteAccountButton'
 import LogoutButton from '@/app/profile/LogoutButton'
+import type { CustomSession } from '@/lib/types'
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
-  const userId = (session as any)?.userId as string | undefined
+  const userId = (session as CustomSession)?.userId
   if (!userId) {
     redirect('/login')
   }

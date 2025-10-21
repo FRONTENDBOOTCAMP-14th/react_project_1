@@ -3,10 +3,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
 import { getErrorMessage } from '@/lib/errors'
+import type { CustomSession } from '@/lib/types'
 
 export async function POST() {
   const session = await getServerSession(authOptions)
-  const userId = (session as any)?.userId as string | undefined
+  const userId = (session as CustomSession)?.userId
   if (!userId) {
     return NextResponse.json({ success: false, error: 'unauthorized' }, { status: 401 })
   }

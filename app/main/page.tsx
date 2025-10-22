@@ -1,15 +1,24 @@
-'use client'
-
 import StudyCard from '@/app/main/study-card/StudyCard'
 import styles from './page.module.css'
 
-export default function main() {
+export default async function CommunityPage({ params }: { params: { id: string } }) {
+  const res = await fetch(`http://localhost:3000/app/api/communities?isPublic=true`, {
+    cache: 'no-store',
+  })
+  //process.env.NEXT_PUBLIC_API_URL
+
+  const communityPage = await res.json()
+
+  //StudyCard로 전달할 형태로 변환
+  //참여율 데이터는 값을 정의
   const study = {
-    title: '하낫 둘 셋! 뛰어!',
-    desc: '한강에서 제니랑 빠르게 뛰는 러닝클럽입니다.',
-    imageUrl: '',
-    tags: ['러닝', '러닝메이트', '한강', '페이스5분', '달려라'],
-    value: '75',
+    title: communityPage.title,
+    desc: communityPage.description,
+    imageUrl: communityPage.thumbnail || '',
+    tags: communityPage.tags || [],
+    value: 75,
+    max: 100,
+    name: '지난 참여율',
   }
 
   return (

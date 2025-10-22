@@ -12,7 +12,7 @@ interface Study {
   imageUrl: string
   tags: string[]
   value: number
-  max: number
+  max?: number
   name: string
 }
 
@@ -26,13 +26,6 @@ interface StudyCardProps {
 }
 
 export default function StudyCard({ study }: StudyCardProps) {
-  // const Study = {
-  //   title: '하낫 둘 셋! 뛰어!'
-  //   desc: '한강에서 제니랑 빠르게 뛰는 러닝클럽입니다.'
-  //   imageUrl: ''
-  //   tags: ['러닝','러닝메이트','한강','페이스5분','달려라']
-  // }
-
   return (
     <article className={styles.card}>
       <h2 className="sr-only">스터디 소개</h2>

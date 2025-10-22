@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import type { CommunityResponse } from '@/lib/types/community'
 
 interface Props {
   onCreated?: () => void
@@ -29,15 +30,23 @@ export default function CommunityForm({ onCreated }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, description, is_public: isPublic }),
       })
-      const data = await res.json()
-      if (!data.success) throw new Error(data?.error || '생성 실패')
 
-      // reset and notify
-      setName('')
-      setDescription('')
-      setIsPublic(true)
-      onCreated?.()
-      router.refresh()
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+      }
+
+      const data: CommunityResponse = await res.json()
+
+      if (data.success && data.data) {
+        // reset and notify
+        setName('')
+        setDescription('')
+        setIsPublic(true)
+        onCreated?.()
+        router.refresh()
+      } else {
+        throw new Error(data.error || '커뮤니티 생성에 실패했습니다')
+      }
     } catch (err: unknown) {
       setError((err as Error)?.message ?? '알 수 없는 오류')
     } finally {

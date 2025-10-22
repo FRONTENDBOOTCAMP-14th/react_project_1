@@ -1,5 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { Community, CreateCommunityInput, UpdateCommunityInput } from '@/lib/types/community'
+import type {
+  Community,
+  CommunityResponse,
+  CreateCommunityInput,
+  UpdateCommunityInput,
+} from '@/lib/types/community'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 
 interface UseCommunityResult {
@@ -33,12 +38,17 @@ export const useCommunity = (id: string): UseCommunityResult => {
       setError(null)
 
       const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(id))
-      const data = await response.json()
 
-      if (data.success && data.data) {
-        setCommunity(data.data)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const result: CommunityResponse = await response.json()
+
+      if (result.success && result.data) {
+        setCommunity(result.data)
       } else {
-        setError(data.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND)
+        setError(result.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND)
       }
     } catch (err) {
       console.error('Failed to fetch community:', err)

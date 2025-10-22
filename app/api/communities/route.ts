@@ -2,16 +2,17 @@
  * 커뮤니티 컬렉션 API
  * - 경로: /api/communities
  * - 메서드:
- *   - GET: 목록 조회 (페이지네이션 지원)
+ *   - GET: 목록 조회 (페이지네이션 및 필터링 지원)
  *   - POST: 신규 커뮤니티 생성
  */
 
 import prisma from '@/lib/prisma'
-import type { NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
 import type { PaginationInfo } from '@/lib/types'
+import type { CommunityWhereClause } from '@/lib/types/community'
 
 /**
  * GET /api/communities
@@ -19,6 +20,10 @@ import type { PaginationInfo } from '@/lib/types'
  * - 쿼리 파라미터
  *   - page?: number (기본값: 1)
  *   - limit?: number (기본값: 10, 최대: 100)
+ *   - isPublic?: 'true'|'false' 공개 여부로 필터
+ *   - search?: string 커뮤니티 이름으로 검색
+ *   - createdAfter?: string (ISO 8601) 생성일 이후로 필터
+ *   - createdBefore?: string (ISO 8601) 생성일 이전으로 필터
  *
  * 응답
  * - 200: { success: true, data: Community[], count: number, pagination: PaginationInfo }
@@ -33,8 +38,41 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
     const skip = (page - 1) * limit
 
-    // where 조건
-    const whereClause = { deletedAt: null }
+    // 필터링 파라미터
+    const isPublic = searchParams.get('isPublic')
+    const search = searchParams.get('search')
+    const createdAfter = searchParams.get('createdAfter')
+    const createdBefore = searchParams.get('createdBefore')
+
+    // where 조건 구성
+    const whereClause: CommunityWhereClause = {
+      deletedAt: null,
+      ...(isPublic !== null && { isPublic: isPublic === 'true' }),
+      ...(search && {
+        name: {
+          contains: search,
+          mode: 'insensitive' as const,
+        },
+      }),
+      ...(createdAfter && {
+        createdAt: {
+          gte: new Date(createdAfter),
+        },
+      }),
+      ...(createdBefore && {
+        createdAt: {
+          lte: new Date(createdBefore),
+        },
+      }),
+    }
+
+    // where 조건에 날짜 범위가 있는 경우 AND로 결합
+    if (createdAfter && createdBefore) {
+      whereClause.createdAt = {
+        gte: new Date(createdAfter),
+        lte: new Date(createdBefore),
+      }
+    }
 
     // 병렬 조회: 데이터 + 전체 개수
     const [communities, total] = await Promise.all([
@@ -61,14 +99,13 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit),
     }
 
-    return createSuccessResponse(
-      {
-        data: communities,
-        count: communities.length,
-        pagination,
-      },
-      200
-    )
+    // CommunityListResponse 타입과 일치하도록 응답 구조 수정
+    return NextResponse.json({
+      success: true,
+      data: communities,
+      count: communities.length,
+      pagination,
+    })
   } catch (err: unknown) {
     console.error('Error fetching communities:', err)
     return createErrorResponse(

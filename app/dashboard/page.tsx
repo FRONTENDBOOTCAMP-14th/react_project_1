@@ -1,21 +1,29 @@
 import Button from '@/components/ui/Button'
 import styles from './page.module.css'
-import prisma from '@/lib/prisma'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
 import Link from 'next/link'
-import type { CommunityWithDate } from '@/lib/types/community'
+import type { CommunityListResponse, CommunityBase } from '@/lib/types/community'
+import type { PaginationInfo } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  // TODO: Prisma -> 페이지네이션 및 스킵 기능 추가 확인
-  const communities: CommunityWithDate[] = await prisma.community.findMany({
-    where: { deletedAt: null },
-    orderBy: { createdAt: 'desc' },
-    select: { clubId: true, name: true, description: true, isPublic: true, createdAt: true },
+  // Next.js Server Component에서 API Route 호출 (절대 URL 사용)
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/communities?limit=50`, {
+    cache: 'no-store',
   })
 
+  if (!response.ok) {
+    throw new Error('Failed to fetch communities')
+  }
+
+  const result: CommunityListResponse = await response.json()
+
+  const communities: CommunityBase[] = result.success && result.data ? result.data : []
+  const paginationInfo: PaginationInfo | null = result.success ? result.pagination || null : null
+  const itemCount: number = result.success ? result.count || 0 : 0
   return (
     <main className={styles.container}>
       <h2 className={styles.title}>대시보드</h2>
@@ -36,11 +44,17 @@ export default async function DashboardPage() {
 
         <div style={{ display: 'grid', gap: 8 }}>
           <h3>커뮤니티 목록</h3>
+          {paginationInfo && (
+            <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '8px' }}>
+              총 {paginationInfo.total}개 중 {itemCount}개 표시 (페이지 {paginationInfo.page}/
+              {paginationInfo.totalPages})
+            </div>
+          )}
           {communities.length === 0 ? (
             <p>아직 커뮤니티가 없습니다.</p>
           ) : (
             <ul style={{ display: 'grid', gap: 8 }}>
-              {communities.map((c: CommunityWithDate) => (
+              {communities.map((c: CommunityBase) => (
                 <li
                   key={c.clubId}
                   style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}

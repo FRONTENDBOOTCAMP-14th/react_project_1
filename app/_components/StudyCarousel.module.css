@@ -1,0 +1,15 @@
+.carousel-container {
+  text-align: center;
+}
+
+.carousel-item {
+  width: 180px;
+  height: 300px;
+  border: 1px solid var(--etc-color-2);
+  flex-shrink: 0;
+  border-radius: var(--inner-card-radius);
+  display: flex;
+  justify-self: center;
+  align-items: center;
+  justify-content: center;
+}

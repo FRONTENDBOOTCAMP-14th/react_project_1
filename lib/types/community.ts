@@ -1,3 +1,5 @@
+import type { PaginationInfo } from './index'
+
 /**
  * 공통 필드를 포함한 커뮤니티 기본 인터페이스
  */
@@ -42,4 +44,57 @@ export interface UpdateCommunityInput {
   name?: string
   description?: string | null
   isPublic?: boolean
+}
+
+/**
+ * 커뮤니티 검색/필터링 옵션
+ */
+export interface CommunityFilterOptions {
+  isPublic?: boolean
+  search?: string
+  createdAfter?: Date
+  createdBefore?: Date
+}
+
+/**
+ * API 응답 타입 - 단일 커뮤니티
+ */
+export interface CommunityResponse {
+  success: boolean
+  data?: Community
+  error?: string
+  message?: string
+}
+
+/**
+ * API 응답 타입 - 커뮤니티 리스트 (페이지네이션 포함)
+ */
+export interface CommunityListResponse {
+  success: boolean
+  data?: CommunityBase[]
+  count?: number
+  pagination?: PaginationInfo
+  error?: string
+  message?: string
+}
+
+/**
+ * 커뮤니티 검색 where 조건 타입
+ */
+export interface CommunityWhereClause {
+  deletedAt: null | { equals: null }
+  isPublic?: boolean
+  name?: {
+    contains: string
+    mode: 'insensitive'
+  }
+  createdAt?:
+    | {
+        gte?: Date
+        lte?: Date
+      }
+    | {
+        gte: Date
+        lte: Date
+      }
 }

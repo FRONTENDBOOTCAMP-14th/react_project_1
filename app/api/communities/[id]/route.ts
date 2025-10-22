@@ -54,9 +54,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 
-    // deletedAt 필드 제거 후 응답
+    // deletedAt 필드 제거 후 응답 (createdAt을 string으로 변환)
     const { deletedAt: _deletedAt, ...communityData } = community
-    return createSuccessResponse(communityData)
+    return createSuccessResponse({
+      ...communityData,
+      createdAt: community.createdAt.toISOString(),
+    })
   } catch (err: unknown) {
     console.error('Error fetching community:', err)
     return createErrorResponse(getErrorMessage(err, MESSAGES.ERROR.FAILED_TO_LOAD_COMMUNITY), 500)

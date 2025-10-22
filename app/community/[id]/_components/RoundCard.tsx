@@ -28,6 +28,10 @@ interface RoundCardProps {
    */
   isOpen: boolean
   /**
+   * 라운드 수정/삭제 가능 여부
+   */
+  isEditMode?: boolean
+  /**
    * 라운드 카드 열림/닫힘 토글 핸들러
    */
   onToggleOpen: () => void
@@ -60,6 +64,10 @@ interface RoundCardHeaderProps {
    */
   isOpen: boolean
   /**
+   * 라운드 수정/삭제 가능 여부
+   */
+  isEditMode?: boolean
+  /**
    * 라운드 카드 열림/닫힘 토글 핸들러
    */
   onToggleOpen: () => void
@@ -69,7 +77,7 @@ interface RoundCardHeaderProps {
  * 라운드 헤더 컴포넌트
  * @param props - RoundCardHeaderProps
  */
-function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) {
+function RoundCardHeader({ round, isOpen, isEditMode, onToggleOpen }: RoundCardHeaderProps) {
   const popoverActions: PopoverAction[] = [
     {
       id: 'edit',
@@ -127,6 +135,10 @@ interface RoundCardBodyProps {
    * 라운드 카드가 열려있는지 여부
    */
   isOpen: boolean
+  /**
+   * 라운드 수정/삭제 가능 여부
+   */
+  isEditMode?: boolean
 }
 
 /**
@@ -135,7 +147,7 @@ interface RoundCardBodyProps {
  * - 선언적 조건부 렌더링
  * @param props - RoundCardBodyProps
  */
-function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
+function RoundCardBody({ roundId, isOpen, isEditMode }: RoundCardBodyProps) {
   // 전역 상태에서 커뮤니티 컴텍스트 가져오기
   const clubId = useCommunityStore(state => state.clubId)
   const isTeamLeader = useCommunityStore(state => state.isTeamLeader)

@@ -5,7 +5,6 @@ import Link from 'next/link'
 import StudyProfile from './StudyProfile'
 import RoundsList from './RoundsList'
 import styles from './CommunityContext.module.css'
-import { AccentLink } from '@/components/ui'
 import { ROUTES, MESSAGES } from '@/constants'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { useNotifications } from '@/lib/hooks'
@@ -45,26 +44,6 @@ function NotificationLink({ clubId }: NotificationLinkProps) {
 }
 
 /**
- * 라운드 추가 링크 컴포넌트에 전달되는 속성
- */
-interface AddRoundLinkProps {
-  /** 커뮤니티 식별자 */
-  clubId: string
-}
-
-/**
- * 라운드 추가 링크 컴포넌트
- * 라운드를 추가할 수 있는 페이지로 이동합니다.
- */
-function AddRoundLink({ clubId }: AddRoundLinkProps) {
-  return (
-    <AccentLink href={ROUTES.COMMUNITY.ROUND(clubId)} aria-label="라운드 추가하기">
-      {MESSAGES.ACTION.ADD_ROUND}
-    </AccentLink>
-  )
-}
-
-/**
  * 커뮤니티 콘텐츠 컴포넌트에 전달되는 속성
  */
 interface CommunityContentProps {
@@ -91,7 +70,6 @@ export default function CommunityContent({ clubId, isTeamLeader }: CommunityCont
     <div className={styles['content-wrapper']}>
       <StudyProfile id={clubId} />
       <NotificationLink clubId={clubId} />
-      <AddRoundLink clubId={clubId} />
       <RoundsList />
     </div>
   )

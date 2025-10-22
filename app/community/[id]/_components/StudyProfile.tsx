@@ -1,8 +1,6 @@
 'use client'
 
-import Image from 'next/image'
-import { memo } from 'react'
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
@@ -10,37 +8,8 @@ import { useCommunity } from '@/lib/hooks'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES, ROUTES } from '@/constants'
-import { StrokeButton, Popover, type PopoverAction, IconLink } from '@/components/ui'
+import { StrokeButton, Popover, type PopoverAction, IconLink, ProfileImage } from '@/components/ui'
 import { toast } from 'sonner'
-
-/**
- * StudyProfile 컴포넌트에 전달되는 속성
- */
-interface StudyProfileProps {
-  /** 커뮤니티 ID */
-  id: string
-}
-
-/**
- * 커뮤니티 프로필 이미지 컴포넌트 (순수 컴포넌트)
- */
-const ProfileImage = memo(({ alt, src = '/images/example.jpg' }: { alt: string; src?: string }) => {
-  const size = UI_CONSTANTS.IMAGE_SIZE.PROFILE_THUMBNAIL
-
-  return (
-    <div className={styles['image-container']}>
-      <Image
-        src={src}
-        alt={alt}
-        width={size}
-        height={size}
-        className={styles.image}
-        sizes={`${size}px`}
-        priority
-      />
-    </div>
-  )
-})
 
 /**
  * 정보 행 컴포넌트에 전달되는 속성
@@ -50,6 +19,14 @@ interface InfoRowProps {
   icon: ReactNode
   /** 텍스트 내용 */
   text: string
+}
+
+/**
+ * StudyProfile 컴포넌트에 전달되는 속성
+ */
+interface StudyProfileProps {
+  /** 커뮤니티 ID */
+  id: string
 }
 
 /**
@@ -128,7 +105,10 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
         <div className={styles['header-left']}>
-          <ProfileImage alt={`${community.name} 커뮤니티 프로필 이미지`} />
+          <ProfileImage
+            alt={`${community.name} 커뮤니티 프로필 이미지`}
+            radius="inner-card-radius"
+          />
           <ProfileInfo community={community} />
         </div>
         <div className={styles['header-right']}>

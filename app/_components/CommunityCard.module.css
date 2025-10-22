@@ -1,0 +1,75 @@
+.card {
+  display: grid;
+  grid: auto auto / 1fr auto;
+  margin-top: 32px;
+  min-width: 320px;
+  max-width: 650px;
+  border: solid 1px var(--etc-color-4);
+  border-radius: var(--card-radius);
+  padding: var(--spacing-sm);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  gap: 0 var(--spacing-sm);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.title {
+  margin: 0 0 8px;
+  border-bottom: 1px solid var(--etc-color-2);
+  font-size: var(--font-md);
+  color: var(--secondary-color);
+  padding-bottom: 8px;
+  font-weight: 700;
+}
+
+/* 설명글과 참여율 마진값 */
+.content > *:not(.title) {
+  margin-left: var(--spacing-xs);
+}
+
+.desc {
+  font-size: var(--font-sm);
+  color: var(--etc-color-2);
+}
+
+.join {
+  margin: 10px 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center stretch;
+  gap: 10px;
+}
+
+.image {
+  width: 100px;
+  height: 100px;
+  background-size: cover;
+  background-color: red;
+  /* background: no-repeat center; */
+  border-radius: var(--spacing-xs);
+}
+
+.tagList {
+  display: flex;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  flex-wrap: wrap;
+  list-style-type: none;
+  padding: 0;
+  gap: var(--spacing-xxs);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border: solid 1px var(--third-color);
+  border-radius: var(--inner-card-radius);
+  padding: 2px var(--spacing-xs);
+  color: var(--third-color);
+}

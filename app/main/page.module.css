@@ -1,0 +1,47 @@
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.communityList {
+  width: 100%;
+}
+
+.title {
+  margin: 0 0 var(--spacing-lg);
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--secondary-color);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.emptySection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.emptySection p {
+  font-size: var(--font-md);
+  color: var(--etc-color-2);
+}
+
+@media (max-width: 768px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+}

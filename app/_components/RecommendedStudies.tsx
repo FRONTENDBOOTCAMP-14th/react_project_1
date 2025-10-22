@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import styles from './RecommendedStudies.module.css'
 import type { CommunityBase, CommunityListResponse } from '@/lib/types/community'
+import CommunityCard from './CommunityCard'
 
 export default function RecommendedStudies() {
   const [communities, setCommunities] = useState<CommunityBase[]>([])
@@ -75,14 +76,7 @@ export default function RecommendedStudies() {
           <div className={styles['recommend-item']}>데이터를 불러올 수 없습니다: {error}</div>
         ) : Array.isArray(communities) && communities.length > 0 ? (
           communities.map(community => (
-            <div key={community.clubId} className={styles['recommend-item']}>
-              <div style={{ fontWeight: 600 }}>{community.name}</div>
-              {community.description && (
-                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '4px' }}>
-                  {community.description}
-                </div>
-              )}
-            </div>
+            <CommunityCard key={community.clubId} community={community} />
           ))
         ) : (
           <div className={styles['recommend-item']}>추천 스터디가 없습니다</div>

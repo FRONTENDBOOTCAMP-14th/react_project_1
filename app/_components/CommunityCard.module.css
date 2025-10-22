@@ -8,7 +8,7 @@
   border-radius: var(--card-radius);
   padding: var(--spacing-sm);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-  gap: var(--spacing-md);
+  gap: 0 var(--spacing-sm);
 }
 
 .content {
@@ -60,9 +60,8 @@
   grid-row: 2;
   flex-wrap: wrap;
   list-style-type: none;
-  margin-top: 30px;
   padding: 0;
-  gap: 5px;
+  gap: var(--spacing-xxs);
 }
 
 .tag {

@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
-import type { StudyGoal, CreateGoalInput, UpdateGoalInput } from '@/lib/types/goal'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import type { CreateGoalInput, StudyGoal, UpdateGoalInput } from '@/lib/types/goal'
+import { useCallback, useEffect, useState } from 'react'
 
 interface GoalsState {
   team: StudyGoal[]

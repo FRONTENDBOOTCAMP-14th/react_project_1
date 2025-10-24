@@ -104,13 +104,10 @@
   justify-content: space-between;
 }
 
-.round-header {
+.round-button {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-}
-
-.round-number {
   font-size: var(--font-lg);
   font-weight: var(--font-weight-bold);
 }

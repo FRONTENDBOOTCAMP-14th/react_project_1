@@ -95,14 +95,15 @@ function RoundCardHeader({ round, isOpen, isEditMode, onToggleOpen }: RoundCardH
   return (
     <header aria-label="회차 정보">
       <div className={styles['round-header-container']}>
-        <div className={styles['round-header']}>
-          <p className={styles['round-number']}>
-            {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
-          </p>
-          <IconButton type="button" onClick={onToggleOpen} aria-expanded={isOpen}>
-            {isOpen ? <ChevronUp /> : <ChevronDown />}
-          </IconButton>
-        </div>
+        <IconButton
+          type="button"
+          onClick={onToggleOpen}
+          aria-expanded={isOpen}
+          className={styles['round-button']}
+        >
+          {round ? MESSAGES.LABEL.ROUND_INFO(round.roundNumber) : MESSAGES.LABEL.NO_ROUND_INFO}
+          {isOpen ? <ChevronUp /> : <ChevronDown />}
+        </IconButton>
         <Popover trigger={<EllipsisVertical />} actions={popoverActions} />
       </div>
       {(round?.startDate || round?.endDate || round?.location) && (

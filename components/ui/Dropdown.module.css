@@ -29,6 +29,7 @@
   flex: 1;
   text-align: left;
   color: var(--secondary-color);
+  font-size: var(--font-sm);
 }
 
 .icon {

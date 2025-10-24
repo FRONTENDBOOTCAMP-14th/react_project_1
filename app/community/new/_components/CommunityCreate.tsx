@@ -7,24 +7,39 @@ import Dropdown from '@/components/ui/Dropdown'
 import FillButton from '@/components/ui/FillButton'
 import FieldInput from '@/app/community/new/_components/FieldInput'
 import styles from './CommunityCreate.module.css'
+import regionData from '@/lib/json/region.json'
 
 export default function CommunityCreate() {
   //const [thumbnail, setThumbnail] = useState<File | string | null>(null)
   const [studyName, setStudyName] = useState('')
   const [studyRegion, setStudyRegion] = useState('')
-  const options = [
-    { value: 'option1', label: '옵션 1' },
-    { value: 'option2', label: '옵션 2' },
-  ]
+  const [subRegion, setSubRegion] = useState('')
   const [studyDescription, setStudyDescription] = useState('')
   const [studyTag, setStudyTags] = useState('')
+
+  const options = (() => {
+    const uniqueRegions = new Set<string>()
+    regionData.forEach(r => {
+      if (r?.region) uniqueRegions.add(r.region)
+    })
+    return Array.from(uniqueRegions)
+      .sort((a, b) => a.localeCompare(b))
+      .map(region => ({ value: region, label: region }))
+  })()
+
+  const subOptions = (() => {
+    const target = regionData.find(r => r?.region === studyRegion)
+    if (!target?.subRegion?.length) return []
+    const uniqueSubs = Array.from(new Set(target.subRegion.filter(Boolean)))
+    return uniqueSubs.sort((a, b) => a.localeCompare(b)).map(sub => ({ value: sub, label: sub }))
+  })()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     //   const formData = {
     //     studyName,
-    //     studyRegion,
+    //     region,
     //     studyDescription,
     //     studyTags: studyTags
     //       .split(',')
@@ -66,13 +81,13 @@ export default function CommunityCreate() {
                 options={options}
                 value={studyRegion}
                 onChange={setStudyRegion}
-                placeholder="선택하세요"
+                placeholder="광역시/도"
               />
               <Dropdown
-                options={options}
-                value={studyRegion}
-                onChange={setStudyRegion}
-                placeholder="선택하세요"
+                options={subOptions}
+                value={subRegion}
+                onChange={setSubRegion}
+                placeholder="시/구/군"
               />
             </div>
           </li>
@@ -110,7 +125,9 @@ export default function CommunityCreate() {
 
       <section className={styles.submit}>
         <h2 className="sr-only">생성버튼</h2>
-        <FillButton onClick={() => alert('Button Clicked!')}>로그인</FillButton>
+        <FillButton type="submit" formAction="">
+          생성
+        </FillButton>
       </section>
     </form>
   )

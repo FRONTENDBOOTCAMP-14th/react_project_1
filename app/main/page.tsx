@@ -1,7 +1,7 @@
-import CommunityCard from '../_components/CommunityCard'
 import { ErrorState } from '@/components/common'
 import { API_ENDPOINTS } from '@/constants'
-import type { CommunityListResponse } from '@/lib/types'
+import type { CommunityBase, CommunityListResponse } from '@/lib/types'
+import CommunityCard from '../_components/CommunityCard'
 import styles from './page.module.css'
 
 /**
@@ -31,7 +31,7 @@ export default async function MainPage() {
       throw new Error(result.error || '커뮤니티 목록을 불러오는데 실패했습니다.')
     }
 
-    const communities = result.data
+    const communities = result.data.data
 
     // 커뮤니티가 없는 경우
     if (communities.length === 0) {
@@ -49,7 +49,7 @@ export default async function MainPage() {
         <section className={styles.communityList}>
           <h1 className={styles.title}>공개 커뮤니티</h1>
           <div className={styles.cardGrid}>
-            {communities.map(community => (
+            {communities.map((community: CommunityBase) => (
               <CommunityCard key={community.clubId} community={community} />
             ))}
           </div>

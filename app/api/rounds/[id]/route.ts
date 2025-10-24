@@ -13,6 +13,10 @@ import type { UpdateRoundRequest } from '@/lib/types/round'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { hasErrorCode } from '@/lib/errors'
+import { checkIsTeamLeader } from '@/lib/auth/permissions'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
+import type { CustomSession } from '@/lib/types'
 
 /**
  * GET /api/rounds/[id]
@@ -50,7 +54,31 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id } = await params
     const body = (await request.json()) as UpdateRoundRequest
 
-    // 동적 업데이트 데이터 구성
+    // 먼저 round 존재 여부와 커뮤니티 정보 확인
+    const existingRound = await prisma.round.findFirst({
+      where: {
+        roundId: id,
+        deletedAt: null,
+      },
+      select: roundSelect,
+    })
+
+    if (!existingRound) {
+      return createErrorResponse('회차를 찾을 수 없습니다.', 404)
+    }
+
+    // 인증 확인
+    const session = await getServerSession(authOptions)
+    const userId = (session as CustomSession)?.userId
+    if (!userId) {
+      return createErrorResponse('인증이 필요합니다.', 401)
+    }
+
+    // 팀장 권한 확인
+    const isTeamLeader = await checkIsTeamLeader(userId, existingRound.clubId)
+    if (!isTeamLeader) {
+      return createErrorResponse('팀장만 회차를 수정할 수 있습니다.', 403)
+    }
     const updateData: {
       roundNumber?: number
       startDate?: Date | null

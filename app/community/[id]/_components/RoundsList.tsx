@@ -6,22 +6,24 @@ import { LoadingState, ErrorState } from '@/components/common'
 import RoundCard from './RoundCard'
 import { MESSAGES } from '@/constants'
 import styles from './RoundCard.module.css'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
+
+interface RoundsListProps {
+  clubId: string
+}
 
 /**
  * 라운드 목록 컨테이너 컴포넌트
  * useRounds 훅을 사용하여 전체 라운드 목록을 가져와 각 라운드를 RoundCard로 렌더링합니다.
  * 전역 상태에서 clubId와 isTeamLeader를 가져옵니다.
  */
-export default function RoundsList() {
-  // 전역 상태에서 커뮤니티 컨텍스트 가져오기
-  const clubId = useCommunityStore(state => state.clubId)
-
-  const { rounds, loading, error, refetch } = useRounds(clubId || '')
+export default function RoundsList({ clubId }: RoundsListProps) {
   // 열린 라운드 ID를 추적하는 상태 (기본값: 첫 번째 라운드 열림)
   const [openRoundIds, setOpenRoundIds] = useState<Set<string>>(() => {
     return new Set()
   })
+
+  // useRounds 훅은 clubId가 없을 때 자동으로 에러 상태를 설정함
+  const { rounds, loading, error, refetch } = useRounds(clubId || '')
 
   /**
    * 라운드 열림/닫힘 토글 핸들러

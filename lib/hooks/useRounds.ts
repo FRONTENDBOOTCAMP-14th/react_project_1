@@ -20,7 +20,11 @@ interface UseRoundsResult {
 
 /**
  * 라운드 데이터를 가져오는 커스텀 훅
- * @param clubId - 클럽 ID
+ *
+ * @param clubId - 커뮤니티 ID (필수)
+ * - 빈 문자열일 경우 데이터를 조회하지 않고 에러 상태를 반환합니다.
+ * - 해당 clubId에 해당하는 회차만 필터링하여 반환합니다.
+ *
  * @returns 라운드 목록, 현재 라운드, 로딩 상태, 에러, CRUD 함수
  */
 export const useRounds = (clubId: string): UseRoundsResult => {
@@ -30,6 +34,15 @@ export const useRounds = (clubId: string): UseRoundsResult => {
   const [error, setError] = useState<string | null>(null)
 
   const fetchRounds = useCallback(async () => {
+    // clubId가 없으면 데이터 조회하지 않음
+    if (!clubId) {
+      setRounds([])
+      setCurrentRound(null)
+      setLoading(false)
+      setError('커뮤니티 ID가 필요합니다')
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)

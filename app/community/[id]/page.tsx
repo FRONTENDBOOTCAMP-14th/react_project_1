@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
-import { checkIsTeamLeader } from '@/lib/auth/permissions'
+import { checkIsTeamLeader, checkIsMember } from '@/lib/auth/permissions'
 import CommunityContent from './_components/CommunityContent'
 import { ROUTES } from '@/constants'
 import type { CustomSession } from '@/lib/types'
@@ -26,6 +26,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   // 서버에서 팀장 권한 확인
   const isTeamLeader = await checkIsTeamLeader(userId, clubId)
+  // 서버에서 멤버 여부 확인
+  const isMember = await checkIsMember(userId, clubId)
 
-  return <CommunityContent clubId={clubId} isTeamLeader={isTeamLeader} />
+  return <CommunityContent clubId={clubId} isTeamLeader={isTeamLeader} isMember={isMember} />
 }

@@ -14,19 +14,19 @@ export async function checkIsTeamLeader(
   userId: string | null | undefined,
   clubId: string
 ): Promise<boolean> {
-  if (!userId) return false
+  if (!userId || !clubId) return false
 
   try {
-    const member = await prisma.communityMember.findFirst({
-      where: {
-        userId,
-        clubId,
-        deletedAt: null,
-        role: 'admin',
-      },
-    })
-
-    return !!member
+    return (
+      (await prisma.communityMember.count({
+        where: {
+          userId,
+          clubId,
+          role: 'admin',
+          deletedAt: null,
+        },
+      })) > 0
+    )
   } catch (error) {
     console.error('Error checking team admin permission:', error)
     return false
@@ -43,20 +43,20 @@ export async function checkIsMember(
   userId: string | null | undefined,
   clubId: string
 ): Promise<boolean> {
-  if (!userId) return false
+  if (!userId || !clubId) return false
 
   try {
-    const member = await prisma.communityMember.findFirst({
-      where: {
-        userId,
-        clubId,
-        deletedAt: null,
-      },
-    })
-
-    return !!member
+    return (
+      (await prisma.communityMember.count({
+        where: {
+          userId,
+          clubId,
+          deletedAt: null,
+        },
+      })) > 0
+    )
   } catch (error) {
-    console.error('Error checking member status:', error)
+    console.error('Error checking member permission:', error)
     return false
   }
 }

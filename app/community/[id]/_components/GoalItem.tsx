@@ -1,10 +1,10 @@
 'use client'
 
 import { memo, useState, useRef, useEffect } from 'react'
-import { Checkbox } from '@/components/ui'
+import { Checkbox, Popover, type PopoverAction } from '@/components/ui'
 import type { StudyGoal } from '@/lib/types/goal'
 import styles from './RoundCard.module.css'
-import { Check, X } from 'lucide-react'
+import { Check, Ellipsis, X } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import type { CustomSession } from '@/lib/types'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
@@ -35,19 +35,43 @@ export interface GoalItemProps {
 
   /**
    * 저장 콜백
+   * @param title - 목표 제목
    */
   onSave?: (title: string) => Promise<void>
+
   /**
    * 취소 콜백
    */
   onCancel?: () => void
+
+  /**
+   * 목표 편집 콜백
+   * @param goalId - 목표 식별자
+   * @param newTitle - 편집 후 목표 제목
+   */
+  onEdit?: (goalId: string, newTitle: string) => Promise<void>
+
+  /**
+   * 목표 삭제 콜백
+   * @param goalId - 목표 식별자
+   */
+  onDelete?: (goalId: string) => Promise<void>
 }
 
 /**
  * 개별 목표 아이템 컴포넌트 (순수 컴포넌트)
  * @param props - GoalItemProps
  */
-function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel }: GoalItemProps) {
+function GoalItem({
+  goal,
+  onToggle,
+  isTeam,
+  isEditing = false,
+  onSave,
+  onCancel,
+  onEdit,
+  onDelete,
+}: GoalItemProps) {
   const { data: session } = useSession()
   const userId = (session as CustomSession)?.userId
   const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
@@ -55,6 +79,20 @@ function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel 
   const [isSaving, setIsSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const isOwner = userId && goal.ownerId === userId
+
+  const popoverActions: PopoverAction[] = [
+    {
+      id: 'edit',
+      label: '수정',
+      onClick: () => {},
+    },
+    {
+      id: 'delete',
+      label: '삭제',
+      onClick: () => {},
+      isDanger: true,
+    },
+  ]
 
   // 편집 모드일 때 자동 포커스
   useEffect(() => {
@@ -135,6 +173,7 @@ function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel 
         />
         <p className={styles['goal-description']}>{goal.title}</p>
       </div>
+      {isOwner && <Popover trigger={<Ellipsis />} actions={popoverActions} />}
     </div>
   )
 }

@@ -9,32 +9,12 @@
 export function getProgressColor(percentage: number): string {
   const clamped = Math.max(0, Math.min(100, percentage))
 
-  if (clamped >= 100) return '#22c55e' // green-500
-  if (clamped >= 80) return '#3b82f6' // blue-500
-  if (clamped >= 60) return '#f59e0b' // amber-500
-  if (clamped >= 40) return '#f97316' // orange-500
-  if (clamped >= 20) return '#ef4444' // red-500
-  return '#6b7280' // gray-500
-}
-
-/**
- * 등급별 색상 (A, B, C, D, F)
- */
-export function getGradeColor(grade: 'A' | 'B' | 'C' | 'D' | 'F'): string {
-  switch (grade) {
-    case 'A':
-      return '#22c55e' // green-500
-    case 'B':
-      return '#3b82f6' // blue-500
-    case 'C':
-      return '#f59e0b' // amber-500
-    case 'D':
-      return '#f97316' // orange-500
-    case 'F':
-      return '#ef4444' // red-500
-    default:
-      return '#6b7280' // gray-500
-  }
+  if (clamped >= 100) return 'var(--success-color)' // green
+  if (clamped >= 80) return 'var(--info-color)' // blue
+  if (clamped >= 60) return 'var(--warning-color)' // amber
+  if (clamped >= 40) return 'var(--color-orange)' // orange
+  if (clamped >= 20) return 'var(--error-color)' // red
+  return 'var(--color-gray)' // gray
 }
 
 /**
@@ -43,15 +23,15 @@ export function getGradeColor(grade: 'A' | 'B' | 'C' | 'D' | 'F'): string {
 export function getGoalStatusColor(status: '초기' | '진행중' | '완료' | '초과'): string {
   switch (status) {
     case '완료':
-      return '#22c55e' // green-500
+      return 'var(--success-color)' // green
     case '진행중':
-      return '#3b82f6' // blue-500
+      return 'var(--info-color)' // blue
     case '초기':
-      return '#6b7280' // gray-500
+      return 'var(--color-gray)' // gray
     case '초과':
-      return '#ef4444' // red-500
+      return 'var(--error-color)' // red
     default:
-      return '#6b7280'
+      return 'var(--color-gray)'
   }
 }
 
@@ -61,15 +41,15 @@ export function getGoalStatusColor(status: '초기' | '진행중' | '완료' | '
 export function getDeadlineColor(status: '임박' | '마감' | '초과' | '여유'): string {
   switch (status) {
     case '여유':
-      return '#22c55e' // green-500
+      return 'var(--success-color)' // green
     case '임박':
-      return '#f59e0b' // amber-500
+      return 'var(--warning-color)' // amber
     case '마감':
-      return '#ef4444' // red-500
+      return 'var(--error-color)' // red
     case '초과':
-      return '#6b7280' // gray-500
+      return 'var(--color-gray)' // gray
     default:
-      return '#6b7280'
+      return 'var(--color-gray)'
   }
 }
 
@@ -79,17 +59,9 @@ export function getDeadlineColor(status: '임박' | '마감' | '초과' | '여�
 export function getRoleColor(role: string): string {
   switch (role.toLowerCase()) {
     case 'admin':
-    case 'owner':
-      return '#7c3aed' // violet-500
-    case 'moderator':
-    case 'manager':
-      return '#3b82f6' // blue-500
-    case 'member':
-      return '#6b7280' // gray-500
-    case 'guest':
-      return '#9ca3af' // gray-400
+      return 'var(--info-color)' // blue
     default:
-      return '#6b7280'
+      return 'var(--color-gray)'
   }
 }
 
@@ -98,16 +70,16 @@ export function getRoleColor(role: string): string {
  */
 export function getRoundColor(roundNumber: number): string {
   const colors = [
-    '#ef4444', // red-500
-    '#f97316', // orange-500
-    '#f59e0b', // amber-500
-    '#eab308', // yellow-500
-    '#22c55e', // green-500
-    '#06b6d4', // cyan-500
-    '#3b82f6', // blue-500
-    '#8b5cf6', // violet-500
-    '#ec4899', // pink-500
-    '#6b7280', // gray-500
+    'var(--color-red)', // red
+    'var(--color-orange)', // orange
+    'var(--warning-color)', // amber
+    'var(--color-yellow)', // yellow
+    'var(--success-color)', // green
+    'var(--color-cyan)', // cyan
+    'var(--info-color)', // blue
+    'var(--color-violet)', // violet
+    'var(--color-pink)', // pink
+    'var(--color-gray)', // gray
   ]
 
   return colors[(roundNumber - 1) % colors.length]
@@ -118,24 +90,24 @@ export function getRoundColor(roundNumber: number): string {
  */
 export const chartColors = {
   primary: [
-    '#3b82f6', // blue-500
-    '#22c55e', // green-500
-    '#f59e0b', // amber-500
-    '#ef4444', // red-500
-    '#8b5cf6', // violet-500
-    '#06b6d4', // cyan-500
-    '#ec4899', // pink-500
-    '#84cc16', // lime-500
+    'var(--info-color)', // blue
+    'var(--success-color)', // green
+    'var(--warning-color)', // amber
+    'var(--error-color)', // red
+    'var(--color-violet)', // violet
+    'var(--color-cyan)', // cyan
+    'var(--color-pink)', // pink
+    'var(--color-lime)', // lime
   ],
   secondary: [
-    '#60a5fa', // blue-400
-    '#4ade80', // green-400
-    '#fbbf24', // amber-400
-    '#f87171', // red-400
-    '#a78bfa', // violet-400
-    '#22d3ee', // cyan-400
-    '#f472b6', // pink-400
-    '#a3e635', // lime-400
+    'var(--color-blue-light)', // blue light
+    'var(--color-green-light)', // green light
+    'var(--color-amber-light)', // amber light
+    'var(--color-red-light)', // red light
+    'var(--color-violet-light)', // violet light
+    'var(--color-cyan-light)', // cyan light
+    'var(--color-pink-light)', // pink light
+    'var(--color-lime-light)', // lime light
   ],
 }
 
@@ -149,16 +121,16 @@ export function getProgressBarColor(percentage: number): {
   const clamped = Math.max(0, Math.min(100, percentage))
 
   if (clamped >= 80) {
-    return { backgroundColor: '#22c55e', color: '#ffffff' }
+    return { backgroundColor: 'var(--success-color)', color: 'var(--primary-color)' }
   } else if (clamped >= 60) {
-    return { backgroundColor: '#3b82f6', color: '#ffffff' }
+    return { backgroundColor: 'var(--info-color)', color: 'var(--primary-color)' }
   } else if (clamped >= 40) {
-    return { backgroundColor: '#f59e0b', color: '#ffffff' }
+    return { backgroundColor: 'var(--warning-color)', color: 'var(--primary-color)' }
   } else if (clamped >= 20) {
-    return { backgroundColor: '#f97316', color: '#ffffff' }
+    return { backgroundColor: 'var(--color-orange)', color: 'var(--primary-color)' }
   }
 
-  return { backgroundColor: '#ef4444', color: '#ffffff' }
+  return { backgroundColor: 'var(--error-color)', color: 'var(--primary-color)' }
 }
 
 /**
@@ -173,7 +145,7 @@ export function getContrastTextColor(backgroundColor: string): string {
 
   const brightness = (r * 299 + g * 587 + b * 114) / 1000
 
-  return brightness > 128 ? '#000000' : '#ffffff'
+  return brightness > 128 ? 'var(--secondary-color)' : 'var(--primary-color)'
 }
 
 /**
@@ -211,16 +183,16 @@ export function darkenColor(color: string, percent: number): string {
  */
 export function getReactionColor(emoji: string): string {
   const emojiColors: Record<string, string> = {
-    '👍': '#22c55e', // green
-    '❤️': '#ef4444', // red
-    '😂': '#f59e0b', // amber
-    '😮': '#3b82f6', // blue
-    '😢': '#8b5cf6', // violet
-    '🔥': '#f97316', // orange
-    '🎉': '#ec4899', // pink
+    '👍': 'var(--success-color)', // green
+    '❤️': 'var(--error-color)', // red
+    '😂': 'var(--warning-color)', // amber
+    '😮': 'var(--info-color)', // blue
+    '😢': 'var(--color-violet)', // violet
+    '🔥': 'var(--color-orange)', // orange
+    '🎉': 'var(--color-pink)', // pink
   }
 
-  return emojiColors[emoji] || '#6b7280'
+  return emojiColors[emoji] || 'var(--color-gray)'
 }
 
 /**
@@ -229,14 +201,14 @@ export function getReactionColor(emoji: string): string {
 export function getNotificationColor(type: 'info' | 'success' | 'warning' | 'error'): string {
   switch (type) {
     case 'info':
-      return '#3b82f6' // blue-500
+      return 'var(--info-color)' // blue
     case 'success':
-      return '#22c55e' // green-500
+      return 'var(--success-color)' // green
     case 'warning':
-      return '#f59e0b' // amber-500
+      return 'var(--warning-color)' // amber
     case 'error':
-      return '#ef4444' // red-500
+      return 'var(--error-color)' // red
     default:
-      return '#6b7280'
+      return 'var(--color-gray)'
   }
 }

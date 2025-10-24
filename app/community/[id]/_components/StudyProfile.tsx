@@ -131,7 +131,8 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
  * - 선언적 조건부 렌더링
  */
 export default function StudyProfile({ id }: StudyProfileProps) {
-  const { community, loading, error } = useCommunity(id)
+  const { community, loading, error, refetch, createCommunity, updateCommunity, deleteCommunity } =
+    useCommunity(id)
 
   return renderWithLoading(
     loading,

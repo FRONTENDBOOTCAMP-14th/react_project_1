@@ -28,10 +28,6 @@ export interface GoalItemProps {
    * 그룹 목표 여부
    */
   isTeam: boolean
-  /**
-   * 편집 모드 (새 목표 추가 시)
-   */
-  isEditing?: boolean
 
   /**
    * 저장 콜백
@@ -62,21 +58,13 @@ export interface GoalItemProps {
  * 개별 목표 아이템 컴포넌트 (순수 컴포넌트)
  * @param props - GoalItemProps
  */
-function GoalItem({
-  goal,
-  onToggle,
-  isTeam,
-  isEditing = false,
-  onSave,
-  onCancel,
-  onEdit,
-  onDelete,
-}: GoalItemProps) {
+function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }: GoalItemProps) {
   const { data: session } = useSession()
   const userId = (session as CustomSession)?.userId
   const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const isOwner = userId && goal.ownerId === userId
 
@@ -84,12 +72,16 @@ function GoalItem({
     {
       id: 'edit',
       label: '수정',
-      onClick: () => {},
+      onClick: () => setIsEditing(true),
     },
     {
       id: 'delete',
       label: '삭제',
-      onClick: () => {},
+      onClick: () => {
+        if (confirm('정말로 삭제하시겠습니까?')) {
+          onDelete?.(goal.goalId)
+        }
+      },
       isDanger: true,
     },
   ]
@@ -100,6 +92,20 @@ function GoalItem({
       inputRef.current.focus()
     }
   }, [isEditing])
+
+  const handleEdit = async () => {
+    if (!title.trim() || !onEdit) return
+
+    setIsSaving(true)
+    try {
+      await onEdit(goal.goalId, title.trim())
+      setIsEditing(false) // 성공 시 편집 모드 종료
+    } catch {
+      setTitle(goal.title || '') // 실패 시 원래 제목으로 복원
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!title.trim() || !onSave) return
@@ -114,9 +120,20 @@ function GoalItem({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSave()
+      // 신규 추가 모드 vs 편집 모드 분기
+      if (isEditing) {
+        handleEdit()
+      } else {
+        handleSave()
+      }
     } else if (e.key === 'Escape') {
-      onCancel?.()
+      // 취소 처리
+      if (isEditing) {
+        setTitle(goal.title || '') // 원래 제목으로 복원
+        setIsEditing(false)
+      } else {
+        onCancel?.()
+      }
     }
   }
 
@@ -140,7 +157,7 @@ function GoalItem({
         <div className={styles['goal-actions']}>
           <button
             type="button"
-            onClick={handleSave}
+            onClick={isEditing ? handleEdit : handleSave}
             disabled={!title.trim() || isSaving}
             className={styles['action-button']}
             aria-label="저장"
@@ -149,7 +166,14 @@ function GoalItem({
           </button>
           <button
             type="button"
-            onClick={onCancel}
+            onClick={
+              isEditing
+                ? () => {
+                    setTitle(goal.title || '')
+                    setIsEditing(false)
+                  }
+                : onCancel
+            }
             disabled={isSaving}
             className={styles['action-button']}
             aria-label="취소"

@@ -10,3 +10,8 @@
   align-items: center;
   padding: var(--spacing-md) 0;
 }
+
+.logo-link {
+  display: flex;
+  justify-self: center;
+}

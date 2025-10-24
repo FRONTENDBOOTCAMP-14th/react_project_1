@@ -28,10 +28,6 @@ interface RoundCardProps {
    */
   isOpen: boolean
   /**
-   * 라운드 수정/삭제 가능 여부
-   */
-  isEditMode?: boolean
-  /**
    * 라운드 카드 열림/닫힘 토글 핸들러
    */
   onToggleOpen: () => void
@@ -64,10 +60,6 @@ interface RoundCardHeaderProps {
    */
   isOpen: boolean
   /**
-   * 라운드 수정/삭제 가능 여부
-   */
-  isEditMode?: boolean
-  /**
    * 라운드 카드 열림/닫힘 토글 핸들러
    */
   onToggleOpen: () => void
@@ -77,7 +69,7 @@ interface RoundCardHeaderProps {
  * 라운드 헤더 컴포넌트
  * @param props - RoundCardHeaderProps
  */
-function RoundCardHeader({ round, isOpen, isEditMode, onToggleOpen }: RoundCardHeaderProps) {
+function RoundCardHeader({ round, isOpen, onToggleOpen }: RoundCardHeaderProps) {
   const popoverActions: PopoverAction[] = [
     {
       id: 'edit',
@@ -136,10 +128,6 @@ interface RoundCardBodyProps {
    * 라운드 카드가 열려있는지 여부
    */
   isOpen: boolean
-  /**
-   * 라운드 수정/삭제 가능 여부
-   */
-  isEditMode?: boolean
 }
 
 /**
@@ -148,12 +136,15 @@ interface RoundCardBodyProps {
  * - 선언적 조건부 렌더링
  * @param props - RoundCardBodyProps
  */
-function RoundCardBody({ roundId, isOpen, isEditMode }: RoundCardBodyProps) {
+function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
   // 전역 상태에서 커뮤니티 컴텍스트 가져오기
   const clubId = useCommunityStore(state => state.clubId)
   const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
   const { data: session } = useSession()
-  const { goals, loading, error, refetch, createGoal } = useGoals(clubId || '', roundId)
+  const { goals, loading, error, refetch, createGoal, updateGoal, deleteGoal } = useGoals(
+    clubId || '',
+    roundId
+  )
   const { optimisticGoals, handleToggleComplete } = useGoalToggle(goals, refetch)
 
   /**
@@ -187,6 +178,38 @@ function RoundCardBody({ roundId, isOpen, isEditMode }: RoundCardBodyProps) {
 
     if (!result.success) {
       toast.error(result.error || '목표 생성에 실패했습니다')
+    } else {
+      toast.success('목표가 추가되었습니다')
+    }
+  }
+
+  /**
+   * 목표 수정 핸들러
+   * @param goalId - 목표 식별자
+   * @param newTitle - 수정할 제목
+   */
+  const handleEditGoal = async (goalId: string, newTitle: string): Promise<void> => {
+    const result = await updateGoal(goalId, { title: newTitle })
+
+    if (result.success) {
+      toast.success('목표가 수정되었습니다')
+    } else {
+      toast.error(result.error || '목표 수정에 실패했습니다')
+      throw new Error(result.error)
+    }
+  }
+
+  /**
+   * 목표 삭제 핸들러
+   * @param goalId - 목표 식별자
+   */
+  const handleDeleteGoal = async (goalId: string): Promise<void> => {
+    const result = await deleteGoal(goalId)
+
+    if (result.success) {
+      toast.success('목표가 삭제되었습니다')
+    } else {
+      toast.error(result.error || '목표 삭제에 실패했습니다')
     }
   }
 
@@ -202,6 +225,8 @@ function RoundCardBody({ roundId, isOpen, isEditMode }: RoundCardBodyProps) {
         onToggle={handleToggleComplete}
         isTeamLeader={isTeamLeader}
         onAddGoal={roundId ? handleAddGoal : undefined}
+        onEdit={handleEditGoal}
+        onDelete={handleDeleteGoal}
         isOpen={isOpen}
       />
     )

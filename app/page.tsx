@@ -7,7 +7,7 @@ export default function HomePage() {
   return (
     <main className={styles.main}>
       <div className={styles['logo-container']}>
-        <IconLink style={{ display: 'flex', justifySelf: 'center' }} href="/">
+        <IconLink className={styles['logo-link']} href="/">
           <Image
             src="/svg/logo.svg"
             alt="Study Club Tracker 로고"

@@ -1,3 +1,5 @@
+'use client'
+
 import { memo, useState, useRef, useEffect } from 'react'
 import { Checkbox } from '@/components/ui'
 import type { StudyGoal } from '@/lib/types/goal'
@@ -52,6 +54,7 @@ function GoalItem({ goal, onToggle, isTeam, isEditing = false, onSave, onCancel 
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const isOwner = userId && goal.ownerId === userId
 
   // 편집 모드일 때 자동 포커스
   useEffect(() => {

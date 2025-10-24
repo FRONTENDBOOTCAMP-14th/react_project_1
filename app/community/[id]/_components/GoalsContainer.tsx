@@ -1,3 +1,5 @@
+'use client'
+
 import { memo } from 'react'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalsList from './GoalsList'

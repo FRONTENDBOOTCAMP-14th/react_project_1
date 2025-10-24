@@ -1,3 +1,5 @@
+'use client'
+
 import { memo, useState } from 'react'
 import { StrokeButton } from '@/components/ui'
 import type { StudyGoal } from '@/lib/types/goal'

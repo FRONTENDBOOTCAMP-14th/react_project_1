@@ -47,6 +47,7 @@ export const MESSAGES = {
     FAILED_TO_DELETE_MEMBER: '멤버 삭제에 실패했습니다.',
     USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
     INVALID_ROLE: '유효하지 않은 역할입니다.',
+    FAILED_TO_LOAD_REGIONS: '지역 정보를 불러오는데 실패했습니다.',
   },
 
   LOADING: {

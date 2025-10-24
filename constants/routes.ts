@@ -81,6 +81,9 @@ export const API_ENDPOINTS = {
       return `/api/members?${searchParams.toString()}`
     },
   },
+  REGION: {
+    BASE: '/api/region',
+  },
 } as const
 
 /**

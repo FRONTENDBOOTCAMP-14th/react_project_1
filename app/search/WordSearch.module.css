@@ -1,0 +1,32 @@
+.container {
+  width: 100%;
+  min-width: 280px;
+}
+.inputWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.IconButton {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+}
+
+.relatedKeywords {
+  margin-top: var(--spacing-xxs);
+}
+
+.word {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+  padding: 0;
+  margin: 0 0 0 var(--spacing-xs);
+  color: var(--etc-color-2);
+  font-size: var(--font-sm);
+  font-weight: var(--font-weight-normal);
+}

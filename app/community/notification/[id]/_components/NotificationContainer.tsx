@@ -111,9 +111,7 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
         쓰기
       </IconButton>
 
-      {/* 공지사항 목록 */}
       <div className={styles.content}>
-        {/* 편집 모드 */}
         {isEditing && (
           <NotificationEditor
             onSave={handleSave}
@@ -123,13 +121,10 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
           />
         )}
 
-        {/* 로딩 */}
         {loading && <div className={styles.message}>로딩 중...</div>}
 
-        {/* 에러 */}
         {error && <div className={styles.error}>{error}</div>}
 
-        {/* 공지사항 목록 */}
         {!loading && !error && notifications.length === 0 && (
           <div className={styles.message}>작성된 공지사항이 없습니다</div>
         )}

@@ -16,18 +16,14 @@ export default async function HomePage() {
     <main className={styles.main}>
       <div className={styles['logo-container']}>
         <IconLink className={styles['logo-link']} href="/">
-          <Image
-            src="/svg/logo.svg"
-            alt="Study Club Tracker 로고"
-            width={40}
-            height={40}
-            priority
-          />
+          <Image src="/svg/logo.svg" alt="토끼노트 로고" width={40} height={40} priority />
         </IconLink>
       </div>
 
       {userId ? (
-        <div>{user?.username}님, 환영합니다!</div>
+        <div className={styles['welcome-message']}>
+          {user?.username}님, 오늘은 어떤 스터디가 기다리고 있을까요?
+        </div>
       ) : (
         <div>커뮤니티를 이용하시려면 로그인이 필요합니다</div>
       )}

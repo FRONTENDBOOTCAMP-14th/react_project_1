@@ -16,8 +16,8 @@ import type { CreateMemberRequest } from '@/lib/types/member'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
-import type { PaginationInfo } from '@/lib/types'
 import { hasErrorCode } from '@/lib/errors'
+import { getPaginationParams, getStringParam, withPagination } from '@/lib/utils/apiHelpers'
 
 /**
  * GET /api/members
@@ -35,15 +35,13 @@ import { hasErrorCode } from '@/lib/errors'
  */
 export async function GET(request: NextRequest) {
   try {
+    const { page, limit, skip } = getPaginationParams(request)
     const searchParams = request.nextUrl.searchParams
-    const clubId = searchParams.get('clubId')
-    const userId = searchParams.get('userId')
-    const role = searchParams.get('role')
 
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)))
-    const skip = (page - 1) * limit
+    // 필터링 파라미터
+    const clubId = getStringParam(searchParams, 'clubId')
+    const userId = getStringParam(searchParams, 'userId')
+    const role = getStringParam(searchParams, 'role')
 
     // where 절 구성
     const whereClause = {
@@ -53,8 +51,8 @@ export async function GET(request: NextRequest) {
       ...(role && { role }),
     }
 
-    // 병렬 조회: 데이터 + 전체 갯수
-    const [members, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.communityMember.findMany({
         where: whereClause,
         skip,
@@ -63,20 +61,8 @@ export async function GET(request: NextRequest) {
         select: memberDetailSelect,
       }),
       prisma.communityMember.count({ where: whereClause }),
-    ])
-
-    const pagination: PaginationInfo = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }
-
-    return createSuccessResponse({
-      data: members,
-      count: members.length,
-      pagination,
-    })
+      { page, limit, skip }
+    )
   } catch (error) {
     console.error('Error fetching members:', error)
     return createErrorResponse(MESSAGES.ERROR.FAILED_TO_LOAD_MEMBERS, 500)

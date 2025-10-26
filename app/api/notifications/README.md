@@ -19,7 +19,7 @@
 | page     | number  | ❌   | 페이지 번호 (기본값: 1)    |
 | limit    | number  | ❌   | 페이지당 개수 (기본값: 20) |
 
-#### Response
+#### Response - 공지사항 목록 조회
 
 ```json
 {
@@ -46,7 +46,7 @@
 }
 ```
 
-#### 사용 예제
+#### 사용 예제 - 공지사항 목록 조회
 
 ```typescript
 // 커뮤니티의 모든 공지사항 조회
@@ -68,7 +68,7 @@ const pageResponse = await fetch('/api/notifications?clubId=club-uuid-here&page=
 
 새로운 공지사항을 생성합니다.
 
-#### Request Body
+#### Request Body - 공지사항 생성
 
 ```json
 {
@@ -88,7 +88,7 @@ const pageResponse = await fetch('/api/notifications?clubId=club-uuid-here&page=
 | content  | string  | ❌   | 공지사항 내용                  |
 | isPinned | boolean | ❌   | 상단 고정 여부 (기본값: false) |
 
-#### Response
+#### Response - 공지사항 생성
 
 ```json
 {
@@ -106,7 +106,7 @@ const pageResponse = await fetch('/api/notifications?clubId=club-uuid-here&page=
 }
 ```
 
-#### 사용 예제
+#### 사용 예제 - 공지사항 생성
 
 ```typescript
 const response = await fetch('/api/notifications', {
@@ -131,7 +131,7 @@ const data = await response.json()
 
 특정 공지사항의 상세 정보를 조회합니다. 작성자와 커뮤니티 정보를 포함합니다.
 
-#### Response
+#### Response - 공지사항 상세 조회
 
 ```json
 {
@@ -157,7 +157,7 @@ const data = await response.json()
 }
 ```
 
-#### 사용 예제
+#### 사용 예제 - 공지사항 상세 조회
 
 ```typescript
 const response = await fetch('/api/notifications/notification-uuid-here')
@@ -172,7 +172,7 @@ const data = await response.json()
 
 특정 공지사항을 수정합니다. 제공된 필드만 업데이트됩니다.
 
-#### Request Body
+#### Request Body - 공지사항 수정
 
 ```json
 {
@@ -184,7 +184,7 @@ const data = await response.json()
 
 모든 필드는 선택적(optional)입니다.
 
-#### Response
+#### Response - 공지사항 수정
 
 ```json
 {
@@ -202,7 +202,7 @@ const data = await response.json()
 }
 ```
 
-#### 사용 예제
+#### 사용 예제 - 공지사항 수정
 
 ```typescript
 // 공지사항 고정/해제
@@ -231,7 +231,7 @@ const updateResponse = await fetch('/api/notifications/notification-uuid-here', 
 
 특정 공지사항을 소프트 삭제합니다. 실제 데이터는 유지되지만 목록에서 제외됩니다.
 
-#### Response
+#### Response - 공지사항 삭제
 
 ```json
 {
@@ -240,7 +240,7 @@ const updateResponse = await fetch('/api/notifications/notification-uuid-here', 
 }
 ```
 
-#### 사용 예제
+#### 사용 예제 - 공지사항 삭제
 
 ```typescript
 const response = await fetch('/api/notifications/notification-uuid-here', {

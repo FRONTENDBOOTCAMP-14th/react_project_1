@@ -1,6 +1,6 @@
 .card {
   background: var(--primary-color);
-  border: 1px solid var(--etc-color-4);
+  border: 1px solid var(--gray-300);
   border-radius: var(--card-radius);
   padding: var(--spacing-sm);
   transition: all 0.2s;
@@ -11,7 +11,7 @@
 }
 
 .card.pinned {
-  background: var(--etc-color-1);
+  background: var(--etc-color);
 }
 
 .header {
@@ -53,7 +53,7 @@
 
 .action-button {
   display: flex;
-  color: var(--etc-color-2);
+  color: var(--gray-500);
   cursor: pointer;
 }
 
@@ -84,10 +84,10 @@
   justify-content: flex-end;
   align-items: center;
   padding-top: var(--spacing-xs);
-  border-top: 1px solid var(--etc-color-3);
+  border-top: 1px solid var(--gray-100);
 }
 
 .date {
   font-size: var(--font-xs);
-  color: var(--etc-color-2);
+  color: var(--gray-500);
 }

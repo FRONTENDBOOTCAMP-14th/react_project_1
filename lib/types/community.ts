@@ -71,9 +71,11 @@ export interface CommunityResponse {
  */
 export interface CommunityListResponse {
   success: boolean
-  data?: CommunityBase[]
-  count?: number
-  pagination?: PaginationInfo
+  data?: {
+    data: CommunityBase[]
+    count: number
+    pagination: PaginationInfo
+  }
   error?: string
   message?: string
 }

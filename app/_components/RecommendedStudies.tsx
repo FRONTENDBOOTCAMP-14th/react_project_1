@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import styles from './RecommendedStudies.module.css'
 import type { CommunityBase, CommunityListResponse } from '@/lib/types/community'
+import { useEffect, useState } from 'react'
 import CommunityCard from './CommunityCard'
+import styles from './RecommendedStudies.module.css'
 
 export default function RecommendedStudies() {
   const [communities, setCommunities] = useState<CommunityBase[]>([])
@@ -25,7 +25,7 @@ export default function RecommendedStudies() {
 
         // response 유틸리티 타입을 활용한 타입 안전한 응답 처리
         if (result.success) {
-          const communitiesData = result.data
+          const communitiesData = result.data?.data
           // 데이터 유효성 검증
           if (communitiesData && Array.isArray(communitiesData)) {
             setCommunities(communitiesData)

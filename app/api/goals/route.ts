@@ -10,12 +10,17 @@
  * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
-import prisma from '@/lib/prisma'
-import { goalSelect, activeGoalWhere } from '@/lib/quaries'
-import type { NextRequest } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
-import type { PaginationInfo } from '@/lib/types'
+import prisma from '@/lib/prisma'
+import { activeGoalWhere, goalSelect } from '@/lib/quaries'
+import {
+  getBooleanParam,
+  getPaginationParams,
+  getStringParam,
+  withPagination,
+} from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/goals
@@ -33,32 +38,28 @@ import type { PaginationInfo } from '@/lib/types'
  */
 export async function GET(request: NextRequest) {
   try {
+    const { page, limit, skip } = getPaginationParams(request)
     const searchParams = request.nextUrl.searchParams
 
     // 필터 파라미터
-    const clubId = searchParams.get('clubId')
-    const roundId = searchParams.get('roundId')
-    const isTeam = searchParams.get('isTeam')
-    const isComplete = searchParams.get('isComplete')
-    const ownerId = searchParams.get('ownerId')
-
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
-    const skip = (page - 1) * limit
+    const clubId = getStringParam(searchParams, 'clubId')
+    const roundId = getStringParam(searchParams, 'roundId')
+    const isTeam = getBooleanParam(searchParams, 'isTeam')
+    const isComplete = getBooleanParam(searchParams, 'isComplete')
+    const ownerId = getStringParam(searchParams, 'ownerId')
 
     // where 절 구성
     const whereClause = {
       ...activeGoalWhere,
       ...(clubId && { clubId }),
       ...(roundId && { roundId }),
-      ...(isTeam !== null && { isTeam: isTeam === 'true' }),
-      ...(isComplete !== null && { isComplete: isComplete === 'true' }),
+      ...(isTeam !== null && { isTeam }),
+      ...(isComplete !== null && { isComplete }),
       ...(ownerId && { ownerId }),
     }
 
-    // 병렬 조회: 데이터 + 전체 갯수
-    const [goals, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.studyGoal.findMany({
         where: whereClause,
         skip,
@@ -67,20 +68,8 @@ export async function GET(request: NextRequest) {
         select: goalSelect,
       }),
       prisma.studyGoal.count({ where: whereClause }),
-    ])
-
-    const pagination: PaginationInfo = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }
-
-    return createSuccessResponse({
-      data: goals,
-      count: goals.length,
-      pagination,
-    })
+      { page, limit, skip }
+    )
   } catch (error) {
     // 서버 내부 오류 처리
     console.error('Error fetching goals:', error)

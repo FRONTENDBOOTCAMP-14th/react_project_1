@@ -29,6 +29,6 @@
   width: 64px;
   height: 64px;
   border-radius: var(--full-radius);
-  background-color: var(--etc-color-4);
+  background-color: var(--gray-300);
   backdrop-filter: saturate(1.2);
 }

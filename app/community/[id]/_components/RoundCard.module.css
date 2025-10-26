@@ -52,7 +52,7 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-sm);
   flex-direction: column;
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
   border-radius: var(--inner-card-radius);
 }
 
@@ -70,13 +70,13 @@
 .empty-state {
   text-align: center;
   padding: var(--spacing-md);
-  color: var(--etc-color-2);
+  color: var(--gray-500);
 }
 
 /* GoalItem 편집 모드 스타일 */
 .goal-input {
   flex: 1;
-  border: 1px solid var(--etc-color-3);
+  border: 1px solid var(--gray-100);
   border-radius: var(--inner-card-radius);
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-sm);
@@ -118,7 +118,7 @@
   gap: var(--spacing-xxs);
   margin-top: var(--spacing-xs);
   font-size: var(--font-sm);
-  color: var(--etc-color-2);
+  color: var(--gray-500);
 }
 
 .round-date {
@@ -142,11 +142,11 @@
   cursor: pointer;
   border-radius: var(--inner-card-radius);
   transition: background-color 0.2s;
-  color: var(--etc-color-2);
+  color: var(--gray-500);
 }
 
 .action-button:hover:not(:disabled) {
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
 }
 
 .action-button:disabled {

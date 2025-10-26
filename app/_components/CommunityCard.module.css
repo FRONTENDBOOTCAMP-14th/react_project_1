@@ -4,7 +4,7 @@
   margin-top: var(--spacing-lg);
   min-width: 320px;
   max-width: 650px;
-  border: solid 1px var(--etc-color-4);
+  border: solid 1px var(--gray-300);
   border-radius: var(--card-radius);
   padding: var(--spacing-sm);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
@@ -20,7 +20,7 @@
 }
 
 .title {
-  border-bottom: 1px solid var(--etc-color-2);
+  border-bottom: 1px solid var(--gray-500);
   font-size: var(--font-md);
   color: var(--secondary-color);
   width: 100%;
@@ -36,7 +36,7 @@
 
 .desc {
   font-size: var(--font-sm);
-  color: var(--etc-color-2);
+  color: var(--gray-500);
 }
 
 .join {

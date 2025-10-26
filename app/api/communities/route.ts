@@ -6,13 +6,18 @@
  *   - POST: 신규 커뮤니티 생성
  */
 
-import prisma from '@/lib/prisma'
-import { type NextRequest, NextResponse } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
-import type { PaginationInfo } from '@/lib/types'
+import prisma from '@/lib/prisma'
 import type { CommunityWhereClause } from '@/lib/types/community'
+import {
+  getBooleanParam,
+  getPaginationParams,
+  getStringParam,
+  withPagination,
+} from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/communities
@@ -31,23 +36,19 @@ import type { CommunityWhereClause } from '@/lib/types/community'
  */
 export async function GET(request: NextRequest) {
   try {
+    const { page, limit, skip } = getPaginationParams(request)
     const searchParams = request.nextUrl.searchParams
 
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
-    const skip = (page - 1) * limit
-
     // 필터링 파라미터
-    const isPublic = searchParams.get('isPublic')
-    const search = searchParams.get('search')
-    const createdAfter = searchParams.get('createdAfter')
-    const createdBefore = searchParams.get('createdBefore')
+    const isPublic = getBooleanParam(searchParams, 'isPublic')
+    const search = getStringParam(searchParams, 'search')
+    const createdAfter = getStringParam(searchParams, 'createdAfter')
+    const createdBefore = getStringParam(searchParams, 'createdBefore')
 
     // where 조건 구성
     const whereClause: CommunityWhereClause = {
       deletedAt: null,
-      ...(isPublic !== null && { isPublic: isPublic === 'true' }),
+      ...(isPublic !== null && { isPublic }),
       ...(search && {
         name: {
           contains: search,
@@ -74,8 +75,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 병렬 조회: 데이터 + 전체 개수
-    const [communities, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.community.findMany({
         where: whereClause,
         skip,
@@ -90,22 +91,8 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.community.count({ where: whereClause }),
-    ])
-
-    const pagination: PaginationInfo = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }
-
-    // CommunityListResponse 타입과 일치하도록 응답 구조 수정
-    return NextResponse.json({
-      success: true,
-      data: communities,
-      count: communities.length,
-      pagination,
-    })
+      { page, limit, skip }
+    )
   } catch (err: unknown) {
     console.error('Error fetching communities:', err)
     return createErrorResponse(

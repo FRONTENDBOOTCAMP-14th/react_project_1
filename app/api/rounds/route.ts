@@ -10,17 +10,18 @@
  * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
+import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
+import { MESSAGES } from '@/constants/messages'
+import { checkIsMember, checkIsTeamLeader } from '@/lib/auth/permissions'
 import prisma from '@/lib/prisma'
 import { roundSelect } from '@/lib/quaries'
-import type { CreateRoundRequest } from '@/lib/types/round'
-import type { NextRequest } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
-import { MESSAGES } from '@/constants/messages'
 import type { CustomSession } from '@/lib/types'
+import type { CreateRoundRequest } from '@/lib/types/round'
+import { getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { buildRoundWhereClause, getNextRoundNumber } from '@/lib/utils/rounds'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
-import { checkIsTeamLeader, checkIsMember } from '@/lib/auth/permissions'
-import { buildRoundWhereClause, createPaginationInfo, getNextRoundNumber } from '@/lib/utils/rounds'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/rounds
@@ -86,9 +87,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
-    const skip = (page - 1) * limit
+    const { page, limit, skip } = getPaginationParams(request)
 
     // 추가 필터링 파라미터
     const roundNumber = searchParams.get('roundNumber')
@@ -106,8 +105,8 @@ export async function GET(request: NextRequest) {
       endDateTo,
     })
 
-    // 병렬 조회: 데이터 + 전체 갯수
-    const [rounds, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.round.findMany({
         where: whereClause,
         skip,
@@ -116,15 +115,8 @@ export async function GET(request: NextRequest) {
         select: roundSelect,
       }),
       prisma.round.count({ where: whereClause }),
-    ])
-
-    const pagination = createPaginationInfo(page, limit, total)
-
-    return createSuccessResponse({
-      data: rounds,
-      count: rounds.length,
-      pagination,
-    })
+      { page, limit, skip }
+    )
   } catch (error) {
     console.error('Error fetching rounds:', error)
     return createErrorResponse(MESSAGES.ERROR.FAILED_TO_LOAD_ROUNDS, 500)

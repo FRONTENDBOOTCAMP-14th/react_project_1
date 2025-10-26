@@ -1,10 +1,10 @@
 import Button from '@/components/ui/Button'
-import styles from './page.module.css'
+import type { PaginationInfo } from '@/lib/types'
+import type { CommunityBase, CommunityListResponse } from '@/lib/types/community'
+import Link from 'next/link'
 import CommunityForm from './CommunityForm'
 import DeleteButton from './DeleteButton'
-import Link from 'next/link'
-import type { CommunityListResponse, CommunityBase } from '@/lib/types/community'
-import type { PaginationInfo } from '@/lib/types'
+import styles from './page.module.css'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,9 +21,11 @@ export default async function DashboardPage() {
 
   const result: CommunityListResponse = await response.json()
 
-  const communities: CommunityBase[] = result.success && result.data ? result.data : []
-  const paginationInfo: PaginationInfo | null = result.success ? result.pagination || null : null
-  const itemCount: number = result.success ? result.count || 0 : 0
+  // API 응답에서 실제 데이터 추출
+  const { data } = result
+  const communities: CommunityBase[] = data?.data ? data.data : []
+  const paginationInfo: PaginationInfo | null = data?.pagination ? data.pagination : null
+  const itemCount: number = data?.count ? data.count : 0
   return (
     <main className={styles.container}>
       <h2 className={styles.title}>대시보드</h2>

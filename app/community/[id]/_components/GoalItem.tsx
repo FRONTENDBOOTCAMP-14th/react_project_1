@@ -1,13 +1,13 @@
 'use client'
 
-import { memo, useState, useRef, useEffect } from 'react'
 import { Checkbox, Popover, type PopoverAction } from '@/components/ui'
+import type { CustomSession } from '@/lib/types'
 import type { StudyGoal } from '@/lib/types/goal'
-import styles from './RoundCard.module.css'
 import { Check, Ellipsis, X } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import type { CustomSession } from '@/lib/types'
+import { memo, useEffect, useRef, useState } from 'react'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
+import styles from './RoundCard.module.css'
 
 /**
  * 개별 목표 아이템 컴포넌트에 전달되는 속성
@@ -68,6 +68,25 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
   const inputRef = useRef<HTMLInputElement>(null)
   const isOwner = userId && goal.ownerId === userId
 
+  // onSave prop이 있으면 자동으로 편집 모드로 전환 (새 목표 추가 시)
+  useEffect(() => {
+    if (onSave && !isEditing) {
+      setIsEditing(true)
+    }
+  }, [onSave, isEditing])
+
+  // 새 목표 추가 시 input에 자동 focus
+  useEffect(() => {
+    if (isEditing && inputRef.current && onSave) {
+      inputRef.current.focus()
+      // 커서를 텍스트 끝으로 이동
+      inputRef.current.setSelectionRange(
+        inputRef.current.value.length,
+        inputRef.current.value.length
+      )
+    }
+  }, [isEditing, onSave])
+
   const popoverActions: PopoverAction[] = [
     {
       id: 'edit',
@@ -86,12 +105,19 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
     },
   ]
 
-  // 편집 모드일 때 자동 포커스
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
+  const handleSave = async () => {
+    if (!title.trim() || !onSave) return
+
+    setIsSaving(true)
+    try {
+      await onSave(title.trim())
+    } catch (error) {
+      console.error('Failed to save goal:', error)
+      // 에러가 발생하면 title을 원래 상태로 복원하지 않음 (사용자가 입력한 내용 유지)
+    } finally {
+      setIsSaving(false)
     }
-  }, [isEditing])
+  }
 
   const handleEdit = async () => {
     if (!title.trim() || !onEdit) return
@@ -100,19 +126,10 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
     try {
       await onEdit(goal.goalId, title.trim())
       setIsEditing(false) // 성공 시 편집 모드 종료
-    } catch {
-      setTitle(goal.title || '') // 실패 시 원래 제목으로 복원
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleSave = async () => {
-    if (!title.trim() || !onSave) return
-
-    setIsSaving(true)
-    try {
-      await onSave(title.trim())
+    } catch (error) {
+      console.error('Failed to edit goal:', error)
+      // 에러 발생 시 원래 제목으로 복원
+      setTitle(goal.title || '')
     } finally {
       setIsSaving(false)
     }
@@ -120,18 +137,18 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      // 신규 추가 모드 vs 편집 모드 분기
-      if (isEditing) {
-        handleEdit()
-      } else {
+      // 새 목표 추가 모드 vs 기존 목표 수정 모드 분기
+      if (onSave) {
         handleSave()
+      } else if (onEdit) {
+        handleEdit()
       }
     } else if (e.key === 'Escape') {
       // 취소 처리
-      if (isEditing) {
+      if (onEdit) {
         setTitle(goal.title || '') // 원래 제목으로 복원
         setIsEditing(false)
-      } else {
+      } else if (onSave) {
         onCancel?.()
       }
     }
@@ -148,7 +165,7 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
             value={title}
             onChange={e => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="목표를 입력하세요"
+            placeholder={onSave ? '새 목표를 입력하세요' : '목표를 입력하세요'}
             className={styles['goal-input']}
             disabled={isSaving}
             aria-label="목표 입력"
@@ -157,7 +174,7 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
         <div className={styles['goal-actions']}>
           <button
             type="button"
-            onClick={isEditing ? handleEdit : handleSave}
+            onClick={onSave ? handleSave : handleEdit}
             disabled={!title.trim() || isSaving}
             className={styles['action-button']}
             aria-label="저장"
@@ -167,7 +184,7 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
           <button
             type="button"
             onClick={
-              isEditing
+              onEdit
                 ? () => {
                     setTitle(goal.title || '')
                     setIsEditing(false)

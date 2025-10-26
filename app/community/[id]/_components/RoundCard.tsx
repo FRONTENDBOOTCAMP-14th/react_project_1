@@ -374,7 +374,7 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
         personalGoals={optimisticGoals.personal}
         onToggle={handleToggleComplete}
         isTeamLeader={isTeamLeader}
-        onAddGoal={roundId ? handleAddGoal : undefined}
+        onAddGoal={handleAddGoal}
         onEdit={handleEditGoal}
         onDelete={handleDeleteGoal}
         isOpen={isOpen}

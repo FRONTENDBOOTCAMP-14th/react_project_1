@@ -2,16 +2,8 @@
 
 import { LoadingState } from '@/components/common'
 import { useUserCommunities } from '@/lib/hooks'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import styles from './CalendarSection.module.css'
-
-interface DayInfo {
-  date: number
-  day: string
-  count: number
-  attendeeCount: number
-  userAttendanceStatus?: 'present' | 'absent' | 'late' | 'excused' | null
-}
 
 interface CalendarSectionProps {
   onDateSelect: (date: number) => void

@@ -29,17 +29,20 @@ export default function WordSearch() {
     return MOCK_KEYWORDS.filter(tag => tag.toLowerCase().includes(q)).slice(0, 8)
   }, [searchQuery])
 
-  const handleSearch = () => {
-    console.log('검색 실행:', { searchQuery, relatedKeywords })
-    // TODO: 실제 검색 로직
-  }
+  // 검색 실행
+  const handleSearch = () => {}
+  //   if (!SearchQuery.trim()) {
+  //     setSearchQuery([])
+  //     return
+  //   }
+  // }
 
   return (
     <section className={Style.container}>
       <form
         onSubmit={e => {
           e.preventDefault()
-          handle()
+          handleSearch()
         }}
       >
         <div className={Style.inputWrapper}>
@@ -54,7 +57,7 @@ export default function WordSearch() {
           </IconButton>
         </div>
 
-        {/* 입력 있을 때만 연관 검색어 노출 */}
+        {/* 입력시 연관 검색 태그 노출 */}
         {searchQuery.trim() && (
           <div className={Style.relatedKeywords}>
             <ul className={Style.word}>

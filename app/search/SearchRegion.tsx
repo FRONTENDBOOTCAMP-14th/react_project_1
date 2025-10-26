@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Dropdown } from '@/components/ui'
 import styles from './SearchRegion.module.css'
 
@@ -9,12 +9,35 @@ import styles from './SearchRegion.module.css'
  *
  */
 
+// json 데이터 정의
+interface Region {
+  name: string
+  subArea: string[]
+}
+
 export default function SearchRegion() {
-  const [selectedOption, setSelectedOption] = useState('')
-  const options = [
-    { value: 'option1', label: '옵션 1' },
-    { value: 'option2', label: '옵션 2' },
-  ]
+  const [regions, setRegions] = useState<Region[]>([])
+  const [selectedRegion, setSelectedRegion] = useState('')
+  const [selectedSubArea, setSelectedSubArea] = useState('')
+
+  useEffect(() => {
+    import('@/app/api/region/region.json').then(regionJson => {
+      setRegions(regionJson.default as Region[])
+    })
+  }, [])
+
+  //첫번째 드롭다운 : name(json)
+  const regionOptions = useMemo(
+    () => regions.map(r => ({ value: r.name, label: r.name })),
+    [regions]
+  )
+
+  //두번째 드롭다운: subarea(json)
+  const subAreaOptions = useMemo(() => {
+    const found = regions.find(r => r.name === selectedRegion)
+    if (!found) return []
+    return found.subArea.map(sa => ({ value: sa, label: sa }))
+  }, [regions, selectedRegion])
 
   return (
     <section className={styles.searchSection}>
@@ -23,15 +46,18 @@ export default function SearchRegion() {
       </h2>
       <div className={styles.searchControls}>
         <Dropdown
-          options={options}
-          value={selectedOption}
-          onChange={value => setSelectedOption(value)}
+          options={regionOptions}
+          value={selectedRegion}
+          onChange={value => {
+            setSelectedRegion(value)
+            setSelectedSubArea('')
+          }}
           placeholder="선택하세요"
         />
         <Dropdown
-          options={options}
-          value={selectedOption}
-          onChange={value => setSelectedOption(value)}
+          options={subAreaOptions}
+          value={selectedSubArea}
+          onChange={value => setSelectedSubArea(value)}
           placeholder="선택하세요"
         />
       </div>

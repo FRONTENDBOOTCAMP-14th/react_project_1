@@ -16,7 +16,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-md);
 }
 
 .title {
@@ -27,6 +27,8 @@
   padding: var(--spacing-xs);
   font-weight: 700;
   text-align: left;
+  margin-left: var(--spacing-xs);
+  text-decoration: none;
 }
 
 /* 설명글과 참여율 마진값 */

@@ -1,18 +1,20 @@
 'use client'
 
 import { useState } from 'react'
+import { useUserCommunities } from '@/lib/hooks'
 import CalendarSection from './CalendarSection'
-import StudyCarousel from './StudyCarousel'
 import RecommendedStudies from './RecommendedStudies'
-import type { CommunityInfo } from '@/lib/types'
+import StudyCarousel from './StudyCarousel'
 
 interface HomeContentProps {
   userId?: string | null
-  filteredCommunities?: CommunityInfo[]
 }
 
-export default function HomeContent({ userId, filteredCommunities }: HomeContentProps) {
+export default function HomeContent({ userId }: HomeContentProps) {
   const [selectedDate, setSelectedDate] = useState<number | null>(new Date().getDate())
+
+  // useUserCommunities 훅으로 사용자 데이터 한 번에 가져오기
+  const { subscribedCommunities, upcomingRounds } = useUserCommunities(userId || '')
 
   if (!userId) {
     return <RecommendedStudies />
@@ -20,11 +22,12 @@ export default function HomeContent({ userId, filteredCommunities }: HomeContent
 
   return (
     <>
-      <CalendarSection onDateSelect={setSelectedDate} />
+      <CalendarSection onDateSelect={setSelectedDate} userId={userId} />
       <StudyCarousel
         selectedDate={selectedDate}
         userId={userId}
-        filteredCommunities={filteredCommunities}
+        upcomingRounds={upcomingRounds}
+        subscribedCommunities={subscribedCommunities}
       />
       <RecommendedStudies />
     </>

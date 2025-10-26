@@ -1,20 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Carousel, CarouselItem } from '@/components/ui'
+import type { Community } from '@/lib/types/community'
+import type { Round } from '@/lib/types/round'
+import { MapPin } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import styles from './StudyCarousel.module.css'
-import type { CommunityInfo } from '@/lib/types'
 
 interface StudyCarouselProps {
   selectedDate: number | null
   userId?: string | null
-  filteredCommunities?: CommunityInfo[]
+  upcomingRounds: Round[]
+  subscribedCommunities: Community[]
 }
 
 export default function StudyCarousel({
   selectedDate,
   userId,
-  filteredCommunities,
+  upcomingRounds,
+  subscribedCommunities,
 }: StudyCarouselProps) {
   const [itemsPerView, setItemsPerView] = useState(3)
 
@@ -38,22 +42,50 @@ export default function StudyCarousel({
 
   if (!selectedDate || !userId) return null
 
+  // 선택된 날짜의 라운드들 필터링
+  const selectedDateRounds = upcomingRounds.filter(round => {
+    if (!round.startDate) return false
+    const roundDate = new Date(round.startDate)
+    const targetDate = new Date()
+    targetDate.setDate(selectedDate)
+    const dayStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
+    const dayEnd = new Date(
+      targetDate.getFullYear(),
+      targetDate.getMonth(),
+      targetDate.getDate() + 1
+    )
+    return roundDate >= dayStart && roundDate < dayEnd
+  })
+
   return (
     <div className={styles['carousel-container']}>
       <p>{selectedDate}일 스터디 목록</p>
+      {selectedDateRounds.length === 0 && (
+        <p className={styles['carousel-none']}>{selectedDate}일에 예정된 스터디가 없습니다</p>
+      )}
       <Carousel showNavigation showIndicators itemsPerView={itemsPerView}>
-        <CarouselItem>
-          <div className={styles['carousel-item']}>스터디 A</div>
-        </CarouselItem>
-        <CarouselItem>
-          <div className={styles['carousel-item']}>스터디 B</div>
-        </CarouselItem>
-        <CarouselItem>
-          <div className={styles['carousel-item']}>스터디 C</div>
-        </CarouselItem>
-        <CarouselItem>
-          <div className={styles['carousel-item']}>스터디 D</div>
-        </CarouselItem>
+        {selectedDateRounds.length < 0 ? (
+          <p className={styles['carousel-none']}>{selectedDate}일에 예정된 스터디가 없습니다</p>
+        ) : (
+          selectedDateRounds.map(round => {
+            const community = subscribedCommunities.find(c => c.clubId === round.clubId)
+            return (
+              <CarouselItem key={round.roundId}>
+                <div className={styles['carousel-item']}>
+                  <div className={styles['study-title']}>
+                    {community?.name || '알 수 없는 커뮤니티'}
+                  </div>
+                  <div className={styles['study-info']}>Round {round.roundNumber}</div>
+                  {round.location && (
+                    <div className={styles['study-location']}>
+                      <MapPin size={16} /> {round.location}
+                    </div>
+                  )}
+                </div>
+              </CarouselItem>
+            )
+          })
+        )}
       </Carousel>
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useUserCommunities } from '@/lib/hooks'
+import { useEffect, useState } from 'react'
 import styles from './CalendarSection.module.css'
 
 interface DayInfo {
@@ -11,11 +12,15 @@ interface DayInfo {
 
 interface CalendarSectionProps {
   onDateSelect: (date: number) => void
+  userId?: string | null
 }
 
-export default function CalendarSection({ onDateSelect }: CalendarSectionProps) {
+export default function CalendarSection({ onDateSelect, userId }: CalendarSectionProps) {
   const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate())
   const [days, setDays] = useState<DayInfo[]>([])
+
+  // useUserCommunities 훅 사용 (userId가 있을 때만)
+  const { upcomingRounds } = useUserCommunities(userId || '')
 
   useEffect(() => {
     // 클라이언트에서만 실행되어 hydration error 방지
@@ -26,15 +31,25 @@ export default function CalendarSection({ onDateSelect }: CalendarSectionProps) 
       const date = new Date(today)
       date.setDate(today.getDate() + i)
 
+      // 해당 날짜의 라운드 수 계산
+      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+
+      const dayRoundsCount = upcomingRounds.filter(round => {
+        if (!round.startDate) return false
+        const roundDate = new Date(round.startDate)
+        return roundDate >= dayStart && roundDate < dayEnd
+      }).length
+
       return {
         date: date.getDate(),
         day: dayNames[date.getDay()],
-        count: Math.floor(Math.random() * 5), // 랜덤값(추후 삭제)
+        count: dayRoundsCount,
       }
     })
 
     setDays(generatedDays)
-  }, []) // 의존성 배열 비움 - 한 번만 실행
+  }, [upcomingRounds]) // upcomingRounds가 변경될 때마다 다시 계산
 
   const handleDateClick = (date: number) => {
     setSelectedDate(date)

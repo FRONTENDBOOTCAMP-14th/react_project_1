@@ -21,7 +21,7 @@ export interface Round {
   attendance?: {
     attendanceId: string
     userId: string
-    attendanceType: 'present' | 'absent' | 'late' | 'excused'
+    attendanceType: string
     user: {
       userId: string
       username: string
@@ -96,7 +96,7 @@ export interface RoundWithRelations extends Round {
   attendance?: {
     attendanceId: string
     userId: string
-    attendanceType: 'present' | 'absent' | 'late' | 'excused'
+    attendanceType: string
     user: {
       userId: string
       username: string

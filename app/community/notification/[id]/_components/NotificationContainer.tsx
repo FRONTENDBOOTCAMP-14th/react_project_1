@@ -1,16 +1,16 @@
 'use client'
 
-import NotificationCard from './NotificationCard'
-import NotificationEditor from './NotificationEditor'
-import { useSession } from 'next-auth/react'
-import type { CustomSession } from '@/lib/types'
-import { useCommunityStore } from '../../../[id]/_hooks/useCommunityStore'
-import { toast } from 'sonner'
-import { useState } from 'react'
+import { IconButton } from '@/components/ui'
 import { useNotifications } from '@/lib/hooks'
-import { StrokeButton } from '@/components/ui'
-import styles from './NotificationContainer.module.css'
+import type { CustomSession } from '@/lib/types'
+import { useSession } from 'next-auth/react'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { useCommunityStore } from '../../../[id]/_hooks/useCommunityStore'
 import { useSmartPin } from '../_hooks'
+import NotificationCard from './NotificationCard'
+import styles from './NotificationContainer.module.css'
+import NotificationEditor from './NotificationEditor'
 
 export default function NotificationContainer({ clubId }: { clubId: string }) {
   const { data: session } = useSession()
@@ -102,14 +102,14 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
   return (
     <div className={styles.container}>
       {/* 쓰기 버튼 */}
-      <StrokeButton
+      <IconButton
         className={styles['add-button']}
         onClick={handleAddClick}
         disabled={!isTeamLeader || isEditing}
         title={!isTeamLeader ? '팀장 권한이 필요합니다' : '공지사항 작성'}
       >
         쓰기
-      </StrokeButton>
+      </IconButton>
 
       {/* 공지사항 목록 */}
       <div className={styles.content}>

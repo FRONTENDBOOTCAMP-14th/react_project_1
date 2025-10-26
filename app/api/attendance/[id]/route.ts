@@ -8,9 +8,9 @@ import { getServerSession } from 'next-auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 /**
@@ -24,7 +24,7 @@ interface RouteParams {
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
       return createErrorResponse('출석 ID가 필요합니다.', 400)
@@ -93,7 +93,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return createErrorResponse('인증이 필요합니다.', 401)
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
       return createErrorResponse('출석 ID가 필요합니다.', 400)
@@ -178,7 +178,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return createErrorResponse('인증이 필요합니다.', 401)
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
       return createErrorResponse('출석 ID가 필요합니다.', 400)

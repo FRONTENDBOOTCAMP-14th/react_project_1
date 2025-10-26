@@ -6,9 +6,9 @@ import { getServerSession } from 'next-auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     roundId: string
-  }
+  }>
 }
 
 /**
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return createErrorResponse('인증이 필요합니다.', 401)
     }
 
-    const { roundId } = params
+    const { roundId } = await params
     const { searchParams } = new URL(request.url)
 
     if (!roundId) {

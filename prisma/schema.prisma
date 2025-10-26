@@ -38,7 +38,7 @@ model Community {
   deletedAt        DateTime?         @map("deleted_at") @db.Timestamp(6)
   tagname          String[]          @default([]) @db.VarChar
   region           String?           @db.VarChar
-  subRegion        String?           @db.VarChar
+  subRegion        String?           @map("sub_region") @db.VarChar
   communityMembers CommunityMember[]
   notifications    Notification[]
   rounds           Round[]
@@ -47,7 +47,7 @@ model Community {
   @@index([isPublic], map: "idx_community_public")
   @@index([name], map: "idx_community_name")
   @@index([region], map: "idx_community_region")
-  @@index([subRegion], map: "idx_community_subRegion")
+  @@index([subRegion], map: "idx_community_sub_region")
   @@map("communities")
 }
 

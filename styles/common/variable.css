@@ -18,6 +18,12 @@
   --warning-color: #f59e0b;
   --error-color: #ef4444;
 
+  /* 상태 배경색 */
+  --status-present-bg: #d1fae5;
+  --status-late-bg: #fef3c7;
+  --status-absent-bg: #fee2e2;
+  --status-excused-bg: var(--gray-100);
+
   /* 확장 색상 */
   --color-green: #22c55e;
   --color-blue: #3b82f6;

@@ -10,7 +10,7 @@ import styles from './page.module.css'
 export default async function HomePage() {
   const session = await getServerSession(authOptions)
   const userId = (session as CustomSession)?.userId
-  const user = await prisma.user.findUnique({ where: { userId } })
+  const user = userId ? await prisma.user.findUnique({ where: { userId } }) : null
 
   return (
     <main className={styles.main}>

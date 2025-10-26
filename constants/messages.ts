@@ -48,17 +48,28 @@ export const MESSAGES = {
     USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
     INVALID_ROLE: '유효하지 않은 역할입니다.',
     FAILED_TO_LOAD_REGIONS: '지역 정보를 불러오는데 실패했습니다.',
+    FAILED_TO_FETCH_ATTENDANCE: '출석 정보를 불러오는데 실패했습니다.',
+    FAILED_TO_CREATE_ATTENDANCE: '출석 생성에 실패했습니다.',
+    FAILED_TO_UPDATE_ATTENDANCE: '출석 수정에 실패했습니다.',
+    FAILED_TO_DELETE_ATTENDANCE: '출석 삭제에 실패했습니다.',
+    CREATING_ATTENDANCE_ERROR: '출석 생성 중 오류가 발생했습니다.',
+    UPDATING_ATTENDANCE_ERROR: '출석 수정 중 오류가 발생했습니다.',
+    DELETING_ATTENDANCE_ERROR: '출석 삭제 중 오류가 발생했습니다.',
+    ATTENDANCE_NOT_FOUND: '출석 정보를 찾을 수 없습니다.',
+    ATTENDANCE_ALREADY_EXISTS: '이미 해당 라운드에 출석 정보가 있습니다.',
   },
 
   LOADING: {
     GOALS: '목표를 불러오는 중...',
     COMMUNITY: '커뮤니티 정보를 불러오는 중...',
+    ATTENDANCE: '출석 정보를 불러오는 중...',
   },
 
   EMPTY: {
     TEAM_GOALS: '그룹목표가 없습니다.',
     PERSONAL_GOALS: '개인목표가 없습니다.',
     NO_DESCRIPTION: '설명이 없습니다.',
+    NO_ATTENDANCE: '출석 정보가 없습니다.',
   },
 
   ACTION: {

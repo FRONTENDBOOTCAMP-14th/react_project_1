@@ -15,6 +15,19 @@ export interface Round {
   createdAt: Date | string
   updatedAt: Date | string
   deletedAt?: Date | string | null
+  _count?: {
+    attendance: number
+  }
+  attendance?: {
+    attendanceId: string
+    userId: string
+    attendanceType: 'present' | 'absent' | 'late' | 'excused'
+    user: {
+      userId: string
+      username: string
+      nickname: string | null
+    }
+  }[]
 }
 
 /**
@@ -79,5 +92,15 @@ export interface RoundWithRelations extends Round {
     goalId: string
     title: string
     isComplete: boolean
+  }[]
+  attendance?: {
+    attendanceId: string
+    userId: string
+    attendanceType: 'present' | 'absent' | 'late' | 'excused'
+    user: {
+      userId: string
+      username: string
+      nickname: string | null
+    }
   }[]
 }

@@ -68,6 +68,28 @@ export const roundSelect = {
   location: true,
   createdAt: true,
   updatedAt: true,
+  _count: {
+    select: {
+      attendance: true,
+    },
+  },
+  attendance: {
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      attendanceId: true,
+      userId: true,
+      attendanceType: true,
+      user: {
+        select: {
+          userId: true,
+          username: true,
+          nickname: true,
+        },
+      },
+    },
+  },
 } satisfies Prisma.RoundSelect
 
 /**

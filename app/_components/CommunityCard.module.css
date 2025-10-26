@@ -3,7 +3,7 @@
   grid: auto auto / 1fr auto;
   margin-top: var(--spacing-lg);
   min-width: 320px;
-  max-width: 650px;
+  max-width: 640px;
   border: solid 1px var(--gray-300);
   border-radius: var(--card-radius);
   padding: var(--spacing-sm);
@@ -25,10 +25,11 @@
   color: var(--secondary-color);
   width: 100%;
   padding: var(--spacing-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-align: left;
   margin-left: var(--spacing-xs);
   text-decoration: none;
+  justify-content: flex-start;
 }
 
 /* 설명글과 참여율 마진값 */

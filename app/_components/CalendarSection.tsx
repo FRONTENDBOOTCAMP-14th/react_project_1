@@ -9,6 +9,8 @@ interface DayInfo {
   date: number
   day: string
   count: number
+  attendeeCount: number
+  userAttendanceStatus?: 'present' | 'absent' | 'late' | 'excused' | null
 }
 
 interface CalendarSectionProps {
@@ -36,21 +38,42 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
 
-      const dayRoundsCount = upcomingRounds.filter(round => {
+      // 해당 날짜의 라운드들
+      const dayRounds = upcomingRounds.filter(round => {
         if (!round.startDate) return false
         const roundDate = new Date(round.startDate)
         return roundDate >= dayStart && roundDate < dayEnd
-      }).length
+      })
+
+      // 출석자 수 계산 (중복 제거)
+      const attendeeCount = dayRounds.reduce((total, round) => {
+        return total + (round._count?.attendance || 0)
+      }, 0)
+
+      // 사용자의 출석 상태 확인
+      const userAttendance = userId
+        ? dayRounds.find(round => round.attendance?.some(att => att.userId === userId))
+        : null
+      const userAttendanceStatus = userAttendance?.attendance?.find(
+        att => att.userId === userId
+      )?.attendanceType
 
       return {
         date: date.getDate(),
         day: dayNames[date.getDay()],
-        count: dayRoundsCount,
+        count: dayRounds.length,
+        attendeeCount,
+        userAttendanceStatus: userAttendanceStatus as
+          | 'present'
+          | 'absent'
+          | 'late'
+          | 'excused'
+          | null,
       }
     })
 
     setDays(generatedDays)
-  }, [upcomingRounds]) // upcomingRounds가 변경될 때마다 다시 계산
+  }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때마다 다시 계산
 
   const handleDateClick = (date: number) => {
     setSelectedDate(date)
@@ -72,6 +95,22 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
             <div className={styles['date']}>{d.date}</div>
             <div className={styles['day']}>{d.day}</div>
             <div className={styles['count-box']}>{d.count}</div>
+
+            {/* 출석 정보 */}
+            {d.attendeeCount > 0 && (
+              <div className={styles['attendee-count']}>{d.attendeeCount}명</div>
+            )}
+
+            {userId && d.userAttendanceStatus && (
+              <div
+                className={`${styles['user-status']} ${styles[`status-${d.userAttendanceStatus}`]}`}
+              >
+                {d.userAttendanceStatus === 'present' && '출석'}
+                {d.userAttendanceStatus === 'late' && '지각'}
+                {d.userAttendanceStatus === 'absent' && '결석'}
+                {d.userAttendanceStatus === 'excused' && '양해'}
+              </div>
+            )}
           </button>
         ))
       )}

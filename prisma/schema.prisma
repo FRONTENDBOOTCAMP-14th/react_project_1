@@ -22,6 +22,7 @@ model User {
   notifications    Notification[]
   reactions        Reaction[]
   studyGoals       StudyGoal[]       @relation("GoalOwner")
+  attendance       Attendance[] @relation("UserAttendance")
 
   @@index([provider, providerId], map: "idx_user_provider")
   @@index([email], map: "idx_user_email")
@@ -122,6 +123,7 @@ model Round {
   location    String?     @db.VarChar
   community   Community   @relation(fields: [clubId], references: [clubId], onDelete: Cascade, onUpdate: NoAction, map: "fk_round_club")
   studyGoals  StudyGoal[]
+  attendance  Attendance[] @relation("RoundAttendance")
 
   @@index([clubId], map: "idx_round_club")
   @@index([createdAt], map: "idx_round_created")
@@ -145,4 +147,24 @@ model Notification {
   @@index([clubId], map: "idx_notification_club")
   @@index([authorId], map: "idx_notification_author")
   @@map("notifications")
+}
+
+model Attendance {
+  attendanceId    String   @id @default(dbgenerated("gen_random_uuid()")) @map("attendance_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  roundId         String   @map("round_id") @db.Uuid
+  attendanceDate  DateTime @map("attendance_date") @db.Timestamp(6)
+  attendanceType  String   @map("attendance_type") @db.VarChar
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamp(6)
+  round           Round    @relation("RoundAttendance", fields: [roundId], references: [roundId], onDelete: Cascade, onUpdate: NoAction, map: "fk_attendance_round")
+  user            User     @relation("UserAttendance", fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_attendance_user")
+
+  @@unique([roundId, userId], map: "uk_attendance_round_user")
+  @@index([roundId], map: "idx_attendance_round")
+  @@index([userId], map: "idx_attendance_user")
+  @@index([attendanceDate], map: "idx_attendance_date")
+  @@index([userId, attendanceDate], map: "idx_attendance_user_date")
+  @@map("attendance")
 }

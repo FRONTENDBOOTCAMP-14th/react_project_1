@@ -5,7 +5,7 @@ import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styles from './StudyCarousel.module.css'
 
 interface StudyCarouselProps {
@@ -44,26 +44,26 @@ export default function StudyCarousel({
 
   if (!selectedDate || !userId) return null
 
-  // useMemo로 필터링 결과 메모이제이션 (성능 최적화)
-  const selectedDateRounds = useMemo(() => {
+  const selectedDateRounds = (() => {
+    if (!selectedDate) return []
+
+    const targetDate = new Date()
+    targetDate.setHours(0, 0, 0, 0)
+    targetDate.setDate(selectedDate)
+
+    const dayStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
+    const dayEnd = new Date(
+      targetDate.getFullYear(),
+      targetDate.getMonth(),
+      targetDate.getDate() + 1
+    )
+
     return upcomingRounds.filter(round => {
       if (!round.startDate) return false
       const roundDate = new Date(round.startDate)
-      const targetDate = new Date()
-      targetDate.setDate(selectedDate)
-      const dayStart = new Date(
-        targetDate.getFullYear(),
-        targetDate.getMonth(),
-        targetDate.getDate()
-      )
-      const dayEnd = new Date(
-        targetDate.getFullYear(),
-        targetDate.getMonth(),
-        targetDate.getDate() + 1
-      )
       return roundDate >= dayStart && roundDate < dayEnd
     })
-  }, [upcomingRounds, selectedDate])
+  })()
 
   return (
     <div className={styles['carousel-container']}>

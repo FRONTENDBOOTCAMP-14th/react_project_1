@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { useUserCommunities } from '@/lib/hooks'
+import { useState } from 'react'
 import CalendarSection from './CalendarSection'
 import RecommendedStudies from './RecommendedStudies'
 import StudyCarousel from './StudyCarousel'

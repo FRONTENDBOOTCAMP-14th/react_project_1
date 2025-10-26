@@ -3,12 +3,19 @@
 import { useState, useEffect } from 'react'
 import { Carousel, CarouselItem } from '@/components/ui'
 import styles from './StudyCarousel.module.css'
+import type { CommunityInfo } from '@/lib/types'
 
 interface StudyCarouselProps {
   selectedDate: number | null
+  userId?: string | null
+  filteredCommunities?: CommunityInfo[]
 }
 
-export default function StudyCarousel({ selectedDate }: StudyCarouselProps) {
+export default function StudyCarousel({
+  selectedDate,
+  userId,
+  filteredCommunities,
+}: StudyCarouselProps) {
   const [itemsPerView, setItemsPerView] = useState(3)
 
   useEffect(() => {
@@ -29,7 +36,7 @@ export default function StudyCarousel({ selectedDate }: StudyCarouselProps) {
     return () => window.removeEventListener('resize', updateItemsPerView)
   }, [])
 
-  if (!selectedDate) return null
+  if (!selectedDate || !userId) return null
 
   return (
     <div className={styles['carousel-container']}>

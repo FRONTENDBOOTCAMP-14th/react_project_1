@@ -29,6 +29,7 @@ import type { NextRequest } from 'next/server'
  *   - search?: string 커뮤니티 이름으로 검색
  *   - createdAfter?: string (ISO 8601) 생성일 이후로 필터
  *   - createdBefore?: string (ISO 8601) 생성일 이전으로 필터
+ *   - userId?: string userId로 필터
  *
  * 응답
  * - 200: { success: true, data: Community[], count: number, pagination: PaginationInfo }
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
     const search = getStringParam(searchParams, 'search')
     const createdAfter = getStringParam(searchParams, 'createdAfter')
     const createdBefore = getStringParam(searchParams, 'createdBefore')
-
+    const userId = getStringParam(searchParams, 'userId')
     // where 조건 구성
     const whereClause: CommunityWhereClause = {
       deletedAt: null,
@@ -63,6 +64,14 @@ export async function GET(request: NextRequest) {
       ...(createdBefore && {
         createdAt: {
           lte: new Date(createdBefore),
+        },
+      }),
+      ...(userId && {
+        communityMembers: {
+          some: {
+            userId,
+            deletedAt: null,
+          },
         },
       }),
     }
@@ -88,6 +97,22 @@ export async function GET(request: NextRequest) {
           description: true,
           isPublic: true,
           createdAt: true,
+          rounds: {
+            select: {
+              roundId: true,
+              roundNumber: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+            where: {
+              deletedAt: null,
+              startDate: {
+                gte: new Date(), // 현재 날짜 이후의 라운드만
+              },
+            },
+            orderBy: { roundNumber: 'desc' },
+          },
         },
       }),
       prisma.community.count({ where: whereClause }),
@@ -133,7 +158,29 @@ export async function POST(req: NextRequest) {
     // 커뮤니티 생성
     const created = await prisma.community.create({
       data: { name, description, isPublic },
-      select: { clubId: true, name: true, description: true, isPublic: true, createdAt: true },
+      select: {
+        clubId: true,
+        name: true,
+        description: true,
+        isPublic: true,
+        createdAt: true,
+        rounds: {
+          select: {
+            roundId: true,
+            roundNumber: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+          },
+          where: {
+            deletedAt: null,
+            startDate: {
+              gte: new Date(), // 현재 날짜 이후의 라운드만
+            },
+          },
+          orderBy: { roundNumber: 'desc' },
+        },
+      },
     })
 
     return createSuccessResponse(created, 201)

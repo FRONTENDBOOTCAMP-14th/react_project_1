@@ -66,6 +66,21 @@ export interface CommunityResponse {
   message?: string
 }
 
+export interface CommunityInfo {
+  clubId: string
+  name: string
+  description: string | null
+  isPublic: boolean
+  createdAt: Date
+  rounds?: {
+    roundId: string
+    roundNumber: number
+    startDate: Date | null
+    endDate: Date | null
+    location: string | null
+  }[]
+}
+
 /**
  * API 응답 타입 - 커뮤니티 리스트 (페이지네이션 포함)
  */
@@ -99,4 +114,10 @@ export interface CommunityWhereClause {
         gte: Date
         lte: Date
       }
+  communityMembers?: {
+    some: {
+      userId: string
+      deletedAt: null
+    }
+  }
 }

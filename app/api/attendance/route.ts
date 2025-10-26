@@ -16,8 +16,8 @@ import type { NextRequest } from 'next/server'
  *   - userId?: string 특정 사용자로 필터
  *   - roundId?: string 특정 라운드로 필터
  *   - attendanceType?: 'present'|'absent'|'late'|'excused' 출석 타입으로 필터
- *   - startDate?: string (ISO 8601) 시작일 이후로 필터
- *   - endDate?: string (ISO 8601) 종료일 이전으로 필터
+ *   - attendanceDateFrom?: string (ISO 8601) 출석일 시작 범위
+ *   - attendanceDateTo?: string (ISO 8601) 출석일 종료 범위
  *
  * 응답
  * - 200: { success: true, data: Attendance[], count: number, pagination: PaginationInfo }
@@ -36,16 +36,19 @@ export async function GET(request: NextRequest) {
       | 'late'
       | 'excused'
       | null
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
+
+    // 명확한 파라미터 이름 사용: attendanceDateFrom, attendanceDateTo
+    const attendanceDateFrom =
+      searchParams.get('attendanceDateFrom') || searchParams.get('startDate') // 하위 호환성
+    const attendanceDateTo = searchParams.get('attendanceDateTo') || searchParams.get('endDate') // 하위 호환성
 
     // 필터 조건 구성
     const filters = {
       userId: userId || undefined,
       roundId: roundId || undefined,
       attendanceType: attendanceType || undefined,
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
+      startDate: attendanceDateFrom ? new Date(attendanceDateFrom) : undefined,
+      endDate: attendanceDateTo ? new Date(attendanceDateTo) : undefined,
     }
 
     const where = buildAttendanceWhereClause(filters)

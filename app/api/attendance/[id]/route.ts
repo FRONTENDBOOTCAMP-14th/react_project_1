@@ -4,6 +4,7 @@ import type { CustomSession } from '@/lib/types'
 import type { UpdateAttendanceInput } from '@/lib/types/attendance'
 import { buildAttendanceUpdateData } from '@/lib/utils/attendance'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { softDeleteHelpers } from '@/lib/utils/softDelete'
 import { getServerSession } from 'next-auth'
 import type { NextRequest } from 'next/server'
 
@@ -184,22 +185,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return createErrorResponse('출석 ID가 필요합니다.', 400)
     }
 
-    // 출석 정보 확인
-    const existingAttendance = await prisma.attendance.findUnique({
-      where: { attendanceId: id },
-    })
-
-    if (!existingAttendance) {
-      return createErrorResponse('출석 정보를 찾을 수 없습니다.', 404)
-    }
-
-    // 소프트 삭제
-    await prisma.attendance.update({
-      where: { attendanceId: id },
-      data: { deletedAt: new Date() },
-    })
-
-    return createSuccessResponse({ success: true })
+    // 소프트 삭제 (일관된 정책 적용)
+    const result = await softDeleteHelpers.deleteAttendance(id)
+    return result.response
   } catch (error) {
     console.error('Error deleting attendance:', error)
     return createErrorResponse('출석 삭제에 실패했습니다', 500)

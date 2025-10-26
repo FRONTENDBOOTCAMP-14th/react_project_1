@@ -2,7 +2,7 @@
 
 import { LoadingState } from '@/components/common'
 import { useUserCommunities } from '@/lib/hooks'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import styles from './CalendarSection.module.css'
 
 interface DayInfo {
@@ -20,17 +20,16 @@ interface CalendarSectionProps {
 
 export default function CalendarSection({ onDateSelect, userId }: CalendarSectionProps) {
   const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate())
-  const [days, setDays] = useState<DayInfo[]>([])
 
   // useUserCommunities 훅 사용 (userId가 있을 때만)
   const { upcomingRounds, loading } = useUserCommunities(userId || '')
 
-  useEffect(() => {
-    // 클라이언트에서만 실행되어 hydration error 방지
+  // useMemo로 days 계산 최적화 (매 렌더링마다 재계산 방지)
+  const days = useMemo(() => {
     const today = new Date()
     const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-    const generatedDays = Array.from({ length: 7 }, (_, i) => {
+    return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
 
@@ -71,9 +70,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
           | null,
       }
     })
-
-    setDays(generatedDays)
-  }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때마다 다시 계산
+  }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때만 재계산
 
   const handleDateClick = (date: number) => {
     setSelectedDate(date)

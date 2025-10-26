@@ -8,6 +8,7 @@
 
 import { MESSAGES } from '@/constants/messages'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
+import { requireAuth } from '@/lib/middleware/auth'
 import prisma from '@/lib/prisma'
 import type { CommunityWhereClause } from '@/lib/types/community'
 import {
@@ -155,6 +156,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    // 인증 확인
+    const { error: authError } = await requireAuth()
+    if (authError) return authError
+
     const body = await req.json()
     const name = (body?.name ?? '').trim()
     const description = (body?.description ?? '').trim() || null

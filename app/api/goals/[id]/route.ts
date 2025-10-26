@@ -82,7 +82,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json()
 
     // 1) 대상 존재 확인(소프트 삭제 제외)
-    const existingGoal = await prisma.studyGoal.findUnique({
+    // findFirst 사용: findUnique는 복합 where 조건 불가
+    const existingGoal = await prisma.studyGoal.findFirst({
       where: { goalId: id, deletedAt: null },
     })
 

@@ -5,7 +5,7 @@ import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from './StudyCarousel.module.css'
 
 interface StudyCarouselProps {
@@ -23,40 +23,47 @@ export default function StudyCarousel({
 }: StudyCarouselProps) {
   const [itemsPerView, setItemsPerView] = useState(3)
 
-  useEffect(() => {
-    const updateItemsPerView = () => {
-      const width = window.innerWidth
-      if (width < 600) {
-        setItemsPerView(1)
-      } else if (width < 800) {
-        setItemsPerView(2)
-      } else {
-        setItemsPerView(3)
-      }
+  // useCallback으로 함수 메모이제이션 (불필요한 리스너 재등록 방지)
+  const updateItemsPerView = useCallback(() => {
+    const width = window.innerWidth
+    if (width < 600) {
+      setItemsPerView(1)
+    } else if (width < 800) {
+      setItemsPerView(2)
+    } else {
+      setItemsPerView(3)
     }
+  }, [])
 
+  useEffect(() => {
     updateItemsPerView()
     window.addEventListener('resize', updateItemsPerView)
 
     return () => window.removeEventListener('resize', updateItemsPerView)
-  }, [])
+  }, [updateItemsPerView])
 
   if (!selectedDate || !userId) return null
 
-  // 선택된 날짜의 라운드들 필터링
-  const selectedDateRounds = upcomingRounds.filter(round => {
-    if (!round.startDate) return false
-    const roundDate = new Date(round.startDate)
-    const targetDate = new Date()
-    targetDate.setDate(selectedDate)
-    const dayStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
-    const dayEnd = new Date(
-      targetDate.getFullYear(),
-      targetDate.getMonth(),
-      targetDate.getDate() + 1
-    )
-    return roundDate >= dayStart && roundDate < dayEnd
-  })
+  // useMemo로 필터링 결과 메모이제이션 (성능 최적화)
+  const selectedDateRounds = useMemo(() => {
+    return upcomingRounds.filter(round => {
+      if (!round.startDate) return false
+      const roundDate = new Date(round.startDate)
+      const targetDate = new Date()
+      targetDate.setDate(selectedDate)
+      const dayStart = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth(),
+        targetDate.getDate()
+      )
+      const dayEnd = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth(),
+        targetDate.getDate() + 1
+      )
+      return roundDate >= dayStart && roundDate < dayEnd
+    })
+  }, [upcomingRounds, selectedDate])
 
   return (
     <div className={styles['carousel-container']}>

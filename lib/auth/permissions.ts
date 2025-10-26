@@ -60,3 +60,43 @@ export async function checkIsMember(
     return false
   }
 }
+
+/**
+ * 한 번의 쿼리로 멤버 여부와 팀장 여부 확인
+ * @param userId - 사용자 ID
+ * @param clubId - 커뮤니티 ID
+ * @returns { isMember: boolean, isTeamLeader: boolean }
+ */
+export async function checkMembershipAndRole(
+  userId: string | null | undefined,
+  clubId: string
+): Promise<{ isMember: boolean; isTeamLeader: boolean }> {
+  if (!userId || !clubId) {
+    return { isMember: false, isTeamLeader: false }
+  }
+
+  try {
+    const member = await prisma.communityMember.findFirst({
+      where: {
+        userId,
+        clubId,
+        deletedAt: null,
+      },
+      select: {
+        role: true,
+      },
+    })
+
+    if (!member) {
+      return { isMember: false, isTeamLeader: false }
+    }
+
+    return {
+      isMember: true,
+      isTeamLeader: member.role === 'admin',
+    }
+  } catch (error) {
+    console.error('Error checking membership and role:', error)
+    return { isMember: false, isTeamLeader: false }
+  }
+}

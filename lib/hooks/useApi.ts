@@ -29,6 +29,21 @@ export function useApi<T>(endpoint: string, options: UseApiOptions = {}) {
 
   const fetchData = useCallback(async (): Promise<T> => {
     const response = await fetch(endpoint)
+
+    // Check HTTP status before parsing JSON
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        if (errorData.error) {
+          errorMessage = errorData.error
+        }
+      } catch {
+        // Failed to parse error response, use default message
+      }
+      throw new Error(errorMessage)
+    }
+
     const result: ApiResponse<T> = await response.json()
 
     if (!result.success) {
@@ -51,6 +66,21 @@ export function useApi<T>(endpoint: string, options: UseApiOptions = {}) {
           headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
         })
+
+        // Check HTTP status before parsing JSON
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // Failed to parse error response
+          }
+          onError?.(errorMessage)
+          return { success: false, error: errorMessage }
+        }
 
         const result: ApiResponse<T> = await response.json()
 
@@ -79,6 +109,21 @@ export function useApi<T>(endpoint: string, options: UseApiOptions = {}) {
           body: JSON.stringify(input),
         })
 
+        // Check HTTP status before parsing JSON
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // Failed to parse error response
+          }
+          onError?.(errorMessage)
+          return { success: false, error: errorMessage }
+        }
+
         const result: ApiResponse<T> = await response.json()
 
         if (result.success) {
@@ -104,6 +149,21 @@ export function useApi<T>(endpoint: string, options: UseApiOptions = {}) {
           method: 'DELETE',
         })
 
+        // Check HTTP status before parsing JSON
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // Failed to parse error response
+          }
+          onError?.(errorMessage)
+          return { success: false, error: errorMessage }
+        }
+
         const result: ApiResponse<null> = await response.json()
 
         if (result.success) {
@@ -126,6 +186,22 @@ export function useApi<T>(endpoint: string, options: UseApiOptions = {}) {
     async (id: string): Promise<{ success: boolean; data?: T; error?: string }> => {
       try {
         const response = await fetch(`${endpoint}/${id}`)
+
+        // Check HTTP status before parsing JSON
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // Failed to parse error response
+          }
+          onError?.(errorMessage)
+          return { success: false, error: errorMessage }
+        }
+
         const result: ApiResponse<T> = await response.json()
 
         if (result.success) {

@@ -8,7 +8,7 @@ export interface CommunityBase {
   name: string
   description: string | null
   isPublic: boolean
-  createdAt: string
+  createdAt: Date
 }
 
 /**

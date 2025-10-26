@@ -81,7 +81,6 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-sm);
   outline: none;
-  transition: border-color 0.2s;
 }
 
 .goal-input:focus {
@@ -141,8 +140,6 @@
   background-color: transparent;
   cursor: pointer;
   border-radius: var(--inner-card-radius);
-  transition: background-color 0.2s;
-  color: var(--gray-500);
 }
 
 .action-button:hover:not(:disabled) {
@@ -150,6 +147,80 @@
 }
 
 .action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Round 편집 모드 스타일 */
+.round-edit-form {
+  width: 100%;
+  padding: var(--spacing-md);
+}
+
+.round-edit-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.edit-field label {
+  font-size: var(--font-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-700);
+}
+
+.edit-field input {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--inner-card-radius);
+  font-size: var(--font-sm);
+  outline: none;
+}
+
+.round-edit-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.edit-save-button,
+.edit-cancel-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--inner-card-radius);
+  font-size: var(--font-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.edit-save-button {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+.edit-save-button:hover:not(:disabled) {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+}
+
+.edit-cancel-button {
+  background-color: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.edit-cancel-button:hover:not(:disabled) {
+  background-color: var(--gray-300);
+}
+
+.edit-save-button:disabled,
+.edit-cancel-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

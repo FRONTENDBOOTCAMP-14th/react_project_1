@@ -1,5 +1,6 @@
 'use client'
 
+import { LoadingState } from '@/components/common'
 import { useUserCommunities } from '@/lib/hooks'
 import { useEffect, useState } from 'react'
 import styles from './CalendarSection.module.css'
@@ -20,7 +21,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
   const [days, setDays] = useState<DayInfo[]>([])
 
   // useUserCommunities 훅 사용 (userId가 있을 때만)
-  const { upcomingRounds } = useUserCommunities(userId || '')
+  const { upcomingRounds, loading } = useUserCommunities(userId || '')
 
   useEffect(() => {
     // 클라이언트에서만 실행되어 hydration error 방지
@@ -58,18 +59,22 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
 
   return (
     <div className={styles['calendar-container']}>
-      {days.map((d, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => handleDateClick(d.date)}
-          className={`${styles['day-box']} ${selectedDate === d.date ? styles['selected-day'] : ''}`}
-        >
-          <div className={styles['date']}>{d.date}</div>
-          <div className={styles['day']}>{d.day}</div>
-          <div className={styles['count-box']}>{d.count}</div>
-        </button>
-      ))}
+      {loading ? (
+        <LoadingState />
+      ) : (
+        days.map((d, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => handleDateClick(d.date)}
+            className={`${styles['day-box']} ${selectedDate === d.date ? styles['selected-day'] : ''}`}
+          >
+            <div className={styles['date']}>{d.date}</div>
+            <div className={styles['day']}>{d.day}</div>
+            <div className={styles['count-box']}>{d.count}</div>
+          </button>
+        ))
+      )}
     </div>
   )
 }

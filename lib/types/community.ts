@@ -8,6 +8,8 @@ export interface CommunityBase {
   name: string
   description: string | null
   isPublic: boolean
+  region?: string | null
+  subRegion?: string | null
   createdAt: Date
 }
 
@@ -35,6 +37,9 @@ export interface CreateCommunityInput {
   name: string
   description?: string | null
   isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
+  tagname?: string
 }
 
 /**
@@ -44,6 +49,9 @@ export interface UpdateCommunityInput {
   name?: string
   description?: string | null
   isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
+  tagname?: string[]
 }
 
 /**
@@ -71,6 +79,8 @@ export interface CommunityInfo {
   name: string
   description: string | null
   isPublic: boolean
+  region?: string | null
+  subRegion?: string | null
   createdAt: Date
   rounds?: {
     roundId: string
@@ -101,6 +111,8 @@ export interface CommunityListResponse {
 export interface CommunityWhereClause {
   deletedAt: null | { equals: null }
   isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
   name?: {
     contains: string
     mode: 'insensitive'

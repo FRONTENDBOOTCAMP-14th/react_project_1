@@ -27,6 +27,8 @@ import type { NextRequest } from 'next/server'
  *   - limit?: number (기본값: 10, 최대: 100)
  *   - isPublic?: 'true'|'false' 공개 여부로 필터
  *   - search?: string 커뮤니티 이름으로 검색
+ *   - region?: string 지역으로 필터
+ *   - subRegion?: string 세부 지역으로 필터
  *   - createdAfter?: string (ISO 8601) 생성일 이후로 필터
  *   - createdBefore?: string (ISO 8601) 생성일 이전으로 필터
  *   - userId?: string userId로 필터
@@ -46,10 +48,15 @@ export async function GET(request: NextRequest) {
     const createdAfter = getStringParam(searchParams, 'createdAfter')
     const createdBefore = getStringParam(searchParams, 'createdBefore')
     const userId = getStringParam(searchParams, 'userId')
+    const region = getStringParam(searchParams, 'region')
+    const subRegion = getStringParam(searchParams, 'subRegion')
+
     // where 조건 구성
     const whereClause: CommunityWhereClause = {
       deletedAt: null,
       ...(isPublic !== null && { isPublic }),
+      ...(region && { region }),
+      ...(subRegion && { subRegion }),
       ...(search && {
         name: {
           contains: search,
@@ -135,7 +142,10 @@ export async function GET(request: NextRequest) {
  * {
  *   "name": "커뮤니티 이름(필수)",
  *   "description": "설명(선택)",
- *   "isPublic": true
+ *   "isPublic": true,
+ *   "region": "지역(선택)",
+ *   "subRegion": "세부 지역(선택)",
+ *   "tagname": "태그(선택)"
  * }
  *
  * 응답
@@ -149,6 +159,9 @@ export async function POST(req: NextRequest) {
     const name = (body?.name ?? '').trim()
     const description = (body?.description ?? '').trim() || null
     const isPublic = Boolean(body?.is_public ?? body?.isPublic ?? true)
+    const region = (body?.region ?? '').trim() || null
+    const subRegion = (body?.subRegion ?? body?.subRegion ?? '').trim() || null
+    const tagname = body?.tagname ? [body.tagname] : []
 
     // 필수 값 검증
     if (!name) {
@@ -157,13 +170,22 @@ export async function POST(req: NextRequest) {
 
     // 커뮤니티 생성
     const created = await prisma.community.create({
-      data: { name, description, isPublic },
+      data: {
+        name,
+        description,
+        isPublic,
+        region,
+        subRegion,
+        tagname,
+      },
       select: {
         clubId: true,
         name: true,
         description: true,
         isPublic: true,
         createdAt: true,
+        updatedAt: true,
+        tagname: true,
         rounds: {
           select: {
             roundId: true,

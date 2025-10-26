@@ -153,6 +153,32 @@ export async function DELETE(
   try {
     const { id } = await params
 
+    // 먼저 round 존재 여부와 커뮤니티 정보 확인
+    const existingRound = await prisma.round.findFirst({
+      where: {
+        roundId: id,
+        deletedAt: null,
+      },
+      select: roundSelect,
+    })
+
+    if (!existingRound) {
+      return createErrorResponse('회차를 찾을 수 없습니다.', 404)
+    }
+
+    // 인증 확인
+    const session = await getServerSession(authOptions)
+    const userId = (session as CustomSession)?.userId
+    if (!userId) {
+      return createErrorResponse('인증이 필요합니다.', 401)
+    }
+
+    // 팀장 권한 확인
+    const isTeamLeader = await checkIsTeamLeader(userId, existingRound.clubId)
+    if (!isTeamLeader) {
+      return createErrorResponse('팀장만 회차를 삭제할 수 있습니다.', 403)
+    }
+
     // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
     try {
       await prisma.round.update({

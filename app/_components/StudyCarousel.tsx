@@ -4,6 +4,7 @@ import { Carousel, CarouselItem } from '@/components/ui'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
 import { MapPin } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import styles from './StudyCarousel.module.css'
 
@@ -60,33 +61,30 @@ export default function StudyCarousel({
   return (
     <div className={styles['carousel-container']}>
       <p>{selectedDate}일 스터디 목록</p>
-      {selectedDateRounds.length === 0 && (
+      {selectedDateRounds.length === 0 ? (
         <p className={styles['carousel-none']}>{selectedDate}일에 예정된 스터디가 없습니다</p>
-      )}
-      <Carousel showNavigation showIndicators itemsPerView={itemsPerView}>
-        {selectedDateRounds.length < 0 ? (
-          <p className={styles['carousel-none']}>{selectedDate}일에 예정된 스터디가 없습니다</p>
-        ) : (
-          selectedDateRounds.map(round => {
+      ) : (
+        <Carousel showNavigation showIndicators itemsPerView={itemsPerView}>
+          {selectedDateRounds.map(round => {
             const community = subscribedCommunities.find(c => c.clubId === round.clubId)
             return (
               <CarouselItem key={round.roundId}>
-                <div className={styles['carousel-item']}>
+                <Link className={styles['carousel-item']} href={`/community/${community?.clubId}`}>
                   <div className={styles['study-title']}>
                     {community?.name || '알 수 없는 커뮤니티'}
                   </div>
-                  <div className={styles['study-info']}>Round {round.roundNumber}</div>
+                  <div className={styles['study-info']}>{round.roundNumber} 회차</div>
                   {round.location && (
                     <div className={styles['study-location']}>
                       <MapPin size={16} /> {round.location}
                     </div>
                   )}
-                </div>
+                </Link>
               </CarouselItem>
             )
-          })
-        )}
-      </Carousel>
+          })}
+        </Carousel>
+      )}
     </div>
   )
 }

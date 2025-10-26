@@ -9,9 +9,12 @@
   flex-shrink: 0;
   border-radius: var(--inner-card-radius);
   display: flex;
+  flex-direction: column;
   justify-self: center;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
+  color: var(--secondary-color);
 }
 
 .carousel-none {

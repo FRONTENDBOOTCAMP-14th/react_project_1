@@ -1,13 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
-import prisma from '@/lib/prisma'
-import {
-  communityDetailSelect,
-  userSubscribedCommunitiesWhere,
-  upcomingRoundsWhere,
-  roundSelect,
-} from '@/lib/quaries'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
+import { useCallback, useEffect, useState } from 'react'
 
 interface UseUserCommunitiesResult {
   subscribedCommunities: Community[]
@@ -15,6 +8,11 @@ interface UseUserCommunitiesResult {
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
+}
+
+interface UserCommunitiesResponse {
+  subscribedCommunities: Community[]
+  upcomingRounds: Round[]
 }
 
 /**
@@ -66,35 +64,18 @@ export const useUserCommunities = (userId: string): UseUserCommunitiesResult => 
       setLoading(true)
       setError(null)
 
-      // 1. 사용자가 구독한 커뮤니티 조회
-      const communities = await prisma.community.findMany({
-        where: userSubscribedCommunitiesWhere(userId),
-        select: communityDetailSelect,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      })
+      // API 호출로 변경
+      const response = await fetch('/api/user/communities')
+      const result = await response.json()
 
-      setSubscribedCommunities(communities)
-
-      // 2. 사용자가 속한 모든 커뮤니티의 다가오는 라운드 조회
-      const subscribedCommunityIds = communities.map(c => c.clubId)
-
-      if (subscribedCommunityIds.length > 0) {
-        const rounds = await prisma.round.findMany({
-          where: {
-            clubId: {
-              in: subscribedCommunityIds,
-            },
-            ...upcomingRoundsWhere(),
-          },
-          select: roundSelect,
-          orderBy: { startDate: 'asc' },
-        })
-
-        setUpcomingRounds(rounds)
+      if (result.success) {
+        const data = result.data as UserCommunitiesResponse
+        setSubscribedCommunities(data.subscribedCommunities)
+        setUpcomingRounds(data.upcomingRounds)
       } else {
+        setSubscribedCommunities([])
         setUpcomingRounds([])
+        setError(result.error || '커뮤니티 정보를 불러오는데 실패했습니다')
       }
     } catch (err) {
       console.error('Failed to fetch user communities:', err)

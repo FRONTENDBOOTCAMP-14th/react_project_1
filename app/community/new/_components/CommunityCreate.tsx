@@ -1,21 +1,31 @@
 'use client'
 
+import { ClipboardList, MapPin, Tag, User } from 'lucide-react'
 import { useState } from 'react'
-import { User, MapPin, Tag, ClipboardList } from 'lucide-react' //  루시드 아이콘
 
+import FieldInput from '@/app/community/new/_components/FieldInput'
 import Dropdown from '@/components/ui/Dropdown'
 import FillButton from '@/components/ui/FillButton'
-import FieldInput from '@/app/community/new/_components/FieldInput'
-import styles from './CommunityCreate.module.css'
 import regionData from '@/lib/json/region.json'
+import type { CreateCommunityInput } from '@/lib/types/community'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import styles from './CommunityCreate.module.css'
 
-export default function CommunityCreate() {
-  //const [thumbnail, setThumbnail] = useState<File | string | null>(null)
+interface CommunityCreateProps {
+  onSubmit: (
+    data: CreateCommunityInput
+  ) => Promise<{ success: boolean; data?: { clubId: string }; error?: string }>
+}
+
+export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
+  const router = useRouter()
   const [studyName, setStudyName] = useState('')
   const [studyRegion, setStudyRegion] = useState('')
   const [subRegion, setSubRegion] = useState('')
   const [studyDescription, setStudyDescription] = useState('')
   const [studyTag, setStudyTags] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const options = (() => {
     const uniqueRegions = new Set<string>()
@@ -34,21 +44,48 @@ export default function CommunityCreate() {
     return uniqueSubs.sort((a, b) => a.localeCompare(b)).map(sub => ({ value: sub, label: sub }))
   })()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    //   const formData = {
-    //     studyName,
-    //     region,
-    //     studyDescription,
-    //     studyTags: studyTags
-    //       .split(',')
-    //       .map(tag => tag.trim())
-    //       .filter(tag => tag),
-    //   }
+    if (!studyName.trim()) {
+      toast.error('모임명을 입력해주세요')
+      return
+    }
 
-    //   console.log('폼 데이터:', formData)
-    //   // API 호출 등 제출 로직
+    setIsSubmitting(true)
+
+    try {
+      // 지역 정보 조합 (예: "서울특별시 강남구")
+      const region = [studyRegion, subRegion].filter(Boolean).join(' ')
+
+      // 태그 처리 (쉼표로 구분된 문자열을 첫 번째 태그만 사용)
+      const tagname =
+        studyTag
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(tag => tag)[0] || undefined
+
+      const result = await onSubmit({
+        name: studyName.trim(),
+        description: studyDescription.trim() || undefined,
+        isPublic: true, // 기본값을 공개로 설정
+        region: region || undefined,
+        subRegion: subRegion || undefined,
+        tagname,
+      })
+
+      if (result.success) {
+        toast.success('커뮤니티가 성공적으로 생성되었습니다!')
+        // 생성된 커뮤니티 페이지로 리디렉션
+        router.push(`/community/${result.data?.clubId}`)
+      } else {
+        toast.error(result.error || '커뮤니티 생성에 실패했습니다')
+      }
+    } catch (_error) {
+      toast.error('커뮤니티 생성 중 오류가 발생했습니다')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -125,8 +162,8 @@ export default function CommunityCreate() {
 
       <section className={styles.submit}>
         <h2 className="sr-only">생성버튼</h2>
-        <FillButton type="submit" formAction="">
-          생성
+        <FillButton type="submit" formAction="" disabled={isSubmitting}>
+          {isSubmitting ? '생성 중...' : '생성'}
         </FillButton>
       </section>
     </form>

@@ -188,6 +188,8 @@ export const communitySelect = {
   name: true,
   description: true,
   isPublic: true,
+  region: true,
+  subRegion: true,
   createdAt: true,
   updatedAt: true,
   tagname: true,

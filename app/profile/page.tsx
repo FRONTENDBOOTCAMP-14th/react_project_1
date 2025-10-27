@@ -1,8 +1,7 @@
 import prisma from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import DeleteAccountButton from '@/app/profile/DeleteAccountButton'
-import LogoutButton from '@/app/profile/LogoutButton'
+import { ButtonContainer } from './_components'
 
 export default async function ProfilePage() {
   const userId = await getCurrentUserId()
@@ -15,35 +14,34 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: 'calc(100dvh - 56px)',
-        padding: '1rem',
-        maxWidth: 640,
-        margin: '0 auto',
-        display: 'grid',
-        gap: 12,
-      }}
-    >
-      <h1 style={{ fontSize: 20, fontWeight: 700 }}>프로필</h1>
-      <div style={{ display: 'grid', gap: 8 }}>
-        <div>
-          <div style={{ fontSize: 12, color: '#6b7280' }}>이메일</div>
-          <div style={{ fontSize: 14 }}>{user.email || '-'}</div>
+    <main style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          padding: '1rem',
+          width: 'fit-content',
+          alignSelf: 'center',
+        }}
+      >
+        <h1 style={{ fontSize: 36 }}>프로필</h1>
+        <div style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
+          <div>
+            <div style={{ fontSize: 16 }}>이메일</div>
+            <div style={{ fontSize: 16 }}>{user.email || '-'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 16, color: '#6b7280' }}>이름</div>
+            <div style={{ fontSize: 16 }}>{user.username || '-'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 16, color: '#6b7280' }}>닉네임</div>
+            <div style={{ fontSize: 16 }}>{user.nickname || '-'}</div>
+          </div>
         </div>
-        <div>
-          <div style={{ fontSize: 12, color: '#6b7280' }}>이름</div>
-          <div style={{ fontSize: 14 }}>{user.username || '-'}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: '#6b7280' }}>닉네임</div>
-          <div style={{ fontSize: 14 }}>{user.nickname || '-'}</div>
-        </div>
-      </div>
-      <div style={{ height: 1, background: '#e5e7eb', margin: '8px 0' }} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-        <LogoutButton />
-        <DeleteAccountButton />
+        <div style={{ height: 1, background: '#e5e7eb', margin: '8px 0' }} />
+        <ButtonContainer />
       </div>
     </main>
   )

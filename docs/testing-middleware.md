@@ -57,6 +57,7 @@ curl -X GET http://localhost:3000/api/communities
 ```
 
 **기대 결과**:
+
 ```json
 {
   "success": false,
@@ -184,7 +185,7 @@ export default withAuth(
     console.log('[Middleware] Path:', req.nextUrl.pathname)
     console.log('[Middleware] Token:', !!req.nextauth.token)
     // ... 나머지 코드
-  },
+  }
   // ...
 )
 ```

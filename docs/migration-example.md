@@ -18,12 +18,9 @@ import type { CustomSession } from '@/lib/types'
 export async function POST() {
   const session = await getServerSession(authOptions)
   const userId = (session as CustomSession)?.userId
-  
+
   if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'unauthorized' },
-      { status: 401 }
-    )
+    return NextResponse.json({ success: false, error: 'unauthorized' }, { status: 401 })
   }
 
   try {
@@ -66,10 +63,7 @@ export async function POST() {
     })
     return createSuccessResponse({ message: '계정이 삭제되었습니다.' })
   } catch (e: unknown) {
-    return createErrorResponse(
-      getErrorMessage(e, '계정 삭제에 실패했습니다.'),
-      500
-    )
+    return createErrorResponse(getErrorMessage(e, '계정 삭제에 실패했습니다.'), 500)
   }
 }
 ```
@@ -95,19 +89,13 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
 import type { CustomSession } from '@/lib/types'
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   // 1. 인증 확인
   const session = await getServerSession(authOptions)
   const userId = (session as CustomSession)?.userId
 
   if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'Unauthorized' },
-      { status: 401 }
-    )
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
 
   // 2. 멤버십 확인
@@ -120,18 +108,12 @@ export async function DELETE(
   })
 
   if (!membership) {
-    return NextResponse.json(
-      { success: false, error: 'Not a member' },
-      { status: 403 }
-    )
+    return NextResponse.json({ success: false, error: 'Not a member' }, { status: 403 })
   }
 
   // 3. 팀장 권한 확인
   if (membership.role !== 'owner') {
-    return NextResponse.json(
-      { success: false, error: 'Only owner can delete' },
-      { status: 403 }
-    )
+    return NextResponse.json({ success: false, error: 'Only owner can delete' }, { status: 403 })
   }
 
   // 4. 삭제 실행
@@ -142,10 +124,7 @@ export async function DELETE(
     })
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Delete failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Delete failed' }, { status: 500 })
   }
 }
 ```
@@ -158,10 +137,7 @@ import { requireAuthAndAccess } from '@/lib/utils/api-auth'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import prisma from '@/lib/prisma'
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   // 인증 + 팀장 권한 확인을 한 번에 처리
   const { userId, error } = await requireAuthAndAccess(params.id, 'owner')
   if (error) return error
@@ -194,10 +170,7 @@ export async function DELETE(
 
 ```typescript
 // app/api/rounds/[id]/route.ts (가상 예제)
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   // 1. 인증
   const session = await getServerSession(authOptions)
   const userId = (session as CustomSession)?.userId
@@ -249,10 +222,7 @@ import { hasPermission } from '@/lib/auth'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import prisma from '@/lib/prisma'
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   // 1. 인증
   const { userId, error: authError } = await requireAuthUser()
   if (authError) return authError

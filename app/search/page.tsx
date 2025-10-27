@@ -10,8 +10,18 @@ import { toast } from 'sonner'
 import style from './page.module.css'
 
 export default function SearchPage() {
-  const { region, subRegion, search, page, setRegion, setSubRegion, setSearch, setPage } =
-    useUrlSearchCommunity()
+  const {
+    region,
+    subRegion,
+    search,
+    searchTags,
+    page,
+    setRegion,
+    setSubRegion,
+    setSearch,
+    setSearchTags,
+    setPage,
+  } = useUrlSearchCommunity()
 
   // 검색 결과 상태
   const [searchResults, setSearchResults] = useState<CommunitySearchResponse | null>(null)
@@ -19,18 +29,14 @@ export default function SearchPage() {
 
   // 검색 실행
   const executeSearch = useCallback(async () => {
-    if (!region.trim()) {
-      toast('지역을 먼저 선택하세요')
-      return
-    }
-
     setLoading(true)
 
     try {
       const params = {
-        region: region.trim(),
+        region: region.trim() || undefined,
         subRegion: subRegion.trim() || undefined,
         search: search.trim() || undefined,
+        searchTags: searchTags?.length ? searchTags : undefined,
         page,
         limit: 12,
       }
@@ -44,16 +50,18 @@ export default function SearchPage() {
     } finally {
       setLoading(false)
     }
-  }, [region, subRegion, search, page])
+  }, [region, subRegion, search, searchTags, page])
 
   // URL 상태 변경 시 자동 검색
   useEffect(() => {
-    if (region.trim()) {
+    // 검색어나 지역이나 태그가 있거나, 페이지가 변경될 때 검색 실행
+    if (search.trim() || region.trim() || (searchTags && searchTags.length > 0)) {
       executeSearch()
-    } else {
+    } else if (!search.trim() && !region.trim() && (!searchTags || searchTags.length === 0)) {
+      // 검색 조건이 모두 없으면 결과 초기화
       setSearchResults(null)
     }
-  }, [region, subRegion, search, page, executeSearch])
+  }, [region, subRegion, search, searchTags, page, executeSearch])
 
   // 페이지 변경 핸들러
   const handlePageChange = useCallback(
@@ -79,6 +87,8 @@ export default function SearchPage() {
       <WordSearch
         query={search}
         onChangeQuery={setSearch}
+        searchTags={searchTags}
+        onChangeSearchTags={setSearchTags}
         onSearch={() => executeSearch()}
         loading={loading}
       />

@@ -11,10 +11,12 @@ export function useUrlSearchCommunity() {
 
   // URL에서 초기 상태 읽기
   const getInitialURLCommunity = useCallback(() => {
+    const searchTagsParams = searchParams.getAll('searchTags')
     return {
       region: searchParams.get('region') || '',
       subRegion: searchParams.get('subRegion') || '',
       search: searchParams.get('search') || '',
+      searchTags: searchTagsParams.length > 0 ? searchTagsParams : undefined,
       page: parseInt(searchParams.get('page') || '1', 10),
       limit: parseInt(searchParams.get('limit') || '12', 10),
       isPublic: searchParams.get('isPublic') ? searchParams.get('isPublic') === 'true' : undefined,
@@ -41,6 +43,11 @@ export function useUrlSearchCommunity() {
       }
       if (updatedState.search.trim()) {
         params.set('search', updatedState.search.trim())
+      }
+      if (updatedState.searchTags?.length) {
+        updatedState.searchTags.forEach(tag => {
+          params.append('searchTags', tag.trim())
+        })
       }
       if (updatedState.page > 1) {
         params.set('page', String(updatedState.page))
@@ -81,6 +88,13 @@ export function useUrlSearchCommunity() {
     [updateUrl]
   )
 
+  const setSearchTags = useCallback(
+    (searchTags: string[]) => {
+      updateUrl({ searchTags, page: 1 }) // 태그 변경 시 페이지를 1로 리셋
+    },
+    [updateUrl]
+  )
+
   const setPage = useCallback(
     (page: number) => {
       updateUrl({ page })
@@ -99,6 +113,7 @@ export function useUrlSearchCommunity() {
     region: searchState.region,
     subRegion: searchState.subRegion,
     search: searchState.search,
+    searchTags: searchState.searchTags,
     page: searchState.page,
     limit: searchState.limit,
     isPublic: searchState.isPublic,
@@ -107,6 +122,7 @@ export function useUrlSearchCommunity() {
     setRegion,
     setSubRegion,
     setSearch,
+    setSearchTags,
     setPage,
 
     // 전체 상태 변경

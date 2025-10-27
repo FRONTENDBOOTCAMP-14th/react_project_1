@@ -8,6 +8,7 @@ export interface CommunitySearchParams {
   region?: string
   subRegion?: string
   search?: string
+  searchTags?: string[]
   page?: number
   limit?: number
   isPublic?: boolean
@@ -52,6 +53,11 @@ function buildCommunitySearchQuery(params: CommunitySearchParams): string {
   if (params.region?.trim()) searchParams.set('region', params.region.trim())
   if (params.subRegion?.trim()) searchParams.set('subRegion', params.subRegion.trim())
   if (params.search?.trim()) searchParams.set('search', params.search.trim())
+  if (params.searchTags?.length) {
+    params.searchTags.forEach(tag => {
+      searchParams.append('searchTags', tag.trim())
+    })
+  }
   if (params.page && params.page > 1) searchParams.set('page', String(params.page))
   if (params.limit) searchParams.set('limit', String(params.limit))
   if (params.isPublic !== undefined) searchParams.set('isPublic', String(params.isPublic))

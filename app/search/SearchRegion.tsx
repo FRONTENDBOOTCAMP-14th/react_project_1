@@ -13,8 +13,8 @@ import styles from './SearchRegion.module.css'
  * @example
  * ```tsx
  * <SearchRegion
- *   region={region} // 시,도
- *   subRegion={subRegion} //구
+ *   region={region} // 시,도 (선택사항)
+ *   subRegion={subRegion} //구 (선택사항)
  *   onChangeRegion={setRegion}
  *   onChangeSubRegion={setSubRegion}
  *   onSearch={handleSearch}
@@ -22,14 +22,15 @@ import styles from './SearchRegion.module.css'
  * ```
  *
  * @param {SearchRegionProps} props - 컴포넌트 속성
- * @param {string} props.region - 선행되는 선택 지역 이름 (시,도)
- * @param {string} props.subRegion - region 선택에 따라 보여지는 하위 지역선택(구)
+ * @param {string} props.region - 선행되는 선택 지역 이름 (시,도) - 선택사항
+ * @param {string} props.subRegion - region 선택에 따라 보여지는 하위 지역선택(구) - 선택사항
  * @param {(v: string) => void} props.onChangeRegion - 상위 지역 선택 시 호출
  * @param {(v: string) => void} props.onChangeSubRegion - 하위 지역 선택 시 호출
  * @param {() => void} props.onSearch - 검색 버튼 클릭 시 호출
  * @param {boolean} props.loading - 검색 중 여부
  *
  * @description
+ * - 지역 선택은 선택사항이며, 선택하지 않으면 모든 지역에서 검색합니다.
  * - 첫번째 드롭다운에서 지역(region.json의 'region')의 목록을 선택후
  *   선택된 지역에 따라 두번째 드롭다운('subRegion')항목이 동적 변경 표시됨
  * - 알아서 import해서 지역 이름을 로드함
@@ -84,21 +85,16 @@ export default function SearchRegion({
           options={regionOptions}
           value={region}
           onChange={onChangeRegion}
-          placeholder="지역을 선택하세요"
+          placeholder="지역을 선택하세요 (선택사항)"
         />
         <Dropdown
           options={subRegionOptions}
           value={subRegion}
           onChange={onChangeSubRegion}
-          placeholder="세부 지역을 선택하세요"
+          placeholder="세부 지역을 선택하세요 (선택사항)"
         />
         {onSearch && (
-          <IconButton
-            type="button"
-            onClick={onSearch}
-            disabled={loading || !region}
-            aria-label="검색 버튼"
-          >
+          <IconButton type="button" onClick={onSearch} disabled={loading} aria-label="검색 버튼">
             <Search strokeWidth="1" size={20} color="var(--primary-color)" />
           </IconButton>
         )}

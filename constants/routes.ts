@@ -87,6 +87,14 @@ export const API_ENDPOINTS = {
   REGION: {
     BASE: '/api/region',
   },
+    SEARCH: {
+    BASE: '/api/search',
+    WITH_PARAMS: (params: { q?: string; region?: string }) => {
+      const searchParams = new URLSearchParams()
+      if (params.q) searchParams.append('q', params.q)
+      if (params.region) searchParams.append('region', params.region)
+      return `/api/search?${searchParams.toString()}`
+    },
 } as const
 
 /**

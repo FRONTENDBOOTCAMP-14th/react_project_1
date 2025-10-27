@@ -15,6 +15,7 @@ export const ROUTES = {
     CREATE: '/goal/create',
     DETAIL: (goalId: string) => `/goal/${goalId}`,
   },
+  NOTIFICATION: '/notification',
 } as const
 
 /**
@@ -86,6 +87,12 @@ export const API_ENDPOINTS = {
   },
   REGION: {
     BASE: '/api/region',
+  },
+  ATTENDANCE: {
+    BASE: '/api/attendance',
+    BY_ID: (id: string) => `/api/attendance/${id}`,
+    BY_ROUND: (roundId: string) => `/api/attendance/round/${roundId}`,
+    BY_USER: (userId: string) => `/api/attendance/user/${userId}`,
   },
 } as const
 

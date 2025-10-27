@@ -1,41 +1,95 @@
 'use client'
 
-import style from './page.module.css'
+import CommunitySearchResults from '@/app/search/CommunitySearchResults'
 import SearchRegion from '@/app/search/SearchRegion'
 import WordSearch from '@/app/search/WordSearch'
-import { useState, useCallback } from 'react'
+import { useUrlSearchCommunity } from '@/lib/hooks/useUrlSearchCommunity'
+import { fetchCommunitySearch, type CommunitySearchResponse } from '@/lib/search/search'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import style from './page.module.css'
 
 export default function SearchPage() {
-  const [region, setRegion] = useState('')
-  const [subRegion, setSubRegion] = useState('')
-  const [query, setQuery] = useState('')
+  const { region, subRegion, search, page, setRegion, setSubRegion, setSearch, setPage } =
+    useUrlSearchCommunity()
 
-  const handleSearch = useCallback(() => {
-    const hasRegion = !!region
-    const hasQuery = !!query.trim()
+  // 검색 결과 상태
+  const [searchResults, setSearchResults] = useState<CommunitySearchResponse | null>(null)
+  const [loading, setLoading] = useState(false)
 
-    // 지역 선택 없이 검색시 토스트 알람
-    if (!hasRegion) {
-      toast({ title: '지역을 먼저 선택하세요' })
-      return
-    }
-    // 지역만 선택후 검색
-    if (hasRegion && !hasQuery) {
-      executeSearch({ region, subRegion: subRegion || undefined })
+  // 검색 실행
+  const executeSearch = useCallback(async () => {
+    if (!region.trim()) {
+      toast('지역을 먼저 선택하세요')
       return
     }
 
-    // 지역선택 + 검색어 검색
-    executeSearch({ region, subRegion: subRegion || undefined, query })
-  }, [region, subRegion, query])
+    setLoading(true)
+
+    try {
+      const params = {
+        region: region.trim(),
+        subRegion: subRegion.trim() || undefined,
+        search: search.trim() || undefined,
+        page,
+        limit: 12,
+      }
+
+      const results = await fetchCommunitySearch(params)
+      setSearchResults(results)
+    } catch (error) {
+      console.error('검색 실패:', error)
+      toast.error('검색 중 오류가 발생했습니다')
+      setSearchResults(null)
+    } finally {
+      setLoading(false)
+    }
+  }, [region, subRegion, search, page])
+
+  // URL 상태 변경 시 자동 검색
+  useEffect(() => {
+    if (region.trim()) {
+      executeSearch()
+    } else {
+      setSearchResults(null)
+    }
+  }, [region, subRegion, search, page, executeSearch])
+
+  // 페이지 변경 핸들러
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage)
+    },
+    [setPage]
+  )
+
   return (
     <main className={style.search}>
       {/* 지역 선택 */}
-      <SearchRegion />
+      <SearchRegion
+        region={region}
+        subRegion={subRegion}
+        onChangeRegion={setRegion}
+        onChangeSubRegion={setSubRegion}
+        onSearch={() => executeSearch()}
+        loading={loading}
+      />
 
-      {/* 연관검색어 */}
-      <WordSearch />
+      {/* 검색어 입력 */}
+      <WordSearch
+        query={search}
+        onChangeQuery={setSearch}
+        onSearch={() => executeSearch()}
+        loading={loading}
+      />
+
+      {/* 검색 결과 */}
+      <CommunitySearchResults
+        items={searchResults?.items || []}
+        loading={loading}
+        pagination={searchResults?.pagination}
+        onPageChange={handlePageChange}
+      />
     </main>
   )
 }

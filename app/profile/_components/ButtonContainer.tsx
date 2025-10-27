@@ -3,16 +3,16 @@
 import EditButton from './EditButton'
 import DeleteAccountButton from './DeleteAccountButton'
 import { memo } from 'react'
-import { toast } from 'sonner'
+import styles from './ButtonContainer.module.css'
 
-function ButtonContainer() {
+interface ButtonContainerProps {
+  onClickEdit: () => void
+}
+
+function ButtonContainer({ onClickEdit }: ButtonContainerProps) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-      <EditButton
-        onClick={() => {
-          toast('편집버튼 눌러짐')
-        }}
-      />
+    <div className={styles['button-container']}>
+      <EditButton onClick={onClickEdit} />
       <DeleteAccountButton />
     </div>
   )

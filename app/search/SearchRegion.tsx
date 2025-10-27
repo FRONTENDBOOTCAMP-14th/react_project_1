@@ -5,6 +5,13 @@ import { Dropdown } from '@/components/ui'
 import styles from './SearchRegion.module.css'
 import type { Region } from '@/lib/types'
 
+interface SearchRegionProps {
+  region: string
+  subRegion: string
+  onChangeRegion: (v: string) => void
+  onChangeSubRegion: (v: string) => void
+}
+
 export default function SearchRegion() {
   const [regions, setRegions] = useState<Region[]>([])
   const [selectedRegion, setSelectedRegion] = useState('')

@@ -37,6 +37,7 @@ export default function Header({ title = '' }: HeaderProps) {
       onClick: () => {
         signOut()
       },
+      isDanger: true,
     },
   ]
 
@@ -88,7 +89,7 @@ export default function Header({ title = '' }: HeaderProps) {
               {/* Right: Alarm + Profile */}
               <div className={styles['right-group']}>
                 {status === 'authenticated' && (
-                  <IconLink href={ROUTES.NOTIFICATION}>
+                  <IconLink href={ROUTES.NOTIFICATIONS}>
                     <Image
                       className={styles['default-icon']}
                       src="/svg/alarm.svg"
@@ -108,13 +109,19 @@ export default function Header({ title = '' }: HeaderProps) {
                   </IconLink>
                 )}
 
-                <Popover
-                  actions={userPopoverAction}
-                  className={styles['default-icon']}
-                  trigger={
+                {status === 'authenticated' ? (
+                  <Popover
+                    actions={userPopoverAction}
+                    className={styles['default-icon']}
+                    trigger={
+                      <Image src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
+                    }
+                  />
+                ) : (
+                  <IconLink href={ROUTES.LOGIN}>
                     <Image src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
-                  }
-                />
+                  </IconLink>
+                )}
               </div>
             </>
           ) : (

@@ -15,7 +15,8 @@ export const ROUTES = {
     CREATE: '/goal/create',
     DETAIL: (goalId: string) => `/goal/${goalId}`,
   },
-  NOTIFICATION: '/notification',
+  NOTIFICATIONS: '/notifications',
+  LOGIN: '/login',
 } as const
 
 /**

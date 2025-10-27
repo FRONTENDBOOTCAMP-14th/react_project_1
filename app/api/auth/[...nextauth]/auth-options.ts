@@ -13,12 +13,12 @@ export const authOptions: NextAuthOptions = {
   ],
   events: {
     async signIn({ user, account, isNewUser }) {
-      console.log(
-        `User signed in: ${user?.email || 'unknown'}, provider: ${account?.provider}, new user: ${isNewUser}`
-      )
+      const _user = user
+      const _account = account
+      const _isNewUser = isNewUser
     },
     async signOut({ session }) {
-      console.log(`User signed out: ${(session as CustomSession)?.userId || 'unknown'}`)
+      const _session = session
     },
   },
   callbacks: {

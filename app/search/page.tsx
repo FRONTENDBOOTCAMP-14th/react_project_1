@@ -3,8 +3,10 @@
 import style from './page.module.css'
 import SearchRegion from '@/app/search/SearchRegion'
 import WordSearch from '@/app/search/WordSearch'
+import { useState, useCallback } from 'react'
+import { toast } from 'sonner'
 
-export default function searchpage() {
+export default function SearchPage() {
   const [region, setRegion] = useState('')
   const [subRegion, setSubRegion] = useState('')
   const [query, setQuery] = useState('')

@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const user = await prisma.user.findUnique({ where: { userId } })
   return (
     <main className={styles.container}>
-      <p>{user?.username}</p>
+      <p>{user?.username} 님이 구독한 스터디 목록</p>
     </main>
   )
 }

@@ -40,9 +40,11 @@ export async function POST(req: NextRequest) {
 
     const user = await createUser({ provider, providerId, email, username, nickname })
 
-    // TODO: 세션 발급/로그인 상태 설정(NextAuth 또는 커스텀)
+    // 클라이언트에서 NextAuth Credentials Provider로 즉시 로그인 처리
     return NextResponse.json({
+      ok: true,
       success: true,
+      userId: user.userId,
       user: { userId: user.userId, username: user.username, nickname: user.nickname },
     })
   } catch (e: unknown) {

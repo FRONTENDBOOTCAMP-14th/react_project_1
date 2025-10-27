@@ -1,3 +1,5 @@
+'use client'
+
 import { memo } from 'react'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalsList from './GoalsList'
@@ -35,6 +37,14 @@ export interface GoalsContainerProps {
    * 목표 추가 핸들러 (새 목표 저장 시)
    */
   onAddGoal?: (title: string) => Promise<void>
+  /**
+   * 목표 수정 핸들러
+   */
+  onEdit?: (goalId: string, newTitle: string) => Promise<void>
+  /**
+   * 목표 삭제 핸들러
+   */
+  onDelete?: (goalId: string) => Promise<void>
 }
 
 /**
@@ -49,6 +59,8 @@ function GoalsContainer({
   showAddButton = false,
   emptyMessage,
   onAddGoal,
+  onEdit,
+  onDelete,
 }: GoalsContainerProps) {
   return (
     <section className={styles['goals-container']} aria-label={title}>
@@ -62,6 +74,8 @@ function GoalsContainer({
         showAddButton={showAddButton}
         emptyMessage={emptyMessage}
         onAddGoal={onAddGoal}
+        onEdit={onEdit}
+        onDelete={onDelete}
       />
     </section>
   )

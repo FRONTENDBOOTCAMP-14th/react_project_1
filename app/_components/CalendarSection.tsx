@@ -1,40 +1,68 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { LoadingState } from '@/components/common'
+import { useUserCommunities } from '@/lib/hooks'
+import { useMemo, useState } from 'react'
 import styles from './CalendarSection.module.css'
-
-interface DayInfo {
-  date: number
-  day: string
-  count: number
-}
 
 interface CalendarSectionProps {
   onDateSelect: (date: number) => void
+  userId?: string | null
 }
 
-export default function CalendarSection({ onDateSelect }: CalendarSectionProps) {
+export default function CalendarSection({ onDateSelect, userId }: CalendarSectionProps) {
   const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate())
-  const [days, setDays] = useState<DayInfo[]>([])
 
-  useEffect(() => {
-    // 클라이언트에서만 실행되어 hydration error 방지
+  // useUserCommunities 훅 사용 (userId가 있을 때만)
+  const { upcomingRounds, loading } = useUserCommunities(userId || '')
+
+  // useMemo로 days 계산 최적화 (매 렌더링마다 재계산 방지)
+  const days = useMemo(() => {
     const today = new Date()
     const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-    const generatedDays = Array.from({ length: 7 }, (_, i) => {
+    return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
+
+      // 해당 날짜의 라운드 수 계산
+      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+
+      // 해당 날짜의 라운드들
+      const dayRounds = upcomingRounds.filter(round => {
+        if (!round.startDate) return false
+        const roundDate = new Date(round.startDate)
+        return roundDate >= dayStart && roundDate < dayEnd
+      })
+
+      // 출석자 수 계산 (중복 제거)
+      const attendeeCount = dayRounds.reduce((total, round) => {
+        return total + (round._count?.attendance || 0)
+      }, 0)
+
+      // 사용자의 출석 상태 확인
+      const userAttendance = userId
+        ? dayRounds.find(round => round.attendance?.some(att => att.userId === userId))
+        : null
+      const userAttendanceStatus = userAttendance?.attendance?.find(
+        att => att.userId === userId
+      )?.attendanceType
 
       return {
         date: date.getDate(),
         day: dayNames[date.getDay()],
-        count: Math.floor(Math.random() * 5), // 랜덤값(추후 삭제)
+        count: dayRounds.length,
+        attendeeCount,
+        userAttendanceStatus: userAttendanceStatus as
+          | 'present'
+          | 'absent'
+          | 'late'
+          | 'excused'
+          | null,
       }
     })
-
-    setDays(generatedDays)
-  }, []) // 의존성 배열 비움 - 한 번만 실행
+  }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때만 재계산
 
   const handleDateClick = (date: number) => {
     setSelectedDate(date)
@@ -43,18 +71,38 @@ export default function CalendarSection({ onDateSelect }: CalendarSectionProps) 
 
   return (
     <div className={styles['calendar-container']}>
-      {days.map((d, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => handleDateClick(d.date)}
-          className={`${styles['day-box']} ${selectedDate === d.date ? styles['selected-day'] : ''}`}
-        >
-          <div className={styles['date']}>{d.date}</div>
-          <div className={styles['day']}>{d.day}</div>
-          <div className={styles['count-box']}>{d.count}</div>
-        </button>
-      ))}
+      {loading ? (
+        <LoadingState />
+      ) : (
+        days.map((d, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => handleDateClick(d.date)}
+            className={`${styles['day-box']} ${selectedDate === d.date ? styles['selected-day'] : ''}`}
+          >
+            <div className={styles['date']}>{d.date}</div>
+            <div className={styles['day']}>{d.day}</div>
+            <div className={styles['count-box']}>{d.count}</div>
+
+            {/* 출석 정보 */}
+            {d.attendeeCount > 0 && (
+              <div className={styles['attendee-count']}>{d.attendeeCount}명</div>
+            )}
+
+            {userId && d.userAttendanceStatus && (
+              <div
+                className={`${styles['user-status']} ${styles[`status-${d.userAttendanceStatus}`]}`}
+              >
+                {d.userAttendanceStatus === 'present' && '출석'}
+                {d.userAttendanceStatus === 'late' && '지각'}
+                {d.userAttendanceStatus === 'absent' && '결석'}
+                {d.userAttendanceStatus === 'excused' && '양해'}
+              </div>
+            )}
+          </button>
+        ))
+      )}
     </div>
   )
 }

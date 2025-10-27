@@ -39,7 +39,7 @@
 
 .header {
   padding: var(--spacing-md) var(--spacing-sm);
-  border-bottom: 1px solid var(--etc-color-4);
+  border-bottom: 1px solid var(--gray-300);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -63,7 +63,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--etc-color-2);
+  color: var(--gray-500);
   transition: color 0.2s ease;
 }
 
@@ -98,18 +98,18 @@
 }
 
 .nav-item:hover {
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
   color: var(--secondary-color);
 }
 
 .nav-item.active {
-  background-color: var(--etc-color-1);
+  background-color: var(--etc-color);
   color: var(--accent-color);
 }
 
 .footer {
   padding: var(--spacing-sm);
-  border-top: 1px solid var(--etc-color-4);
+  border-top: 1px solid var(--gray-300);
   font-size: var(--font-sm);
-  color: var(--etc-color-2);
+  color: var(--gray-500);
 }

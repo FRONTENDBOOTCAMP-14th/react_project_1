@@ -64,7 +64,7 @@ export const useGoalToggle = (
           // 실패 시 refetch로 서버 상태로 롤백
           await refetch()
           toast.dismiss()
-          toast.error('목표를 업데이트하는데 실패했습니다.')
+          toast.error(data.error || '목표를 업데이트하는데 실패했습니다.')
           return
         }
 

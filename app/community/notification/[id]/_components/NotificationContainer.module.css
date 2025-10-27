@@ -31,7 +31,7 @@
 .message {
   text-align: center;
   padding: var(--spacing-sm);
-  color: var(--etc-color-2);
+  color: var(--gray-500);
   font-size: var(--font-sm);
 }
 

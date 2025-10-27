@@ -8,7 +8,9 @@ export interface CommunityBase {
   name: string
   description: string | null
   isPublic: boolean
-  createdAt: string
+  region?: string | null
+  subRegion?: string | null
+  createdAt: Date
 }
 
 /**
@@ -35,6 +37,9 @@ export interface CreateCommunityInput {
   name: string
   description?: string | null
   isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
+  tagname?: string
 }
 
 /**
@@ -44,6 +49,9 @@ export interface UpdateCommunityInput {
   name?: string
   description?: string | null
   isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
+  tagname?: string[]
 }
 
 /**
@@ -66,14 +74,33 @@ export interface CommunityResponse {
   message?: string
 }
 
+export interface CommunityInfo {
+  clubId: string
+  name: string
+  description: string | null
+  isPublic: boolean
+  region?: string | null
+  subRegion?: string | null
+  createdAt: Date
+  rounds?: {
+    roundId: string
+    roundNumber: number
+    startDate: Date | null
+    endDate: Date | null
+    location: string | null
+  }[]
+}
+
 /**
  * API 응답 타입 - 커뮤니티 리스트 (페이지네이션 포함)
  */
 export interface CommunityListResponse {
   success: boolean
-  data?: CommunityBase[]
-  count?: number
-  pagination?: PaginationInfo
+  data?: {
+    data: CommunityBase[]
+    count: number
+    pagination: PaginationInfo
+  }
   error?: string
   message?: string
 }
@@ -84,6 +111,8 @@ export interface CommunityListResponse {
 export interface CommunityWhereClause {
   deletedAt: null | { equals: null }
   isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
   name?: {
     contains: string
     mode: 'insensitive'
@@ -97,4 +126,10 @@ export interface CommunityWhereClause {
         gte: Date
         lte: Date
       }
+  communityMembers?: {
+    some: {
+      userId: string
+      deletedAt: null
+    }
+  }
 }

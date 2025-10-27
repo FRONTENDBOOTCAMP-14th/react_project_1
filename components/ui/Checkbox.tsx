@@ -1,9 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
 import type { InputHTMLAttributes } from 'react'
 import styles from './Checkbox.module.css'
-import { X } from 'lucide-react'
 
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'onChange'> {
@@ -64,7 +64,7 @@ const Checkbox = ({
       />
       <span className={cn(styles['custom-checkbox'], checked && styles.checked)}>
         {disabled ? (
-          <X size={20} color="var(--etc-color-3)" strokeWidth={3} />
+          <X size={20} color="var(--gray-100)" strokeWidth={3} />
         ) : (
           <svg
             width="24"

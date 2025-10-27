@@ -93,8 +93,11 @@ export default function Header({ title = '' }: HeaderProps) {
                   aria-label="프로필"
                   className={styles['icon-button']}
                   onClick={() => {
-                    if (status === 'authenticated') router.push('/profile')
-                    else router.push('/login')
+                    if (status === 'authenticated') {
+                      router.push('/profile')
+                    } else {
+                      router.push('/login')
+                    }
                   }}
                 >
                   <Image

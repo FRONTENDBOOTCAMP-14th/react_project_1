@@ -10,13 +10,13 @@
  * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
-import prisma from '@/lib/prisma'
-import { notificationSelect, activeNotificationWhere } from '@/lib/quaries'
-import type { CreateNotificationRequest } from '@/lib/types/notification'
-import type { NextRequest } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
-import type { PaginationInfo } from '@/lib/types'
+import prisma from '@/lib/prisma'
+import { activeNotificationWhere, notificationSelect } from '@/lib/quaries'
+import type { CreateNotificationRequest } from '@/lib/types/notification'
+import { getBooleanParam, getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/notifications
@@ -34,27 +34,24 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const clubId = searchParams.get('clubId')
-    const isPinnedParam = searchParams.get('isPinned')
+    const isPinned = getBooleanParam(searchParams, 'isPinned')
 
     // clubId는 필수
     if (!clubId) {
       return createErrorResponse('clubId is required', 400)
     }
 
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)))
-    const skip = (page - 1) * limit
+    const { page, limit, skip } = getPaginationParams(request)
 
     // where 절 구성
     const whereClause = {
       ...activeNotificationWhere,
       clubId,
-      ...(isPinnedParam !== null && { isPinned: isPinnedParam === 'true' }),
+      ...(isPinned !== null && { isPinned }),
     }
 
-    // 병렬 조회: 데이터 + 전체 갯수
-    const [notifications, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.notification.findMany({
         where: whereClause,
         skip,
@@ -66,20 +63,8 @@ export async function GET(request: NextRequest) {
         select: notificationSelect,
       }),
       prisma.notification.count({ where: whereClause }),
-    ])
-
-    const pagination: PaginationInfo = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }
-
-    return createSuccessResponse({
-      data: notifications,
-      count: notifications.length,
-      pagination,
-    })
+      { page, limit, skip }
+    )
   } catch (error) {
     console.error('Error fetching notifications:', error)
     const message = error instanceof Error ? error.message : 'Unknown error'

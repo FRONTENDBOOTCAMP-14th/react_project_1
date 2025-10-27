@@ -10,3 +10,16 @@
   align-items: center;
   padding: var(--spacing-md) 0;
 }
+
+.logo-link {
+  display: flex;
+  justify-self: center;
+}
+
+.welcome-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--font-lg);
+  font-weight: var(--font-weight-bold);
+}

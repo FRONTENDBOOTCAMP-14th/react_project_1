@@ -1,8 +1,7 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
-import type { CustomSession } from '@/lib/types'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { getServerSession } from 'next-auth'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { hasPermission } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
@@ -26,12 +25,10 @@ interface RouteParams {
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions)
-    const currentUserId = (session as CustomSession)?.userId
-
-    if (!currentUserId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    // 인증 확인
+    const { userId: currentUserId, error: authError } = await requireAuthUser()
+    if (authError || !currentUserId)
+      return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const { roundId } = await params
     const { searchParams } = new URL(request.url)
@@ -49,18 +46,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       | 'excused'
       | null
 
-    // 라운드 정보 확인 (사용자가 접근 권한이 있는지 확인)
+    // 라운드 정보와 멤버십 권한 확인
     const round = await prisma.round.findFirst({
       where: {
         roundId,
-        community: {
-          communityMembers: {
-            some: {
-              userId: currentUserId,
-              deletedAt: null,
-            },
-          },
-        },
+        deletedAt: null,
       },
       include: {
         community: {
@@ -73,7 +63,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     })
 
     if (!round) {
-      return createErrorResponse('라운드를 찾을 수 없거나 접근 권한이 없습니다.', 404)
+      return createErrorResponse('라운드를 찾을 수 없습니다.', 404)
+    }
+
+    // 멤버십 권한 확인
+    const isMember = await hasPermission(currentUserId, round.community.clubId, 'member')
+    if (!isMember) {
+      return createErrorResponse('접근 권한이 없습니다. 이 커뮤니티의 멤버가 아닙니다.', 403)
     }
 
     // 필터 조건 구성

@@ -115,13 +115,10 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
     location: round?.location || '',
   })
   const [hasAttended, setHasAttended] = useState(false)
-  const [checkingAttendance, setCheckingAttendance] = useState(true)
 
   useEffect(() => {
     const checkAttendance = async () => {
       if (!round?.roundId) return
-
-      setCheckingAttendance(true)
 
       try {
         if (!userId) return
@@ -134,8 +131,6 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
         }
       } catch (error) {
         console.error('출석 확인 실패:', error)
-      } finally {
-        setCheckingAttendance(false)
       }
     }
 

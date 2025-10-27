@@ -12,7 +12,12 @@ interface SearchRegionProps {
   onChangeSubRegion: (v: string) => void
 }
 
-export default function SearchRegion() {
+export default function SearchRegion({
+  region,
+  subRegion,
+  onChangeRegion,
+  onChangeSubRegion,
+}: SearchRegionProps) {
   const [regions, setRegions] = useState<Region[]>([])
   const [selectedRegion, setSelectedRegion] = useState('')
   const [selectedSubRegion, setSelectedSubRegion] = useState('')
@@ -33,7 +38,7 @@ export default function SearchRegion() {
   const subRegionOptions = useMemo(() => {
     const found = regions.find(r => r.region === selectedRegion)
     if (!found) return []
-    return found.subRegion.map(sa => ({ value: sa, label: sa }))
+    return found.subRegion.map(sr => ({ value: sr, label: sr }))
   }, [regions, selectedRegion])
 
   return (
@@ -44,16 +49,15 @@ export default function SearchRegion() {
       <div className={styles.searchControls}>
         <Dropdown
           options={regionOptions}
-          value={selectedRegion}
+          value={region}
           onChange={value => {
             setSelectedRegion(value)
-            setSelectedSubRegion('')
           }}
           placeholder="선택하세요"
         />
         <Dropdown
           options={subRegionOptions}
-          value={selectedSubRegion}
+          value={subRegion}
           onChange={value => setSelectedSubRegion(value)}
           placeholder="선택하세요"
         />

@@ -45,7 +45,7 @@ export default function WordSearch() {
           handleLocalSearch()
         }}
       >
-        <div className={Style.inputWrapper}>
+        <div className={Style['input-wrapper']}>
           <TextInput
             value={searchQuery}
             onChange={e => setSearchQuery(e.currentTarget.value)}
@@ -59,7 +59,7 @@ export default function WordSearch() {
 
         {/* 입력시 연관 검색 태그 노출 */}
         {searchQuery.trim() && (
-          <div className={Style.relatedKeywords}>
+          <div className={Style['related-keywords']}>
             <ul className={Style.word}>
               {relatedKeywords.map(tag => (
                 <li key={tag}>{tag}</li>

@@ -1,7 +1,7 @@
-.searchSection {
+.search-section {
   width: 100%;
 }
-.searchControls {
+.search-controls {
   display: flex;
   flex-direction: row;
   min-width: 280px;

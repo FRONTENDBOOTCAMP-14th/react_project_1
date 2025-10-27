@@ -69,11 +69,11 @@ export default function SearchRegion({
   }, [regions, selectedRegion])
 
   return (
-    <section className={styles.searchSection}>
+    <section className={styles['search-section']}>
       <h2 className="sr-only" id="search-heading">
         검색
       </h2>
-      <div className={styles.searchControls}>
+      <div className={styles['search-controls']}>
         <Dropdown
           options={regionOptions}
           value={region}

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import styles from './Sidebar.module.css'
 import Image from 'next/image'
 import { IconLink } from '@/components/ui'
-import { Search, Plus, Users, Home, X, LogIn, UserPlus } from 'lucide-react'
+import { Search, Plus, Users, Home, X, LogIn /* , UserPlus */ } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 
 interface SidebarProps {
@@ -109,10 +109,10 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                   <span>로그인</span>
                 </IconLink>
 
-                <IconLink href="/login?step=register" className={styles['nav-item']}>
+                {/* <IconLink href="/login?step=register" className={styles['nav-item']}>
                   <UserPlus size={20} />
                   <span>회원가입</span>
-                </IconLink>
+                </IconLink> */}
               </>
             )}
           </nav>

@@ -14,6 +14,8 @@ import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { hasErrorCode } from '@/lib/errors'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { hasPermission } from '@/lib/auth'
 
 /**
  * GET /api/members/[id]
@@ -46,6 +48,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PATCH /api/members/[id]
  * - 멤버 역할을 수정합니다.
+ * - 권한: 팀장만 수정 가능
  *
  * 요청 Body
  * {
@@ -55,6 +58,27 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
+    // 멤버 정보 조회
+    const existingMember = await prisma.communityMember.findFirst({
+      where: { id, deletedAt: null },
+      select: { clubId: true, userId: true },
+    })
+
+    if (!existingMember) {
+      return createErrorResponse(MESSAGES.ERROR.MEMBER_NOT_FOUND, 404)
+    }
+
+    // 팀장 권한 확인
+    const hasAdminPermission = await hasPermission(userId, existingMember.clubId, 'admin')
+    if (!hasAdminPermission) {
+      return createErrorResponse('팀장만 멤버 역할을 수정할 수 있습니다.', 403)
+    }
+
     const body = (await request.json()) as UpdateMemberRequest
 
     // 역할 검증
@@ -103,6 +127,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 /**
  * DELETE /api/members/[id]
  * - 멤버를 소프트 삭제합니다 (커뮤니티 탈퇴).
+ * - 권한: 본인 또는 팀장
  */
 export async function DELETE(
   request: NextRequest,
@@ -110,6 +135,27 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
+    // 멤버 정보 조회
+    const existingMember = await prisma.communityMember.findFirst({
+      where: { id, deletedAt: null },
+      select: { clubId: true, userId: true },
+    })
+
+    if (!existingMember) {
+      return createErrorResponse(MESSAGES.ERROR.MEMBER_NOT_FOUND, 404)
+    }
+
+    // 권한 확인: 본인 또는 팀장
+    const isSelf = existingMember.userId === userId
+    const hasAdminPermission = await hasPermission(userId, existingMember.clubId, 'admin')
+    if (!isSelf && !hasAdminPermission) {
+      return createErrorResponse('본인 또는 팀장만 멤버를 삭제할 수 있습니다.', 403)
+    }
 
     // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
     try {

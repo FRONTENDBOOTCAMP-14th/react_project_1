@@ -7,6 +7,7 @@ import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import styles from './StudyCarousel.module.css'
+import { formatDateRange } from '@/lib/utils'
 
 interface StudyCarouselProps {
   selectedDate: number | null
@@ -108,6 +109,12 @@ export default function StudyCarousel({
                       </div>
                     )}
                   </div>
+
+                  {round.startDate && round.endDate && (
+                    <div className={styles['study-date']}>
+                      {formatDateRange(round.startDate, round.endDate)}
+                    </div>
+                  )}
 
                   {round.location && (
                     <div className={styles['study-location']}>

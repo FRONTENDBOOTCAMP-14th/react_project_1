@@ -1,12 +1,14 @@
 'use client'
+
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import styles from './Header.module.css'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Sidebar from './Sidebar'
-import { IconButton } from '@/components/ui'
+import { IconButton, IconLink } from '@/components/ui'
 import { decodeAndCapitalize, isUUID, isNumericId } from '@/lib/utils'
+import { ROUTES } from '@/constants'
 
 interface HeaderProps {
   title?: string
@@ -70,24 +72,26 @@ export default function Header({ title = '' }: HeaderProps) {
               <div className={styles.center} />
               {/* Right: Alarm + Profile */}
               <div className={styles['right-group']}>
-                <IconButton type="button" aria-label="알림">
-                  <Image
-                    className={styles['default-icon']}
-                    src="/svg/alarm.svg"
-                    alt="알림"
-                    width={50}
-                    height={50}
-                    priority
-                  />
-                  <Image
-                    className={styles['active-icon']}
-                    src="/svg/alarm-active.svg"
-                    alt="알림 활성"
-                    width={50}
-                    height={50}
-                    priority
-                  />
-                </IconButton>
+                {status === 'authenticated' && (
+                  <IconLink href={ROUTES.NOTIFICATION}>
+                    <Image
+                      className={styles['default-icon']}
+                      src="/svg/alarm.svg"
+                      alt="알림"
+                      width={50}
+                      height={50}
+                      priority
+                    />
+                    <Image
+                      className={styles['active-icon']}
+                      src="/svg/alarm-active.svg"
+                      alt="알림 활성"
+                      width={50}
+                      height={50}
+                      priority
+                    />
+                  </IconLink>
+                )}
                 <IconButton
                   type="button"
                   aria-label="프로필"

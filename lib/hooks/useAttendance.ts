@@ -8,6 +8,7 @@ import type {
   UpdateAttendanceInput,
 } from '@/lib/types/attendance'
 import { useCallback, useEffect, useState } from 'react'
+import { API_ENDPOINTS, HTTP_HEADERS } from '@/constants/routes'
 
 interface UseAttendanceResult {
   attendance: Attendance | null
@@ -34,19 +35,6 @@ interface UseAttendanceResult {
     filters?: AttendanceFilterOptions
   ) => Promise<AttendanceListResponse>
 }
-
-const API_ENDPOINTS = {
-  ATTENDANCE: {
-    BASE: '/api/attendance',
-    BY_ID: (id: string) => `/api/attendance/${id}`,
-    BY_ROUND: (roundId: string) => `/api/attendance/round/${roundId}`,
-    BY_USER: (userId: string) => `/api/attendance/user/${userId}`,
-  },
-} as const
-
-const HTTP_HEADERS = {
-  'Content-Type': 'application/json',
-} as const
 
 /**
  * 출석 관리 커스텀 훅
@@ -164,7 +152,7 @@ export const useAttendance = (
       try {
         const response = await fetch(API_ENDPOINTS.ATTENDANCE.BASE, {
           method: 'POST',
-          headers: HTTP_HEADERS,
+          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
         })
 
@@ -192,7 +180,7 @@ export const useAttendance = (
       try {
         const response = await fetch(API_ENDPOINTS.ATTENDANCE.BY_ID(id), {
           method: 'PATCH',
-          headers: HTTP_HEADERS,
+          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
         })
 

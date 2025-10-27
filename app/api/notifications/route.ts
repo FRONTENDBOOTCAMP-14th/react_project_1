@@ -16,6 +16,8 @@ import { activeNotificationWhere, notificationSelect } from '@/lib/quaries'
 import type { CreateNotificationRequest } from '@/lib/types/notification'
 import { getBooleanParam, getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { hasPermission } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -75,11 +77,11 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/notifications
  * - 신규 공지사항을 생성합니다.
+ * - 권한: 커뮤니티 관리자 이상
  *
  * 요청 Body 예시
  * {
  *   "clubId": "커뮤니티ID(필수)",
- *   "authorId": "작성자ID(필수)",
  *   "title": "공지사항 제목(필수)",
  *   "content": "공지사항 내용(선택)",
  *   "isPinned": false  // 상단 고정 여부(선택, 기본값 false)
@@ -93,12 +95,22 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
     const body = (await request.json()) as CreateNotificationRequest
-    const { clubId, authorId, title, content, isPinned } = body
+    const { clubId, title, content, isPinned } = body
 
     // 필수 값 검증
-    if (!clubId || !authorId || !title) {
-      return createErrorResponse('Missing required fields: clubId, authorId, title', 400)
+    if (!clubId || !title) {
+      return createErrorResponse('Missing required fields: clubId, title', 400)
+    }
+
+    // 관리자 권한 확인
+    const hasAdminPermission = await hasPermission(userId, clubId, 'admin')
+    if (!hasAdminPermission) {
+      return createErrorResponse('관리자 이상만 공지사항을 생성할 수 있습니다.', 403)
     }
 
     // 제목 길이 검증
@@ -117,20 +129,10 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 
-    // authorId 존재 확인
-    const author = await prisma.user.findFirst({
-      where: { userId: authorId, deletedAt: null },
-      select: { userId: true },
-    })
-
-    if (!author) {
-      return createErrorResponse('Author not found', 404)
-    }
-
     const newNotification = await prisma.notification.create({
       data: {
         clubId,
-        authorId,
+        authorId: userId,
         title: trimmedTitle,
         content: content?.trim() || null,
         isPinned: isPinned ?? false,

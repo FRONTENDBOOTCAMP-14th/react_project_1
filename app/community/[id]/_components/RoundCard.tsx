@@ -1,7 +1,7 @@
 'use client'
 
 import { ErrorState, LoadingState } from '@/components/common'
-import { IconButton, Popover, type PopoverAction } from '@/components/ui'
+import { IconButton, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES } from '@/constants'
 import { useGoals } from '@/lib/hooks'
 import type { CustomSession } from '@/lib/types'
@@ -255,11 +255,14 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
               {formatDateRange(round.startDate, round.endDate)}
             </p>
           )}
-          {round?.location && (
-            <p className={styles['round-location']}>
-              <MapPin /> {round.location}
-            </p>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {round?.location && (
+              <p className={styles['round-location']}>
+                <MapPin /> {round.location}
+              </p>
+            )}
+            <StrokeButton type="button">참석하기</StrokeButton>
+          </div>
         </div>
       )}
     </header>

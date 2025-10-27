@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalsList from './GoalsList'
-import styles from './RoundCard.module.css'
+import styles from './GoalsContainer.module.css'
 
 /**
  * 목표 컨테이너 컴포넌트에 전달되는 속성

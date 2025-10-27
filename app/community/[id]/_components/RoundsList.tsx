@@ -178,11 +178,11 @@ export default function RoundsList({ clubId }: RoundsListProps) {
       <div className={styles['empty-state']}>
         {!isAddingRound && (
           <StrokeButton type="button" onClick={handleAddRoundClick}>
-            라운드 추가
+            회차 추가
           </StrokeButton>
         )}
         {renderAddRoundForm()}
-        {!isAddingRound && <p>아직 생성된 라운드가 없습니다.</p>}
+        {!isAddingRound && <p>아직 생성된 회차가 없습니다.</p>}
       </div>
     )
   }
@@ -192,7 +192,7 @@ export default function RoundsList({ clubId }: RoundsListProps) {
     <div className={styles['rounds-list-container']}>
       {!isAddingRound && (
         <StrokeButton type="button" onClick={handleAddRoundClick}>
-          라운드 추가
+          회차 추가
         </StrokeButton>
       )}
       {renderAddRoundForm()}

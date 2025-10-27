@@ -106,6 +106,7 @@ export async function GET(request: NextRequest) {
           isPublic: true,
           region: true,
           subRegion: true,
+          tagname: true,
           createdAt: true,
           rounds: {
             select: {
@@ -160,11 +161,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    // 인증 확인 (미들웨어가 이미 처리)
-    // userId가 필요한 경우 아래 주석 해제
-    // const { error: authError, userId } = await requireAuth()
-    const { error: authError } = await requireAuth()
-    if (authError) return authError
+    // 인증 확인 및 userId 가져오기
+    const { error: authError, userId } = await requireAuth()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const body = await req.json()
     const name = (body?.name ?? '').trim()
@@ -179,43 +178,57 @@ export async function POST(req: NextRequest) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NAME_REQUIRED, 400)
     }
 
-    // 커뮤니티 생성
-    const created = await prisma.community.create({
-      data: {
-        name,
-        description,
-        isPublic,
-        region,
-        subRegion,
-        tagname,
-      },
-      select: {
-        clubId: true,
-        name: true,
-        description: true,
-        isPublic: true,
-        region: true,
-        subRegion: true,
-        createdAt: true,
-        updatedAt: true,
-        tagname: true,
-        rounds: {
-          select: {
-            roundId: true,
-            roundNumber: true,
-            startDate: true,
-            endDate: true,
-            location: true,
-          },
-          where: {
-            deletedAt: null,
-            startDate: {
-              gte: new Date(), // 현재 날짜 이후의 라운드만
-            },
-          },
-          orderBy: { roundNumber: 'desc' },
+    // 트랜잭션으로 커뮤니티 생성 및 생성자를 멤버로 추가
+    const created = await prisma.$transaction(async tx => {
+      // 1. 커뮤니티 생성
+      const community = await tx.community.create({
+        data: {
+          name,
+          description,
+          isPublic,
+          region,
+          subRegion,
+          tagname,
         },
-      },
+        select: {
+          clubId: true,
+          name: true,
+          description: true,
+          isPublic: true,
+          region: true,
+          subRegion: true,
+          createdAt: true,
+          updatedAt: true,
+          tagname: true,
+          rounds: {
+            select: {
+              roundId: true,
+              roundNumber: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+            where: {
+              deletedAt: null,
+              startDate: {
+                gte: new Date(),
+              },
+            },
+            orderBy: { roundNumber: 'desc' },
+          },
+        },
+      })
+
+      // 2. 생성자를 admin 멤버로 추가
+      await tx.communityMember.create({
+        data: {
+          clubId: community.clubId,
+          userId,
+          role: 'admin',
+        },
+      })
+
+      return community
     })
 
     return createSuccessResponse(created, 201)

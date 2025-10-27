@@ -50,36 +50,3 @@
   font-size: var(--font-xs);
   margin-bottom: var(--spacing-xs);
 }
-
-.attendee-count {
-  font-size: var(--font-xs);
-  color: var(--gray-600);
-  margin-bottom: var(--spacing-xxs);
-}
-
-.user-status {
-  font-size: var(--font-xs);
-  font-weight: 500;
-  padding: var(--spacing-xxs) var(--spacing-xs);
-  border-radius: var(--inner-card-radius);
-}
-
-.status-present {
-  color: var(--success-color);
-  background-color: var(--status-present-bg);
-}
-
-.status-late {
-  color: var(--warning-color);
-  background-color: var(--status-late-bg);
-}
-
-.status-absent {
-  color: var(--error-color);
-  background-color: var(--status-absent-bg);
-}
-
-.status-excused {
-  color: var(--gray-500);
-  background-color: var(--status-excused-bg);
-}

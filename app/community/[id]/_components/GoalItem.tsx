@@ -173,7 +173,6 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
         </div>
         <div className={styles['goal-actions']}>
           <button
-            type="button"
             onClick={onSave ? handleSave : handleEdit}
             disabled={!title.trim() || isSaving}
             className={styles['action-button']}

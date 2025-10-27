@@ -104,6 +104,8 @@ export async function GET(request: NextRequest) {
           name: true,
           description: true,
           isPublic: true,
+          region: true,
+          subRegion: true,
           createdAt: true,
           rounds: {
             select: {
@@ -192,6 +194,8 @@ export async function POST(req: NextRequest) {
         name: true,
         description: true,
         isPublic: true,
+        region: true,
+        subRegion: true,
         createdAt: true,
         updatedAt: true,
         tagname: true,

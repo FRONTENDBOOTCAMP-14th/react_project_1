@@ -10,7 +10,7 @@ export default function NotFound() {
       <p>요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.</p>
       <div className={styles['button-container']}>
         <StrokeLink href="/">홈으로 돌아가기</StrokeLink>
-        <StrokeButton onClick={() => globalThis.history.back()}>
+        <StrokeButton type="button" onClick={() => globalThis.history.back()}>
           이전 페이지로 돌아가기
         </StrokeButton>
       </div>

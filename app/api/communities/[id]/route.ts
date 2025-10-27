@@ -40,6 +40,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         name: true,
         description: true,
         isPublic: true,
+        region: true,
+        subRegion: true,
         createdAt: true,
         tagname: true,
         deletedAt: true,
@@ -78,6 +80,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  *   - name?: string
  *   - description?: string | null
  *   - isPublic?: boolean
+ *   - region?: string | null
+ *   - subRegion?: string | null
  *
  * 응답
  * - 200: { success: true, data: UpdatedCommunity }
@@ -114,6 +118,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       name?: string
       description?: string | null
       isPublic?: boolean
+      region?: string | null
+      subRegion?: string | null
       updatedAt: Date
     } = {
       updatedAt: new Date(),
@@ -125,6 +131,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updateData.description = body.description?.trim() || null
     }
     if (body.isPublic !== undefined) updateData.isPublic = Boolean(body.isPublic)
+    if (body.region !== undefined) updateData.region = body.region?.trim() || null
+    if (body.subRegion !== undefined) updateData.subRegion = body.subRegion?.trim() || null
 
     // 이름 검증
     if (updateData.name !== undefined && !updateData.name) {
@@ -140,6 +148,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         name: true,
         description: true,
         isPublic: true,
+        region: true,
+        subRegion: true,
         createdAt: true,
         updatedAt: true,
       },

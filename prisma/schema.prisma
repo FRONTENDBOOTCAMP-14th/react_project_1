@@ -125,7 +125,6 @@ model Round {
   studyGoals  StudyGoal[]
   attendance  Attendance[] @relation("RoundAttendance")
 
-  @@unique([clubId, roundNumber], map: "uk_round_club_number")
   @@index([clubId], map: "idx_round_club")
   @@index([createdAt], map: "idx_round_created")
   @@index([startDate, endDate], map: "idx_round_dates")

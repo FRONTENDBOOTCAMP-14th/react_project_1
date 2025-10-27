@@ -19,7 +19,10 @@ import { NextResponse } from 'next/server'
 const PUBLIC_API_ROUTES = ['/api/auth', '/api/health', '/api/region', '/api/login-kakao']
 
 /**
- * 인증이 필요한 API 엔드포인트
+ * 인증이 필요한 API 엔드포인트 (POST, PATCH, DELETE 요청만)
+ * - GET /api/communities는 공개 (조회만 가능)
+ * - POST /api/communities는 보호 (생성)
+ * - PATCH/DELETE /api/communities/*는 보호 (수정/삭제)
  */
 const PROTECTED_API_ROUTES = [
   '/api/goals',
@@ -39,9 +42,12 @@ const PROTECTED_PAGE_ROUTES = ['/goal', '/profile']
 /**
  * 경로가 보호된 경로인지 확인
  */
-function isProtectedRoute(pathname: string): boolean {
+function isProtectedRoute(pathname: string, method?: string): boolean {
   // 보호된 API 경로 확인
   if (PROTECTED_API_ROUTES.some(route => pathname.startsWith(route))) {
+    // GET 요청은 공개 (조회만 가능)
+    if (method === 'GET') return false
+    // POST, PATCH, DELETE는 보호
     return true
   }
 
@@ -83,9 +89,10 @@ export default withAuth(
   req => {
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
+    const method = req.method
 
     // 보호된 라우트인데 토큰이 없는 경우
-    if (isProtectedRoute(pathname) && !token) {
+    if (isProtectedRoute(pathname, method) && !token) {
       // API 요청인 경우 401 응답
       if (pathname.startsWith('/api/')) {
         return NextResponse.json(
@@ -122,8 +129,8 @@ export default withAuth(
           return true
         }
 
-        // 보호된 경로는 토큰 존재 여부로 판단
-        if (isProtectedRoute(pathname)) {
+        // 보호된 경로는 토큰 존재 여부로 판단 (HTTP 메소드 고려)
+        if (isProtectedRoute(pathname, req.method)) {
           return !!token
         }
 

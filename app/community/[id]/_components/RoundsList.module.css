@@ -1,0 +1,12 @@
+/* RoundsList 컴포넌트 스타일 */
+.rounds-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--gray-500);
+}

@@ -20,6 +20,7 @@ import {
   withPagination,
 } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -80,10 +81,10 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/goals
  * - 신규 목표를 생성합니다.
+ * - 인증 필요: 미들웨어가 이미 인증 확인
  *
  * 요청 Body 예시
  * {
- *   "ownerId": "사용자ID(필수)",
  *   "clubId": "클럽ID(선택, 없으면 null)",
  *   "roundId": "회차ID(선택, 없으면 null)",
  *   "title": "제목(필수)",
@@ -101,12 +102,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // 인증 확인
+    const { userId: authUserId, error: authError } = await requireAuthUser()
+    if (authError || !authUserId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
     // 요청 바디 파싱
     const body = await request.json()
 
-    const { ownerId, clubId, roundId, title, description, isTeam, isComplete, startDate, endDate } =
+    const { clubId, roundId, title, description, isTeam, isComplete, startDate, endDate } =
       body as {
-        ownerId?: string
         clubId?: string | null
         roundId?: string | null
         title?: string
@@ -118,9 +122,12 @@ export async function POST(request: NextRequest) {
       }
 
     // 필수 값 검증
-    if (!ownerId || !title || !startDate || !endDate) {
-      return createErrorResponse('Missing required fields: ownerId, title, startDate, endDate', 400)
+    if (!title || !startDate || !endDate) {
+      return createErrorResponse('Missing required fields: title, startDate, endDate', 400)
     }
+
+    // ownerId는 인증된 사용자로 자동 설정 (요청에서 제공된 경우에도 인증된 사용자로 덮어쓰기)
+    const finalOwnerId = authUserId
 
     // 날짜 변환(문자열 → Date)
     const start = new Date(startDate)
@@ -128,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     // 목표 생성
     const createData = {
-      ownerId,
+      ownerId: finalOwnerId,
       clubId: clubId || null,
       roundId: roundId || null,
       title,

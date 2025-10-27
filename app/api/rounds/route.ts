@@ -10,17 +10,15 @@
  * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import { MESSAGES } from '@/constants/messages'
-import { checkIsMember, checkIsTeamLeader } from '@/lib/auth/permissions'
+import { hasPermission, getCurrentUserId } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { roundSelect } from '@/lib/quaries'
-import type { CustomSession } from '@/lib/types'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import { getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { buildRoundWhereClause, getNextRoundNumber } from '@/lib/utils/rounds'
-import { getServerSession } from 'next-auth'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -72,15 +70,14 @@ export async function GET(request: NextRequest) {
 
     // 비공개 커뮤니티의 경우 멤버 권한 확인
     if (!community.isPublic) {
-      const session = await getServerSession(authOptions)
-      const userId = (session as CustomSession)?.userId
+      const userId = await getCurrentUserId()
 
       if (!userId) {
         return createErrorResponse('인증이 필요합니다.', 401)
       }
 
-      // 멤버 여부 확인 (최적화된 함수 사용)
-      const isMember = await checkIsMember(userId, clubId)
+      // 멤버 여부 확인
+      const isMember = await hasPermission(userId, clubId, 'member')
       if (!isMember) {
         return createErrorResponse('접근 권한이 없습니다. 이 커뮤니티의 멤버가 아닙니다.', 403)
       }
@@ -180,15 +177,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 인증 확인
-    const session = await getServerSession(authOptions)
-    const userId = (session as CustomSession)?.userId
-    if (!userId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     // 팀장 권한 확인
-    const isTeamLeader = await checkIsTeamLeader(userId, clubId)
-    if (!isTeamLeader) {
+    const hasAdminPermission = await hasPermission(userId, clubId, 'admin')
+    if (!hasAdminPermission) {
       return createErrorResponse('팀장만 회차를 생성할 수 있습니다.', 403)
     }
 

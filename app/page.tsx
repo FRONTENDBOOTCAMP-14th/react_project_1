@@ -1,15 +1,12 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import { IconLink } from '@/components/ui'
 import prisma from '@/lib/prisma'
-import type { CustomSession } from '@/lib/types'
-import { getServerSession } from 'next-auth'
+import { getCurrentUserId } from '@/lib/auth'
 import Image from 'next/image'
 import { HomeContent } from './_components'
 import styles from './page.module.css'
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions)
-  const userId = (session as CustomSession)?.userId
+  const userId = await getCurrentUserId()
   const user = userId ? await prisma.user.findUnique({ where: { userId } }) : null
 
   return (

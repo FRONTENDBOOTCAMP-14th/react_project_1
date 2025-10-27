@@ -1,0 +1,75 @@
+.add-button {
+  font-size: var(--font-md);
+  padding: var(--spacing-xxs);
+}
+
+.goal-card {
+  padding: var(--spacing-sm);
+  border-radius: var(--inner-card-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.goal-description {
+  font-size: var(--font-sm);
+}
+
+/* GoalItem 편집 모드 스타일 */
+.goal-input {
+  flex: 1;
+  border: 1px solid var(--gray-100);
+  border-radius: var(--inner-card-radius);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-sm);
+  outline: none;
+}
+
+.goal-input:focus {
+  border-color: var(--primary-color);
+}
+
+.goal-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.goal-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: var(--inner-card-radius);
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: var(--gray-100);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.goals-list {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  flex-direction: column;
+  background-color: var(--gray-100);
+  border-radius: var(--inner-card-radius);
+}

@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalsContainer from './GoalsContainer'
-import styles from './RoundCard.module.css'
+import styles from './GoalsSection.module.css'
 import { MESSAGES } from '@/constants'
 
 /**

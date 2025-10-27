@@ -1,14 +1,11 @@
 import prisma from '@/lib/prisma'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
-import { getServerSession } from 'next-auth'
+import { getCurrentUserId } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import DeleteAccountButton from '@/app/profile/DeleteAccountButton'
 import LogoutButton from '@/app/profile/LogoutButton'
-import type { CustomSession } from '@/lib/types'
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions)
-  const userId = (session as CustomSession)?.userId
+  const userId = await getCurrentUserId()
   if (!userId) {
     redirect('/login')
   }

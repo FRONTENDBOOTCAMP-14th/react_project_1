@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import StudyProfile from './StudyProfile'
 import RoundsList from './RoundsList'
-import styles from './CommunityContext.module.css'
+import styles from './CommunityContent.module.css'
 import { ROUTES, MESSAGES } from '@/constants'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { useNotifications } from '@/lib/hooks'
@@ -76,7 +76,7 @@ export default function CommunityContent({
     <div className={styles['content-wrapper']}>
       <StudyProfile id={clubId} />
       <NotificationLink clubId={clubId} />
-      <RoundsList clubId={clubId} />
+      {isTeamLeader && <RoundsList clubId={clubId} />}
     </div>
   )
 }

@@ -18,6 +18,12 @@
   padding: var(--spacing-sm);
 }
 
+.study-date {
+  font-size: var(--font-xs);
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-sm);
+}
+
 .carousel-none {
   width: 100%;
   height: 300px;

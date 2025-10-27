@@ -15,6 +15,7 @@ export const ROUTES = {
     CREATE: '/goal/create',
     DETAIL: (goalId: string) => `/goal/${goalId}`,
   },
+  NOTIFICATION: '/notification',
 } as const
 
 /**
@@ -87,7 +88,7 @@ export const API_ENDPOINTS = {
   REGION: {
     BASE: '/api/region',
   },
-    SEARCH: {
+  SEARCH: {
     BASE: '/api/search',
     WITH_PARAMS: (params: { q?: string; region?: string }) => {
       const searchParams = new URLSearchParams()
@@ -95,6 +96,13 @@ export const API_ENDPOINTS = {
       if (params.region) searchParams.append('region', params.region)
       return `/api/search?${searchParams.toString()}`
     },
+  },
+  ATTENDANCE: {
+    BASE: '/api/attendance',
+    BY_ID: (id: string) => `/api/attendance/${id}`,
+    BY_ROUND: (roundId: string) => `/api/attendance/round/${roundId}`,
+    BY_USER: (userId: string) => `/api/attendance/user/${userId}`,
+  },
 } as const
 
 /**

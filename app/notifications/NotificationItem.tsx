@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import styles from './page.module.css'
 
-type Props = {
+interface Props {
   name: string
   message: string
   image: string

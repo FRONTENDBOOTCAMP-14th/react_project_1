@@ -1,10 +1,11 @@
 'use client'
 
-import { memo, type ReactNode } from 'react'
+import { memo, useMemo, type ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
 import type { Community } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
 import { useCommunity } from '@/lib/hooks'
+import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES, ROUTES } from '@/constants'
@@ -84,23 +85,30 @@ interface CommunityContentProps {
  * 커뮤니티 콘텐츠 컴포넌트 (순수 컴포넌트)
  */
 const CommunityContent = memo(({ community }: CommunityContentProps) => {
-  const actions: PopoverAction[] = [
-    {
-      id: 'edit',
-      label: '정보 편집',
-      onClick: () => {
-        toast('정보 편집')
+  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
+  const isMember = useCommunityStore(state => state.isMember)
+
+  // 팀장 전용 액션 메뉴
+  const actions: PopoverAction[] = useMemo(
+    () => [
+      {
+        id: 'edit',
+        label: '정보 편집',
+        onClick: () => {
+          toast('정보 편집')
+        },
       },
-    },
-    {
-      id: 'delete',
-      label: '삭제',
-      isDanger: true,
-      onClick: () => {
-        toast('삭제')
+      {
+        id: 'delete',
+        label: '삭제',
+        isDanger: true,
+        onClick: () => {
+          toast('삭제')
+        },
       },
-    },
-  ]
+    ],
+    []
+  )
   return (
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
@@ -111,15 +119,23 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
           />
           <ProfileInfo community={community} />
         </div>
-        <div className={styles['header-right']}>
-          <Popover trigger={<Ellipsis />} actions={actions} />
-        </div>
+        {isTeamLeader && (
+          <div className={styles['header-right']}>
+            <Popover trigger={<Ellipsis />} actions={actions} />
+          </div>
+        )}
       </article>
       <div className={styles['description-row']}>
         <p className={styles.description}>
           {community.description || MESSAGES.EMPTY.NO_DESCRIPTION}
         </p>
-        <StrokeButton>가입하기</StrokeButton>
+        {!isMember ? (
+          <StrokeButton onClick={() => toast('가입 기능 구현 예정')}>가입하기</StrokeButton>
+        ) : (
+          !isTeamLeader && (
+            <StrokeButton onClick={() => toast('탈퇴 기능 구현 예정')}>탈퇴하기</StrokeButton>
+          )
+        )}
       </div>
     </div>
   )
@@ -131,7 +147,8 @@ const CommunityContent = memo(({ community }: CommunityContentProps) => {
  * - 선언적 조건부 렌더링
  */
 export default function StudyProfile({ id }: StudyProfileProps) {
-  const { community, loading, error } = useCommunity(id)
+  const { community, loading, error, refetch, createCommunity, updateCommunity, deleteCommunity } =
+    useCommunity(id)
 
   return renderWithLoading(
     loading,

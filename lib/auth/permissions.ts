@@ -14,19 +14,19 @@ export async function checkIsTeamLeader(
   userId: string | null | undefined,
   clubId: string
 ): Promise<boolean> {
-  if (!userId) return false
+  if (!userId || !clubId) return false
 
   try {
-    const member = await prisma.communityMember.findFirst({
-      where: {
-        userId,
-        clubId,
-        deletedAt: null,
-        role: 'admin',
-      },
-    })
-
-    return !!member
+    return (
+      (await prisma.communityMember.count({
+        where: {
+          userId,
+          clubId,
+          role: 'admin',
+          deletedAt: null,
+        },
+      })) > 0
+    )
   } catch (error) {
     console.error('Error checking team admin permission:', error)
     return false
@@ -43,7 +43,37 @@ export async function checkIsMember(
   userId: string | null | undefined,
   clubId: string
 ): Promise<boolean> {
-  if (!userId) return false
+  if (!userId || !clubId) return false
+
+  try {
+    return (
+      (await prisma.communityMember.count({
+        where: {
+          userId,
+          clubId,
+          deletedAt: null,
+        },
+      })) > 0
+    )
+  } catch (error) {
+    console.error('Error checking member permission:', error)
+    return false
+  }
+}
+
+/**
+ * 한 번의 쿼리로 멤버 여부와 팀장 여부 확인
+ * @param userId - 사용자 ID
+ * @param clubId - 커뮤니티 ID
+ * @returns { isMember: boolean, isTeamLeader: boolean }
+ */
+export async function checkMembershipAndRole(
+  userId: string | null | undefined,
+  clubId: string
+): Promise<{ isMember: boolean; isTeamLeader: boolean }> {
+  if (!userId || !clubId) {
+    return { isMember: false, isTeamLeader: false }
+  }
 
   try {
     const member = await prisma.communityMember.findFirst({
@@ -52,11 +82,21 @@ export async function checkIsMember(
         clubId,
         deletedAt: null,
       },
+      select: {
+        role: true,
+      },
     })
 
-    return !!member
+    if (!member) {
+      return { isMember: false, isTeamLeader: false }
+    }
+
+    return {
+      isMember: true,
+      isTeamLeader: member.role === 'admin',
+    }
   } catch (error) {
-    console.error('Error checking member status:', error)
-    return false
+    console.error('Error checking membership and role:', error)
+    return { isMember: false, isTeamLeader: false }
   }
 }

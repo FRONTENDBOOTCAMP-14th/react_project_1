@@ -3,7 +3,8 @@ import { useEffect } from 'react'
 import styles from './Sidebar.module.css'
 import Image from 'next/image'
 import { IconLink } from '@/components/ui'
-import { Search, Plus, Users, Home, X } from 'lucide-react'
+import { Search, Plus, Users, Home, X, LogIn, UserPlus } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
 interface SidebarProps {
   open: boolean
@@ -11,6 +12,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open, setOpen }: SidebarProps) {
+  const { status } = useSession()
+
   // ESC 키로 사이드바 닫기
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -65,25 +68,53 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
 
         <div className={styles.content}>
           <nav className={styles.nav}>
-            <IconLink href="/search" className={styles['nav-item']}>
-              <Search size={20} />
-              <span>검색</span>
-            </IconLink>
+            {status === 'authenticated' ? (
+              // 로그인된 사용자 메뉴
+              <>
+                <IconLink href="/search" className={styles['nav-item']}>
+                  <Search size={20} />
+                  <span>검색</span>
+                </IconLink>
 
-            <IconLink href="/community/new" className={styles['nav-item']}>
-              <Plus size={20} />
-              <span>새 스터디</span>
-            </IconLink>
+                <IconLink href="/community/new" className={styles['nav-item']}>
+                  <Plus size={20} />
+                  <span>새 스터디</span>
+                </IconLink>
 
-            <IconLink href="/community" className={styles['nav-item']}>
-              <Users size={20} />
-              <span>스터디 목록</span>
-            </IconLink>
+                <IconLink href="/community" className={styles['nav-item']}>
+                  <Users size={20} />
+                  <span>스터디 목록</span>
+                </IconLink>
 
-            <IconLink href="/dashboard" className={styles['nav-item']}>
-              <Home size={20} />
-              <span>내 스터디</span>
-            </IconLink>
+                <IconLink href="/dashboard" className={styles['nav-item']}>
+                  <Home size={20} />
+                  <span>내 스터디</span>
+                </IconLink>
+              </>
+            ) : (
+              // 로그인되지 않은 사용자 메뉴
+              <>
+                <IconLink href="/search" className={styles['nav-item']}>
+                  <Search size={20} />
+                  <span>검색</span>
+                </IconLink>
+
+                <IconLink href="/community" className={styles['nav-item']}>
+                  <Users size={20} />
+                  <span>스터디 목록</span>
+                </IconLink>
+
+                <IconLink href="/login" className={styles['nav-item']}>
+                  <LogIn size={20} />
+                  <span>로그인</span>
+                </IconLink>
+
+                <IconLink href="/login?step=register" className={styles['nav-item']}>
+                  <UserPlus size={20} />
+                  <span>회원가입</span>
+                </IconLink>
+              </>
+            )}
           </nav>
         </div>
         <div className={styles.footer}>{/* TODO: 추가 정보나 링크 */}</div>

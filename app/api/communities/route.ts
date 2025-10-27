@@ -6,13 +6,19 @@
  *   - POST: 신규 커뮤니티 생성
  */
 
-import prisma from '@/lib/prisma'
-import { type NextRequest, NextResponse } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
-import type { PaginationInfo } from '@/lib/types'
+import { requireAuth } from '@/lib/middleware/auth'
+import prisma from '@/lib/prisma'
 import type { CommunityWhereClause } from '@/lib/types/community'
+import {
+  getBooleanParam,
+  getPaginationParams,
+  getStringParam,
+  withPagination,
+} from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/communities
@@ -22,8 +28,11 @@ import type { CommunityWhereClause } from '@/lib/types/community'
  *   - limit?: number (기본값: 10, 최대: 100)
  *   - isPublic?: 'true'|'false' 공개 여부로 필터
  *   - search?: string 커뮤니티 이름으로 검색
+ *   - region?: string 지역으로 필터
+ *   - subRegion?: string 세부 지역으로 필터
  *   - createdAfter?: string (ISO 8601) 생성일 이후로 필터
  *   - createdBefore?: string (ISO 8601) 생성일 이전으로 필터
+ *   - userId?: string userId로 필터
  *
  * 응답
  * - 200: { success: true, data: Community[], count: number, pagination: PaginationInfo }
@@ -31,23 +40,24 @@ import type { CommunityWhereClause } from '@/lib/types/community'
  */
 export async function GET(request: NextRequest) {
   try {
+    const { page, limit, skip } = getPaginationParams(request)
     const searchParams = request.nextUrl.searchParams
 
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
-    const skip = (page - 1) * limit
-
     // 필터링 파라미터
-    const isPublic = searchParams.get('isPublic')
-    const search = searchParams.get('search')
-    const createdAfter = searchParams.get('createdAfter')
-    const createdBefore = searchParams.get('createdBefore')
+    const isPublic = getBooleanParam(searchParams, 'isPublic')
+    const search = getStringParam(searchParams, 'search')
+    const createdAfter = getStringParam(searchParams, 'createdAfter')
+    const createdBefore = getStringParam(searchParams, 'createdBefore')
+    const userId = getStringParam(searchParams, 'userId')
+    const region = getStringParam(searchParams, 'region')
+    const subRegion = getStringParam(searchParams, 'subRegion')
 
     // where 조건 구성
     const whereClause: CommunityWhereClause = {
       deletedAt: null,
-      ...(isPublic !== null && { isPublic: isPublic === 'true' }),
+      ...(isPublic !== null && { isPublic }),
+      ...(region && { region }),
+      ...(subRegion && { subRegion }),
       ...(search && {
         name: {
           contains: search,
@@ -64,6 +74,14 @@ export async function GET(request: NextRequest) {
           lte: new Date(createdBefore),
         },
       }),
+      ...(userId && {
+        communityMembers: {
+          some: {
+            userId,
+            deletedAt: null,
+          },
+        },
+      }),
     }
 
     // where 조건에 날짜 범위가 있는 경우 AND로 결합
@@ -74,8 +92,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 병렬 조회: 데이터 + 전체 개수
-    const [communities, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.community.findMany({
         where: whereClause,
         skip,
@@ -87,25 +105,27 @@ export async function GET(request: NextRequest) {
           description: true,
           isPublic: true,
           createdAt: true,
+          rounds: {
+            select: {
+              roundId: true,
+              roundNumber: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+            where: {
+              deletedAt: null,
+              startDate: {
+                gte: new Date(), // 현재 날짜 이후의 라운드만
+              },
+            },
+            orderBy: { roundNumber: 'desc' },
+          },
         },
       }),
       prisma.community.count({ where: whereClause }),
-    ])
-
-    const pagination: PaginationInfo = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }
-
-    // CommunityListResponse 타입과 일치하도록 응답 구조 수정
-    return NextResponse.json({
-      success: true,
-      data: communities,
-      count: communities.length,
-      pagination,
-    })
+      { page, limit, skip }
+    )
   } catch (err: unknown) {
     console.error('Error fetching communities:', err)
     return createErrorResponse(
@@ -123,7 +143,10 @@ export async function GET(request: NextRequest) {
  * {
  *   "name": "커뮤니티 이름(필수)",
  *   "description": "설명(선택)",
- *   "isPublic": true
+ *   "isPublic": true,
+ *   "region": "지역(선택)",
+ *   "subRegion": "세부 지역(선택)",
+ *   "tagname": "태그(선택)"
  * }
  *
  * 응답
@@ -133,10 +156,17 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    // 인증 확인
+    const { error: authError } = await requireAuth()
+    if (authError) return authError
+
     const body = await req.json()
     const name = (body?.name ?? '').trim()
     const description = (body?.description ?? '').trim() || null
     const isPublic = Boolean(body?.is_public ?? body?.isPublic ?? true)
+    const region = (body?.region ?? '').trim() || null
+    const subRegion = (body?.subRegion ?? body?.subRegion ?? '').trim() || null
+    const tagname = body?.tagname ? [body.tagname] : []
 
     // 필수 값 검증
     if (!name) {
@@ -145,8 +175,39 @@ export async function POST(req: NextRequest) {
 
     // 커뮤니티 생성
     const created = await prisma.community.create({
-      data: { name, description, isPublic },
-      select: { clubId: true, name: true, description: true, isPublic: true, createdAt: true },
+      data: {
+        name,
+        description,
+        isPublic,
+        region,
+        subRegion,
+        tagname,
+      },
+      select: {
+        clubId: true,
+        name: true,
+        description: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+        tagname: true,
+        rounds: {
+          select: {
+            roundId: true,
+            roundNumber: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+          },
+          where: {
+            deletedAt: null,
+            startDate: {
+              gte: new Date(), // 현재 날짜 이후의 라운드만
+            },
+          },
+          orderBy: { roundNumber: 'desc' },
+        },
+      },
     })
 
     return createSuccessResponse(created, 201)

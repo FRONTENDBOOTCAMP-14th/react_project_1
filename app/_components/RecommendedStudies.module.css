@@ -17,7 +17,7 @@
 
 .recommend-item {
   padding: var(--spacing-md);
-  border: 1px solid var(--etc-color-2);
+  border: 1px solid var(--gray-500);
   border-radius: var(--inner-card-radius);
   background: var(--bg-color);
   transition: all 0.2s ease;

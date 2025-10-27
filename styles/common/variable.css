@@ -1,15 +1,54 @@
 :root {
-  --primary-color: #ffffff;
-  --secondary-color: #121212;
-  --third-color: #fdaaaa;
-  --error-color: #ef4444;
+  /* 핵심 팔레트 */
+  --primary-color: #ffffff; /* 앱 배경 */
+  --secondary-color: #121212; /* 기본 텍스트 */
+  --third-color: #fdaaaa; /* 보조 포인트 */
+  --accent-color: #3468c0;
+  --etc-color: #ffeeee;
+
+  /* 레거시 색상: 호환성을 위하여 */
   --etc-color-1: #ffeeee;
   --etc-color-2: #a4a4a4;
   --etc-color-3: #f9f9f9;
   --etc-color-4: #d9d9d9;
-  --accent-color: #3468c0;
-  --shadow-color: rgba(18, 18, 18, 0.1);
 
+  /* 의미 기반 상태 */
+  --info-color: #3b82f6;
+  --success-color: #22c55e;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+
+  /* 상태 배경색 */
+  --status-present-bg: #d1fae5;
+  --status-late-bg: #fef3c7;
+  --status-absent-bg: #fee2e2;
+  --status-excused-bg: var(--gray-100);
+
+  /* 확장 색상 */
+  --color-green: #22c55e;
+  --color-blue: #3b82f6;
+  --color-amber: #f59e0b;
+  --color-orange: #f97316;
+  --color-red: #ef4444;
+  --color-gray: #6b7280;
+  --color-yellow: #eab308;
+  --color-cyan: #06b6d4;
+  --color-violet: #8b5cf6;
+  --color-pink: #ec4899;
+  --color-lime: #84cc16;
+
+  /* 라이트 톤 변형 */
+  --color-green-light: #4ade80;
+  --color-blue-light: #60a5fa;
+  --color-amber-light: #fbbf24;
+  --color-red-light: #f87171;
+  --color-violet-light: #a78bfa;
+  --color-cyan-light: #22d3ee;
+  --color-pink-light: #f472b6;
+  --color-lime-light: #a3e635;
+
+  /* 중립 그레이 스케일 */
+  --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
   --gray-300: #d1d5db;
@@ -20,17 +59,31 @@
   --gray-800: #1f2937;
   --gray-900: #111827;
 
+  /* 파생 의미 별칭 */
+  --bg-color: var(--primary-color);
+  --text-color: var(--secondary-color);
+  --border-color: var(--gray-300);
+  --muted-text-color: var(--gray-500);
+
+  /* 모서리 반경 */
   --full-radius: 9999px;
   --card-radius: 16px;
   --inner-card-radius: 8px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
 
+  /* 간격 스케일 */
   --spacing-xxs: 4px;
   --spacing-xs: 8px;
   --spacing-sm: 16px;
   --spacing-md: 24px;
   --spacing-lg: 32px;
   --spacing-xl: 48px;
+  --spacing-2xl: 64px;
+  --spacing-3xl: 96px;
 
+  /* 타이포그래피 */
   --font-xs: 0.75rem;
   --font-sm: 1rem;
   --font-md: 1.25rem;
@@ -43,9 +96,21 @@
   --font-weight-medium: 500;
   --font-weight-bold: 700;
 
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* 아이콘 크기 */
   --icon-xs: 16px;
   --icon-sm: 24px;
   --icon-md: 36px;
   --icon-lg: 48px;
   --icon-xl: 64px;
+
+  /* 높이감 및 그림자 */
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
 }

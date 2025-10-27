@@ -61,8 +61,8 @@ export interface BaseContainerProps extends WithClubId, WithTeamLeaderPermission
  * 지역 정보 타입
  */
 export interface Region {
-  name: string
-  subArea: string[]
+  region: string
+  subRegion: string[]
 }
 
 /**

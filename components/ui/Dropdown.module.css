@@ -17,7 +17,7 @@
 }
 
 .trigger:hover {
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
 }
 
 .trigger:focus {
@@ -29,6 +29,7 @@
   flex: 1;
   text-align: left;
   color: var(--secondary-color);
+  font-size: var(--font-sm);
 }
 
 .icon {
@@ -79,15 +80,15 @@
 }
 
 .option:hover {
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
 }
 
 .option-active {
-  background-color: var(--etc-color-1);
+  background-color: var(--etc-color);
   color: var(--third-color);
   font-weight: 600;
 }
 
 .option-active:hover {
-  background-color: var(--etc-color-1);
+  background-color: var(--etc-color);
 }

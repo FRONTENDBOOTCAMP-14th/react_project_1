@@ -19,19 +19,18 @@ import { NextResponse } from 'next/server'
 const PUBLIC_API_ROUTES = ['/api/auth', '/api/health', '/api/region', '/api/login-kakao']
 
 /**
- * 인증이 필요한 API 엔드포인트 (POST, PATCH, DELETE 요청만)
- * - GET /api/communities는 공개 (조회만 가능)
- * - POST /api/communities는 보호 (생성)
- * - PATCH/DELETE /api/communities/*는 보호 (수정/삭제)
+ * 인증이 필요한 API 엔드포인트 (GET 요청도 포함)
+ * - 민감한 사용자 데이터나 개인정보를 다루는 API들
+ * - GET 요청도 인증이 필요한 API들
  */
 const PROTECTED_API_ROUTES = [
-  '/api/goals',
-  '/api/rounds',
-  '/api/members',
-  '/api/attendance',
-  '/api/notifications',
-  '/api/profile',
-  '/api/user',
+  '/api/goals', // 목표 정보 (개인/팀 목표)
+  '/api/rounds', // 라운드 정보 (참여자 정보 포함 가능)
+  '/api/members', // 멤버 정보 (개인정보)
+  '/api/attendance', // 출석 정보 (개인 출석 기록)
+  '/api/notifications', // 알림 (개인 알림)
+  '/api/profile', // 프로필 (개인정보)
+  '/api/user', // 사용자 정보 (개인정보)
 ]
 
 /**
@@ -42,12 +41,9 @@ const PROTECTED_PAGE_ROUTES = ['/goal', '/profile']
 /**
  * 경로가 보호된 경로인지 확인
  */
-function isProtectedRoute(pathname: string, method?: string): boolean {
-  // 보호된 API 경로 확인
+function isProtectedRoute(pathname: string, _method?: string): boolean {
+  // 보호된 API 경로 확인 (모든 HTTP 메소드에 대해 인증 필요)
   if (PROTECTED_API_ROUTES.some(route => pathname.startsWith(route))) {
-    // GET 요청은 공개 (조회만 가능)
-    if (method === 'GET') return false
-    // POST, PATCH, DELETE는 보호
     return true
   }
 

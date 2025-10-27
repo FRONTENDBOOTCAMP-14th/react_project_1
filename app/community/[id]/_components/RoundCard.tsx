@@ -321,7 +321,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
             )}
             {hasAttended || checkingAttendance ? (
               <StrokeButton type="button" disabled>
-                출석 완료
+                {checkingAttendance ? '출석 중...' : '출석 완료'}
               </StrokeButton>
             ) : (
               <StrokeButton type="button" onClick={handleAttendance}>

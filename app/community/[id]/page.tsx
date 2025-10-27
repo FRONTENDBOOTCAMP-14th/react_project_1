@@ -1,8 +1,6 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import { ROUTES } from '@/constants'
 import { checkMembershipAndRole } from '@/lib/auth/permissions'
-import type { CustomSession } from '@/lib/types'
-import { getServerSession } from 'next-auth'
+import { getCurrentUserId } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import CommunityContent from './_components/CommunityContent'
 
@@ -22,8 +20,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   }
 
   // 서버에서 세션 확인
-  const session = await getServerSession(authOptions)
-  const userId = (session as CustomSession)?.userId
+  const userId = await getCurrentUserId()
 
   // 한 번의 쿼리로 멤버십과 역할 확인
   const { isMember, isTeamLeader } = await checkMembershipAndRole(userId, clubId)

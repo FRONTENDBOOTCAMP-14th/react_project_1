@@ -138,6 +138,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/communities
  * - 신규 커뮤니티를 생성합니다.
+ * - 미들웨어가 이미 인증을 확인하므로 간단한 헬퍼 사용
  *
  * 요청 Body
  * {
@@ -152,11 +153,14 @@ export async function GET(request: NextRequest) {
  * 응답
  * - 201: { success: true, data: Community }
  * - 400: { success: false, error: string }
+ * - 401: { success: false, error: string }
  * - 500: { success: false, error: string }
  */
 export async function POST(req: NextRequest) {
   try {
-    // 인증 확인
+    // 인증 확인 (미들웨어가 이미 처리)
+    // userId가 필요한 경우 아래 주석 해제
+    // const { error: authError, userId } = await requireAuth()
     const { error: authError } = await requireAuth()
     if (authError) return authError
 

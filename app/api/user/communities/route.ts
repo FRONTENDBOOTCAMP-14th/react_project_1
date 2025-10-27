@@ -5,14 +5,12 @@
  * - 기능: 현재 사용자가 구독한 커뮤니티와 다가오는 라운드 조회
  */
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
 import { roundSelect, upcomingRoundsWhere, userSubscribedCommunitiesWhere } from '@/lib/quaries'
-import type { CustomSession } from '@/lib/types'
 import type { Round } from '@/lib/types/round'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { getServerSession } from 'next-auth'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -26,13 +24,9 @@ import type { NextRequest } from 'next/server'
  */
 export async function GET(_request: NextRequest) {
   try {
-    // 인증 확인
-    const session = await getServerSession(authOptions)
-    const userId = (session as CustomSession)?.userId
-
-    if (!userId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    // 인증 확인 (미들웨어가 이미 처리)
+    const { userId, error } = await requireAuthUser()
+    if (error || !userId) return error || createErrorResponse('인증이 필요합니다.', 401)
 
     // 1. 사용자가 구독한 커뮤니티 조회
     const subscribedCommunities = await prisma.community.findMany({

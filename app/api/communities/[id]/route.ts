@@ -12,6 +12,8 @@ import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { hasPermission } from '@/lib/auth'
 
 /**
  * GET /api/communities/[id]
@@ -69,6 +71,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PATCH /api/communities/[id]
  * - 커뮤니티 일부 필드를 부분 수정합니다.
+ * - 권한: 팀장만 수정 가능
  * - 파라미터
  *   - params.id: 수정할 커뮤니티의 clubId(필수)
  * - 요청 Body (전부 선택)
@@ -84,6 +87,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
     const body = await request.json()
 
     // 1) 대상 존재 확인 (소프트 삭제 제외)
@@ -93,6 +101,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (!existingCommunity) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
+    }
+
+    // 팀장 권한 확인
+    const hasAdminPermission = await hasPermission(userId, id, 'admin')
+    if (!hasAdminPermission) {
+      return createErrorResponse('팀장만 커뮤니티를 수정할 수 있습니다.', 403)
     }
 
     // 2) 동적 업데이트 데이터 구성
@@ -147,6 +161,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 /**
  * DELETE /api/communities/[id]
  * - 커뮤니티를 소프트 삭제합니다. 실제 삭제가 아닌 deletedAt 타임스탬프를 설정합니다.
+ * - 권한: 팀장만 삭제 가능
  * - 파라미터
  *   - params.id: 삭제할 커뮤니티의 clubId(필수)
  *
@@ -161,6 +176,26 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
+    // 커뮤니티 존재 확인
+    const existingCommunity = await prisma.community.findFirst({
+      where: { clubId: id, deletedAt: null },
+      select: { clubId: true },
+    })
+
+    if (!existingCommunity) {
+      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
+    }
+
+    // 팀장 권한 확인
+    const hasAdminPermission = await hasPermission(userId, id, 'admin')
+    if (!hasAdminPermission) {
+      return createErrorResponse('팀장만 커뮤니티를 삭제할 수 있습니다.', 403)
+    }
 
     // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
     await prisma.community.update({

@@ -1,11 +1,9 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
-import type { CustomSession } from '@/lib/types'
 import type { UpdateAttendanceInput } from '@/lib/types/attendance'
 import { buildAttendanceUpdateData } from '@/lib/utils/attendance'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { softDeleteHelpers } from '@/lib/utils/softDelete'
-import { getServerSession } from 'next-auth'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
@@ -87,12 +85,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions)
-    const currentUserId = (session as CustomSession)?.userId
-
-    if (!currentUserId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    // 인증 확인
+    const { userId: currentUserId, error: authError } = await requireAuthUser()
+    if (authError || !currentUserId)
+      return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const { id } = await params
 
@@ -172,12 +168,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions)
-    const currentUserId = (session as CustomSession)?.userId
-
-    if (!currentUserId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    // 인증 확인
+    const { userId: currentUserId, error: authError } = await requireAuthUser()
+    if (authError || !currentUserId)
+      return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const { id } = await params
 

@@ -9,6 +9,7 @@ import Sidebar from './Sidebar'
 import { IconButton, IconLink, Popover, type PopoverAction } from '@/components/ui'
 import { decodeAndCapitalize, isUUID, isNumericId } from '@/lib/utils'
 import { ROUTES } from '@/constants'
+import { Home } from 'lucide-react'
 
 interface HeaderProps {
   title?: string
@@ -137,6 +138,9 @@ export default function Header({ title = '' }: HeaderProps) {
                     priority
                   />
                 </IconButton>
+                <IconLink href="/">
+                  <Home size={20} color="#121212" />
+                </IconLink>
               </div>
               {/* Center: Title */}
               <div className={styles.center}>

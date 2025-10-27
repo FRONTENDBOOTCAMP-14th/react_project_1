@@ -21,7 +21,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
     const today = new Date()
     const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-    return Array.from({ length: 7 }, (_, i) => {
+    return Array.from({ length: 3 }, (_, i) => {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
 

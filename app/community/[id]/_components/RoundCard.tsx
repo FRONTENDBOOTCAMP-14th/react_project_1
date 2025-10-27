@@ -115,6 +115,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
     location: round?.location || '',
   })
   const [hasAttended, setHasAttended] = useState(false)
+  const [checkingAttendance, setCheckingAttendance] = useState(false)
 
   useEffect(() => {
     const checkAttendance = async () => {
@@ -123,6 +124,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
       try {
         if (!userId) return
 
+        setCheckingAttendance(true)
         const response = await fetch(`/api/attendance?userId=${userId}&roundId=${round.roundId}`)
         const result = await response.json()
 
@@ -131,6 +133,8 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
         }
       } catch (error) {
         console.error('출석 확인 실패:', error)
+      } finally {
+        setCheckingAttendance(false)
       }
     }
 
@@ -315,7 +319,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
                 <MapPin /> {round.location}
               </p>
             )}
-            {hasAttended ? (
+            {hasAttended || checkingAttendance ? (
               <StrokeButton type="button" disabled>
                 출석 완료
               </StrokeButton>

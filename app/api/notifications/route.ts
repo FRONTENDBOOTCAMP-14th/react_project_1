@@ -10,10 +10,12 @@
  * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
+import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { notificationSelect, activeNotificationWhere } from '@/lib/quaries'
+import { activeNotificationWhere, notificationSelect } from '@/lib/quaries'
 import type { CreateNotificationRequest } from '@/lib/types/notification'
-import { NextResponse } from 'next/server'
+import { getBooleanParam, getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -32,33 +34,24 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const clubId = searchParams.get('clubId')
-    const isPinnedParam = searchParams.get('isPinned')
+    const isPinned = getBooleanParam(searchParams, 'isPinned')
 
     // clubId는 필수
     if (!clubId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'clubId is required',
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('clubId is required', 400)
     }
 
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)))
-    const skip = (page - 1) * limit
+    const { page, limit, skip } = getPaginationParams(request)
 
     // where 절 구성
     const whereClause = {
       ...activeNotificationWhere,
       clubId,
-      ...(isPinnedParam !== null && { isPinned: isPinnedParam === 'true' }),
+      ...(isPinned !== null && { isPinned }),
     }
 
-    // 병렬 조회: 데이터 + 전체 갯수
-    const [notifications, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.notification.findMany({
         where: whereClause,
         skip,
@@ -70,29 +63,12 @@ export async function GET(request: NextRequest) {
         select: notificationSelect,
       }),
       prisma.notification.count({ where: whereClause }),
-    ])
-
-    return NextResponse.json({
-      success: true,
-      data: notifications,
-      count: notifications.length,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
+      { page, limit, skip }
+    )
   } catch (error) {
     console.error('Error fetching notifications:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch notifications',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return createErrorResponse(`Failed to fetch notifications: ${message}`, 500)
   }
 }
 
@@ -122,26 +98,13 @@ export async function POST(request: NextRequest) {
 
     // 필수 값 검증
     if (!clubId || !authorId || !title) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields',
-          required: ['clubId', 'authorId', 'title'],
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Missing required fields: clubId, authorId, title', 400)
     }
 
     // 제목 길이 검증
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Title cannot be empty',
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Title cannot be empty', 400)
     }
 
     // clubId 존재 확인
@@ -151,13 +114,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!club) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Community not found',
-        },
-        { status: 404 }
-      )
+      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 
     // authorId 존재 확인
@@ -167,13 +124,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!author) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Author not found',
-        },
-        { status: 404 }
-      )
+      return createErrorResponse('Author not found', 404)
     }
 
     const newNotification = await prisma.notification.create({
@@ -187,22 +138,9 @@ export async function POST(request: NextRequest) {
       select: notificationSelect,
     })
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: newNotification,
-      },
-      { status: 201 }
-    )
+    return createSuccessResponse(newNotification, 201)
   } catch (error) {
     console.error('Error creating notification:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create notification',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_CREATE_NOTIFICATION, 500)
   }
 }

@@ -31,7 +31,7 @@
   top: calc(100% + var(--spacing-xxs));
   min-width: 120px;
   background-color: var(--primary-color);
-  border: 1px solid var(--etc-color-3);
+  border: 1px solid var(--gray-100);
   border-radius: var(--inner-card-radius);
   box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 100;
@@ -63,7 +63,7 @@
 }
 
 .action:hover:not(.action-disabled) {
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
 }
 
 .action-danger {
@@ -71,7 +71,7 @@
 }
 
 .action-danger:hover:not(.action-disabled) {
-  background-color: var(--etc-color-3);
+  background-color: var(--gray-100);
 }
 
 .action-disabled {

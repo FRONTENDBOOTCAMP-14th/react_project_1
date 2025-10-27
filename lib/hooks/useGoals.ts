@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
-import type { StudyGoal, CreateGoalInput, UpdateGoalInput } from '@/lib/types/goal'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import type { CreateGoalInput, StudyGoal, UpdateGoalInput } from '@/lib/types/goal'
+import { useCallback, useEffect, useState } from 'react'
 
 interface GoalsState {
   team: StudyGoal[]
@@ -53,14 +53,28 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ ...params, isTeam: false })),
       ])
 
-      const [teamData, personalData] = await Promise.all([
+      const [teamResult, personalResult] = await Promise.all([
         teamResponse.json(),
         personalResponse.json(),
       ])
 
+      // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
+      const teamList =
+        teamResult.success && teamResult.data
+          ? Array.isArray(teamResult.data)
+            ? teamResult.data
+            : teamResult.data.data
+          : []
+      const personalList =
+        personalResult.success && personalResult.data
+          ? Array.isArray(personalResult.data)
+            ? personalResult.data
+            : personalResult.data.data
+          : []
+
       setGoals({
-        team: teamData.success ? teamData.data || [] : [],
-        personal: personalData.success ? personalData.data || [] : [],
+        team: teamList || [],
+        personal: personalList || [],
       })
     } catch (err) {
       console.error('Failed to fetch goals:', err)

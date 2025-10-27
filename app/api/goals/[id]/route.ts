@@ -14,8 +14,10 @@
 
 import prisma from '@/lib/prisma'
 import { goalDetailSelect } from '@/lib/quaries'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
+import { MESSAGES } from '@/constants/messages'
+import { hasErrorCode } from '@/lib/errors'
 
 /**
  * GET /api/goals/[id]
@@ -43,22 +45,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // 존재하지 않거나 소프트 삭제된 경우
     if (!goal) {
-      return NextResponse.json({ success: false, error: 'Goal not found' }, { status: 404 })
+      return createErrorResponse('Goal not found', 404)
     }
 
     // 성공 응답
-    return NextResponse.json({ success: true, data: goal })
+    return createSuccessResponse(goal)
   } catch (error) {
     // 예외 처리(로깅 포함)
     console.error('Error fetching goal:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch goal',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_LOAD_GOALS, 500)
   }
 }
 
@@ -87,12 +82,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json()
 
     // 1) 대상 존재 확인(소프트 삭제 제외)
-    const existingGoal = await prisma.studyGoal.findUnique({
+    // findFirst 사용: findUnique는 복합 where 조건 불가
+    const existingGoal = await prisma.studyGoal.findFirst({
       where: { goalId: id, deletedAt: null },
     })
 
     if (!existingGoal) {
-      return NextResponse.json({ success: false, error: 'Goal not found' }, { status: 404 })
+      return createErrorResponse('Goal not found', 404)
     }
 
     // 2) 동적 업데이트 데이터 구성
@@ -139,18 +135,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     })
 
     // 성공 응답
-    return NextResponse.json({ success: true, data: updatedGoal })
+    return createSuccessResponse(updatedGoal)
   } catch (error) {
     // 예외 처리(로깅 포함)
     console.error('Error updating goal:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to update goal',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_UPDATE_GOAL, 500)
   }
 }
 
@@ -182,27 +171,17 @@ export async function DELETE(
         data: { deletedAt: new Date() },
       })
 
-      return NextResponse.json({
-        success: true,
-        message: 'Goal deleted successfully',
-      })
+      return createSuccessResponse({ message: 'Goal deleted successfully' })
     } catch (error: unknown) {
       // Prisma P2025: Record not found
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
-        return NextResponse.json({ success: false, error: 'Goal not found' }, { status: 404 })
+      if (hasErrorCode(error, 'P2025')) {
+        return createErrorResponse('Goal not found', 404)
       }
       throw error
     }
   } catch (error) {
     // 예외 처리(로깅 포함)
     console.error('Error deleting goal:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to delete goal',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_DELETE_GOAL, 500)
   }
 }

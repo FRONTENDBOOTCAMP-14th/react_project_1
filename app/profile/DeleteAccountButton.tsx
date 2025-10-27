@@ -20,7 +20,7 @@ export default function DeleteAccountButton() {
       }
       // 세션 종료 후 로그인 페이지로 이동
       await signOut({ callbackUrl: '/login' })
-    } catch (e) {
+    } catch (_e) {
       alert('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
     } finally {
       setLoading(false)

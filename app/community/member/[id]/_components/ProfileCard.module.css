@@ -11,7 +11,7 @@
   box-shadow: 0 0 16px 4px var(--shadow-color);
 }
 
-.avatarContainer {
+.avatar-container {
   position: relative;
   width: 90px;
   height: 90px;
@@ -22,4 +22,37 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.info {
+  text-align: center;
+  width: 100%;
+}
+
+.display-name {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-xxs);
+}
+
+.username {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.role-badge {
+  display: inline-block;
+  margin-top: var(--spacing-xs);
+  padding: 2px var(--spacing-xs);
+  font-size: var(--font-xs);
+  border-radius: var(--spacing-xxs);
+}
+
+.role-admin {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+}
+
+.role-member {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }

@@ -13,9 +13,13 @@ interface CommunityState {
    */
   isTeamLeader: boolean
   /**
+   * 멤버 여부
+   */
+  isMember: boolean
+  /**
    * 커뮤니티 컨텍스트 초기화
    */
-  initializeCommunity: (clubId: string, isTeamLeader: boolean) => void
+  initializeCommunity: (clubId: string, isTeamLeader: boolean, isMember: boolean) => void
   /**
    * 스토어 초기화
    */
@@ -30,6 +34,7 @@ interface CommunityState {
 export const useCommunityStore = create<CommunityState>(set => ({
   clubId: null,
   isTeamLeader: false,
-  initializeCommunity: (clubId, isTeamLeader) => set({ clubId, isTeamLeader }),
-  reset: () => set({ clubId: null, isTeamLeader: false }),
+  isMember: false,
+  initializeCommunity: (clubId, isTeamLeader, isMember) => set({ clubId, isTeamLeader, isMember }),
+  reset: () => set({ clubId: null, isTeamLeader: false, isMember: false }),
 }))

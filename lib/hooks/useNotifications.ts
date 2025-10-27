@@ -99,17 +99,21 @@ export const useNotifications = ({
           limit,
         })
       )
-      const data = await response.json()
+      const result = await response.json()
 
-      if (data.success && data.data) {
-        setNotifications(data.data)
-        if (data.pagination) {
-          setPagination(data.pagination)
+      if (result.success && result.data) {
+        // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
+        const notificationsList = Array.isArray(result.data) ? result.data : result.data.data
+        setNotifications(notificationsList || [])
+
+        // pagination은 result.data.pagination에 있음
+        if (result.data.pagination) {
+          setPagination(result.data.pagination)
         }
       } else {
         setNotifications([])
         setPagination(null)
-        setError(data.error || MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
+        setError(result.error || MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
       }
     } catch (err) {
       console.error('Failed to fetch notifications:', err)

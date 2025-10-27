@@ -5,7 +5,6 @@ import Link from 'next/link'
 import StudyProfile from './StudyProfile'
 import RoundsList from './RoundsList'
 import styles from './CommunityContext.module.css'
-import { AccentLink } from '@/components/ui'
 import { ROUTES, MESSAGES } from '@/constants'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { useNotifications } from '@/lib/hooks'
@@ -45,26 +44,6 @@ function NotificationLink({ clubId }: NotificationLinkProps) {
 }
 
 /**
- * 라운드 추가 링크 컴포넌트에 전달되는 속성
- */
-interface AddRoundLinkProps {
-  /** 커뮤니티 식별자 */
-  clubId: string
-}
-
-/**
- * 라운드 추가 링크 컴포넌트
- * 라운드를 추가할 수 있는 페이지로 이동합니다.
- */
-function AddRoundLink({ clubId }: AddRoundLinkProps) {
-  return (
-    <AccentLink href={ROUTES.COMMUNITY.ROUND(clubId)} aria-label="라운드 추가하기">
-      {MESSAGES.ACTION.ADD_ROUND}
-    </AccentLink>
-  )
-}
-
-/**
  * 커뮤니티 콘텐츠 컴포넌트에 전달되는 속성
  */
 interface CommunityContentProps {
@@ -72,6 +51,8 @@ interface CommunityContentProps {
   clubId: string
   /** 팀장 권한 여부 (서버에서 확인됨) */
   isTeamLeader: boolean
+  /** 멤버 여부 (서버에서 확인됨) */
+  isMember: boolean
 }
 
 /**
@@ -79,20 +60,23 @@ interface CommunityContentProps {
  * 프로필, 공지, 라운드 목록 등 커뮤니티 상세 정보를 구성합니다.
  * 서버에서 받은 데이터로 전역 상태를 초기화합니다.
  */
-export default function CommunityContent({ clubId, isTeamLeader }: CommunityContentProps) {
+export default function CommunityContent({
+  clubId,
+  isTeamLeader,
+  isMember,
+}: CommunityContentProps) {
   const initializeCommunity = useCommunityStore(state => state.initializeCommunity)
 
   // 서버에서 받은 데이터로 전역 상태 초기화
   useEffect(() => {
-    initializeCommunity(clubId, isTeamLeader)
-  }, [clubId, isTeamLeader, initializeCommunity])
+    initializeCommunity(clubId, isTeamLeader, isMember)
+  }, [clubId, isTeamLeader, isMember, initializeCommunity])
 
   return (
     <div className={styles['content-wrapper']}>
       <StudyProfile id={clubId} />
       <NotificationLink clubId={clubId} />
-      <AddRoundLink clubId={clubId} />
-      <RoundsList />
+      <RoundsList clubId={clubId} />
     </div>
   )
 }

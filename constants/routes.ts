@@ -35,7 +35,6 @@ export const API_ENDPOINTS = {
   COMMUNITIES: {
     BASE: '/api/communities',
     BY_ID: (clubId: string) => `/api/communities/${clubId}`,
-    DELETE_BY_ID: (clubId: string) => `/api/communities?id=${clubId}`,
   },
   ROUNDS: {
     BASE: '/api/rounds',
@@ -62,6 +61,31 @@ export const API_ENDPOINTS = {
       if (params.limit) searchParams.append('limit', String(params.limit))
       return `/api/notifications?${searchParams.toString()}`
     },
+  },
+  MEMBERS: {
+    BASE: '/api/members',
+    BY_ID: (memberId: string) => `/api/members/${memberId}`,
+    WITH_PARAMS: (params: {
+      clubId?: string
+      userId?: string
+      role?: string
+      page?: number
+      limit?: number
+    }) => {
+      const searchParams = new URLSearchParams()
+      if (params.clubId) searchParams.append('clubId', params.clubId)
+      if (params.userId) searchParams.append('userId', params.userId)
+      if (params.role) searchParams.append('role', params.role)
+      if (params.page) searchParams.append('page', String(params.page))
+      if (params.limit) searchParams.append('limit', String(params.limit))
+      return `/api/members?${searchParams.toString()}`
+    },
+  },
+  USER: {
+    COMMUNITIES: '/api/user/communities',
+  },
+  REGION: {
+    BASE: '/api/region',
   },
 } as const
 

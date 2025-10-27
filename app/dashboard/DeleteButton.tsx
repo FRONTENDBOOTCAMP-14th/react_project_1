@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { API_ENDPOINTS } from '@/constants/routes'
 
 interface Props {
   id: string
@@ -16,12 +17,12 @@ export default function DeleteButton({ id }: Props) {
     setError(null)
     setLoading(true)
     try {
-      const res = await fetch(`/api/communities?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const res = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(id), { method: 'DELETE' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || '삭제 실패')
+      if (!data.success) throw new Error(data?.error || '삭제 실패')
       router.refresh()
-    } catch (e: any) {
-      setError(e?.message ?? '알 수 없는 오류')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '알 수 없는 오류')
     } finally {
       setLoading(false)
     }

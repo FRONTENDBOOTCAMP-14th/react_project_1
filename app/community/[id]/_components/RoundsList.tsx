@@ -5,7 +5,8 @@ import { useRounds } from '@/lib/hooks'
 import { LoadingState, ErrorState } from '@/components/common'
 import RoundCard from './RoundCard'
 import { MESSAGES } from '@/constants'
-import styles from './RoundCard.module.css'
+import styles from './RoundsList.module.css'
+import { StrokeButton } from '@/components/ui'
 
 interface RoundsListProps {
   clubId: string
@@ -62,6 +63,7 @@ export default function RoundsList({ clubId }: RoundsListProps) {
   // 라운드 목록 렌더링
   return (
     <div className={styles['rounds-list-container']}>
+      <StrokeButton>라운드 추가</StrokeButton>
       {rounds.map(round => (
         <RoundCard
           key={round.roundId}

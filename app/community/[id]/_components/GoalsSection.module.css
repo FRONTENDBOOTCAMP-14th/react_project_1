@@ -1,0 +1,4 @@
+.goals-section {
+  width: 100%;
+  gap: var(--spacing-sm);
+}

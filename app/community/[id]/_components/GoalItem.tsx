@@ -7,7 +7,7 @@ import { Check, Ellipsis, X } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { memo, useEffect, useRef, useState } from 'react'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
-import styles from './RoundCard.module.css'
+import styles from './GoalItem.module.css'
 
 /**
  * 개별 목표 아이템 컴포넌트에 전달되는 속성

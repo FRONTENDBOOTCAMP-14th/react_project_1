@@ -10,99 +10,6 @@
   margin-bottom: var(--spacing-lg);
 }
 
-.goals-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
-}
-
-.goals-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.add-button {
-  font-size: var(--font-md);
-  padding: var(--spacing-xxs);
-}
-
-.goal-card {
-  padding: var(--spacing-sm);
-  border-radius: var(--inner-card-radius);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.goal-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.goal-description {
-  font-size: var(--font-sm);
-}
-
-.goals-list {
-  display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  flex-direction: column;
-  background-color: var(--gray-100);
-  border-radius: var(--inner-card-radius);
-}
-
-.goals-section {
-  width: 100%;
-  gap: var(--spacing-sm);
-}
-
-/* RoundsList 컴포넌트 스타일 */
-.rounds-list-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--spacing-md);
-  color: var(--gray-500);
-}
-
-/* GoalItem 편집 모드 스타일 */
-.goal-input {
-  flex: 1;
-  border: 1px solid var(--gray-100);
-  border-radius: var(--inner-card-radius);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-sm);
-  outline: none;
-}
-
-.goal-input:focus {
-  border-color: var(--primary-color);
-}
-
-.goal-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.goal-actions {
-  display: flex;
-  gap: var(--spacing-xs);
-}
-
-.round-header-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .round-button {
   display: flex;
   align-items: center;
@@ -131,27 +38,6 @@
   gap: var(--spacing-xs);
 }
 
-.action-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xs);
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  border-radius: var(--inner-card-radius);
-}
-
-.action-button:hover:not(:disabled) {
-  background-color: var(--gray-100);
-}
-
-.action-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Round 편집 모드 스타일 */
 .round-edit-form {
   width: 100%;
   padding: var(--spacing-md);
@@ -223,4 +109,10 @@
 .edit-cancel-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.round-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

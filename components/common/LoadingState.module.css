@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 200px;
+}
+
+.message {
+  color: var(--color-text-secondary, #666);
+  font-size: 1rem;
+}

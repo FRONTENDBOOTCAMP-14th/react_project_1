@@ -1,17 +1,17 @@
-import Button from '@/components/ui/Button'
+import prisma from '@/lib/prisma'
+import { getCurrentUserId } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    redirect('/login')
+  }
+  const user = await prisma.user.findUnique({ where: { userId } })
   return (
     <main className={styles.container}>
-      <h2 className={styles.title}>대시보드</h2>
-      <p className={styles.subtitle}>개인/팀 진행 상황을 한눈에 확인하세요.</p>
-      <div className={styles.actions}>
-        <Button href="/">홈으로</Button>
-        <Button href="/dashboard" variant="secondary">
-          새로고침
-        </Button>
-      </div>
+      <p>{user?.username} 님이 구독한 스터디 목록</p>
     </main>
   )
 }

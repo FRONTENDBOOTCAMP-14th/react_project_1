@@ -1,0 +1,94 @@
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  background-color: var(--primary-color);
+  border: 1px solid var(--secondary-color);
+  border-radius: 8px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+}
+
+.trigger:hover {
+  background-color: var(--gray-100);
+}
+
+.trigger:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 104, 192, 0.2);
+}
+
+.label {
+  flex: 1;
+  text-align: left;
+  color: var(--secondary-color);
+  font-size: var(--font-sm);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+  color: var(--secondary-color);
+}
+
+.icon-open {
+  transform: rotate(180deg);
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  font-size: var(--font-sm);
+  color: var(--secondary-color);
+}
+
+.option:hover {
+  background-color: var(--gray-100);
+}
+
+.option-active {
+  background-color: var(--etc-color);
+  color: var(--third-color);
+  font-weight: 600;
+}
+
+.option-active:hover {
+  background-color: var(--etc-color);
+}

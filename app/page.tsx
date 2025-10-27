@@ -1,13 +1,31 @@
-import Link from 'next/link'
+import { IconLink } from '@/components/ui'
+import prisma from '@/lib/prisma'
+import { getCurrentUserId } from '@/lib/auth'
+import Image from 'next/image'
+import { HomeContent } from './_components'
+import styles from './page.module.css'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const userId = await getCurrentUserId()
+  const user = userId ? await prisma.user.findUnique({ where: { userId } }) : null
+
   return (
-    <main style={{ padding: '2rem' }}>
-      <h1>Study Club Tracker</h1>
-      <p>Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼</p>
-      <p>
-        <Link href="/dashboard">대시보드로 이동</Link>
-      </p>
+    <main className={styles.main}>
+      <div className={styles['logo-container']}>
+        <IconLink className={styles['logo-link']} href="/">
+          <Image src="/svg/logo.svg" alt="토끼노트 로고" width={40} height={40} priority />
+        </IconLink>
+      </div>
+
+      {userId ? (
+        <div className={styles['welcome-message']}>
+          {user?.username}님, 오늘은 어떤 스터디가 기다리고 있을까요?
+        </div>
+      ) : (
+        <div>커뮤니티를 이용하시려면 로그인이 필요합니다</div>
+      )}
+
+      <HomeContent userId={userId} />
     </main>
   )
 }

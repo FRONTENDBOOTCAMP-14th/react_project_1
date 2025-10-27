@@ -1,0 +1,10 @@
+.profile-image {
+  object-fit: cover;
+  border-radius: var(--inner-card-radius);
+}
+
+.image-container {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}

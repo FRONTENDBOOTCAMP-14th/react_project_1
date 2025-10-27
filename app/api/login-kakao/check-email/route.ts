@@ -1,0 +1,11 @@
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { isEmailTaken } from '@/lib/repositories/user'
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const email = searchParams.get('email') || ''
+  if (!email) return NextResponse.json({ success: false, error: 'missing_email' }, { status: 400 })
+  const taken = await isEmailTaken(email)
+  return NextResponse.json({ success: true, email, taken })
+}

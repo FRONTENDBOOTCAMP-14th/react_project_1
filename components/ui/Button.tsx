@@ -9,6 +9,7 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary'
 }
 
+// TODO: 프로덕션에서 사용되지 않을 것 -> 삭제 예정
 export default function Button({ href, children, variant = 'primary' }: ButtonProps) {
   const className = cn(styles.button, variant === 'secondary' && styles.secondary)
 

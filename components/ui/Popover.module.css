@@ -1,0 +1,80 @@
+.popover {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--third-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + var(--spacing-xxs));
+  min-width: 120px;
+  background-color: var(--primary-color);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--inner-card-radius);
+  box-shadow: 0 4px 16px var(--shadow-color);
+  z-index: 100;
+  list-style: none;
+  padding: var(--spacing-xs);
+  margin: 0;
+}
+
+.menu-right {
+  right: 0;
+}
+
+.menu-left {
+  left: 0;
+}
+
+.action {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  font-size: var(--font-sm);
+  color: var(--secondary-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: var(--inner-card-radius);
+}
+
+.action:hover:not(.action-disabled) {
+  background-color: var(--gray-100);
+}
+
+.action-danger {
+  color: var(--error-color);
+}
+
+.action-danger:hover:not(.action-disabled) {
+  background-color: var(--gray-100);
+}
+
+.action-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,125 @@
+/* Fade 효과 */
+.carousel-effect-fade .item {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-effect-fade .item:not(.active) {
+  opacity: 0.3;
+}
+
+.carousel-effect-fade .item.active {
+  opacity: 1;
+}
+
+/* Coverflow 효과 (3D 회전) */
+.carousel-effect-coverflow {
+  perspective: 1200px;
+}
+
+.carousel-effect-coverflow .item {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.carousel-effect-coverflow .item:not(.active) {
+  transform: rotateY(25deg) scale(0.9);
+  opacity: 0.6;
+  filter: brightness(0.7);
+}
+
+.carousel-effect-coverflow .item.active {
+  transform: rotateY(0) scale(1);
+  opacity: 1;
+  filter: brightness(1);
+  z-index: 2;
+}
+
+/* Flip 효과 */
+.carousel-effect-flip {
+  perspective: 1000px;
+}
+
+.carousel-effect-flip .item {
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+
+.carousel-effect-flip .item:not(.active) {
+  transform: rotateY(180deg);
+  opacity: 0;
+}
+
+.carousel-effect-flip .item.active {
+  transform: rotateY(0);
+  opacity: 1;
+}
+
+/* Scale 효과 */
+.carousel-effect-scale .item {
+  transition: all 0.4s ease-out;
+}
+
+.carousel-effect-scale .item:not(.active) {
+  transform: scale(0.85);
+  opacity: 0.5;
+}
+
+.carousel-effect-scale .item.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Parallax 효과 */
+.carousel-effect-parallax .item {
+  transition: transform 0.3s ease-out;
+  will-change: transform; /* 성능 힌트 */
+}
+
+.carousel-effect-parallax .item:not(.active) {
+  transform: translateX(-20px) scale(0.95);
+  opacity: 0.7;
+}
+
+.carousel-effect-parallax .item.active {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+  z-index: 2;
+}
+
+/* Cube 효과 */
+.carousel-effect-cube {
+  perspective: 1200px;
+  overflow: hidden;
+}
+
+.carousel-effect-cube .container {
+  transform-style: preserve-3d;
+}
+
+.carousel-effect-cube .item {
+  backface-visibility: hidden;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.carousel-effect-cube .item.prev {
+  transform: rotateY(-90deg) translateZ(300px);
+  opacity: 0;
+}
+
+.carousel-effect-cube .item.active {
+  transform: rotateY(0) translateZ(0);
+  opacity: 1;
+}
+
+.carousel-effect-cube .item.next {
+  transform: rotateY(90deg) translateZ(300px);
+  opacity: 0;
+}
+
+.carousel-effect-coverflow .item,
+.carousel-effect-flip .item,
+.carousel-effect-cube .item,
+.carousel-effect-scale .item {
+  will-change: transform, opacity;
+}

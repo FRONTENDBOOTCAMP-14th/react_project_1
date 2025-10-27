@@ -13,5 +13,8 @@ body {
 
 main {
   max-width: 960px;
-  margin: 0 auto;
+}
+
+.error {
+  color: var(--error-color);
 }

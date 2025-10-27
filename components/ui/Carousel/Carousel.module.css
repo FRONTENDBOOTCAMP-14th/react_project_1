@@ -1,0 +1,21 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.container {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: auto;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: var(--spacing-xs) 0;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}

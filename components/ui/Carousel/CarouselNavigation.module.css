@@ -1,0 +1,54 @@
+/* 내비게이션 버튼 */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-color);
+  border: 1px solid var(--gray-300);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  transition: all 0.2s ease;
+  opacity: 0.9;
+}
+
+.nav:hover:not(:disabled) {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.nav:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.nav-left {
+  left: var(--spacing-xs);
+}
+
+.nav-right {
+  right: var(--spacing-xs);
+}
+
+.nav-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-left {
+    left: var(--spacing-xxs);
+  }
+
+  .nav-right {
+    right: var(--spacing-xxs);
+  }
+}

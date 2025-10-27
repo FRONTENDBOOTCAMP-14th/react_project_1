@@ -1,0 +1,10 @@
+.searchSection {
+  width: 100%;
+}
+.searchControls {
+  display: flex;
+  flex-direction: row;
+  min-width: 280px;
+  width: 100%;
+  gap: var(--spacing-sm);
+}

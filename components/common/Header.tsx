@@ -3,10 +3,10 @@
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import styles from './Header.module.css'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Sidebar from './Sidebar'
-import { IconButton, IconLink } from '@/components/ui'
+import { IconButton, IconLink, Popover, type PopoverAction } from '@/components/ui'
 import { decodeAndCapitalize, isUUID, isNumericId } from '@/lib/utils'
 import { ROUTES } from '@/constants'
 
@@ -24,6 +24,21 @@ export default function Header({ title = '' }: HeaderProps) {
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen)
   }
+
+  const userPopoverAction: PopoverAction[] = [
+    {
+      id: 'profile',
+      label: '프로필',
+      onClick: () => router.push('/profile'),
+    },
+    {
+      id: 'logout',
+      label: '로그아웃',
+      onClick: () => {
+        signOut()
+      },
+    },
+  ]
 
   // pathname에서 제목을 추출하려면 프롭스가 제공되지 않은 경우에 사용됩니다.
   const getTitleFromPathname = (path: string): string => {
@@ -92,35 +107,14 @@ export default function Header({ title = '' }: HeaderProps) {
                     />
                   </IconLink>
                 )}
-                <IconButton
-                  type="button"
-                  aria-label="프로필"
-                  className={styles['icon-button']}
-                  onClick={() => {
-                    if (status === 'authenticated') {
-                      router.push('/profile')
-                    } else {
-                      router.push('/login')
-                    }
-                  }}
-                >
-                  <Image
-                    className={styles['default-icon']}
-                    src="/svg/profile.svg"
-                    alt="프로필"
-                    width={50}
-                    height={50}
-                    priority
-                  />
-                  <Image
-                    className={styles['active-icon']}
-                    src="/svg/profile-active.svg"
-                    alt="프로필 활성"
-                    width={50}
-                    height={50}
-                    priority
-                  />
-                </IconButton>
+
+                <Popover
+                  actions={userPopoverAction}
+                  className={styles['default-icon']}
+                  trigger={
+                    <Image src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
+                  }
+                />
               </div>
             </>
           ) : (

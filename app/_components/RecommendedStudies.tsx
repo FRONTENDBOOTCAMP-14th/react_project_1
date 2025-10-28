@@ -1,12 +1,12 @@
 'use client'
 
-import type { CommunityBase, CommunityListResponse } from '@/lib/types/community'
+import type { Community, CommunityListResponse } from '@/lib/types/community'
 import { useEffect, useState } from 'react'
 import CommunityCard from './CommunityCard'
 import styles from './RecommendedStudies.module.css'
 
 export default function RecommendedStudies() {
-  const [communities, setCommunities] = useState<CommunityBase[]>([])
+  const [communities, setCommunities] = useState<Community[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

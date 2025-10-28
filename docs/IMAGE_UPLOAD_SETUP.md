@@ -7,9 +7,11 @@
 ## 1. Supabase Storage 설정
 
 ### 1.1 기존 Supabase 프로젝트 사용
+
 현재 데이터베이스로 사용 중인 Supabase 프로젝트에서 Storage를 설정합니다.
 
 ### 1.2 Storage Bucket 생성
+
 1. Supabase 대시보드에서 **Storage** 메뉴로 이동
 2. **New bucket** 클릭
 3. Bucket 이름: `community-images`
@@ -17,7 +19,9 @@
 5. **Create bucket** 클릭
 
 ### 1.3 Storage 정책 설정 (선택사항)
+
 기본적으로 public bucket은 읽기가 가능하지만, 업로드 권한을 제한하려면:
+
 1. Storage > Policies로 이동
 2. `community-images` bucket 선택
 3. 필요한 정책 추가 (예: 인증된 사용자만 업로드 가능)
@@ -33,6 +37,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ### 환경 변수 값 찾기
+
 현재 `DATABASE_URL`에 사용 중인 Supabase 프로젝트의 정보를 사용합니다:
 
 1. Supabase 대시보드에서 **Settings** > **API** 메뉴로 이동
@@ -59,10 +64,11 @@ pnpm prisma migrate deploy
 ```
 
 ### 3.2 수동 마이그레이션 (선택사항)
+
 마이그레이션 도구를 사용하지 않는 경우, 다음 SQL을 직접 실행하세요:
 
 ```sql
-ALTER TABLE communities 
+ALTER TABLE communities
 ADD COLUMN image_url VARCHAR;
 ```
 
@@ -85,16 +91,19 @@ pnpm dev
 ## 구현된 기능
 
 ### API 엔드포인트
+
 - **POST /api/upload/image**: 이미지 파일 업로드
   - 지원 형식: JPG, PNG, WEBP, GIF
   - 최대 크기: 5MB
   - 인증 필요
 
 ### 프론트엔드 컴포넌트
+
 - **ImageUploader**: 이미지 선택, 미리보기, 업로드, 삭제 기능
 - **NewCommunity**: 커뮤니티 생성 시 이미지 URL 자동 연동
 
 ### 데이터베이스
+
 - `communities` 테이블에 `image_url` 컬럼 추가
 
 ## 사용 방법
@@ -108,15 +117,18 @@ pnpm dev
 ## 문제 해결
 
 ### "Supabase URL과 Anon Key가 환경변수에 설정되지 않았습니다" 에러
+
 - `.env` 파일에 `NEXT_PUBLIC_SUPABASE_URL`과 `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 올바르게 설정되었는지 확인
 - 개발 서버를 재시작
 
 ### "이미지 업로드 실패" 에러
+
 - Supabase Storage bucket이 `community-images` 이름으로 생성되었는지 확인
 - Bucket이 public으로 설정되었는지 확인
 - Storage 정책이 업로드를 허용하는지 확인
 
 ### Prisma 타입 에러
+
 - `pnpm prisma generate` 명령어로 Prisma Client 재생성
 - TypeScript 서버 재시작 (VSCode: Ctrl+Shift+P > "TypeScript: Restart TS Server")
 

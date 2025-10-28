@@ -54,6 +54,7 @@ export interface UpdateCommunityInput {
   region?: string | null
   subRegion?: string | null
   tagname?: string[]
+  imageUrl?: string | null
 }
 
 /**

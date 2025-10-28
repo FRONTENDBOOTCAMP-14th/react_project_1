@@ -5,10 +5,9 @@
  * - Supabase Storage를 사용하여 이미지를 업로드합니다.
  */
 
-import { MESSAGES } from '@/constants/messages'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { requireAuth } from '@/lib/middleware/auth'
 import { supabase } from '@/lib/supabase'
-import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import type { NextRequest } from 'next/server'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -70,13 +69,11 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
 
     // Supabase Storage에 업로드
-    const { data, error } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        cacheControl: '3600',
-        upsert: false,
-      })
+    const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(filePath, buffer, {
+      contentType: file.type,
+      cacheControl: '3600',
+      upsert: false,
+    })
 
     if (error) {
       console.error('Supabase upload error:', error)

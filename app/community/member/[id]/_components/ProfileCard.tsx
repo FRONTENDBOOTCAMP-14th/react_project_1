@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import styles from './ProfileCard.module.css'
+import Link from 'next/link'
 
 interface Member {
   id: string
@@ -41,7 +42,7 @@ export default function ProfileCard({ member }: ProfileCardProps) {
   }
 
   return (
-    <section className={styles.card}>
+    <Link href={`/community/member-profile/${member.id}`} className={styles.card}>
       <div className={styles['avatar-container']}>
         <Image src="/images/example.jpg" alt="" width={90} height={90} className={styles.avatar} />
       </div>
@@ -50,6 +51,6 @@ export default function ProfileCard({ member }: ProfileCardProps) {
         <p className={styles.username}>@{member.user.username}</p>
         <span className={getRoleBadgeClass()}>{roleLabel}</span>
       </div>
-    </section>
+    </Link>
   )
 }

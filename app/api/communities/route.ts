@@ -104,6 +104,10 @@ export async function GET(request: NextRequest) {
           name: true,
           description: true,
           isPublic: true,
+          region: true,
+          subRegion: true,
+          imageUrl: true,
+          tagname: true,
           createdAt: true,
           rounds: {
             select: {
@@ -138,6 +142,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/communities
  * - 신규 커뮤니티를 생성합니다.
+ * - 미들웨어가 이미 인증을 확인하므로 간단한 헬퍼 사용
  *
  * 요청 Body
  * {
@@ -152,13 +157,14 @@ export async function GET(request: NextRequest) {
  * 응답
  * - 201: { success: true, data: Community }
  * - 400: { success: false, error: string }
+ * - 401: { success: false, error: string }
  * - 500: { success: false, error: string }
  */
 export async function POST(req: NextRequest) {
   try {
-    // 인증 확인
-    const { error: authError } = await requireAuth()
-    if (authError) return authError
+    // 인증 확인 및 userId 가져오기
+    const { error: authError, userId } = await requireAuth()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const body = await req.json()
     const name = (body?.name ?? '').trim()
@@ -167,49 +173,63 @@ export async function POST(req: NextRequest) {
     const region = (body?.region ?? '').trim() || null
     const subRegion = (body?.subRegion ?? body?.subRegion ?? '').trim() || null
     const tagname = body?.tagname ? [body.tagname] : []
-    const imageUrl = (body?.imageUrl ?? '').trim() || null
 
     // 필수 값 검증
     if (!name) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NAME_REQUIRED, 400)
     }
 
-    // 커뮤니티 생성
-    const created = await prisma.community.create({
-      data: {
-        name,
-        description,
-        isPublic,
-        region,
-        subRegion,
-        tagname,
-        imageUrl,
-      },
-      select: {
-        clubId: true,
-        name: true,
-        description: true,
-        isPublic: true,
-        createdAt: true,
-        updatedAt: true,
-        tagname: true,
-        rounds: {
-          select: {
-            roundId: true,
-            roundNumber: true,
-            startDate: true,
-            endDate: true,
-            location: true,
-          },
-          where: {
-            deletedAt: null,
-            startDate: {
-              gte: new Date(), // 현재 날짜 이후의 라운드만
-            },
-          },
-          orderBy: { roundNumber: 'desc' },
+    // 트랜잭션으로 커뮤니티 생성 및 생성자를 멤버로 추가
+    const created = await prisma.$transaction(async tx => {
+      // 1. 커뮤니티 생성
+      const community = await tx.community.create({
+        data: {
+          name,
+          description,
+          isPublic,
+          region,
+          subRegion,
+          tagname,
         },
-      },
+        select: {
+          clubId: true,
+          name: true,
+          description: true,
+          isPublic: true,
+          region: true,
+          subRegion: true,
+          createdAt: true,
+          updatedAt: true,
+          tagname: true,
+          rounds: {
+            select: {
+              roundId: true,
+              roundNumber: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+            where: {
+              deletedAt: null,
+              startDate: {
+                gte: new Date(),
+              },
+            },
+            orderBy: { roundNumber: 'desc' },
+          },
+        },
+      })
+
+      // 2. 생성자를 admin 멤버로 추가
+      await tx.communityMember.create({
+        data: {
+          clubId: community.clubId,
+          userId,
+          role: 'admin',
+        },
+      })
+
+      return community
     })
 
     return createSuccessResponse(created, 201)

@@ -57,7 +57,7 @@ export default function ErrorState({
     <section role="alert" aria-live="assertive" className={className}>
       <p className="error">{message}</p>
       {actionHandler && (
-        <StrokeButton onClick={actionHandler} type="button" aria-label={buttonLabel}>
+        <StrokeButton type="button" onClick={actionHandler} aria-label={buttonLabel}>
           {buttonLabel}
         </StrokeButton>
       )}

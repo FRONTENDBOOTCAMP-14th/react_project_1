@@ -1,15 +1,12 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import { IconLink } from '@/components/ui'
 import prisma from '@/lib/prisma'
-import type { CustomSession } from '@/lib/types'
-import { getServerSession } from 'next-auth'
+import { getCurrentUserId } from '@/lib/auth'
 import Image from 'next/image'
 import { HomeContent } from './_components'
 import styles from './page.module.css'
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions)
-  const userId = (session as CustomSession)?.userId
+  const userId = await getCurrentUserId()
   const user = userId ? await prisma.user.findUnique({ where: { userId } }) : null
 
   return (
@@ -20,13 +17,11 @@ export default async function HomePage() {
         </IconLink>
       </div>
 
-      {userId ? (
-        <div className={styles['welcome-message']}>
-          {user?.username}님, 오늘은 어떤 스터디가 기다리고 있을까요?
-        </div>
-      ) : (
-        <div>커뮤니티를 이용하시려면 로그인이 필요합니다</div>
-      )}
+      <p className={styles['welcome-message']}>
+        {userId
+          ? `${user?.username}님, 오늘은 어떤 스터디가 기다리고 있을까요?`
+          : '스터디를 이용하시려면 로그인이 필요합니다'}
+      </p>
 
       <HomeContent userId={userId} />
     </main>

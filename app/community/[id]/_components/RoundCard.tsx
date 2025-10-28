@@ -1,7 +1,7 @@
 'use client'
 
 import { ErrorState, LoadingState } from '@/components/common'
-import { IconButton, Popover, type PopoverAction } from '@/components/ui'
+import { IconButton, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES } from '@/constants'
 import { useGoals } from '@/lib/hooks'
 import type { CustomSession } from '@/lib/types'
@@ -9,7 +9,7 @@ import type { Round } from '@/lib/types/round'
 import { formatDateRange, renderWithError, renderWithLoading } from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
@@ -105,6 +105,8 @@ interface RoundCardHeaderProps {
  * @param props - RoundCardHeaderProps
  */
 function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHeaderProps) {
+  const { data: session } = useSession()
+  const userId = (session as CustomSession)?.userId
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
     roundNumber: round?.roundNumber || 1,
@@ -112,6 +114,32 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
     endDate: round?.endDate ? new Date(round.endDate).toISOString().slice(0, 16) : '',
     location: round?.location || '',
   })
+  const [hasAttended, setHasAttended] = useState(false)
+  const [checkingAttendance, setCheckingAttendance] = useState(false)
+
+  useEffect(() => {
+    const checkAttendance = async () => {
+      if (!round?.roundId) return
+
+      try {
+        if (!userId) return
+
+        setCheckingAttendance(true)
+        const response = await fetch(`/api/attendance?userId=${userId}&roundId=${round.roundId}`)
+        const result = await response.json()
+
+        if (result.success && result.data.data.length > 0) {
+          setHasAttended(true)
+        }
+      } catch (error) {
+        console.error('출석 확인 실패:', error)
+      } finally {
+        setCheckingAttendance(false)
+      }
+    }
+
+    checkAttendance()
+  }, [round?.roundId, userId])
 
   const popoverActions: PopoverAction[] = [
     {
@@ -172,6 +200,36 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
       location: round?.location || '',
     })
     setIsEditing(false)
+  }
+
+  const handleAttendance = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!round) return
+
+    try {
+      const response = await fetch(`/api/attendance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roundId: round.roundId,
+          userId,
+          attendanceType: 'present',
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('출석처리 되었습니다')
+        window.location.reload()
+      } else {
+        toast.error(result.error || '출석 처리에 실패했습니다')
+      }
+    } catch (_error) {
+      toast.error('출석 처리 중 오류가 발생했습니다')
+    }
   }
 
   if (isEditing && round) {
@@ -255,11 +313,22 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
               {formatDateRange(round.startDate, round.endDate)}
             </p>
           )}
-          {round?.location && (
-            <p className={styles['round-location']}>
-              <MapPin /> {round.location}
-            </p>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {round?.location && (
+              <p className={styles['round-location']}>
+                <MapPin /> {round.location}
+              </p>
+            )}
+            {hasAttended || checkingAttendance ? (
+              <StrokeButton type="button" disabled>
+                {checkingAttendance ? '출석 중...' : '출석 완료'}
+              </StrokeButton>
+            ) : (
+              <StrokeButton type="button" onClick={handleAttendance}>
+                출석하기
+              </StrokeButton>
+            )}
+          </div>
         </div>
       )}
     </header>

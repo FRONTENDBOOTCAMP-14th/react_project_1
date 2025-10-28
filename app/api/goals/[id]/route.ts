@@ -18,6 +18,7 @@ import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { hasErrorCode } from '@/lib/errors'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 
 /**
  * GET /api/goals/[id]
@@ -60,6 +61,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PATCH /api/goals/[id]
  * - 목표 일부 필드를 부분 수정합니다(Partial Update).
+ * - 권한: 목표 소유자만 수정 가능
  * - 파라미터
  *   - params.id: 수정할 목표의 goalId(필수)
  * - 요청 Body(전부 선택)
@@ -79,6 +81,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
     const body = await request.json()
 
     // 1) 대상 존재 확인(소프트 삭제 제외)
@@ -91,7 +98,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return createErrorResponse('Goal not found', 404)
     }
 
-    // 2) 동적 업데이트 데이터 구성
+    // 2) 소유자 권한 확인
+    if (existingGoal.ownerId !== userId) {
+      return createErrorResponse('목표 소유자만 수정할 수 있습니다.', 403)
+    }
+
+    // 3) 동적 업데이트 데이터 구성
     const updateData: {
       title?: string
       description?: string | null
@@ -114,7 +126,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.startDate !== undefined) updateData.startDate = new Date(body.startDate)
     if (body.endDate !== undefined) updateData.endDate = new Date(body.endDate)
 
-    // 3) 업데이트 실행
+    // 4) 업데이트 실행
     const updatedGoal = await prisma.studyGoal.update({
       where: { goalId: id },
       data: updateData,
@@ -146,6 +158,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 /**
  * DELETE /api/goals/[id]
  * - 목표를 소프트 삭제합니다. 실제 삭제가 아닌 deletedAt 타임스탬프를 설정합니다.
+ * - 권한: 목표 소유자만 삭제 가능
  * - 파라미터
  *   - params.id: 삭제할 목표의 goalId(필수)
  *
@@ -160,6 +173,24 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
+    // 목표 존재 및 소유자 확인
+    const existingGoal = await prisma.studyGoal.findFirst({
+      where: { goalId: id, deletedAt: null },
+      select: { ownerId: true },
+    })
+
+    if (!existingGoal) {
+      return createErrorResponse('Goal not found', 404)
+    }
+
+    if (existingGoal.ownerId !== userId) {
+      return createErrorResponse('목표 소유자만 삭제할 수 있습니다.', 403)
+    }
 
     // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
     try {

@@ -15,6 +15,7 @@
   padding: var(--spacing-sm);
   border-width: 0 0 1px;
   border-color: var(--border-color);
+  outline: none;
 }
 
 .label {

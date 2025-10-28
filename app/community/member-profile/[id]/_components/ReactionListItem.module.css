@@ -1,4 +1,23 @@
-.item {
+.container {
   display: flex;
   gap: var(--spacing-sm);
+  justify-content: space-between;
+}
+
+.info {
+  display: flex;
+  justify-content: space-between;
+  width: fit-content;
+  gap: var(--spacing-xs);
+  font-size: var(--font-xs);
+}
+
+.reaction {
+  font-size: var(--font-md);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }

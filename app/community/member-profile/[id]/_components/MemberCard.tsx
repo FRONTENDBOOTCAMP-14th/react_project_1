@@ -42,7 +42,7 @@ function MemberCard({
           toast.success('좋아요 버튼을 눌렀습니다.')
         }}
       >
-        <ThumbsUp size={40} strokeWidth={1.5} />
+        <ThumbsUp size={30} strokeWidth={1} />
       </IconButton>
     </div>
   )

@@ -61,7 +61,7 @@ export default function ReactionForm({ memberId }: ReactionFormProps) {
           className={styles['input']}
         />
         <IconButton type="submit">
-          <SendHorizonal size={40} strokeWidth={1.5} />
+          <SendHorizonal size={30} strokeWidth={1} />
         </IconButton>
       </div>
     </form>

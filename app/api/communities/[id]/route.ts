@@ -42,6 +42,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         isPublic: true,
         region: true,
         subRegion: true,
+        imageUrl: true,
         createdAt: true,
         tagname: true,
         deletedAt: true,
@@ -124,6 +125,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       isPublic?: boolean
       region?: string | null
       subRegion?: string | null
+      imageUrl?: string | null
       updatedAt: Date
     } = {
       updatedAt: new Date(),
@@ -137,6 +139,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.isPublic !== undefined) updateData.isPublic = Boolean(body.isPublic)
     if (body.region !== undefined) updateData.region = body.region?.trim() || null
     if (body.subRegion !== undefined) updateData.subRegion = body.subRegion?.trim() || null
+    if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl?.trim() || null
 
     // 이름 검증
     if (updateData.name !== undefined && !updateData.name) {
@@ -154,6 +157,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         isPublic: true,
         region: true,
         subRegion: true,
+        imageUrl: true,
         createdAt: true,
         updatedAt: true,
       },

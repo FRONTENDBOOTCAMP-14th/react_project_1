@@ -8,8 +8,12 @@ const nextConfig: NextConfig = {
     // domains: ['search1.kakaocdn.net'],
     // 외부 이미지 경로 추가
     remotePatterns: [
-      //   new URL('https://images.pexels.com/**'),
-      // ...
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
   eslint: {

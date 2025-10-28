@@ -87,7 +87,7 @@ export default function SearchPage() {
       <WordSearch
         query={search}
         onChangeQuery={setSearch}
-        searchTags={searchTags}
+        searchTags={searchTags || []}
         onChangeSearchTags={setSearchTags}
         onSearch={() => executeSearch()}
         loading={loading}

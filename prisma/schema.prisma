@@ -40,6 +40,7 @@ model Community {
   tagname          String[]          @default([]) @db.VarChar
   region           String?           @db.VarChar
   subRegion        String?           @map("sub_region") @db.VarChar
+  imageUrl         String?           @map("image_url") @db.VarChar
   communityMembers CommunityMember[]
   notifications    Notification[]
   rounds           Round[]

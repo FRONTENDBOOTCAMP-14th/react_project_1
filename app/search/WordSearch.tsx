@@ -39,7 +39,9 @@ export default function WordSearch({
 }: WordSearchProps) {
   const relatedKeywords = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return []
+    // 검색어가 없으면 모든 키워드 표시
+    if (!q) return MOCK_KEYWORDS.slice(0, 8)
+    // 검색어가 있으면 매칭되는 키워드만 필터링
     return MOCK_KEYWORDS.filter(tag => tag.toLowerCase().includes(q)).slice(0, 8)
   }, [query])
 
@@ -52,17 +54,19 @@ export default function WordSearch({
 
   // 연관 검색어 클릭
   const handleAddTag = (tag: string) => {
-    if (onChangeSearchTags && searchTags) {
-      if (!searchTags.includes(tag)) {
-        onChangeSearchTags([...searchTags, tag])
+    if (onChangeSearchTags) {
+      const currentTags = searchTags || []
+      if (!currentTags.includes(tag)) {
+        onChangeSearchTags([...currentTags, tag])
       }
     }
   }
 
   // 태그 제거
   const handleRemoveTag = (tagToRemove: string) => {
-    if (onChangeSearchTags && searchTags) {
-      onChangeSearchTags(searchTags.filter(tag => tag !== tagToRemove))
+    if (onChangeSearchTags) {
+      const currentTags = searchTags || []
+      onChangeSearchTags(currentTags.filter(tag => tag !== tagToRemove))
     }
   }
 
@@ -98,8 +102,8 @@ export default function WordSearch({
           </IconButton>
         </div>
 
-        {/* 입력시 연관 검색 태그 노출 */}
-        {query.trim() && (
+        {/* 연관 검색 태그 노출 */}
+        {relatedKeywords.length > 0 && (
           <div className={Style['related-keywords']}>
             <ul className={Style.word}>
               {relatedKeywords.map(tag => (

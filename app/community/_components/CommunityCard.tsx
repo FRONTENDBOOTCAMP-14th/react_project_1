@@ -1,9 +1,11 @@
 'use client'
 
-import { IconLink, ProfileImage } from '@/components/ui'
+import { IconLink } from '@/components/ui'
 import { ROUTES } from '@/constants'
 import type { Community } from '@/lib/types'
 import styles from './CommunityCard.module.css'
+import Image from 'next/image'
+import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 
 /**
  * 커뮤니티 카드 컴포넌트 Props
@@ -35,7 +37,13 @@ export default function CommunityCard({ community, className }: CommunityCardPro
       </div>
 
       <div className={styles.join}>
-        <ProfileImage alt={community.name} radius="inner-card-radius" />
+        <Image
+          src={community.imageUrl || DefaultImg.src}
+          alt={`${community.name} 커뮤니티 이미지`}
+          width={150}
+          height={150}
+          className={styles.image}
+        />
       </div>
 
       <ul className={styles.tagList}>

@@ -193,7 +193,15 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
         toast.error('수정 중 오류가 발생했습니다')
       }
     },
-    [editForm.name, editForm.description, editForm.tags, region, subRegion, onUpdate, community.clubId]
+    [
+      editForm.name,
+      editForm.description,
+      editForm.tags,
+      region,
+      subRegion,
+      onUpdate,
+      community.clubId,
+    ]
   )
 
   /**

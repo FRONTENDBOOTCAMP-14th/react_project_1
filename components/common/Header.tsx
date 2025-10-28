@@ -133,13 +133,13 @@ export default function Header({ title = '' }: HeaderProps) {
                   <Image
                     src="/svg/header-arrow.svg"
                     alt="뒤로가기"
-                    width={24}
-                    height={24}
+                    width={30}
+                    height={30}
                     priority
                   />
                 </IconButton>
                 <IconLink href="/">
-                  <Home size={20} color="#121212" />
+                  <Home size={30} color="#121212" strokeWidth={1.5} />
                 </IconLink>
               </div>
               {/* Center: Title */}

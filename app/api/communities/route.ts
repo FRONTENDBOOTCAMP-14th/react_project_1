@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
           isPublic: true,
           region: true,
           subRegion: true,
+          imageUrl: true,
           tagname: true,
           createdAt: true,
           rounds: {

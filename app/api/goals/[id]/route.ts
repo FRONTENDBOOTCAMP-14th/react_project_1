@@ -13,7 +13,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { goalDetailSelect } from '@/lib/quaries'
+import { goalDetailSelect } from '@/lib/queries'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'

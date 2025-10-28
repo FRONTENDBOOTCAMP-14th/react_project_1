@@ -4,7 +4,6 @@ import { formatDiffFromNow } from '@/lib/utils'
 import { memo } from 'react'
 import styles from './MemberCard.module.css'
 import Image from 'next/image'
-import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 import { IconButton } from '@/components/ui'
 import { ThumbsUp } from 'lucide-react'
 import { toast } from 'sonner'
@@ -26,7 +25,7 @@ function MemberCard({
         <Image
           width={90}
           height={90}
-          src={DefaultImg}
+          src="/svg/default-profile.svg"
           alt={`${nickname} 프로필 이미지`}
           className={styles.image}
         />

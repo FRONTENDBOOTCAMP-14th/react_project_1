@@ -1,15 +1,19 @@
 .container {
-  padding: 2rem;
-  width: 100%;
-}
-.title {
-  margin: 0 0 0.5rem 0;
-}
-.subtitle {
-  color: #475569;
-  margin: 0 0 1rem 0;
-}
-.actions {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-xs);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  list-style-type: none;
+  gap: var(--spacing-sm);
+  padding: 0;
+}
+
+.title {
+  text-align: center;
+  margin: var(--spacing-sm) 0;
 }

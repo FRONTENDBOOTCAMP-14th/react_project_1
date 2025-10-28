@@ -3,12 +3,13 @@
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import styles from './Header.module.css'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Sidebar from './Sidebar'
-import { IconButton, IconLink } from '@/components/ui'
+import { IconButton, IconLink, Popover, type PopoverAction } from '@/components/ui'
 import { decodeAndCapitalize, isUUID, isNumericId } from '@/lib/utils'
 import { ROUTES } from '@/constants'
+import { Home } from 'lucide-react'
 
 interface HeaderProps {
   title?: string
@@ -24,6 +25,22 @@ export default function Header({ title = '' }: HeaderProps) {
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen)
   }
+
+  const userPopoverAction: PopoverAction[] = [
+    {
+      id: 'profile',
+      label: '프로필',
+      onClick: () => router.push('/profile'),
+    },
+    {
+      id: 'logout',
+      label: '로그아웃',
+      onClick: () => {
+        signOut()
+      },
+      isDanger: true,
+    },
+  ]
 
   // pathname에서 제목을 추출하려면 프롭스가 제공되지 않은 경우에 사용됩니다.
   const getTitleFromPathname = (path: string): string => {
@@ -73,7 +90,7 @@ export default function Header({ title = '' }: HeaderProps) {
               {/* Right: Alarm + Profile */}
               <div className={styles['right-group']}>
                 {status === 'authenticated' && (
-                  <IconLink href={ROUTES.NOTIFICATION}>
+                  <IconLink href={ROUTES.NOTIFICATIONS}>
                     <Image
                       className={styles['default-icon']}
                       src="/svg/alarm.svg"
@@ -92,35 +109,20 @@ export default function Header({ title = '' }: HeaderProps) {
                     />
                   </IconLink>
                 )}
-                <IconButton
-                  type="button"
-                  aria-label="프로필"
-                  className={styles['icon-button']}
-                  onClick={() => {
-                    if (status === 'authenticated') {
-                      router.push('/profile')
-                    } else {
-                      router.push('/login')
-                    }
-                  }}
-                >
-                  <Image
+
+                {status === 'authenticated' ? (
+                  <Popover
+                    actions={userPopoverAction}
                     className={styles['default-icon']}
-                    src="/svg/profile.svg"
-                    alt="프로필"
-                    width={50}
-                    height={50}
-                    priority
+                    trigger={
+                      <Image src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
+                    }
                   />
-                  <Image
-                    className={styles['active-icon']}
-                    src="/svg/profile-active.svg"
-                    alt="프로필 활성"
-                    width={50}
-                    height={50}
-                    priority
-                  />
-                </IconButton>
+                ) : (
+                  <IconLink href={ROUTES.LOGIN}>
+                    <Image src="/svg/profile.svg" alt="프로필" width={50} height={50} priority />
+                  </IconLink>
+                )}
               </div>
             </>
           ) : (
@@ -136,6 +138,9 @@ export default function Header({ title = '' }: HeaderProps) {
                     priority
                   />
                 </IconButton>
+                <IconLink href="/">
+                  <Home size={20} color="#121212" />
+                </IconLink>
               </div>
               {/* Center: Title */}
               <div className={styles.center}>

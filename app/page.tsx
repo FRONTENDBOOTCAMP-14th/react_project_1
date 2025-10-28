@@ -17,13 +17,11 @@ export default async function HomePage() {
         </IconLink>
       </div>
 
-      {userId ? (
-        <div className={styles['welcome-message']}>
-          {user?.username}님, 오늘은 어떤 스터디가 기다리고 있을까요?
-        </div>
-      ) : (
-        <div>커뮤니티를 이용하시려면 로그인이 필요합니다</div>
-      )}
+      <p className={styles['welcome-message']}>
+        {userId
+          ? `${user?.username}님, 오늘은 어떤 스터디가 기다리고 있을까요?`
+          : '스터디를 이용하시려면 로그인이 필요합니다'}
+      </p>
 
       <HomeContent userId={userId} />
     </main>

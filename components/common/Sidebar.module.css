@@ -95,6 +95,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  border-radius: var(--inner-card-radius);
 }
 
 .nav-item:hover {

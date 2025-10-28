@@ -1,13 +1,31 @@
-# robots.txt for next.js application
+# 검색 엔진 크롤러 설정
 
 User-agent: *
-Disallow: /api/auth/login
-Disallow: /api/auth/register
-Disallow: /api/auth/refresh
-Disallow: /api/auth/logout
-Disallow: /api/auth/me
-Disallow: /api/auth/update
-Disallow: /api/auth/delete
-Disallow: /api/auth/reset-password
 
-# Sitemap: https://study-club-tracker.com/sitemap.xml
+# API 경로 전체 차단
+Disallow: /api/
+
+# 인증 관련 페이지
+Disallow: /login
+Disallow: /profile
+Disallow: /dashboard
+
+# Next.js 내부 파일
+Disallow: /_next/
+Disallow: /static/
+
+# 사용자 데이터 및 관리 페이지
+Disallow: /community/new
+Disallow: /community/*/notification
+Disallow: /community/member/
+
+# 검색 결과 페이지 (중복 컨텐츠 방지)
+Disallow: /search?*
+
+# 공개 허용 경로
+Allow: /$
+Allow: /community$
+Allow: /community/[0-9a-f-]*$
+
+# Sitemap 위치
+Sitemap: https://tokkinote.vercel.app/sitemap.xml

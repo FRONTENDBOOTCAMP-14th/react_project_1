@@ -42,7 +42,7 @@ export default function CommunitiesPage() {
   }, [])
 
   return (
-    <main className={styles.container}>
+    <>
       <div className={styles.header}>
         <h1>전체 커뮤니티</h1>
         <p>참여 가능한 모든 커뮤니티를 확인하세요</p>
@@ -63,6 +63,6 @@ export default function CommunitiesPage() {
           <div className={styles.empty}>등록된 커뮤니티가 없습니다</div>
         )}
       </div>
-    </main>
+    </>
   )
 }

@@ -27,6 +27,7 @@ interface WordSearchProps {
   onChangeSearchTags?: (tags: string[]) => void
   onSearch?: () => void
   loading?: boolean
+  canTagSearch?: boolean
 }
 
 export default function WordSearch({
@@ -36,6 +37,7 @@ export default function WordSearch({
   onChangeSearchTags,
   onSearch,
   loading = false,
+  canTagSearch = false,
 }: WordSearchProps) {
   const relatedKeywords = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -103,7 +105,7 @@ export default function WordSearch({
         </div>
 
         {/* 연관 검색 태그 노출 */}
-        {relatedKeywords.length > 0 && (
+        {canTagSearch && relatedKeywords.length > 0 && (
           <div className={Style['related-keywords']}>
             <ul className={Style.word}>
               {relatedKeywords.map(tag => (
@@ -127,7 +129,7 @@ export default function WordSearch({
         )}
 
         {/* 선택된 태그들 */}
-        {searchTags && searchTags.length > 0 && (
+        {canTagSearch && searchTags && searchTags.length > 0 && (
           <div className={Style['selected-tags']}>
             <div className={Style['tags-header']}>
               <span className={Style['tags-label']}>검색 태그:</span>

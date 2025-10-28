@@ -106,10 +106,3 @@
   background-color: var(--etc-color);
   color: var(--accent-color);
 }
-
-.footer {
-  padding: var(--spacing-sm);
-  border-top: 1px solid var(--gray-300);
-  font-size: var(--font-sm);
-  color: var(--gray-500);
-}

@@ -53,9 +53,20 @@
 .image {
   width: 100px;
   height: 100px;
-  background-size: cover;
-  background-color: red;
-  /* background: no-repeat center; */
+  object-fit: cover;
+  border-radius: var(--spacing-xs);
+}
+
+.placeholder {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
   border-radius: var(--spacing-xs);
 }
 

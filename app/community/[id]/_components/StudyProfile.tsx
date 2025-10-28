@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useState, useCallback, type ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
+import communityCardStyles from '@/app/_components/CommunityCard.module.css'
 import type { Community, UpdateCommunityInput } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
 import { useCommunity } from '@/lib/hooks'
@@ -9,14 +10,8 @@ import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { renderWithLoading, renderWithError } from '@/lib/utils'
 import { LoadingState, ErrorState } from '@/components/common'
 import { UI_CONSTANTS, MESSAGES, ROUTES } from '@/constants'
-import {
-  StrokeButton,
-  Popover,
-  type PopoverAction,
-  IconLink,
-  ProfileImage,
-  Dropdown,
-} from '@/components/ui'
+import { StrokeButton, Popover, type PopoverAction, IconLink, Dropdown } from '@/components/ui'
+import CommunityImageUploader from './CommunityImageUploader'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import regions from '@/lib/json/region.json'
@@ -87,6 +82,15 @@ const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
         <Users size={iconSize} aria-hidden="true" />
         <span>{MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}</span>
       </IconLink>
+      {community.tagname && community.tagname.length > 0 && (
+        <ul className={communityCardStyles.tagList}>
+          {community.tagname.map(tag => (
+            <li key={tag} className={communityCardStyles.tag}>
+              {tag}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 })
@@ -121,6 +125,7 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
   const [editForm, setEditForm] = useState({
     name: community.name,
     description: community.description || '',
+    tags: (community.tagname || []).join(', '),
   })
 
   /**
@@ -130,9 +135,10 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     setEditForm({
       name: community.name,
       description: community.description || '',
+      tags: (community.tagname || []).join(', '),
     })
     setIsEditing(true)
-  }, [community.name, community.description])
+  }, [community.name, community.description, community.tagname])
 
   /**
    * 편집 취소
@@ -141,9 +147,10 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     setEditForm({
       name: community.name,
       description: community.description || '',
+      tags: (community.tagname || []).join(', '),
     })
     setIsEditing(false)
-  }, [community.name, community.description])
+  }, [community.name, community.description, community.tagname])
 
   /**
    * 편집 저장
@@ -163,11 +170,17 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
       }
 
       try {
+        const tagArray = editForm.tags
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean)
+
         const result = await onUpdate(community.clubId, {
           name: editForm.name.trim(),
           description: editForm.description.trim() || null,
           region: region || null,
           subRegion: subRegion || null,
+          tagname: tagArray,
         })
 
         if (result.success) {
@@ -180,7 +193,15 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
         toast.error('수정 중 오류가 발생했습니다')
       }
     },
-    [editForm.name, editForm.description, region, subRegion, onUpdate, community.clubId]
+    [
+      editForm.name,
+      editForm.description,
+      editForm.tags,
+      region,
+      subRegion,
+      onUpdate,
+      community.clubId,
+    ]
   )
 
   /**
@@ -204,6 +225,27 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
       toast.error('삭제 중 오류가 발생했습니다')
     }
   }, [onDelete, community.clubId, router])
+
+  /**
+   * 커뮤니티 이미지 업데이트
+   */
+  const handleImageUpdate = useCallback(
+    async (imageUrl: string) => {
+      try {
+        const result = await onUpdate(community.clubId, {
+          imageUrl,
+        })
+
+        if (!result.success) {
+          throw new Error(result.error || '이미지 업데이트에 실패했습니다')
+        }
+      } catch (error) {
+        console.error('Image update error:', error)
+        throw error
+      }
+    },
+    [onUpdate, community.clubId]
+  )
 
   /**
    * 커뮤니티 가입
@@ -294,6 +336,15 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
               />
             </div>
             <div className={styles['edit-field']}>
+              <label>태그</label>
+              <input
+                type="text"
+                value={editForm.tags}
+                onChange={e => setEditForm(prev => ({ ...prev, tags: e.target.value }))}
+                placeholder=",로 구분하여 입력 (예: 알고리즘, 독서, CS)"
+              />
+            </div>
+            <div className={styles['edit-field']}>
               <label>지역</label>
               <Dropdown
                 options={regions.map(regionData => ({
@@ -337,9 +388,11 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     <div className={styles['profile-wrapper']}>
       <article className={styles['profile-header']}>
         <div className={styles['header-left']}>
-          <ProfileImage
-            alt={`${community.name} 커뮤니티 프로필 이미지`}
-            radius="inner-card-radius"
+          <CommunityImageUploader
+            currentImageUrl={community.imageUrl}
+            communityName={community.name}
+            onImageUpdate={handleImageUpdate}
+            isAdmin={isTeamLeader}
           />
           <ProfileInfo community={community} />
         </div>

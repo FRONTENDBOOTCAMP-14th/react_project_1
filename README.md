@@ -138,5 +138,3 @@ pnpm typecheck    # TypeScript 타입 체크
 
 - **[conventions.md](docs/conventions.md)** - 코딩 컨벤션 및 스타일 가이드
 - **[data-model.md](docs/data-model.md)** - 데이터베이스 스키마 및 ERD
-- **[middleware-auth.md](docs/middleware-auth.md)** - Next.js 미들웨어 인증 가이드
-- **[IMAGE_UPLOAD_SETUP.md](docs/IMAGE_UPLOAD_SETUP.md)** - Supabase Storage 이미지 업로드 설정

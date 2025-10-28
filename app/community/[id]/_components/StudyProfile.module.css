@@ -31,6 +31,10 @@
 .description {
   font-size: var(--font-sm);
   color: var(--gray-500);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  overflow: hidden;
 }
 
 .info-row {

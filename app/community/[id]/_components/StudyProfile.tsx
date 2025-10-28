@@ -354,7 +354,7 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
           {community.description || MESSAGES.EMPTY.NO_DESCRIPTION}
         </p>
         {!isMember && (
-          <StrokeButton type="button" onClick={handleJoinClick}>
+          <StrokeButton style={{ minWidth: '76px' }} type="button" onClick={handleJoinClick}>
             가입하기
           </StrokeButton>
         )}

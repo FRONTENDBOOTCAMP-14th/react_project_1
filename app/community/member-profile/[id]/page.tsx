@@ -30,8 +30,6 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     })
     .then(attendance => attendance.length)
 
-  console.log(attendanceCount)
-
   return (
     <div className={styles.container}>
       <MemberCard

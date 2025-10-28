@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useState, useCallback, type ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
+import communityCardStyles from '@/app/_components/CommunityCard.module.css'
 import type { Community, UpdateCommunityInput } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
 import { useCommunity } from '@/lib/hooks'
@@ -81,6 +82,15 @@ const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
         <Users size={iconSize} aria-hidden="true" />
         <span>{MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}</span>
       </IconLink>
+      {community.tagname && community.tagname.length > 0 && (
+        <ul className={communityCardStyles.tagList}>
+          {community.tagname.map(tag => (
+            <li key={tag} className={communityCardStyles.tag}>
+              {tag}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 })

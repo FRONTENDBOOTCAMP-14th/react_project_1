@@ -1,6 +1,14 @@
 import { formatDiffFromNow } from '@/lib/utils'
 
-export default function MemberCard({ member }: { member: any }) {
+export default function MemberCard({
+  nickname,
+  role,
+  joinedAt,
+}: {
+  nickname: string
+  role: string
+  joinedAt: Date
+}) {
   return (
     <div
       style={{
@@ -15,9 +23,9 @@ export default function MemberCard({ member }: { member: any }) {
         border: '1px solid var(--border-color)',
       }}
     >
-      <h2>{member.user.nickname}</h2>
-      <p>{member.role === 'admin' ? '관리자' : '멤버'}</p>
-      <p>가입일: {formatDiffFromNow(member.joinedAt)}</p>
+      <h2>{nickname}</h2>
+      <p>{role === 'admin' ? '관리자' : '멤버'}</p>
+      <p>가입일: {formatDiffFromNow(joinedAt)}</p>
     </div>
   )
 }

@@ -43,8 +43,6 @@ function StudyCardListItem({
         return
       }
 
-      console.log(members)
-
       const memberId = members.data[0].id
 
       const deleteResponse = await fetch(`/api/members/${memberId}`, {

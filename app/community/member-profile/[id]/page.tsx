@@ -24,7 +24,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
 
   return (
     <div className={styles.container}>
-      <MemberCard member={member} />
+      <MemberCard
+        nickname={member.user.nickname || ''}
+        role={member.role}
+        joinedAt={member.joinedAt}
+      />
       <ReactionForm memberId={member.id} />
       <ReactionList memberId={member.id} />
     </div>

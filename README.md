@@ -1,4 +1,4 @@
-# Study Club Tracker
+# 토끼노트
 
 Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼입니다. 팀/개인별 목표 설정, 주차·일간 계획 수립, 진행률 관리, 팀 피드백 및 알림을 지원합니다.
 
@@ -28,7 +28,9 @@ Next.js + Supabase 기반 스터디 진행 관리/커뮤니티 플랫폼입니�
 ## 기술 스택
 
 - 프레임워크: Next.js 15 (App Router), React 19, TypeScript
-- 데이터/인증: Supabase (Postgres, Row Level Security, Auth)
+- 데이터베이스: Prisma + PostgreSQL (Supabase)
+- 인증: NextAuth v4 (JWT, 카카오 소셜 로그인)
+- 미들웨어: Next.js Middleware (라우트 가드, 인증 처리)
 - 스타일: VanillaCSS + CSS Modules
 - 품질도구: ESLint, Prettier
 - 배포: Vercel
@@ -166,15 +168,65 @@ graph LR
 
 ---
 
+## 인증 및 보안
+
+### Next.js 미들웨어 통합
+
+이 프로젝트는 **Next.js 미들웨어**와 **NextAuth**를 통합하여 일관된 인증 및 보안을 제공합니다.
+
+#### 주요 특징
+
+- **자동 라우트 보호**: 모든 보호된 라우트에 대해 서버 측에서 자동 인증 확인
+- **성능 최적화**: 인증되지 않은 사용자의 불필요한 페이지 로드 방지
+- **일관된 보안**: 각 API 라우트에서 인증 코드 반복 제거
+- **JWT 기반**: 빠르고 확장 가능한 토큰 기반 인증
+
+#### 보호된 라우트
+
+- `/goal/*` - 목표 관리 페이지
+- `/profile/*` - 프로필 페이지
+- `/api/goals/*` - 목표 API
+- 기타 보호된 API 엔드포인트
+
+자세한 내용은 [미들웨어 인증 문서](docs/middleware-auth.md)를 참고하세요.
+
+---
+
 ## 로컬 개발 가이드
 
 ### 사전 준비
 
 - Node LTS, pnpm 설치
-- Supabase 프로젝트 생성 및 환경변수
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`
+- PostgreSQL 데이터베이스 (Supabase 또는 로컬)
+- 카카오 개발자 계정 (소셜 로그인용)
+
+### 환경 변수 설정
+
+`.env.example` 파일을 복사하여 `.env` 파일을 생성하고 값을 설정합니다:
+
+```bash
+cp .env.example .env
+```
+
+필수 환경 변수:
+
+```bash
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-at-least-32-characters
+
+# 카카오 로그인
+KAKAO_CLIENT_ID=your-kakao-client-id
+KAKAO_CLIENT_SECRET=your-kakao-client-secret
+
+# 데이터베이스
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+DIRECT_URL=postgresql://user:password@localhost:5432/dbname
+
+# 리다이렉트 URL
+LOGIN_SUCCESS_REDIRECT=/
+REGISTER_PAGE_URL=/login?step=register
+```
 
 ### 설치 및 실행
 

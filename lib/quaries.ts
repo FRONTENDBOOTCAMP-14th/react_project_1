@@ -68,6 +68,28 @@ export const roundSelect = {
   location: true,
   createdAt: true,
   updatedAt: true,
+  _count: {
+    select: {
+      attendance: true,
+    },
+  },
+  attendance: {
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      attendanceId: true,
+      userId: true,
+      attendanceType: true,
+      user: {
+        select: {
+          userId: true,
+          username: true,
+          nickname: true,
+        },
+      },
+    },
+  },
 } satisfies Prisma.RoundSelect
 
 /**
@@ -99,3 +121,205 @@ export const roundDetailSelect = {
 export const activeRoundWhere = {
   deletedAt: null,
 } satisfies Prisma.RoundWhereInput
+
+/**
+ * Notification 기본 Select (목록 조회용)
+ */
+export const notificationSelect = {
+  notificationId: true,
+  clubId: true,
+  authorId: true,
+  title: true,
+  content: true,
+  isPinned: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.NotificationSelect
+
+/**
+ * Notification 상세 Select (관계 포함)
+ */
+export const notificationDetailSelect = {
+  ...notificationSelect,
+  community: {
+    select: {
+      clubId: true,
+      name: true,
+    },
+  },
+  author: {
+    select: {
+      userId: true,
+      username: true,
+    },
+  },
+} satisfies Prisma.NotificationSelect
+
+/**
+ * 활성 공지사항 조건 (소프트 삭제 제외)
+ */
+export const activeNotificationWhere = {
+  deletedAt: null,
+} satisfies Prisma.NotificationWhereInput
+
+/**
+ * CommunityMember 기본 Select (목록 조회용)
+ */
+export const memberSelect = {
+  id: true,
+  clubId: true,
+  userId: true,
+  role: true,
+  joinedAt: true,
+} satisfies Prisma.CommunityMemberSelect
+
+/**
+ * CommunityMember 상세 Select (관계 포함)
+ */
+export const memberDetailSelect = {
+  ...memberSelect,
+  community: {
+    select: {
+      clubId: true,
+      name: true,
+      description: true,
+    },
+  },
+  user: {
+    select: {
+      userId: true,
+      username: true,
+      email: true,
+      nickname: true,
+    },
+  },
+} satisfies Prisma.CommunityMemberSelect
+
+/**
+ * 활성 멤버 조건 (소프트 삭제 제외)
+ */
+export const activeMemberWhere = {
+  deletedAt: null,
+} satisfies Prisma.CommunityMemberWhereInput
+
+/**
+ * Community 기본 Select (목록 조회용)
+ */
+export const communitySelect = {
+  clubId: true,
+  name: true,
+  description: true,
+  isPublic: true,
+  region: true,
+  subRegion: true,
+  createdAt: true,
+  updatedAt: true,
+  tagname: true,
+} satisfies Prisma.CommunitySelect
+
+/**
+ * Community 상세 Select (관계 포함)
+ */
+export const communityDetailSelect = {
+  ...communitySelect,
+  communityMembers: {
+    where: activeMemberWhere,
+    select: {
+      id: true,
+      role: true,
+      joinedAt: true,
+      user: {
+        select: {
+          userId: true,
+          username: true,
+          email: true,
+          nickname: true,
+        },
+      },
+    },
+  },
+  rounds: {
+    where: activeRoundWhere,
+    select: roundSelect,
+    orderBy: {
+      startDate: 'asc',
+    },
+  },
+} satisfies Prisma.CommunitySelect
+
+/**
+ * 활성 커뮤니티 조건 (소프트 삭제 제외)
+ */
+export const activeCommunityWhere = {
+  deletedAt: null,
+} satisfies Prisma.CommunityWhereInput
+
+/**
+ * 사용자별 구독 커뮤니티 조회 조건
+ */
+export const userSubscribedCommunitiesWhere = (userId: string) =>
+  ({
+    deletedAt: null,
+    communityMembers: {
+      some: {
+        userId,
+        deletedAt: null,
+      },
+    },
+  }) satisfies Prisma.CommunityWhereInput
+
+/**
+ * 다가오는 라운드 조회 조건 (현재 날짜 이후)
+ */
+export const upcomingRoundsWhere = (fromDate: Date = new Date()) =>
+  ({
+    deletedAt: null,
+    startDate: {
+      gte: fromDate,
+    },
+  }) satisfies Prisma.RoundWhereInput
+
+/**
+ * Reaction 기본 Select (목록 조회용)
+ */
+export const reactionSelect = {
+  reactionId: true,
+  userId: true,
+  member_id: true,
+  reaction: true,
+  createdAt: true,
+} satisfies Prisma.ReactionSelect
+
+/**
+ * Reaction 상세 Select (관계 포함)
+ */
+export const reactionDetailSelect = {
+  ...reactionSelect,
+  user: {
+    select: {
+      userId: true,
+      username: true,
+      nickname: true,
+    },
+  },
+  community_members: {
+    select: {
+      id: true,
+      role: true,
+      user: {
+        select: {
+          userId: true,
+          username: true,
+          nickname: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.ReactionSelect
+
+/**
+ * 활성 리액션 조건 (소프트 삭제 제외)
+ */
+export const activeReactionWhere = {
+  deletedAt: null,
+} satisfies Prisma.ReactionWhereInput

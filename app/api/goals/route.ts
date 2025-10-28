@@ -10,9 +10,17 @@
  * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
+import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { goalSelect, activeGoalWhere } from '@/lib/quaries'
-import { NextResponse } from 'next/server'
+import { activeGoalWhere, goalSelect } from '@/lib/quaries'
+import {
+  getBooleanParam,
+  getPaginationParams,
+  getStringParam,
+  withPagination,
+} from '@/lib/utils/apiHelpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -31,32 +39,28 @@ import type { NextRequest } from 'next/server'
  */
 export async function GET(request: NextRequest) {
   try {
+    const { page, limit, skip } = getPaginationParams(request)
     const searchParams = request.nextUrl.searchParams
 
     // 필터 파라미터
-    const clubId = searchParams.get('clubId')
-    const roundId = searchParams.get('roundId')
-    const isTeam = searchParams.get('isTeam')
-    const isComplete = searchParams.get('isComplete')
-    const ownerId = searchParams.get('ownerId')
-
-    // 페이지네이션 파라미터
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
-    const skip = (page - 1) * limit
+    const clubId = getStringParam(searchParams, 'clubId')
+    const roundId = getStringParam(searchParams, 'roundId')
+    const isTeam = getBooleanParam(searchParams, 'isTeam')
+    const isComplete = getBooleanParam(searchParams, 'isComplete')
+    const ownerId = getStringParam(searchParams, 'ownerId')
 
     // where 절 구성
     const whereClause = {
       ...activeGoalWhere,
       ...(clubId && { clubId }),
       ...(roundId && { roundId }),
-      ...(isTeam !== null && { isTeam: isTeam === 'true' }),
-      ...(isComplete !== null && { isComplete: isComplete === 'true' }),
+      ...(isTeam !== null && { isTeam }),
+      ...(isComplete !== null && { isComplete }),
       ...(ownerId && { ownerId }),
     }
 
-    // 병렬 조회: 데이터 + 전체 갯수
-    const [goals, total] = await Promise.all([
+    // withPagination 유틸리티 사용
+    return withPagination(
       prisma.studyGoal.findMany({
         where: whereClause,
         skip,
@@ -65,40 +69,22 @@ export async function GET(request: NextRequest) {
         select: goalSelect,
       }),
       prisma.studyGoal.count({ where: whereClause }),
-    ])
-
-    return NextResponse.json({
-      success: true,
-      data: goals,
-      count: goals.length,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
+      { page, limit, skip }
+    )
   } catch (error) {
     // 서버 내부 오류 처리
     console.error('Error fetching goals:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch goals',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_LOAD_GOALS, 500)
   }
 }
 
 /**
  * POST /api/goals
  * - 신규 목표를 생성합니다.
+ * - 인증 필요: 미들웨어가 이미 인증 확인
  *
  * 요청 Body 예시
  * {
- *   "ownerId": "사용자ID(필수)",
  *   "clubId": "클럽ID(선택, 없으면 null)",
  *   "roundId": "회차ID(선택, 없으면 null)",
  *   "title": "제목(필수)",
@@ -116,12 +102,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // 인증 확인
+    const { userId: authUserId, error: authError } = await requireAuthUser()
+    if (authError || !authUserId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
     // 요청 바디 파싱
     const body = await request.json()
 
-    const { ownerId, clubId, roundId, title, description, isTeam, isComplete, startDate, endDate } =
+    const { clubId, roundId, title, description, isTeam, isComplete, startDate, endDate } =
       body as {
-        ownerId?: string
         clubId?: string | null
         roundId?: string | null
         title?: string
@@ -133,16 +122,12 @@ export async function POST(request: NextRequest) {
       }
 
     // 필수 값 검증
-    if (!ownerId || !title || !startDate || !endDate) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields',
-          required: ['ownerId', 'title', 'startDate', 'endDate'],
-        },
-        { status: 400 }
-      )
+    if (!title || !startDate || !endDate) {
+      return createErrorResponse('Missing required fields: title, startDate, endDate', 400)
     }
+
+    // ownerId는 인증된 사용자로 자동 설정 (요청에서 제공된 경우에도 인증된 사용자로 덮어쓰기)
+    const finalOwnerId = authUserId
 
     // 날짜 변환(문자열 → Date)
     const start = new Date(startDate)
@@ -150,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     // 목표 생성
     const createData = {
-      ownerId,
+      ownerId: finalOwnerId,
       clubId: clubId || null,
       roundId: roundId || null,
       title,
@@ -179,33 +164,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: newGoal,
-      },
-      { status: 201 }
-    )
+    return createSuccessResponse(newGoal, 201)
   } catch (error) {
     // 서버 내부 오류 처리
     console.error('POST /api/goals - Error creating goal:', error)
-
-    // Prisma 에러 상세 정보
-    if (error && typeof error === 'object') {
-      console.error('Error details:', {
-        code: (error as any).code,
-        meta: (error as any).meta,
-        message: error instanceof Error ? error.message : 'Unknown error',
-      })
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create goal',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return createErrorResponse(MESSAGES.ERROR.FAILED_TO_CREATE_GOAL, 500)
   }
 }

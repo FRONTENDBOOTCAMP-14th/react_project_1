@@ -1,4 +1,5 @@
+export { ErrorBoundary, useErrorHandler } from './ErrorBoundary'
+export { default as ErrorState } from './ErrorState'
 export { default as Footer } from './Footer'
 export { default as Header } from './Header'
 export { default as LoadingState } from './LoadingState'
-export { default as ErrorState } from './ErrorState'

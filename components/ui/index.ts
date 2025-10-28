@@ -1,5 +1,14 @@
 export { default as AccentButton } from './AccentButton'
 export { default as AccentLink } from './AccentLink'
+export {
+  Carousel,
+  CarouselItem,
+  CarouselNavigation,
+  CarouselIndicators,
+  useCarouselScroll,
+  useCarouselAutoPlay,
+} from './Carousel'
+export type { CarouselProps, CarouselItemProps, CarouselEffect } from './Carousel'
 export { default as Checkbox } from './Checkbox'
 export type { CheckboxProps } from './Checkbox'
 export { default as Dropdown } from './Dropdown'
@@ -14,3 +23,6 @@ export { default as StrokeButton } from './StrokeButton'
 export { default as StrokeLink } from './StrokeLink'
 export { default as Popover } from './Popover'
 export type { PopoverAction } from './Popover'
+export { default as TextInput } from './TextInput'
+export type { TextInputProps } from './TextInput'
+export { default as ProfileImage } from './ProfileImage'

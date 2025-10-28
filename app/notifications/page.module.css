@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  width: 306px;
+  height: 68px;
+  background-color: var(--etc-color-3);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-xs);
+  margin-bottom: 10px;
+  gap: var(--spacing-sm);
+}
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  font-size: var(--font-sm);
+  color: var(--secondary-color);
+  line-height: 1.4;
+}

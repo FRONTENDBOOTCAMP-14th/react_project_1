@@ -40,7 +40,7 @@ export default function LoginPage() {
 
 function RegisterForm() {
   const search = useSearchParams()
-  const provider = search.get('provider') || 'kakao'
+  const _provider = search.get('provider') || 'kakao'
   const providerId = search.get('providerId') || ''
   const emailFromQuery = search.get('email') || ''
   const [email, setEmail] = React.useState(emailFromQuery)
@@ -144,7 +144,17 @@ function RegisterForm() {
         else setErrors({ form: '회원가입에 실패했습니다. 다시 시도해주세요.' })
         return
       }
-      await signIn('kakao', { callbackUrl: '/' })
+
+      // 회원가입 완료 후 Credentials Provider로 즉시 로그인
+      const result = await signIn('register-complete', {
+        userId: json.userId,
+        callbackUrl: '/',
+        redirect: true,
+      })
+
+      if (result?.error) {
+        setErrors({ form: '로그인 처리에 실패했습니다. 다시 시도해주세요.' })
+      }
     } catch (_e) {
       setErrors({ form: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.' })
     } finally {

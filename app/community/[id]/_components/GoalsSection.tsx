@@ -1,7 +1,9 @@
+'use client'
+
 import { memo } from 'react'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalsContainer from './GoalsContainer'
-import styles from './RoundCard.module.css'
+import styles from './GoalsSection.module.css'
 import { MESSAGES } from '@/constants'
 
 /**
@@ -29,6 +31,14 @@ export interface GoalsSectionProps {
    */
   onAddGoal?: (title: string, isTeam: boolean) => Promise<void>
   /**
+   * 목표 수정 핸들러
+   */
+  onEdit?: (goalId: string, newTitle: string) => Promise<void>
+  /**
+   * 목표 삭제 핸들러
+   */
+  onDelete?: (goalId: string) => Promise<void>
+  /**
    * 목표 섹션의 열림/닫힘 상태
    */
   isOpen?: boolean
@@ -44,6 +54,8 @@ function GoalsSection({
   onToggle,
   isTeamLeader,
   onAddGoal,
+  onEdit,
+  onDelete,
   isOpen,
 }: GoalsSectionProps) {
   return (
@@ -57,6 +69,8 @@ function GoalsSection({
           showAddButton={!!isTeamLeader}
           emptyMessage={MESSAGES.EMPTY.TEAM_GOALS}
           onAddGoal={onAddGoal ? async title => onAddGoal(title, true) : undefined}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
         <GoalsContainer
           title="개인목표"
@@ -66,6 +80,8 @@ function GoalsSection({
           showAddButton={true}
           emptyMessage={MESSAGES.EMPTY.PERSONAL_GOALS}
           onAddGoal={onAddGoal ? async title => onAddGoal(title, false) : undefined}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       </section>
     )

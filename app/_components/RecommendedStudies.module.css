@@ -1,0 +1,29 @@
+.footer-container {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+}
+
+.footer-container h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-color);
+}
+
+.recommend-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.recommend-item {
+  padding: var(--spacing-md);
+  border: 1px solid var(--gray-500);
+  border-radius: var(--inner-card-radius);
+  background: var(--bg-color);
+  transition: all 0.2s ease;
+}
+
+.recommend-item:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+}

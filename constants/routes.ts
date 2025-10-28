@@ -15,6 +15,8 @@ export const ROUTES = {
     CREATE: '/goal/create',
     DETAIL: (goalId: string) => `/goal/${goalId}`,
   },
+  NOTIFICATIONS: '/notifications',
+  LOGIN: '/login',
 } as const
 
 /**
@@ -35,7 +37,6 @@ export const API_ENDPOINTS = {
   COMMUNITIES: {
     BASE: '/api/communities',
     BY_ID: (clubId: string) => `/api/communities/${clubId}`,
-    DELETE_BY_ID: (clubId: string) => `/api/communities?id=${clubId}`,
   },
   ROUNDS: {
     BASE: '/api/rounds',
@@ -45,6 +46,63 @@ export const API_ENDPOINTS = {
       if (params.clubId) searchParams.append('clubId', params.clubId)
       return `/api/rounds?${searchParams.toString()}`
     },
+  },
+  NOTIFICATIONS: {
+    BASE: '/api/notifications',
+    BY_ID: (notificationId: string) => `/api/notifications/${notificationId}`,
+    WITH_PARAMS: (params: {
+      clubId: string
+      isPinned?: boolean
+      page?: number
+      limit?: number
+    }) => {
+      const searchParams = new URLSearchParams()
+      searchParams.append('clubId', params.clubId)
+      if (params.isPinned !== undefined) searchParams.append('isPinned', String(params.isPinned))
+      if (params.page) searchParams.append('page', String(params.page))
+      if (params.limit) searchParams.append('limit', String(params.limit))
+      return `/api/notifications?${searchParams.toString()}`
+    },
+  },
+  MEMBERS: {
+    BASE: '/api/members',
+    BY_ID: (memberId: string) => `/api/members/${memberId}`,
+    WITH_PARAMS: (params: {
+      clubId?: string
+      userId?: string
+      role?: string
+      page?: number
+      limit?: number
+    }) => {
+      const searchParams = new URLSearchParams()
+      if (params.clubId) searchParams.append('clubId', params.clubId)
+      if (params.userId) searchParams.append('userId', params.userId)
+      if (params.role) searchParams.append('role', params.role)
+      if (params.page) searchParams.append('page', String(params.page))
+      if (params.limit) searchParams.append('limit', String(params.limit))
+      return `/api/members?${searchParams.toString()}`
+    },
+  },
+  USER: {
+    COMMUNITIES: '/api/user/communities',
+  },
+  REGION: {
+    BASE: '/api/region',
+  },
+  SEARCH: {
+    BASE: '/api/search',
+    WITH_PARAMS: (params: { q?: string; region?: string }) => {
+      const searchParams = new URLSearchParams()
+      if (params.q) searchParams.append('q', params.q)
+      if (params.region) searchParams.append('region', params.region)
+      return `/api/search?${searchParams.toString()}`
+    },
+  },
+  ATTENDANCE: {
+    BASE: '/api/attendance',
+    BY_ID: (id: string) => `/api/attendance/${id}`,
+    BY_ROUND: (roundId: string) => `/api/attendance/round/${roundId}`,
+    BY_USER: (userId: string) => `/api/attendance/user/${userId}`,
   },
 } as const
 

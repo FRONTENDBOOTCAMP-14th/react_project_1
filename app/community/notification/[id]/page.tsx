@@ -1,17 +1,9 @@
-export default function NotificationPage() {
-  return (
-    <div style={{ position: 'relative' }}>
-      <button
-        style={{
-          display: 'block',
-          position: 'absolute',
-          top: '-56px',
-          right: '36px',
-        }}
-      >
-        쓰기
-      </button>
-      <div>내용</div>
-    </div>
-  )
+import { checkIsTeamLeader, getCurrentUserId } from '@/lib/auth'
+import NotificationContainer from './_components/NotificationContainer'
+
+export default async function NotificationPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: clubId } = await params
+  const userId = await getCurrentUserId()
+  const isTeamLeader = await checkIsTeamLeader(userId, clubId)
+  return <NotificationContainer clubId={clubId} userId={userId || ''} isTeamLeader={isTeamLeader} />
 }

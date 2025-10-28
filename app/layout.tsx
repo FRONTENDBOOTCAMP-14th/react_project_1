@@ -8,6 +8,9 @@ import styles from './layout.module.css'
 export const metadata: Metadata = {
   title: '토끼노트',
   description: '스터디 진행 관리/커뮤니티 플랫폼',
+  icons: {
+    icon: '/images/logo.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

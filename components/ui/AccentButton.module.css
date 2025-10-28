@@ -1,6 +1,6 @@
 .accent-button {
-  display: inline;
-  padding: 8px;
+  display: flex;
+  padding: var(--spacing-xxs);
   justify-content: center;
   align-items: center;
   border-radius: var(--radius-sm, 8px);
@@ -10,9 +10,16 @@
   text-align: center;
   text-decoration: none;
   font-family: var(--font-family);
+  gap: var(--spacing-xxs);
   font-size: var(--font-sm);
   box-shadow: 0 1px 2.4px 0 var(--accent-color);
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  transition: all 0.2s ease-in-out;
+}
+
+.accent-button:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
 }

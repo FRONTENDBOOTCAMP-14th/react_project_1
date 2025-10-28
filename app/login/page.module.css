@@ -101,5 +101,5 @@
 .submit-button:disabled {
   cursor: not-allowed;
   opacity: 0.8;
-  background: var(--etc-color-2);
+  background: var(--gray-500);
 }

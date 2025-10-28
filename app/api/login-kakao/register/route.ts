@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createUser, isEmailTaken, isNicknameTaken } from '@/lib/repositories/user'
+import { getErrorMessage } from '@/lib/errors'
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,20 +13,20 @@ export async function POST(req: NextRequest) {
     const nickname = (body.nickname ?? null) as string | null
 
     if (!providerId) {
-      return NextResponse.json({ ok: false, error: 'missing_provider_id' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'missing_provider_id' }, { status: 400 })
     }
     if (!username) {
-      return NextResponse.json({ ok: false, error: 'missing_username' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'missing_username' }, { status: 400 })
     }
     if (!email) {
-      return NextResponse.json({ ok: false, error: 'missing_email' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'missing_email' }, { status: 400 })
     }
 
     // 이메일 중복 체크(활성 사용자 기준)
     if (email) {
       const taken = await isEmailTaken(email)
       if (taken) {
-        return NextResponse.json({ ok: false, error: 'email_taken' }, { status: 409 })
+        return NextResponse.json({ success: false, error: 'email_taken' }, { status: 409 })
       }
     }
 
@@ -33,20 +34,22 @@ export async function POST(req: NextRequest) {
     if (nickname) {
       const taken = await isNicknameTaken(nickname)
       if (taken) {
-        return NextResponse.json({ ok: false, error: 'nickname_taken' }, { status: 409 })
+        return NextResponse.json({ success: false, error: 'nickname_taken' }, { status: 409 })
       }
     }
 
     const user = await createUser({ provider, providerId, email, username, nickname })
 
-    // TODO: 세션 발급/로그인 상태 설정(NextAuth 또는 커스텀)
+    // 클라이언트에서 NextAuth Credentials Provider로 즉시 로그인 처리
     return NextResponse.json({
       ok: true,
+      success: true,
+      userId: user.userId,
       user: { userId: user.userId, username: user.username, nickname: user.nickname },
     })
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json(
-      { ok: false, error: 'register_failed', detail: e?.message },
+      { success: false, error: 'register_failed', detail: getErrorMessage(e, 'Unknown error') },
       { status: 500 }
     )
   }

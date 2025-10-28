@@ -1,22 +1,19 @@
-import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
+import { getErrorMessage } from '@/lib/errors'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 
 export async function POST() {
-  const session = await getServerSession(authOptions)
-  const userId = (session as any)?.userId as string | undefined
-  if (!userId) {
-    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 })
-  }
-
   try {
+    // 인증 확인
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
+
+    // 사용자 계정 소프트 삭제
     await prisma.user.update({ where: { userId }, data: { deletedAt: new Date() } })
-    return NextResponse.json({ ok: true })
-  } catch (e: any) {
-    return NextResponse.json(
-      { ok: false, error: 'delete_failed', detail: e?.message },
-      { status: 500 }
-    )
+    return createSuccessResponse({ message: '계정이 삭제되었습니다.' })
+  } catch (e: unknown) {
+    console.error('Error deleting user account:', e)
+    return createErrorResponse(getErrorMessage(e, '계정 삭제에 실패했습니다.'), 500)
   }
 }

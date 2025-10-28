@@ -1,6 +1,6 @@
 .stroke-link {
-  display: inline;
-  padding: 8px;
+  display: flex;
+  padding: var(--spacing-xxs);
   justify-content: center;
   align-items: center;
   border-radius: var(--radius-sm, 8px);
@@ -8,10 +8,16 @@
   box-shadow: 0 1px 2.4px 0 var(--third-color);
   color: var(--third-color);
   text-align: center;
+  gap: var(--spacing-xxs);
   text-decoration: none;
   font-family: var(--font-family);
   font-size: var(--font-sm);
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.stroke-link:hover {
+  opacity: 0.8;
 }

@@ -1,0 +1,13 @@
+.goals-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

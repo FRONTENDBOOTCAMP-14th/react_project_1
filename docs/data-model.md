@@ -9,6 +9,10 @@ erDiagram
         varchar provider
         varchar provider_id
         varchar email
+        varchar username
+        varchar nickname
+        timestamp created_at
+        timestamp updated_at
         timestamp deleted_at
     }
     STUDYGOAL {
@@ -16,21 +20,34 @@ erDiagram
         uuid owner_id FK
         uuid club_id FK
         uuid round_id FK
+        varchar title
+        text description
         boolean is_team
         boolean is_complete
+        date start_date
+        date end_date
+        timestamp created_at
+        timestamp updated_at
         timestamp deleted_at
     }
     REACTION {
         uuid reaction_id PK
         uuid user_id FK
-        uuid goal_id FK
-        text emoji
+        uuid member_id FK
+        text reaction
+        timestamp created_at
         timestamp deleted_at
     }
     COMMUNITY {
         uuid club_id PK
         varchar name
+        text description
         boolean is_public
+        varchar[] tagname
+        varchar region
+        varchar sub_region
+        timestamp created_at
+        timestamp updated_at
         timestamp deleted_at
     }
     COMMUNITYMEMBER {
@@ -45,20 +62,49 @@ erDiagram
         uuid round_id PK
         uuid club_id FK
         integer round_number
+        timestamp start_date
+        timestamp end_date
+        varchar location
         timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    NOTIFICATION {
+        uuid notification_id PK
+        uuid club_id FK
+        uuid author_id FK
+        varchar title
+        text content
+        boolean is_pinned
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    ATTENDANCE {
+        uuid attendance_id PK
+        uuid user_id FK
+        uuid round_id FK
+        timestamp attendance_date
+        varchar attendance_type
+        timestamp created_at
+        timestamp updated_at
         timestamp deleted_at
     }
 
     USER ||--o{ STUDYGOAL : owns
-    STUDYGOAL ||--o{ REACTION : receives
     USER ||--o{ REACTION : reacts_with
+    COMMUNITYMEMBER ||--o{ REACTION : receives
+    USER ||--o{ COMMUNITYMEMBER : joins
     COMMUNITY ||--o{ STUDYGOAL : hosts
     STUDYGOAL }o--|| COMMUNITY : optional_club
     COMMUNITY ||--o{ COMMUNITYMEMBER : has
-    USER ||--o{ COMMUNITYMEMBER : joins
     COMMUNITY ||--o{ ROUND : has_rounds
     ROUND ||--o{ STUDYGOAL : contains
     STUDYGOAL }o--|| ROUND : belongs_to
+    COMMUNITY ||--o{ NOTIFICATION : has_notifications
+    USER ||--o{ NOTIFICATION : writes
+    ROUND ||--o{ ATTENDANCE : tracks
+    USER ||--o{ ATTENDANCE : attends
 ```
 
 ## 데이터 스키마 테이블
@@ -136,7 +182,7 @@ CONSTRAINT chk_team_goal_club CHECK (
 
 #### 인덱스 - StudyGoal 테이블
 
-> 소유자·기간·팀 여부별 조회를 빠르게 처리하고 삭제되지 않은 목표만 효율적으로 제공합니다.
+> 소유자·기간·팀 여부·커뮤니티·라운드·완료 상태별 조회를 빠르게 처리하고 삭제되지 않은 목표만 효율적으로 제공합니다.
 
 ```sql
 CREATE INDEX idx_goal_owner ON study_goals (owner_id);
@@ -144,6 +190,7 @@ CREATE INDEX idx_goal_dates ON study_goals (start_date, end_date);
 CREATE INDEX idx_goal_team ON study_goals (is_team);
 CREATE INDEX idx_goal_round ON study_goals (round_id);
 CREATE INDEX idx_goal_complete ON study_goals (is_complete);
+CREATE INDEX idx_goal_club ON study_goals (club_id);
 CREATE INDEX idx_goal_owner_team ON study_goals (owner_id, is_team)
     WHERE deleted_at IS NULL;
 CREATE INDEX idx_goal_active ON study_goals (owner_id)
@@ -152,33 +199,32 @@ CREATE INDEX idx_goal_active ON study_goals (owner_id)
 
 ### Reaction 테이블
 
-| 컬럼명      | 타입      | 제약조건                          | 설명                               |
-| ----------- | --------- | --------------------------------- | ---------------------------------- |
-| reaction_id | uuid      | PK DEFAULT gen_random_uuid()      | 리액션 고유 ID                     |
-| user_id     | uuid      | NOT NULL, FK(users.user_id)       | 반응 누른 사용자 ID                |
-| goal_id     | uuid      | NOT NULL, FK(study_goals.goal_id) | 대상 목표 ID                       |
-| emoji       | text      | NOT NULL                          | 이모지 코드 또는 이름 (예: 👍, ❤️) |
-| created_at  | timestamp | NOT NULL, DEFAULT now()           | 반응 누른 시간                     |
-| deleted_at  | timestamp | NULL                              | 소프트 삭제 시각                   |
+| 컬럼명      | 타입      | 제약조건                           | 설명                           |
+| ----------- | --------- | ---------------------------------- | ------------------------------ |
+| reaction_id | uuid      | PK DEFAULT gen_random_uuid()       | 리액션 고유 ID                 |
+| user_id     | uuid      | NOT NULL, FK(users.user_id)        | 반응 누른 사용자 ID            |
+| member_id   | uuid      | NOT NULL, FK(community_members.id) | 대상 멤버 ID                   |
+| reaction    | text      | NOT NULL                           | 리액션 내용 (이모지 또는 댓글) |
+| created_at  | timestamp | NOT NULL, DEFAULT now()            | 반응 누른 시간                 |
+| deleted_at  | timestamp | NULL                               | 소프트 삭제 시각               |
 
 #### 제약조건 - Reaction 테이블
 
-> 사용자·목표 연결 무결성을 보장하고 사용자별 동일 이모지 중복 입력을 제한합니다.
+> 사용자와 멤버 간 연결 무결성을 보장합니다. 같은 사용자가 같은 멤버에게 여러 댓글을 남길 수 있도록 unique 제약조건은 없습니다.
 
 ```sql
-CONSTRAINT uk_reaction_user_goal UNIQUE (user_id, goal_id, emoji)
 CONSTRAINT fk_reaction_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-CONSTRAINT fk_reaction_goal FOREIGN KEY (goal_id) REFERENCES study_goals(goal_id) ON DELETE CASCADE
+CONSTRAINT fk_reaction_member FOREIGN KEY (member_id) REFERENCES community_members(id) ON DELETE CASCADE
 ```
 
 #### 인덱스 - Reaction 테이블
 
-> 반응을 목표 또는 사용자 기준으로 집계하고 활성 반응만 효율적으로 조회합니다.
+> 반응을 멤버 또는 사용자 기준으로 집계하고 활성 반응만 효율적으로 조회합니다.
 
 ```sql
-CREATE INDEX idx_reaction_goal ON reactions (goal_id);
+CREATE INDEX idx_reaction_member ON reactions (member_id);
 CREATE INDEX idx_reaction_user ON reactions (user_id);
-CREATE INDEX idx_reaction_active ON reactions (goal_id)
+CREATE INDEX idx_reaction_active ON reactions (member_id)
     WHERE deleted_at IS NULL;
 ```
 
@@ -190,6 +236,9 @@ CREATE INDEX idx_reaction_active ON reactions (goal_id)
 | name        | varchar   | NOT NULL, UNIQUE             | 클럽 이름                       |
 | description | text      | NULL                         | 클럽 소개                       |
 | is_public   | boolean   | NOT NULL, DEFAULT true       | 공개 여부                       |
+| tagname     | varchar[] | DEFAULT []                   | 커뮤니티 태그 목록              |
+| region      | varchar   | NULL                         | 지역 (시/도)                    |
+| sub_region  | varchar   | NULL                         | 세부 지역 (구/군)               |
 | created_at  | timestamp | NOT NULL, DEFAULT now()      | 생성일                          |
 | updated_at  | timestamp | NOT NULL, DEFAULT now()      | 수정일 (트리거로 자동 업데이트) |
 | deleted_at  | timestamp | NULL                         | 소프트 삭제 시각                |
@@ -205,11 +254,13 @@ CREATE UNIQUE INDEX uk_community_name_active ON communities (name)
 
 #### 인덱스 - Community 테이블
 
-> 공개 여부와 이름 검색, 활성 커뮤니티 조회를 빠르게 처리합니다.
+> 공개 여부와 이름 검색, 지역 기반 검색, 활성 커뮤니티 조회를 빠르게 처리합니다.
 
 ```sql
 CREATE INDEX idx_community_public ON communities (is_public);
 CREATE INDEX idx_community_name ON communities (name);
+CREATE INDEX idx_community_region ON communities (region);
+CREATE INDEX idx_community_sub_region ON communities (sub_region);
 CREATE INDEX idx_community_active ON communities (name)
     WHERE deleted_at IS NULL;
 ```
@@ -256,6 +307,9 @@ CREATE UNIQUE INDEX uk_member_active ON community_members (club_id, user_id)
 | round_id     | uuid      | PK DEFAULT gen_random_uuid()      | 회차 고유 ID                    |
 | club_id      | uuid      | NOT NULL, FK(communities.club_id) | 소속 커뮤니티 ID                |
 | round_number | integer   | NOT NULL, DEFAULT 1               | 회차 번호                       |
+| start_date   | timestamp | NULL                              | 회차 시작 일시                  |
+| end_date     | timestamp | NULL                              | 회차 종료 일시                  |
+| location     | varchar   | NULL                              | 모임 장소                       |
 | created_at   | timestamp | NOT NULL, DEFAULT now()           | 생성일                          |
 | updated_at   | timestamp | NOT NULL, DEFAULT now()           | 수정일 (트리거로 자동 업데이트) |
 | deleted_at   | timestamp | NULL                              | 소프트 삭제 시각                |
@@ -271,11 +325,86 @@ CONSTRAINT fk_round_club FOREIGN KEY (club_id) REFERENCES communities(club_id) O
 
 #### 인덱스 - Round 테이블
 
-> 커뮤니티별 회차 조회와 생성 시간 기반 정렬, 활성 회차 조회를 효율적으로 처리합니다.
+> 커뮤니티별 회차 조회와 생성 시간 기반 정렬, 일정별 조회, 활성 회차 조회를 효율적으로 처리합니다.
 
 ```sql
 CREATE INDEX idx_round_club ON rounds (club_id);
 CREATE INDEX idx_round_created ON rounds (created_at);
+CREATE INDEX idx_round_dates ON rounds (start_date, end_date);
 CREATE INDEX idx_round_active ON rounds (club_id, deleted_at)
+    WHERE deleted_at IS NULL;
+```
+
+### Notification 테이블
+
+| 컬럼명          | 타입      | 제약조건                          | 설명                            |
+| --------------- | --------- | --------------------------------- | ------------------------------- |
+| notification_id | uuid      | PK DEFAULT gen_random_uuid()      | 공지사항 고유 ID                |
+| club_id         | uuid      | NOT NULL, FK(communities.club_id) | 소속 커뮤니티 ID                |
+| author_id       | uuid      | NULL, FK(users.user_id)           | 작성자 ID (작성자 삭제 시 NULL) |
+| title           | varchar   | NOT NULL                          | 공지사항 제목                   |
+| content         | text      | NULL                              | 공지사항 내용                   |
+| is_pinned       | boolean   | NOT NULL, DEFAULT false           | 상단 고정 여부                  |
+| created_at      | timestamp | NOT NULL, DEFAULT now()           | 생성일                          |
+| updated_at      | timestamp | NOT NULL, DEFAULT now()           | 수정일 (트리거로 자동 업데이트) |
+| deleted_at      | timestamp | NULL                              | 소프트 삭제 시각                |
+
+#### 제약조건 - Notification 테이블
+
+> 커뮤니티 삭제 시 공지사항도 함께 삭제되고 작성자 삭제 시 공지사항은 유지되도록 설정합니다.
+
+```sql
+CONSTRAINT pk_notification PRIMARY KEY (notification_id)
+CONSTRAINT fk_notification_club FOREIGN KEY (club_id) REFERENCES communities(club_id) ON DELETE CASCADE
+CONSTRAINT fk_notification_author FOREIGN KEY (author_id) REFERENCES users(user_id) ON DELETE SET NULL
+```
+
+#### 인덱스 - Notification 테이블
+
+> 커뮤니티별 공지사항 조회, 고정 공지사항 우선 정렬, 활성 공지사항 조회를 효율적으로 처리합니다.
+
+```sql
+CREATE INDEX idx_notification_club ON notifications (club_id);
+CREATE INDEX idx_notification_author ON notifications (author_id);
+CREATE INDEX idx_notification_pinned ON notifications (club_id, is_pinned, created_at DESC)
+    WHERE deleted_at IS NULL;
+CREATE INDEX idx_notification_active ON notifications (club_id, created_at DESC)
+    WHERE deleted_at IS NULL;
+```
+
+### Attendance 테이블
+
+| 컬럼명          | 타입      | 제약조건                      | 설명                    |
+| --------------- | --------- | ----------------------------- | ----------------------- |
+| attendance_id   | uuid      | PK DEFAULT gen_random_uuid()  | 출석 고유 ID            |
+| user_id         | uuid      | NOT NULL, FK(users.user_id)   | 출석한 사용자 ID        |
+| round_id        | uuid      | NOT NULL, FK(rounds.round_id) | 출석한 스터디 라운드 ID |
+| attendance_date | timestamp | NOT NULL                      | 출석 날짜/시간          |
+| attendance_type | varchar   | NOT NULL                      | 출석 타입               |
+| created_at      | timestamp | NOT NULL, DEFAULT now()       | 출석 기록 생성일        |
+| updated_at      | timestamp | NOT NULL, DEFAULT now()       | 출석 기록 수정일        |
+| deleted_at      | timestamp | NULL                          | 소프트 삭제 시각        |
+
+#### 제약조건 - Attendance 테이블
+
+> 사용자·라운드 연결 무결성을 보장하고 한 사용자가 같은 라운드에 중복 출석하는 것을 방지합니다.
+
+```sql
+CONSTRAINT uk_attendance_round_user UNIQUE (round_id, user_id)
+CONSTRAINT fk_attendance_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+CONSTRAINT fk_attendance_round FOREIGN KEY (round_id) REFERENCES rounds(round_id) ON DELETE CASCADE
+CONSTRAINT chk_attendance_type CHECK (attendance_type IN ('present', 'absent', 'late', 'excused'))
+```
+
+#### 인덱스 - Attendance 테이블
+
+> 라운드별, 사용자별, 날짜별 출석 조회를 효율적으로 처리합니다.
+
+```sql
+CREATE INDEX idx_attendance_round ON attendance (round_id);
+CREATE INDEX idx_attendance_user ON attendance (user_id);
+CREATE INDEX idx_attendance_date ON attendance (attendance_date);
+CREATE INDEX idx_attendance_user_date ON attendance (user_id, attendance_date DESC);
+CREATE INDEX idx_attendance_active ON attendance (round_id, user_id)
     WHERE deleted_at IS NULL;
 ```

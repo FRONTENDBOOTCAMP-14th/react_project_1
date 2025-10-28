@@ -1,8 +1,10 @@
+'use client'
+
 import { memo, useState } from 'react'
 import { StrokeButton } from '@/components/ui'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalItem from './GoalItem'
-import styles from './RoundCard.module.css'
+import styles from './GoalItem.module.css'
 import { renderWithEmpty } from '@/lib/utils'
 import { isGoalsEmpty } from '../_utils'
 
@@ -34,6 +36,14 @@ export interface GoalsListProps {
    * 목표 추가 핸들러 (새 목표 저장 시)
    */
   onAddGoal?: (title: string) => Promise<void>
+  /**
+   * 목표 수정 핸들러
+   */
+  onEdit?: (goalId: string, newTitle: string) => Promise<void>
+  /**
+   * 목표 삭제 핸들러
+   */
+  onDelete?: (goalId: string) => Promise<void>
 }
 
 /**
@@ -47,6 +57,8 @@ function GoalsList({
   showAddButton = false,
   emptyMessage,
   onAddGoal,
+  onEdit,
+  onDelete,
 }: GoalsListProps) {
   const [isAdding, setIsAdding] = useState(false)
 
@@ -99,7 +111,6 @@ function GoalsList({
           goal={emptyGoal}
           onToggle={async () => {}}
           isTeam={isTeam}
-          isEditing={true}
           onSave={handleSave}
           onCancel={handleCancel}
         />
@@ -110,7 +121,14 @@ function GoalsList({
           {emptyMessage}
         </p>,
         goals.map(goal => (
-          <GoalItem key={goal.goalId} goal={goal} onToggle={onToggle} isTeam={isTeam} />
+          <GoalItem
+            key={goal.goalId}
+            goal={goal}
+            onToggle={onToggle}
+            isTeam={isTeam}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         ))
       )}
     </div>

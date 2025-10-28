@@ -44,7 +44,14 @@ export default function ProfileCard({ member }: ProfileCardProps) {
   return (
     <Link href={`/community/member-profile/${member.id}`} className={styles.card}>
       <div className={styles['avatar-container']}>
-        <Image src="/images/example.jpg" alt="" width={90} height={90} className={styles.avatar} />
+        <Image
+          src="/images/example.jpg"
+          alt=""
+          width={90}
+          height={90}
+          className={styles.avatar}
+          priority
+        />
       </div>
       <div className={styles.info}>
         <p className={styles['display-name']}>{displayName}</p>

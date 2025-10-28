@@ -10,7 +10,7 @@ interface Props {
 export default function NotificationItem({ name, message, image }: Props) {
   return (
     <div className={styles.card} role="listitem">
-      <Image src={image} alt={name} width={45} height={45} className={styles.avatar} />
+      <Image src={image} alt={name} width={45} height={45} className={styles.avatar} priority />
       <div className={styles.text}>
         <span className={styles.name}>{name}</span>
         <span>{message}</span>

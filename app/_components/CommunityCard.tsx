@@ -38,13 +38,16 @@ export default function CommunityCard({ community, className }: CommunityCardPro
         <ProfileImage alt={community.name} radius="inner-card-radius" />
       </div>
 
-      <ul className={styles.tagList}>
-        {community.tagname?.map(tag => (
-          <li key={tag} className={styles.tag}>
-            {tag}
-          </li>
-        ))}
-      </ul>
+      {/* 태그가 없을 경우에는 ul렌더 누락 그외엔 모든 태그 li로 표시*/}
+      {community.tagname && community.tagname.length > 0 && (
+        <ul className={styles.tagList}>
+          {community.tagname?.slice(0, 10).map((tag, index) => (
+            <li key={tag + index} className={styles.tag}>
+              {tag}
+            </li>
+          ))}
+        </ul>
+      )}
     </article>
   )
 }

@@ -25,7 +25,7 @@ export interface ProfileImageProps {
  * 프로필 이미지 컴포넌트
  *
  * @param props - 이미지 props
- * @param props.src - 이미지 소스 URL (기본값: '/images/example.jpg')
+ * @param props.src - 이미지 소스 URL (기본값: '/images/example.webp')
  * @param props.alt - 이미지 대체 텍스트
  * @param props.size - 이미지 크기 (12 | 20 | 40 | 60 | 90 | 120)
  * @param props.variant - UI_CONSTANTS 기반 크기 ('thumbnail' | 'small' | 'large')
@@ -35,7 +35,7 @@ export interface ProfileImageProps {
  * @returns 프로필 이미지 컴포넌트
  */
 const ProfileImage = memo<ProfileImageProps>(
-  ({ src = '/images/example.jpg', alt, size, variant, className, radius, priority = false }) => {
+  ({ src = '/images/example.webp', alt, size, variant, className, radius, priority = false }) => {
     // 크기 결정 로직
     let imageSize: number
     let containerClass = styles['image-container']

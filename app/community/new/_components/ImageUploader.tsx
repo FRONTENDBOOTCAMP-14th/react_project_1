@@ -51,6 +51,7 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
           className={styles.image}
           width={150}
           height={150}
+          priority
         />
 
         {/* 업로드 버튼 */}

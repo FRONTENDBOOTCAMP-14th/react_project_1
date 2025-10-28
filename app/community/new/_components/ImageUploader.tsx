@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { useState, useRef } from 'react'
 
 interface ImageUploaderProps {
-  onImageChange?: (file: File | null) => void
+  onImageChange?: (url: string | null) => void
 }
 
 /**

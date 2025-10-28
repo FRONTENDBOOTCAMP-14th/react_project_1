@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useState, useCallback, type ReactNode } from 'react'
 import styles from './StudyProfile.module.css'
+import communityCardStyles from '@/app/_components/CommunityCard.module.css'
 import type { Community, UpdateCommunityInput } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
 import { useCommunity } from '@/lib/hooks'
@@ -81,6 +82,15 @@ const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
         <Users size={iconSize} aria-hidden="true" />
         <span>{MESSAGES.LABEL.MEMBERS_COUNT(memberCount)}</span>
       </IconLink>
+      {community.tagname && community.tagname.length > 0 && (
+        <ul className={communityCardStyles.tagList}>
+          {community.tagname.map(tag => (
+            <li key={tag} className={communityCardStyles.tag}>
+              {tag}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 })
@@ -115,6 +125,7 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
   const [editForm, setEditForm] = useState({
     name: community.name,
     description: community.description || '',
+    tags: (community.tagname || []).join(', '),
   })
 
   /**
@@ -124,9 +135,10 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     setEditForm({
       name: community.name,
       description: community.description || '',
+      tags: (community.tagname || []).join(', '),
     })
     setIsEditing(true)
-  }, [community.name, community.description])
+  }, [community.name, community.description, community.tagname])
 
   /**
    * 편집 취소
@@ -135,9 +147,10 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     setEditForm({
       name: community.name,
       description: community.description || '',
+      tags: (community.tagname || []).join(', '),
     })
     setIsEditing(false)
-  }, [community.name, community.description])
+  }, [community.name, community.description, community.tagname])
 
   /**
    * 편집 저장
@@ -157,11 +170,17 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
       }
 
       try {
+        const tagArray = editForm.tags
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean)
+
         const result = await onUpdate(community.clubId, {
           name: editForm.name.trim(),
           description: editForm.description.trim() || null,
           region: region || null,
           subRegion: subRegion || null,
+          tagname: tagArray,
         })
 
         if (result.success) {
@@ -174,7 +193,15 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
         toast.error('수정 중 오류가 발생했습니다')
       }
     },
-    [editForm.name, editForm.description, region, subRegion, onUpdate, community.clubId]
+    [
+      editForm.name,
+      editForm.description,
+      editForm.tags,
+      region,
+      subRegion,
+      onUpdate,
+      community.clubId,
+    ]
   )
 
   /**
@@ -306,6 +333,15 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
                 onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="커뮤니티 설명을 입력하세요"
                 rows={4}
+              />
+            </div>
+            <div className={styles['edit-field']}>
+              <label>태그</label>
+              <input
+                type="text"
+                value={editForm.tags}
+                onChange={e => setEditForm(prev => ({ ...prev, tags: e.target.value }))}
+                placeholder=",로 구분하여 입력 (예: 알고리즘, 독서, CS)"
               />
             </div>
             <div className={styles['edit-field']}>

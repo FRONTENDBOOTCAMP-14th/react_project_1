@@ -116,6 +116,11 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
   })
   const [hasAttended, setHasAttended] = useState(false)
   const [checkingAttendance, setCheckingAttendance] = useState(false)
+  const now = new Date()
+  const start = round?.startDate ? new Date(round.startDate) : null
+  const end = round?.endDate ? new Date(round.endDate) : null
+  const isWithinWindow = start && end ? now >= start && now <= end : false
+  const isAttendanceClosed = !isWithinWindow
 
   useEffect(() => {
     const checkAttendance = async () => {
@@ -205,6 +210,10 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
   const handleAttendance = async (e: React.MouseEvent) => {
     e.preventDefault()
     if (!round) return
+    if (isAttendanceClosed) {
+      toast.error('출석 기간이 종료되었습니다')
+      return
+    }
 
     try {
       const response = await fetch(`/api/attendance`, {
@@ -322,6 +331,10 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
             {hasAttended || checkingAttendance ? (
               <StrokeButton type="button" disabled>
                 {checkingAttendance ? '출석 중...' : '출석 완료'}
+              </StrokeButton>
+            ) : isAttendanceClosed ? (
+              <StrokeButton type="button" disabled>
+                출석 기간 아님
               </StrokeButton>
             ) : (
               <StrokeButton type="button" onClick={handleAttendance}>

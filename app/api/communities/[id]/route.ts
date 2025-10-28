@@ -126,6 +126,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       region?: string | null
       subRegion?: string | null
       imageUrl?: string | null
+      tagname?: string[]
       updatedAt: Date
     } = {
       updatedAt: new Date(),
@@ -140,6 +141,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.region !== undefined) updateData.region = body.region?.trim() || null
     if (body.subRegion !== undefined) updateData.subRegion = body.subRegion?.trim() || null
     if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl?.trim() || null
+    if (body.tagname !== undefined) {
+      const tags: string[] = Array.isArray(body.tagname)
+        ? body.tagname
+        : typeof body.tagname === 'string'
+          ? body.tagname
+              .split(',')
+              .map((t: string) => t.trim())
+              .filter(Boolean)
+          : []
+      updateData.tagname = tags
+    }
 
     // 이름 검증
     if (updateData.name !== undefined && !updateData.name) {
@@ -158,6 +170,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         region: true,
         subRegion: true,
         imageUrl: true,
+        tagname: true,
         createdAt: true,
         updatedAt: true,
       },

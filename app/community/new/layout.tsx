@@ -10,12 +10,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko-KR">
-      <body className={fonts.pretendard.className}>
-        <div className={styles['main-wrapper']}>
-          <div>{children}</div>
-        </div>
-      </body>
-    </html>
+    <div className={styles['main-wrapper']}>
+      <div>{children}</div>
+    </div>
   )
 }

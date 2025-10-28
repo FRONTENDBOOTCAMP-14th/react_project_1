@@ -62,7 +62,6 @@ export default function CommunitySearchResults({
             <div className={styles['card-header']}>
               <h3 className={styles['community-title']}>{item.title}</h3>
               <div className={styles['community-badges']}>
-                {item.isPublic && <span className={styles['badge-public']}>공개</span>}
                 {item.tags.slice(0, 2).map(tag => (
                   <span key={tag} className={styles['badge-tag']}>
                     {tag}
@@ -83,7 +82,7 @@ export default function CommunitySearchResults({
               <div className={styles['meta-item']}>
                 <MapPin size={14} />
                 <span>{item.region || '지역 미설정'}</span>
-                {item.subRegion && <span>, {item.subRegion}</span>}
+                {item.subRegion && <span>{item.subRegion}</span>}
               </div>
               <div className={styles['meta-item']}>
                 <Calendar size={14} />

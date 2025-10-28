@@ -86,6 +86,10 @@ export interface CommunityInfo {
   subRegion?: string | null
   imageUrl?: string | null
   createdAt: Date
+  communityMembers?: {
+    role: string
+    userId: string
+  }[]
   rounds?: {
     roundId: string
     roundNumber: number

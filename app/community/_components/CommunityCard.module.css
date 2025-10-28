@@ -40,6 +40,7 @@
 .desc {
   font-size: var(--font-sm);
   color: var(--gray-500);
+  margin-left: var(--spacing-sm);
 }
 
 .join {

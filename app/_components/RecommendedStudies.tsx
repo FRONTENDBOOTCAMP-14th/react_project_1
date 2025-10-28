@@ -15,7 +15,7 @@ export default function RecommendedStudies() {
       try {
         setIsLoading(true)
         // 추천 커뮤니티 조회 (공개 커뮤니티 우선, 최신순)
-        const response = await fetch('/api/communities?limit=3&isPublic=true')
+        const response = await fetch('/api/communities?limit=10&isPublic=true')
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)

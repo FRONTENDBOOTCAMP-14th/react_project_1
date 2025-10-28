@@ -173,6 +173,7 @@ export async function POST(req: NextRequest) {
     const region = (body?.region ?? '').trim() || null
     const subRegion = (body?.subRegion ?? body?.subRegion ?? '').trim() || null
     const tagname = body?.tagname ? [body.tagname] : []
+    const imageUrl = (body?.imageUrl ?? '').trim() || null
 
     // 필수 값 검증
     if (!name) {
@@ -190,6 +191,7 @@ export async function POST(req: NextRequest) {
           region,
           subRegion,
           tagname,
+          imageUrl,
         },
         select: {
           clubId: true,
@@ -198,6 +200,7 @@ export async function POST(req: NextRequest) {
           isPublic: true,
           region: true,
           subRegion: true,
+          imageUrl: true,
           createdAt: true,
           updatedAt: true,
           tagname: true,

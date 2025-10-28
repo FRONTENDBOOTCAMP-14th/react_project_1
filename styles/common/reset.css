@@ -73,3 +73,8 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* remove a link  */
+a {
+  text-decoration: none;
+}

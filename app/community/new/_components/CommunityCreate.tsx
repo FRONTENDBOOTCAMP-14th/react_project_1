@@ -55,10 +55,6 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
     setIsSubmitting(true)
 
     try {
-      // 지역 정보 조합 (예: "서울특별시 강남구")
-      const region = [studyRegion, subRegion].filter(Boolean).join(' ')
-
-      // 태그 처리 (쉼표로 구분된 문자열을 첫 번째 태그만 사용)
       const tagname =
         studyTag
           .split(',')
@@ -68,15 +64,14 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
       const result = await onSubmit({
         name: studyName.trim(),
         description: studyDescription.trim() || undefined,
-        isPublic: true, // 기본값을 공개로 설정
-        region: region || undefined,
+        isPublic: true,
+        region: studyRegion || undefined,
         subRegion: subRegion || undefined,
         tagname,
       })
 
       if (result.success) {
         toast.success('커뮤니티가 성공적으로 생성되었습니다!')
-        // 생성된 커뮤니티 페이지로 리디렉션
         router.push(`/community/${result.data?.clubId}`)
       } else {
         toast.error(result.error || '커뮤니티 생성에 실패했습니다')

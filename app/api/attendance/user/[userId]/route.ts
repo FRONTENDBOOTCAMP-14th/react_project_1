@@ -1,9 +1,7 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
-import type { CustomSession } from '@/lib/types'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { Prisma } from '@prisma/client'
-import { getServerSession } from 'next-auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
@@ -30,12 +28,10 @@ interface RouteParams {
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions)
-    const currentUserId = (session as CustomSession)?.userId
-
-    if (!currentUserId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    // 인증 확인
+    const { userId: currentUserId, error: authError } = await requireAuthUser()
+    if (authError || !currentUserId)
+      return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const { userId } = await params
     const { searchParams } = new URL(request.url)

@@ -13,10 +13,8 @@ import type { UpdateRoundRequest } from '@/lib/types/round'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { hasErrorCode } from '@/lib/errors'
-import { checkIsTeamLeader } from '@/lib/auth/permissions'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
-import type { CustomSession } from '@/lib/types'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { hasPermission } from '@/lib/auth'
 
 /**
  * GET /api/rounds/[id]
@@ -68,15 +66,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // 인증 확인
-    const session = await getServerSession(authOptions)
-    const userId = (session as CustomSession)?.userId
-    if (!userId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     // 팀장 권한 확인
-    const isTeamLeader = await checkIsTeamLeader(userId, existingRound.clubId)
-    if (!isTeamLeader) {
+    const hasAdminPermission = await hasPermission(userId, existingRound.clubId, 'admin')
+    if (!hasAdminPermission) {
       return createErrorResponse('팀장만 회차를 수정할 수 있습니다.', 403)
     }
     const updateData: {
@@ -167,15 +162,12 @@ export async function DELETE(
     }
 
     // 인증 확인
-    const session = await getServerSession(authOptions)
-    const userId = (session as CustomSession)?.userId
-    if (!userId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    const { userId, error: authError } = await requireAuthUser()
+    if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     // 팀장 권한 확인
-    const isTeamLeader = await checkIsTeamLeader(userId, existingRound.clubId)
-    if (!isTeamLeader) {
+    const hasAdminPermission = await hasPermission(userId, existingRound.clubId, 'admin')
+    if (!hasAdminPermission) {
       return createErrorResponse('팀장만 회차를 삭제할 수 있습니다.', 403)
     }
 

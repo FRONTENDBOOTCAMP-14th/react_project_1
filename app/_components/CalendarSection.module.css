@@ -1,9 +1,11 @@
 .calendar-container {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  justify-content: space-between;
   gap: var(--spacing-sm);
   width: 100%;
   text-align: center;
+  max-width: 960px;
+  padding: var(--spacing-lg);
 }
 
 .day-box {
@@ -16,6 +18,18 @@
   padding: var(--spacing-xs);
   background: none;
   border: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.day-box:hover {
+  color: var(--accent-color);
+  transform: scale(1.05);
+  opacity: 0.8;
+
+  .count-box {
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+  }
 }
 
 .selected-day {
@@ -32,6 +46,7 @@
   color: var(--third-color);
   border: 2px solid var(--third-color);
   margin-bottom: var(--spacing-xxs);
+  transition: all 0.2s ease-in-out;
 }
 
 .selected-day .count-box {
@@ -47,37 +62,4 @@
 .day {
   font-size: var(--font-xs);
   margin-bottom: var(--spacing-xs);
-}
-
-.attendee-count {
-  font-size: var(--font-xs);
-  color: var(--gray-600);
-  margin-bottom: var(--spacing-xxs);
-}
-
-.user-status {
-  font-size: var(--font-xs);
-  font-weight: 500;
-  padding: var(--spacing-xxs) var(--spacing-xs);
-  border-radius: var(--inner-card-radius);
-}
-
-.status-present {
-  color: var(--success-color);
-  background-color: var(--status-present-bg);
-}
-
-.status-late {
-  color: var(--warning-color);
-  background-color: var(--status-late-bg);
-}
-
-.status-absent {
-  color: var(--error-color);
-  background-color: var(--status-absent-bg);
-}
-
-.status-excused {
-  color: var(--gray-500);
-  background-color: var(--status-excused-bg);
 }

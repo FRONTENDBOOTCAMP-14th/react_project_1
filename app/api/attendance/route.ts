@@ -1,10 +1,8 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import prisma from '@/lib/prisma'
 import type { CreateAttendanceInput } from '@/lib/types/attendance'
-import type { CustomSession } from '@/lib/types'
 import { buildAttendanceWhereClause, buildAttendanceCreateData } from '@/lib/utils/attendance'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { getServerSession } from 'next-auth'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -126,12 +124,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    const currentUserId = (session as CustomSession)?.userId
-
-    if (!currentUserId) {
-      return createErrorResponse('인증이 필요합니다.', 401)
-    }
+    // 인증 확인
+    const { userId: currentUserId, error: authError } = await requireAuthUser()
+    if (authError || !currentUserId)
+      return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const body: CreateAttendanceInput = await request.json()
     const { userId, roundId, attendanceType, attendanceDate } = body

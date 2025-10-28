@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
+import { FillButton } from '@/components/ui'
+import styles from './button.module.css'
 
 export default function DeleteAccountButton() {
   const [loading, setLoading] = useState(false)
@@ -28,22 +30,8 @@ export default function DeleteAccountButton() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={onDelete}
-      disabled={loading}
-      style={{
-        height: 44,
-        padding: '0 16px',
-        borderRadius: 8,
-        border: '1px solid #ef4444',
-        background: '#fff1f2',
-        color: '#b91c1c',
-        fontWeight: 600,
-        cursor: loading ? 'not-allowed' : 'pointer',
-      }}
-    >
+    <FillButton className={styles.button} type="button" onClick={onDelete} disabled={loading}>
       {loading ? '처리 중…' : '회원탈퇴'}
-    </button>
+    </FillButton>
   )
 }

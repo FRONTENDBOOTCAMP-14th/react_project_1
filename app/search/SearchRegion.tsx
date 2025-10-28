@@ -1,65 +1,103 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
-import { Dropdown } from '@/components/ui'
+import { Dropdown, IconButton } from '@/components/ui'
+import type { Region } from '@/lib/types'
+import { Search } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import styles from './SearchRegion.module.css'
 
 /**
- * 검색 엔진 컴포넌트
+ * 드롭다운 지역 선택 컴포넌트
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <SearchRegion
+ *   region={region} // 시,도 (선택사항)
+ *   subRegion={subRegion} //구 (선택사항)
+ *   onChangeRegion={setRegion}
+ *   onChangeSubRegion={setSubRegion}
+ *   onSearch={handleSearch}
+ * />
+ * ```
+ *
+ * @param {SearchRegionProps} props - 컴포넌트 속성
+ * @param {string} props.region - 선행되는 선택 지역 이름 (시,도) - 선택사항
+ * @param {string} props.subRegion - region 선택에 따라 보여지는 하위 지역선택(구) - 선택사항
+ * @param {(v: string) => void} props.onChangeRegion - 상위 지역 선택 시 호출
+ * @param {(v: string) => void} props.onChangeSubRegion - 하위 지역 선택 시 호출
+ * @param {() => void} props.onSearch - 검색 버튼 클릭 시 호출
+ * @param {boolean} props.loading - 검색 중 여부
+ *
+ * @description
+ * - 지역 선택은 선택사항이며, 선택하지 않으면 모든 지역에서 검색합니다.
+ * - 첫번째 드롭다운에서 지역(region.json의 'region')의 목록을 선택후
+ *   선택된 지역에 따라 두번째 드롭다운('subRegion')항목이 동적 변경 표시됨
+ * - 알아서 import해서 지역 이름을 로드함
  *
  */
 
-// json 데이터 정의
-interface Region {
-  name: string
-  subArea: string[]
+interface SearchRegionProps {
+  region: string
+  subRegion: string
+  onChangeRegion: (v: string) => void
+  onChangeSubRegion: (v: string) => void
+  onSearch?: () => void
+  loading?: boolean
 }
 
-export default function SearchRegion() {
+export default function SearchRegion({
+  region,
+  subRegion,
+  onChangeRegion,
+  onChangeSubRegion,
+  onSearch,
+  loading = false,
+}: SearchRegionProps) {
   const [regions, setRegions] = useState<Region[]>([])
-  const [selectedRegion, setSelectedRegion] = useState('')
-  const [selectedSubArea, setSelectedSubArea] = useState('')
 
   useEffect(() => {
-    import('@/app/api/region/region.json').then(regionJson => {
+    import('@/lib/json/region.json').then(regionJson => {
       setRegions(regionJson.default as Region[])
     })
   }, [])
 
-  //첫번째 드롭다운 : name(json)
+  //첫번째 드롭다운 : region(json)
   const regionOptions = useMemo(
-    () => regions.map(r => ({ value: r.name, label: r.name })),
+    () => regions.map((r: Region) => ({ value: r.region, label: r.region })),
     [regions]
   )
 
-  //두번째 드롭다운: subarea(json)
-  const subAreaOptions = useMemo(() => {
-    const found = regions.find(r => r.name === selectedRegion)
+  //두번째 드롭다운: subregion(json)
+  const subRegionOptions = useMemo(() => {
+    const found = regions.find(r => r.region === region)
     if (!found) return []
-    return found.subArea.map(sa => ({ value: sa, label: sa }))
-  }, [regions, selectedRegion])
+    return found.subRegion.map((sr: string) => ({ value: sr, label: sr }))
+  }, [regions, region])
 
   return (
-    <section className={styles.searchSection}>
+    <section className={styles['search-section']}>
       <h2 className="sr-only" id="search-heading">
         검색
       </h2>
-      <div className={styles.searchControls}>
+      <div className={styles['search-controls']}>
         <Dropdown
           options={regionOptions}
-          value={selectedRegion}
-          onChange={value => {
-            setSelectedRegion(value)
-            setSelectedSubArea('')
-          }}
-          placeholder="선택하세요"
+          value={region}
+          onChange={onChangeRegion}
+          placeholder="지역을 선택하세요 (선택사항)"
         />
         <Dropdown
-          options={subAreaOptions}
-          value={selectedSubArea}
-          onChange={value => setSelectedSubArea(value)}
-          placeholder="선택하세요"
+          options={subRegionOptions}
+          value={subRegion}
+          onChange={onChangeSubRegion}
+          placeholder="세부 지역을 선택하세요 (선택사항)"
         />
+        {onSearch && (
+          <IconButton type="button" onClick={onSearch} disabled={loading} aria-label="검색 버튼">
+            <Search strokeWidth="1" size={20} color="var(--primary-color)" />
+          </IconButton>
+        )}
       </div>
     </section>
   )

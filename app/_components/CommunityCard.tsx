@@ -1,15 +1,15 @@
 'use client'
 
-import { IconLink, ParticipateRate, ProfileImage } from '@/components/ui'
+import { IconLink, ProfileImage } from '@/components/ui'
 import { ROUTES } from '@/constants'
-import type { CommunityBase } from '@/lib/types'
+import type { Community } from '@/lib/types'
 import styles from './CommunityCard.module.css'
 
 /**
  * 커뮤니티 카드 컴포넌트 Props
  */
 interface CommunityCardProps {
-  community: CommunityBase
+  community: Community
   className?: string
 }
 
@@ -32,16 +32,18 @@ export default function CommunityCard({ community, className }: CommunityCardPro
           {community.name}
         </IconLink>
         <p className={styles.desc}>{community.description || '설명이 없습니다.'}</p>
-        <ParticipateRate name="지난 참여율" value={0} max={100} />
       </div>
 
       <div className={styles.join}>
         <ProfileImage alt={community.name} radius="inner-card-radius" />
       </div>
 
-      {/* 태그는 추후 구현 예정 */}
       <ul className={styles.tagList}>
-        {community.isPublic && <li className={styles.tag}>공개</li>}
+        {community.tagname?.map(tag => (
+          <li key={tag} className={styles.tag}>
+            {tag}
+          </li>
+        ))}
       </ul>
     </article>
   )

@@ -1,10 +1,20 @@
-.link {
+.link-data {
   overflow: hidden;
   text-overflow: ellipsis;
   text-decoration: none;
   color: var(--text-color);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.link {
+  width: 100%;
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
 }
 
 .header {
@@ -13,13 +23,15 @@
   align-items: center;
   min-height: 40px;
   white-space: nowrap;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
 .description {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-sm);
 }
 
 .actions {
@@ -27,11 +39,30 @@
   gap: var(--spacing-xs);
 }
 
+.image {
+  object-fit: cover;
+  border-radius: var(--inner-card-radius);
+}
+
 .item {
-  list-style-type: none;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
   border: 1px solid var(--border-color);
   border-radius: var(--card-radius);
   gap: var(--spacing-sm);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
+
+.item-container {
+  list-style-type: none;
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.badge {
+  color: var(--accent-color);
+  font-weight: bold;
+  border-radius: var(--full-radius);
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--accent-color);
 }

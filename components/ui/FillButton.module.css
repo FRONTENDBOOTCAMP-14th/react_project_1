@@ -1,5 +1,5 @@
 .fill-button {
-  display: inline;
+  display: flex;
   min-width: 64px;
   padding: var(--spacing-xxs);
   justify-content: center;

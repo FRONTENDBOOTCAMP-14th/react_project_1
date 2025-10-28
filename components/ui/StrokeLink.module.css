@@ -1,5 +1,5 @@
 .stroke-link {
-  display: inline;
+  display: flex;
   padding: var(--spacing-xxs);
   justify-content: center;
   align-items: center;

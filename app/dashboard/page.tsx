@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
-import Link from 'next/link'
+import { StudyCardListItem } from './_components'
 
 export default async function DashboardPage() {
   const userId = await getCurrentUserId()
@@ -52,20 +52,22 @@ export default async function DashboardPage() {
 
   return (
     <main className={styles.container}>
-      <p>{user?.username} 님이 구독한 스터디 목록</p>
+      <h2 className={styles.title}>{user?.username}님의 스터디 목록</h2>
       {subscribedCommunities.length === 0 ? (
         <p>구독한 커뮤니티가 없습니다.</p>
       ) : (
         <div>
-          <ul>
+          <ul className={styles.list}>
             {subscribedCommunities.map(community => (
-              <li key={community.clubId}>
-                <Link href={`/community/${community.clubId}`}>{community.name}</Link>
-                <p>{community.description}</p>
-                <p>
-                  지역: {community.region} {community.subRegion}
-                </p>
-              </li>
+              <StudyCardListItem
+                key={community.clubId}
+                clubId={community.clubId}
+                userId={userId}
+                name={community.name}
+                description={community.description || ''}
+                region={community.region || ''}
+                subRegion={community.subRegion || ''}
+              />
             ))}
           </ul>
         </div>

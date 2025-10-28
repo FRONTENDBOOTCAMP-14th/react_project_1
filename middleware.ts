@@ -36,7 +36,7 @@ const PROTECTED_API_ROUTES = [
 /**
  * 인증이 필요한 페이지 경로
  */
-const PROTECTED_PAGE_ROUTES = ['/goal', '/profile']
+const PROTECTED_PAGE_ROUTES = ['/profile']
 
 /**
  * 경로가 보호된 경로인지 확인

@@ -57,6 +57,14 @@ export const MESSAGES = {
     DELETING_ATTENDANCE_ERROR: '출석 삭제 중 오류가 발생했습니다.',
     ATTENDANCE_NOT_FOUND: '출석 정보를 찾을 수 없습니다.',
     ATTENDANCE_ALREADY_EXISTS: '이미 해당 라운드에 출석 정보가 있습니다.',
+    FAILED_TO_LOAD_REACTIONS: '리액션을 불러오는데 실패했습니다.',
+    FAILED_TO_CREATE_REACTION: '리액션 생성에 실패했습니다.',
+    FAILED_TO_UPDATE_REACTION: '리액션 수정에 실패했습니다.',
+    FAILED_TO_DELETE_REACTION: '리액션 삭제에 실패했습니다.',
+    CREATING_REACTION_ERROR: '리액션 생성 중 오류가 발생했습니다.',
+    UPDATING_REACTION_ERROR: '리액션 수정 중 오류가 발생했습니다.',
+    DELETING_REACTION_ERROR: '리액션 삭제 중 오류가 발생했습니다.',
+    REACTION_NOT_FOUND: '리액션을 찾을 수 없습니다.',
   },
 
   LOADING: {

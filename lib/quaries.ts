@@ -278,3 +278,48 @@ export const upcomingRoundsWhere = (fromDate: Date = new Date()) =>
       gte: fromDate,
     },
   }) satisfies Prisma.RoundWhereInput
+
+/**
+ * Reaction 기본 Select (목록 조회용)
+ */
+export const reactionSelect = {
+  reactionId: true,
+  userId: true,
+  member_id: true,
+  reaction: true,
+  createdAt: true,
+} satisfies Prisma.ReactionSelect
+
+/**
+ * Reaction 상세 Select (관계 포함)
+ */
+export const reactionDetailSelect = {
+  ...reactionSelect,
+  user: {
+    select: {
+      userId: true,
+      username: true,
+      nickname: true,
+    },
+  },
+  community_members: {
+    select: {
+      id: true,
+      role: true,
+      user: {
+        select: {
+          userId: true,
+          username: true,
+          nickname: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.ReactionSelect
+
+/**
+ * 활성 리액션 조건 (소프트 삭제 제외)
+ */
+export const activeReactionWhere = {
+  deletedAt: null,
+} satisfies Prisma.ReactionWhereInput

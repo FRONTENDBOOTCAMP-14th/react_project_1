@@ -2,20 +2,22 @@
 
 import { IconButton } from '@/components/ui'
 import { useNotifications } from '@/lib/hooks'
-import type { CustomSession } from '@/lib/types'
-import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { useSmartPin } from '../_hooks'
 import NotificationCard from './NotificationCard'
 import styles from './NotificationContainer.module.css'
 import NotificationEditor from './NotificationEditor'
-import { checkIsTeamLeader } from '@/lib/auth'
 
-export default function NotificationContainer({ clubId }: { clubId: string }) {
-  const { data: session } = useSession()
-  const userId = (session as CustomSession)?.userId
-  const [isTeamLeader, setIsTeamLeader] = useState(false)
+export default function NotificationContainer({
+  clubId,
+  userId,
+  isTeamLeader,
+}: {
+  clubId: string
+  userId: string
+  isTeamLeader: boolean
+}) {
   const [isEditing, setIsEditing] = useState(false)
 
   const {
@@ -29,10 +31,6 @@ export default function NotificationContainer({ clubId }: { clubId: string }) {
   } = useNotifications({ clubId })
 
   const { smartTogglePin } = useSmartPin({ pinnedNotifications, togglePin })
-
-  useEffect(() => {
-    checkIsTeamLeader(userId, clubId).then(res => setIsTeamLeader(res))
-  }, [userId, clubId])
 
   const handleAddClick = () => {
     if (!userId) {

@@ -10,6 +10,7 @@ export interface CommunityBase {
   isPublic: boolean
   region?: string | null
   subRegion?: string | null
+  imageUrl?: string | null
   createdAt: Date
 }
 
@@ -40,6 +41,7 @@ export interface CreateCommunityInput {
   region?: string | null
   subRegion?: string | null
   tagname?: string
+  imageUrl?: string | null
 }
 
 /**
@@ -52,6 +54,7 @@ export interface UpdateCommunityInput {
   region?: string | null
   subRegion?: string | null
   tagname?: string[]
+  imageUrl?: string | null
 }
 
 /**
@@ -81,7 +84,12 @@ export interface CommunityInfo {
   isPublic: boolean
   region?: string | null
   subRegion?: string | null
+  imageUrl?: string | null
   createdAt: Date
+  communityMembers?: {
+    role: string
+    userId: string
+  }[]
   rounds?: {
     roundId: string
     roundNumber: number

@@ -177,8 +177,12 @@ export default function RoundsList({ clubId }: RoundsListProps) {
     return (
       <div className={styles['empty-state']}>
         {!isAddingRound && (
-          <StrokeButton type="button" onClick={handleAddRoundClick}>
-            회차 추가
+          <StrokeButton
+            className={styles['add-round-button']}
+            type="button"
+            onClick={handleAddRoundClick}
+          >
+            {MESSAGES.ACTION.ADD_ROUND}
           </StrokeButton>
         )}
         {renderAddRoundForm()}
@@ -191,8 +195,12 @@ export default function RoundsList({ clubId }: RoundsListProps) {
   return (
     <div className={styles['rounds-list-container']}>
       {!isAddingRound && (
-        <StrokeButton type="button" onClick={handleAddRoundClick}>
-          회차 추가
+        <StrokeButton
+          className={styles['add-round-button']}
+          type="button"
+          onClick={handleAddRoundClick}
+        >
+          {MESSAGES.ACTION.ADD_ROUND}
         </StrokeButton>
       )}
       {renderAddRoundForm()}

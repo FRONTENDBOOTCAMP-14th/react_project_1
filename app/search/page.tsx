@@ -84,10 +84,11 @@ export default function SearchPage() {
       />
 
       {/* 검색어 입력 */}
+      {/* TODO: 태그 검색 기능 완성 */}
       <WordSearch
         query={search}
         onChangeQuery={setSearch}
-        searchTags={searchTags}
+        searchTags={searchTags || []}
         onChangeSearchTags={setSearchTags}
         onSearch={() => executeSearch()}
         loading={loading}

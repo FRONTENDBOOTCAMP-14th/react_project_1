@@ -1,31 +1,50 @@
-import { formatDiffFromNow } from '@/lib/utils'
+'use client'
 
-export default function MemberCard({
+import { formatDiffFromNow } from '@/lib/utils'
+import { memo } from 'react'
+import styles from './MemberCard.module.css'
+import Image from 'next/image'
+import { IconButton } from '@/components/ui'
+import { ThumbsUp } from 'lucide-react'
+import { toast } from 'sonner'
+
+function MemberCard({
   nickname,
   role,
   joinedAt,
+  attendanceCount,
 }: {
   nickname: string
   role: string
   joinedAt: Date
+  attendanceCount?: number
 }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        width: 'fit-content',
-        alignItems: 'center',
-        padding: '1rem',
-        borderRadius: 'var(--inner-card-radius)',
-        backgroundColor: 'var(--primary-color)',
-        border: '1px solid var(--border-color)',
-      }}
-    >
-      <h2>{nickname}</h2>
-      <p>{role === 'admin' ? '관리자' : '멤버'}</p>
-      <p>가입일: {formatDiffFromNow(joinedAt)}</p>
+    <div className={styles['member-card']}>
+      <div className={styles['profile']}>
+        <Image
+          width={90}
+          height={90}
+          src="/svg/default-profile.svg"
+          alt={`${nickname} 프로필 이미지`}
+          className={styles.image}
+        />
+        <p>{nickname}</p>
+      </div>
+      <div className={styles['description-container']}>
+        <p className={styles.description}>스터디 가입일: {formatDiffFromNow(joinedAt)}</p>
+        <p className={styles.description}>역할: {role === 'admin' ? '관리자' : '멤버'}</p>
+        <p className={styles.description}>출석: {attendanceCount}회</p>
+      </div>
+      <IconButton
+        onClick={() => {
+          toast.success('좋아요 버튼을 눌렀습니다.')
+        }}
+      >
+        <ThumbsUp size={30} strokeWidth={1} />
+      </IconButton>
     </div>
   )
 }
+
+export default memo(MemberCard)

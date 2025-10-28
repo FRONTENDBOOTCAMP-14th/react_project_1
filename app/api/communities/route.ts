@@ -28,6 +28,7 @@ import type { NextRequest } from 'next/server'
  *   - limit?: number (기본값: 10, 최대: 100)
  *   - isPublic?: 'true'|'false' 공개 여부로 필터
  *   - search?: string 커뮤니티 이름으로 검색
+ *   - searchTags?: string[] 태그로 검색 (다중 가능)
  *   - region?: string 지역으로 필터
  *   - subRegion?: string 세부 지역으로 필터
  *   - createdAfter?: string (ISO 8601) 생성일 이후로 필터
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
     // 필터링 파라미터
     const isPublic = getBooleanParam(searchParams, 'isPublic')
     const search = getStringParam(searchParams, 'search')
+    const searchTags = searchParams.getAll('searchTags').filter(Boolean)
     const createdAfter = getStringParam(searchParams, 'createdAfter')
     const createdBefore = getStringParam(searchParams, 'createdBefore')
     const userId = getStringParam(searchParams, 'userId')
@@ -62,6 +64,11 @@ export async function GET(request: NextRequest) {
         name: {
           contains: search,
           mode: 'insensitive' as const,
+        },
+      }),
+      ...(searchTags.length > 0 && {
+        tagname: {
+          hasSome: searchTags,
         },
       }),
       ...(createdAfter && {
@@ -106,6 +113,7 @@ export async function GET(request: NextRequest) {
           isPublic: true,
           region: true,
           subRegion: true,
+          imageUrl: true,
           tagname: true,
           createdAt: true,
           rounds: {
@@ -172,6 +180,7 @@ export async function POST(req: NextRequest) {
     const region = (body?.region ?? '').trim() || null
     const subRegion = (body?.subRegion ?? body?.subRegion ?? '').trim() || null
     const tagname = body?.tagname ? [body.tagname] : []
+    const imageUrl = (body?.imageUrl ?? '').trim() || null
 
     // 필수 값 검증
     if (!name) {
@@ -189,6 +198,7 @@ export async function POST(req: NextRequest) {
           region,
           subRegion,
           tagname,
+          imageUrl,
         },
         select: {
           clubId: true,
@@ -197,6 +207,7 @@ export async function POST(req: NextRequest) {
           isPublic: true,
           region: true,
           subRegion: true,
+          imageUrl: true,
           createdAt: true,
           updatedAt: true,
           tagname: true,

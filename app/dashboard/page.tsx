@@ -3,6 +3,7 @@ import { getCurrentUserId } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import { StudyCardListItem } from './_components'
+import type { CommunityInfo } from '@/lib/types/community'
 
 export default async function DashboardPage() {
   const userId = await getCurrentUserId()
@@ -30,6 +31,17 @@ export default async function DashboardPage() {
       subRegion: true,
       tagname: true,
       createdAt: true,
+      imageUrl: true,
+      communityMembers: {
+        select: {
+          role: true,
+          userId: true,
+        },
+        where: {
+          userId,
+          deletedAt: null,
+        },
+      },
       rounds: {
         select: {
           roundId: true,
@@ -58,17 +70,24 @@ export default async function DashboardPage() {
       ) : (
         <div>
           <ul className={styles.list}>
-            {subscribedCommunities.map(community => (
-              <StudyCardListItem
-                key={community.clubId}
-                clubId={community.clubId}
-                userId={userId}
-                name={community.name}
-                description={community.description || ''}
-                region={community.region || ''}
-                subRegion={community.subRegion || ''}
-              />
-            ))}
+            {subscribedCommunities.map((community: CommunityInfo) => {
+              const currentMember = community.communityMembers?.[0]
+              const isTeamLeader = currentMember?.role === 'admin'
+
+              return (
+                <StudyCardListItem
+                  key={community.clubId}
+                  clubId={community.clubId}
+                  userId={userId}
+                  name={community.name}
+                  description={community.description || ''}
+                  region={community.region || ''}
+                  subRegion={community.subRegion || ''}
+                  imageUrl={community.imageUrl || ''}
+                  isTeamLeader={isTeamLeader}
+                />
+              )
+            })}
           </ul>
         </div>
       )}

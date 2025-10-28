@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { Popover, type PopoverAction } from '@/components/ui'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
+import Image from 'next/image'
+import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 
 interface StudyCardListItemProps {
   clubId: string
@@ -14,6 +16,8 @@ interface StudyCardListItemProps {
   description: string
   region: string
   subRegion: string
+  imageUrl?: string
+  isTeamLeader: boolean
 }
 
 function StudyCardListItem({
@@ -23,6 +27,8 @@ function StudyCardListItem({
   description,
   region,
   subRegion,
+  imageUrl,
+  isTeamLeader,
 }: StudyCardListItemProps) {
   const handleLeaveCommunity = async (clubId: string) => {
     try {
@@ -78,17 +84,30 @@ function StudyCardListItem({
     },
   ]
   return (
-    <li key={clubId} className={styles.item}>
-      <div className={styles.header}>
-        <Link className={styles.link} href={`/community/${clubId}`}>
-          {name}
-        </Link>
-        <Popover trigger={<EllipsisVertical />} actions={popoverActions} />
+    <li key={clubId} className={styles['item-container']}>
+      <div className={styles.item}>
+        <div className={styles.header}>
+          <Link className={styles.link} href={`/community/${clubId}`}>
+            <Image
+              width={90}
+              height={90}
+              src={imageUrl || DefaultImg.src}
+              alt={`${name} 커뮤니티 이미지`}
+              className={styles.image}
+            />
+            <div className={styles['link-data']}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {name} <span className={styles.badge}>{isTeamLeader ? '팀장' : '멤버'}</span>
+              </div>
+              <span className={styles.description}>{description}</span>
+              <span className={styles.description}>
+                지역: {region} {subRegion}
+              </span>
+            </div>
+          </Link>
+          <Popover trigger={<EllipsisVertical />} actions={popoverActions} />
+        </div>
       </div>
-      <p className={styles.description}>{description}</p>
-      <p>
-        지역: {region} {subRegion}
-      </p>
     </li>
   )
 }

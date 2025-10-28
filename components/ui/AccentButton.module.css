@@ -16,4 +16,10 @@
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  transition: all 0.2s ease-in-out;
+}
+
+.accent-button:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
 }

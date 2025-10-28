@@ -20,4 +20,9 @@
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.fill-link:hover {
+  opacity: 0.8;
 }

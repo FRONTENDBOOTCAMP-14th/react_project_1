@@ -1,5 +1,0 @@
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-xs);
-}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { ButtonContainer } from '.'
+import { DeleteAccountButton, EditButton } from '.'
 import { toast } from 'sonner'
 import { StrokeButton, FillButton } from '@/components/ui'
 import styles from './ProfileContent.module.css'
@@ -161,7 +161,10 @@ export default function ProfileContent({ user }: ProfileContentProps) {
           </div>
         </div>
         <div className={styles['divider']} />
-        <ButtonContainer onClickEdit={handleEditClick} />
+        <div className={styles['button-group']}>
+          <EditButton onClick={handleEditClick} />
+          <DeleteAccountButton />
+        </div>
       </div>
     </main>
   )

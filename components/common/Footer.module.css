@@ -11,7 +11,7 @@
   color: var(--gray-400);
   font-size: 0.875rem;
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   gap: var(--spacing-sm);
 }
 

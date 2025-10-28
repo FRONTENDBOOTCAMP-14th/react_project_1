@@ -9,7 +9,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const { id } = await params
 
   const member =
-    id.length === 36
+    id.length > 35
       ? await prisma.communityMember.findUnique({
           where: {
             id,

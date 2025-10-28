@@ -1,0 +1,11 @@
+.member-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: fit-content;
+  align-items: center;
+  padding: 1rem;
+  border-radius: var(--inner-card-radius);
+  background-color: var(--primary-color);
+  border: 1px solid var(--border-color);
+}

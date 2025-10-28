@@ -22,12 +22,23 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     return <div className={styles.empty}>없는 멤버입니다</div>
   }
 
+  const attendanceCount = await prisma.attendance
+    .findMany({
+      where: {
+        userId: member.user.userId,
+      },
+    })
+    .then(attendance => attendance.length)
+
+  console.log(attendanceCount)
+
   return (
     <div className={styles.container}>
       <MemberCard
         nickname={member.user.nickname || ''}
         role={member.role}
         joinedAt={member.joinedAt}
+        attendanceCount={attendanceCount}
       />
       <ReactionForm memberId={member.id} />
       <ReactionList memberId={member.id} />

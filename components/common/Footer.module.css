@@ -7,12 +7,12 @@
 .inner {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem var(--spacing-sm);
   color: var(--gray-400);
   font-size: 0.875rem;
   display: flex;
   justify-content: start;
-  gap: 1rem;
+  gap: var(--spacing-sm);
 }
 
 .inner a {

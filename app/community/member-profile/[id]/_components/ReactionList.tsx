@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import ReactionListItem from './ReactionListItem'
+import styles from './ReactionList.module.css'
 
 export default async function ReactionList({ memberId }: { memberId: string }) {
   const reactions = await prisma.reaction.findMany({
@@ -19,7 +20,7 @@ export default async function ReactionList({ memberId }: { memberId: string }) {
   })
 
   return (
-    <ul>
+    <ul className={styles.list}>
       {reactions.map(reaction => (
         <ReactionListItem
           key={reaction.reactionId}

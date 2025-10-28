@@ -1,11 +1,38 @@
 .member-card {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: fit-content;
+  gap: var(--spacing-lg);
+  width: 100%;
   align-items: center;
-  padding: 1rem;
+  padding: var(--spacing-md);
   border-radius: var(--inner-card-radius);
   background-color: var(--primary-color);
   border: 1px solid var(--border-color);
+  justify-content: space-between;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.description-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image {
+  object-fit: cover;
+  border-radius: var(--full-radius);
 }

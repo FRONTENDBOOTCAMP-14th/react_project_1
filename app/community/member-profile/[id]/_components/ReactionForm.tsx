@@ -1,8 +1,9 @@
 'use client'
 
-import { StrokeButton } from '@/components/ui'
+import { IconButton } from '@/components/ui'
+import { SendHorizonal } from 'lucide-react'
 import { toast } from 'sonner'
-
+import styles from './ReactionForm.module.css'
 interface ReactionFormProps {
   memberId: string
 }
@@ -16,6 +17,7 @@ export default function ReactionForm({ memberId }: ReactionFormProps) {
       return
     }
     try {
+      toast.loading('리액션을 생성 중입니다')
       const response = await fetch('/api/reactions', {
         method: 'POST',
         headers: {
@@ -32,21 +34,35 @@ export default function ReactionForm({ memberId }: ReactionFormProps) {
       const data = await response.json()
 
       if (data.success) {
+        toast.dismiss()
         toast.success('리액션을 성공적으로 생성했습니다')
         window.location.reload()
       } else {
+        toast.dismiss()
         throw new Error(data.error)
       }
     } catch (error) {
+      toast.dismiss()
       toast.error(`리액션 생성 중 오류가 발생했습니다: ${error}`)
     }
   }
   return (
-    <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} onSubmit={handleSubmit}>
-      <label htmlFor="reaction">댓글</label>
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <input required type="text" id="reaction" name="reaction" />
-        <StrokeButton style={{ padding: '0.5rem 1rem' }}>작성</StrokeButton>
+    <form className={styles['reaction-form']} onSubmit={handleSubmit}>
+      <label className={styles['label']} htmlFor="reaction">
+        댓글
+      </label>
+      <div className={styles['input-container']}>
+        <input
+          required
+          placeholder="응원과 칭찬의 메세지를 남겨주세요"
+          type="text"
+          id="reaction"
+          name="reaction"
+          className={styles['input']}
+        />
+        <IconButton type="submit">
+          <SendHorizonal size={40} strokeWidth={1.5} />
+        </IconButton>
       </div>
     </form>
   )

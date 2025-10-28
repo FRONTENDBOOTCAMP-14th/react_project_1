@@ -6,10 +6,10 @@ import DefaultImg from '@/app/community/new/_components/assets/default-study01.p
 import styles from './ImageUploader.module.css'
 import { toast } from 'sonner'
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface ImageUploaderProps {
-  onImageChange?: (imageUrl: string | null) => void
+  onImageChange?: (file: File | null) => void
 }
 
 /**
@@ -17,9 +17,8 @@ interface ImageUploaderProps {
  *
  * - 사용자가 이미지를 선택하고 업로드하는 컴포넌트입니다.
  * - 썸네일 클릭 시 이미지를 삭제하고, 업로드 버튼으로 이미지를 선택합니다.
- *
  * @param {Object} props - 컴포넌트 props
- * @param {(imageUrl: string | null) => void} [onImageChange] - 이미지 업로드 완료 시 호출되는 콜백 함수 (이미지 URL 전달)
+ * @param {(file: File | null) => void} [onImageChange] - 이미지 선택 시 호출되는 콜백 함수
  * @returns 선택한 이미지 업로드 컴포넌트
  *
  * @example
@@ -32,16 +31,8 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleThumbnailClick = () => {
-    if (previewUrl || uploadedUrl) {
-      // 이미지 삭제
-      setPreviewUrl(null)
-      setUploadedUrl(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
-      onImageChange?.(null)
-      toast.success('이미지가 삭제되었습니다.')
-    }
+    // 이미지 삭제
+    toast('썸네일 클릭 - 삭제')
   }
 
   const handleUploadClick = (event: React.MouseEvent<HTMLButtonElement>) => {

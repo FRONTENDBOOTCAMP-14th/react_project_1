@@ -3,6 +3,7 @@ import ProfileCard from './_components/ProfileCard'
 import styles from './page.module.css'
 import prisma from '@/lib/prisma'
 import { memberDetailSelect, activeMemberWhere } from '@/lib/quaries'
+import type { Member, PrismaMember } from '@/lib/types/member'
 
 interface MemberPageProps {
   params: Promise<{
@@ -11,41 +12,6 @@ interface MemberPageProps {
   searchParams: Promise<{
     search?: string
   }>
-}
-
-// Prisma 반환 타입
-interface PrismaMember {
-  id: string
-  clubId: string
-  userId: string
-  role: string
-  joinedAt: Date
-  user: {
-    userId: string
-    username: string
-    email: string | null
-    nickname: string | null
-  }
-  community: {
-    clubId: string
-    name: string
-    description: string | null
-  }
-}
-
-// ProfileCard에 전달할 타입
-interface Member {
-  id: string
-  clubId: string
-  userId: string
-  role: string
-  joinedAt: string
-  user: {
-    userId: string
-    username: string
-    email: string
-    nickname: string | null
-  }
 }
 
 async function getMembers(clubId: string): Promise<Member[] | null> {

@@ -8,6 +8,8 @@
   border-radius: var(--inner-card-radius);
   background-color: var(--primary-color);
   width: 100%;
+  text-decoration: none;
+  color: inherit;
   transition: all 0.2s ease-in-out;
 }
 

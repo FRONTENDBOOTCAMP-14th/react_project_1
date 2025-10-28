@@ -92,3 +92,39 @@ export function formatDateRange(
 
   return `${formatDate(startDate, includeTime)} ~ ${formatDate(endDate, includeTime)}`
 }
+
+/**
+ * 주어진 날짜가 현재 시각으로부터 얼마나 지났는지 상대 시간으로 포맷팅합니다.
+ * - "방금 전", "N초 전", "N분 전", "N시간 전", "N일 전" 형식으로 반환합니다.
+ *
+ * @param dateInput - Date 객체 또는 ISO 날짜 문자열 (null/undefined 허용)
+ * @returns 상대 시간 문자열. 입력이 없거나 유효하지 않으면 빈 문자열 반환
+ *
+ * @example
+ * formatDiffFromNow(new Date()) // "방금 전"
+ * formatDiffFromNow('2025-10-20T14:00:00Z') // "N일 전"
+ */
+export function formatDiffFromNow(dateInput: Date | string | null | undefined): string {
+  if (!dateInput) return ''
+
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
+  if (isNaN(date.getTime())) return ''
+
+  const now = Date.now()
+  const diffMs = now - date.getTime()
+
+  if (diffMs < 0) return ''
+
+  const seconds = Math.floor(diffMs / 1000)
+  if (seconds === 0) return '방금 전'
+  if (seconds < 60) return `${seconds}초 전`
+
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}분 전`
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}시간 전`
+
+  const days = Math.floor(hours / 24)
+  return `${days}일 전`
+}

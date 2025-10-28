@@ -1,7 +1,8 @@
-import prisma from '@/lib/prisma'
-import type { CustomSession, ExtendedToken, KakaoProfile } from '@/lib/types'
 import type { NextAuthOptions } from 'next-auth'
 import KakaoProvider from 'next-auth/providers/kakao'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import prisma from '@/lib/prisma'
+import type { KakaoProfile, ExtendedToken, CustomSession } from '@/lib/types'
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
@@ -10,75 +11,78 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.KAKAO_CLIENT_ID || '',
       clientSecret: process.env.KAKAO_CLIENT_SECRET || '',
     }),
+    // 회원가입 완료 후 즉시 로그인을 위한 내부 Provider
+    CredentialsProvider({
+      id: 'register-complete',
+      name: 'Register Complete',
+      credentials: {
+        userId: { label: 'User ID', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.userId) return null
+
+        // 회원가입 직후에만 사용되므로 userId로 사용자 조회
+        const user = await prisma.user.findUnique({
+          where: { userId: credentials.userId, deletedAt: null },
+        })
+
+        if (!user) return null
+
+        // NextAuth User 객체 반환
+        return {
+          id: user.userId,
+          email: user.email,
+          name: user.nickname ?? user.username,
+        }
+      },
+    }),
   ],
-  events: {
-    async signIn({ user, account, isNewUser }) {
-      const _user = user
-      const _account = account
-      const _isNewUser = isNewUser
-    },
-    async signOut({ session }) {
-      const _session = session
-    },
-  },
   callbacks: {
     async signIn({ user, account, profile }) {
+      // Credentials Provider (회원가입 완료 후 로그인)
+      if (account?.provider === 'register-complete') {
+        return true
+      }
+
+      // Kakao OAuth Provider
       if (account?.provider === 'kakao') {
         const providerId = String((profile as KakaoProfile)?.id ?? account.providerAccountId)
         const email = (profile as KakaoProfile)?.kakao_account?.email ?? user?.email ?? null
-
-        // 기존 사용자 확인 (providerId + email 모두 확인)
         const existing = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { provider: 'kakao', providerId, deletedAt: null },
-              ...(email ? [{ email, deletedAt: null }] : []),
-            ],
-          },
+          where: { provider: 'kakao', providerId, deletedAt: null },
         })
-
-        // 이미 가입된 사용자면 로그인 허용
         if (existing) return true
 
-        // 신규 사용자 자동 회원가입
-        try {
-          await prisma.user.create({
-            data: {
-              provider: 'kakao',
-              providerId,
-              email: email || null,
-              username: `kakao_${providerId}`,
-              nickname: null, // Kakao profile에서 nickname을 가져올 수 없으므로 null로 설정
-            },
-          })
-          return true
-        } catch (error) {
-          console.error('Auto signup failed:', error)
-          // Prisma 제약조건 위반 (중복 이메일 등)인 경우
-          if (error instanceof Error && error.message.includes('Unique constraint')) {
-            const redirectBase = '/login?step=register&error=duplicate'
-            const qs = new URLSearchParams({
-              provider: 'kakao',
-              providerId,
-              email: email ?? '',
-            })
-            return `${redirectBase}&${qs.toString()}`
-          }
-          // 기타 DB 에러
-          const redirectBase = '/login?step=register&error=signup_failed'
-          const qs = new URLSearchParams({
-            provider: 'kakao',
-            providerId,
-            email: email ?? '',
-          })
-          return `${redirectBase}&${qs.toString()}`
-        }
+        // 미가입 사용자 → 회원가입 페이지로 리다이렉트
+        const redirectUrl = new URL(
+          process.env.REGISTER_PAGE_URL || '/login',
+          process.env.NEXTAUTH_URL || 'http://localhost:3000'
+        )
+        redirectUrl.searchParams.set('step', 'register')
+        redirectUrl.searchParams.set('provider', 'kakao')
+        redirectUrl.searchParams.set('providerId', providerId)
+        if (email) redirectUrl.searchParams.set('email', email)
+
+        return redirectUrl.toString()
       }
+
       return true
     },
     async jwt({ token, account, profile, user }) {
-      // account가 있는 경우에만 DB 조회 (최초 로그인 시에만)
-      if (account?.provider === 'kakao' && user) {
+      // Credentials Provider (회원가입 완료 후 로그인)
+      if (account?.provider === 'register-complete' && user) {
+        const dbUser = await prisma.user.findUnique({
+          where: { userId: user.id, deletedAt: null },
+        })
+        if (dbUser) {
+          ;(token as ExtendedToken).userId = dbUser.userId
+          ;(token as ExtendedToken).username = dbUser.username
+          ;(token as ExtendedToken).nickname = dbUser.nickname
+        }
+      }
+
+      // Kakao OAuth Provider
+      if (account?.provider === 'kakao') {
         const providerId = String((profile as KakaoProfile)?.id ?? account.providerAccountId)
         const existing = await prisma.user.findFirst({
           where: { provider: 'kakao', providerId, deletedAt: null },
@@ -89,6 +93,7 @@ export const authOptions: NextAuthOptions = {
           ;(token as ExtendedToken).nickname = existing.nickname
         }
       }
+
       return token
     },
     async session({ session, token }) {

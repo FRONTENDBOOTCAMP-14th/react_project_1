@@ -2,20 +2,22 @@
 
 import { IconButton } from '@/components/ui'
 import { useNotifications } from '@/lib/hooks'
-import type { CustomSession } from '@/lib/types'
-import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { useCommunityStore } from '../../../[id]/_hooks/useCommunityStore'
 import { useSmartPin } from '../_hooks'
 import NotificationCard from './NotificationCard'
 import styles from './NotificationContainer.module.css'
 import NotificationEditor from './NotificationEditor'
 
-export default function NotificationContainer({ clubId }: { clubId: string }) {
-  const { data: session } = useSession()
-  const userId = (session as CustomSession)?.userId
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
+export default function NotificationContainer({
+  clubId,
+  userId,
+  isTeamLeader,
+}: {
+  clubId: string
+  userId: string
+  isTeamLeader: boolean
+}) {
   const [isEditing, setIsEditing] = useState(false)
 
   const {

@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import styles from './Sidebar.module.css'
 import Image from 'next/image'
+import Footer from '@/components/common/Footer'
 import { IconLink } from '@/components/ui'
 import { Search, Plus, Users, Home, X, LogIn /* , UserPlus */ } from 'lucide-react'
 import { useSession } from 'next-auth/react'
@@ -117,7 +118,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
             )}
           </nav>
         </div>
-        <div className={styles.footer}>{/* TODO: 추가 정보나 링크 */}</div>
+        <Footer />
       </aside>
     </>
   )

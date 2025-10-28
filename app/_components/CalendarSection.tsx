@@ -21,7 +21,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
     const today = new Date()
     const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-    return Array.from({ length: 7 }, (_, i) => {
+    return Array.from({ length: 3 }, (_, i) => {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
 
@@ -84,22 +84,6 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
             <div className={styles['date']}>{d.date}</div>
             <div className={styles['day']}>{d.day}</div>
             <div className={styles['count-box']}>{d.count}</div>
-
-            {/* 출석 정보 */}
-            {d.attendeeCount > 0 && (
-              <div className={styles['attendee-count']}>{d.attendeeCount}명</div>
-            )}
-
-            {userId && d.userAttendanceStatus && (
-              <div
-                className={`${styles['user-status']} ${styles[`status-${d.userAttendanceStatus}`]}`}
-              >
-                {d.userAttendanceStatus === 'present' && '출석'}
-                {d.userAttendanceStatus === 'late' && '지각'}
-                {d.userAttendanceStatus === 'absent' && '결석'}
-                {d.userAttendanceStatus === 'excused' && '양해'}
-              </div>
-            )}
           </button>
         ))
       )}

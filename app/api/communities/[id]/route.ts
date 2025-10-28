@@ -47,7 +47,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         deletedAt: true,
         _count: {
           select: {
-            communityMembers: true,
+            communityMembers: {
+              where: {
+                deletedAt: null,
+              },
+            },
           },
         },
       },

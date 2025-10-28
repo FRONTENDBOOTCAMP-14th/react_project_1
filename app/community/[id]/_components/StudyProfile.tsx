@@ -20,6 +20,12 @@ import {
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import regions from '@/lib/json/region.json'
+import { useSession } from 'next-auth/react'
+import type { Session } from 'next-auth'
+
+interface CustomSession extends Session {
+  userId?: string
+}
 
 /**
  * 정보 행 컴포넌트에 전달되는 속성
@@ -199,6 +205,51 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     }
   }, [onDelete, community.clubId, router])
 
+  /**
+   * 커뮤니티 가입
+   */
+  const { data: session } = useSession()
+  const handleJoinClick = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+
+      const userId = (session as CustomSession)?.userId
+
+      if (!userId) {
+        toast.error('로그인이 필요합니다')
+        return
+      }
+
+      try {
+        const response = await fetch('/api/members', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clubId: community.clubId,
+            userId,
+            role: 'member',
+          }),
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          toast.success('커뮤니티에 가입되었습니다')
+          // 페이지 새로고침으로 멤버십 상태 업데이트
+          window.location.reload()
+        } else {
+          toast.error(data.error || '가입에 실패했습니다')
+        }
+      } catch (error) {
+        console.error('Failed to join community:', error)
+        toast.error('가입 중 오류가 발생했습니다')
+      }
+    },
+    [community.clubId, session]
+  )
+
   // 팀장 전용 액션 메뉴
   const actions: PopoverAction[] = useMemo(
     () => [
@@ -216,6 +267,7 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
     ],
     [handleEditClick, handleDeleteClick]
   )
+
   // 편집 모드 UI
   if (isEditing) {
     return (
@@ -301,16 +353,10 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
         <p className={styles.description}>
           {community.description || MESSAGES.EMPTY.NO_DESCRIPTION}
         </p>
-        {!isMember ? (
-          <StrokeButton type="button" onClick={() => toast('가입 기능 구현 예정')}>
+        {!isMember && (
+          <StrokeButton style={{ minWidth: '76px' }} type="button" onClick={handleJoinClick}>
             가입하기
           </StrokeButton>
-        ) : (
-          !isTeamLeader && (
-            <StrokeButton type="button" onClick={() => toast('탈퇴 기능 구현 예정')}>
-              탈퇴하기
-            </StrokeButton>
-          )
         )}
       </div>
     </div>

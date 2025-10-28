@@ -3,7 +3,7 @@
  * loading, error, data 상태와 fetch 함수를 제공
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 
 interface UseAsyncDataOptions<T> {
   initialData?: T
@@ -12,11 +12,11 @@ interface UseAsyncDataOptions<T> {
 }
 
 interface UseAsyncDataResult<T> {
-  data: T
+  data: T | undefined
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
-  setData: (data: T) => void
+  setData: (data: T | undefined) => void
   setError: (error: string | null) => void
 }
 
@@ -31,9 +31,13 @@ export function useAsyncData<T>(
   options: UseAsyncDataOptions<T> = {}
 ): UseAsyncDataResult<T> {
   const { initialData, onSuccess, onError } = options
-  const [data, setData] = useState<T>(initialData as T)
+  const [data, setData] = useState<T | undefined>(initialData)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // fetchFn이 변경되지 않았는지 추적 (무한 루프 방지)
+  const fetchFnRef = useRef(fetchFn)
+  const isInitialMountRef = useRef(true)
 
   const refetch = useCallback(async () => {
     try {
@@ -54,8 +58,17 @@ export function useAsyncData<T>(
   }, [fetchFn, onSuccess, onError])
 
   useEffect(() => {
-    refetch()
-  }, [refetch])
+    // fetchFn이 실제로 변경되었는지 확인 (무한 루프 방지)
+    if (fetchFnRef.current !== fetchFn) {
+      fetchFnRef.current = fetchFn
+      isInitialMountRef.current = false
+      refetch()
+    } else if (isInitialMountRef.current) {
+      // 초기 마운트인 경우에만 실행
+      isInitialMountRef.current = false
+      refetch()
+    }
+  }, [fetchFn, refetch])
 
   return {
     data,

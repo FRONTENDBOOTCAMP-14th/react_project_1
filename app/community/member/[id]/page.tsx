@@ -1,6 +1,9 @@
 import SearchForm from './_components/SearchForm'
 import ProfileCard from './_components/ProfileCard'
 import styles from './page.module.css'
+import prisma from '@/lib/prisma'
+import { memberDetailSelect, activeMemberWhere } from '@/lib/quaries'
+import type { Member, PrismaMember } from '@/lib/types/member'
 
 interface MemberPageProps {
   params: Promise<{
@@ -11,53 +14,31 @@ interface MemberPageProps {
   }>
 }
 
-interface Member {
-  id: string
-  clubId: string
-  userId: string
-  role: string
-  joinedAt: string
-  user: {
-    userId: string
-    username: string
-    email: string
-    nickname: string | null
-  }
-}
-
-interface MembersResponse {
-  success: boolean
-  data: {
-    data: Member[]
-    count: number
-    pagination: {
-      page: number
-      limit: number
-      total: number
-      totalPages: number
-    }
-  }
-}
-
-async function getMembers(clubId: string, _search?: string): Promise<MembersResponse | null> {
+async function getMembers(clubId: string): Promise<Member[] | null> {
   try {
-    const searchParams = new URLSearchParams({
-      clubId,
-      limit: '50',
+    const members = await prisma.communityMember.findMany({
+      where: {
+        ...activeMemberWhere,
+        clubId,
+      },
+      select: memberDetailSelect,
+      orderBy: { joinedAt: 'desc' },
     })
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/members?${searchParams}`,
-      {
-        cache: 'no-store',
-      }
-    )
-
-    if (!response.ok) {
-      return null
-    }
-
-    return response.json()
+    // Prisma 타입을 ProfileCard 타입으로 변환
+    return members.map((member: PrismaMember) => ({
+      id: member.id,
+      clubId: member.clubId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt.toISOString(),
+      user: {
+        userId: member.user.userId,
+        username: member.user.username,
+        email: member.user.email || '',
+        nickname: member.user.nickname,
+      },
+    }))
   } catch (error) {
     console.error('Failed to fetch members:', error)
     return null
@@ -68,9 +49,9 @@ export default async function MemberPage({ params, searchParams }: MemberPagePro
   const { id: clubId } = await params
   const { search } = await searchParams
 
-  const result = await getMembers(clubId, search)
+  const members = await getMembers(clubId)
 
-  if (!result?.success) {
+  if (!members) {
     return (
       <div className={styles.container}>
         <SearchForm placeholder="검색어를 입력해주세요" clubId={clubId} />
@@ -81,10 +62,7 @@ export default async function MemberPage({ params, searchParams }: MemberPagePro
     )
   }
 
-  // API 응답 구조: { success: true, data: { data: [], count, pagination } }
-  const members = result.data.data
-
-  // 검색어가 있으면 클라이언트 사이드 필터링
+  // 검색어가 있으면 필터링
   const filteredMembers = search
     ? members.filter(
         member =>

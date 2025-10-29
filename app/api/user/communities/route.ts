@@ -7,7 +7,7 @@
 
 import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { roundSelect, upcomingRoundsWhere, userSubscribedCommunitiesWhere } from '@/lib/quaries'
+import { roundSelect, upcomingRoundsWhere, userSubscribedCommunitiesWhere } from '@/lib/queries'
 import type { Round } from '@/lib/types/round'
 import type { Community } from '@/lib/types/community'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'

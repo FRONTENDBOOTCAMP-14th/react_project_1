@@ -13,7 +13,7 @@
 import { MESSAGES } from '@/constants/messages'
 import { hasPermission, getCurrentUserId } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { roundSelect } from '@/lib/quaries'
+import { roundSelect } from '@/lib/queries'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import { getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'

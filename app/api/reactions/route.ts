@@ -12,7 +12,7 @@
 
 import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { activeReactionWhere, reactionSelect } from '@/lib/quaries'
+import { activeReactionWhere, reactionSelect } from '@/lib/queries'
 import type { CreateReactionRequest } from '@/lib/types/reaction'
 import { getPaginationParams, getStringParam, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'

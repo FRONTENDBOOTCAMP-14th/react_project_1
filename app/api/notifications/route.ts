@@ -12,7 +12,7 @@
 
 import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { activeNotificationWhere, notificationSelect } from '@/lib/quaries'
+import { activeNotificationWhere, notificationSelect } from '@/lib/queries'
 import type { CreateNotificationRequest } from '@/lib/types/notification'
 import { getBooleanParam, getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'

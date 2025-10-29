@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { memberDetailSelect } from '@/lib/quaries'
+import { memberDetailSelect } from '@/lib/queries'
 import MemberCard from './_components/MemberCard'
 import ReactionForm from './_components/ReactionForm'
 import ReactionList from './_components/ReactionList'

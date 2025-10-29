@@ -182,8 +182,8 @@
 }
 
 .page-button-active {
-  background: var(--accent-color) !important;
-  border-color: var(--accent-color) !important;
+  background: var(--third-color) !important;
+  border-color: var(--third-color) !important;
   color: white !important;
 }
 

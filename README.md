@@ -138,3 +138,4 @@ pnpm typecheck    # TypeScript 타입 체크
 
 - **[conventions.md](docs/conventions.md)** - 코딩 컨벤션 및 스타일 가이드
 - **[data-model.md](docs/data-model.md)** - 데이터베이스 스키마 및 ERD
+- **[user-flow.md](docs/user-flow.md)** - 사용자 플로우

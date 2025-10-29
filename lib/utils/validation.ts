@@ -93,3 +93,52 @@ export function isValidUsername(username: string): boolean {
   const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/
   return usernameRegex.test(username)
 }
+
+/**
+ * UTC 기준 날짜 범위 유효성 검증
+ * 서버 시간과 일관되게 UTC 기준으로 검증합니다.
+ *
+ * @param startDate - 시작 날짜 (ISO string 또는 Date)
+ * @param endDate - 종료 날짜 (ISO string 또는 Date)
+ * @returns 유효하면 true
+ */
+export function isValidDateRangeUTC(startDate: Date | string, endDate: Date | string): boolean {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return false
+  }
+
+  // UTC 기준으로 비교
+  return start.getTime() <= end.getTime()
+}
+
+/**
+ * UTC 기준으로 미래 날짜인지 확인
+ *
+ * @param date - 확인할 날짜
+ * @param serverNow - 서버 현재 시간 (선택, 없으면 클라이언트 시간 사용)
+ * @returns 미래 날짜면 true
+ */
+export function isFutureDateUTC(date: Date | string, serverNow?: Date | string): boolean {
+  const targetDate = new Date(date)
+  const now = serverNow ? new Date(serverNow) : new Date()
+
+  if (isNaN(targetDate.getTime())) {
+    return false
+  }
+
+  return targetDate.getTime() > now.getTime()
+}
+
+/**
+ * ISO 8601 형식의 날짜 문자열인지 검증
+ *
+ * @param dateString - 검증할 문자열
+ * @returns ISO 형식이면 true
+ */
+export function isISODateString(dateString: string): boolean {
+  const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/
+  return isoRegex.test(dateString) && !isNaN(new Date(dateString).getTime())
+}

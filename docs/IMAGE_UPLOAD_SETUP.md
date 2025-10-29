@@ -32,8 +32,8 @@
 
 ```env
 # Supabase 설정 (Storage 및 Database 공통)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ### 환경 변수 값 찾기
@@ -41,8 +41,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 현재 `DATABASE_URL`에 사용 중인 Supabase 프로젝트의 정보를 사용합니다:
 
 1. Supabase 대시보드에서 **Settings** > **API** 메뉴로 이동
-2. **Project URL**을 복사하여 `NEXT_PUBLIC_SUPABASE_URL`에 입력
-3. **Project API keys** 섹션에서 `anon` `public` 키를 복사하여 `NEXT_PUBLIC_SUPABASE_ANON_KEY`에 입력
+2. **Project URL**을 복사하여 `SUPABASE_URL`에 입력
+3. **Project API keys** 섹션에서 `anon` `public` 키를 복사하여 `SUPABASE_ANON_KEY`에 입력
 
 > **중요**: 데이터베이스와 Storage는 같은 Supabase 프로젝트를 사용합니다.
 
@@ -118,7 +118,7 @@ pnpm dev
 
 ### "Supabase URL과 Anon Key가 환경변수에 설정되지 않았습니다" 에러
 
-- `.env` 파일에 `NEXT_PUBLIC_SUPABASE_URL`과 `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 올바르게 설정되었는지 확인
+- `.env` 파일에 `SUPABASE_URL`과 `SUPABASE_ANON_KEY`가 올바르게 설정되었는지 확인
 - 개발 서버를 재시작
 
 ### "이미지 업로드 실패" 에러

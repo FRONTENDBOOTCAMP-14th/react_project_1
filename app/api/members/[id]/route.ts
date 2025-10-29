@@ -8,7 +8,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { memberSelect, memberDetailSelect } from '@/lib/quaries'
+import { memberSelect, memberDetailSelect } from '@/lib/queries'
 import type { UpdateMemberRequest } from '@/lib/types/member'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'

@@ -6,7 +6,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { activeReactionWhere, reactionDetailSelect } from '@/lib/quaries'
+import { activeReactionWhere, reactionDetailSelect } from '@/lib/queries'
 import { getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse } from '@/lib/utils/response'
 import type { NextRequest } from 'next/server'

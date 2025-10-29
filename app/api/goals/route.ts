@@ -12,7 +12,7 @@
 
 import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { activeGoalWhere, goalSelect } from '@/lib/quaries'
+import { activeGoalWhere, goalSelect } from '@/lib/queries'
 import {
   getBooleanParam,
   getPaginationParams,

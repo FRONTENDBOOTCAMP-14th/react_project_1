@@ -2,7 +2,7 @@ import SearchForm from './_components/SearchForm'
 import ProfileCard from './_components/ProfileCard'
 import styles from './page.module.css'
 import prisma from '@/lib/prisma'
-import { memberDetailSelect, activeMemberWhere } from '@/lib/quaries'
+import { memberDetailSelect, activeMemberWhere } from '@/lib/queries'
 import type { Member, PrismaMember } from '@/lib/types/member'
 
 interface MemberPageProps {

@@ -38,7 +38,7 @@ export default function SearchPage() {
         search: search.trim() || undefined,
         searchTags: searchTags?.length ? searchTags : undefined,
         page,
-        limit: 12,
+        limit: 6,
       }
 
       const results = await fetchCommunitySearch(params)
@@ -54,13 +54,8 @@ export default function SearchPage() {
 
   // URL 상태 변경 시 자동 검색
   useEffect(() => {
-    // 검색어나 지역이나 태그가 있거나, 페이지가 변경될 때 검색 실행
-    if (search.trim() || region.trim() || (searchTags && searchTags.length > 0)) {
-      executeSearch()
-    } else if (!search.trim() && !region.trim() && (!searchTags || searchTags.length === 0)) {
-      // 검색 조건이 모두 없으면 결과 초기화
-      setSearchResults(null)
-    }
+    // 검색 조건이 없어도 전체 목록을 표시하기 위해 항상 검색 실행
+    executeSearch()
   }, [region, subRegion, search, searchTags, page, executeSearch])
 
   // 페이지 변경 핸들러

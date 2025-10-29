@@ -11,7 +11,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { memberDetailSelect, activeMemberWhere } from '@/lib/quaries'
+import { memberDetailSelect, activeMemberWhere } from '@/lib/queries'
 import type { CreateMemberRequest } from '@/lib/types/member'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'

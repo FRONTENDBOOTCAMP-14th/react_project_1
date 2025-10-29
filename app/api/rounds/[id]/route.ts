@@ -8,7 +8,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { roundSelect, roundDetailSelect } from '@/lib/quaries'
+import { roundSelect, roundDetailSelect } from '@/lib/queries'
 import type { UpdateRoundRequest } from '@/lib/types/round'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'

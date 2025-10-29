@@ -8,7 +8,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { notificationSelect, notificationDetailSelect } from '@/lib/quaries'
+import { notificationSelect, notificationDetailSelect } from '@/lib/queries'
 import type { UpdateNotificationRequest } from '@/lib/types/notification'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'

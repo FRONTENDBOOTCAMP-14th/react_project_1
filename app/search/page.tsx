@@ -38,7 +38,7 @@ export default function SearchPage() {
         search: search.trim() || undefined,
         searchTags: searchTags?.length ? searchTags : undefined,
         page,
-        limit: 5,
+        limit: 6,
       }
 
       const results = await fetchCommunitySearch(params)

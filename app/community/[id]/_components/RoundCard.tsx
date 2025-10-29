@@ -6,7 +6,13 @@ import { MESSAGES } from '@/constants'
 import { useGoals } from '@/lib/hooks'
 import type { CustomSession } from '@/lib/types'
 import type { Round } from '@/lib/types/round'
-import { formatDateRange, renderWithError, renderWithLoading } from '@/lib/utils'
+import {
+  formatDateRangeUTC,
+  renderWithError,
+  renderWithLoading,
+  toDatetimeLocalString,
+  fromDatetimeLocalString,
+} from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
@@ -110,8 +116,8 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
     roundNumber: round?.roundNumber || 1,
-    startDate: round?.startDate ? new Date(round.startDate).toISOString().slice(0, 16) : '',
-    endDate: round?.endDate ? new Date(round.endDate).toISOString().slice(0, 16) : '',
+    startDate: toDatetimeLocalString(round?.startDate),
+    endDate: toDatetimeLocalString(round?.endDate),
     location: round?.location || '',
   })
   const [hasAttended, setHasAttended] = useState(false)
@@ -176,8 +182,8 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
         },
         body: JSON.stringify({
           roundNumber: editForm.roundNumber,
-          startDate: editForm.startDate || null,
-          endDate: editForm.endDate || null,
+          startDate: editForm.startDate ? fromDatetimeLocalString(editForm.startDate) : null,
+          endDate: editForm.endDate ? fromDatetimeLocalString(editForm.endDate) : null,
           location: editForm.location || null,
         }),
       })
@@ -200,8 +206,8 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
   const handleCancelEdit = () => {
     setEditForm({
       roundNumber: round?.roundNumber || 1,
-      startDate: round?.startDate ? new Date(round.startDate).toISOString().slice(0, 16) : '',
-      endDate: round?.endDate ? new Date(round.endDate).toISOString().slice(0, 16) : '',
+      startDate: toDatetimeLocalString(round?.startDate),
+      endDate: toDatetimeLocalString(round?.endDate),
       location: round?.location || '',
     })
     setIsEditing(false)
@@ -319,7 +325,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
         <div className={styles['round-info']}>
           {(round?.startDate || round?.endDate) && (
             <p className={styles['round-date']}>
-              {formatDateRange(round.startDate, round.endDate)}
+              {formatDateRangeUTC(round.startDate, round.endDate)}
             </p>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>

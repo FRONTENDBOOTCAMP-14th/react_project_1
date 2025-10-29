@@ -10,6 +10,7 @@ import { StrokeButton } from '@/components/ui'
 import { toast } from 'sonner'
 import roundCardStyles from './RoundCard.module.css'
 import { fromDatetimeLocalString } from '@/lib/utils'
+import { useCommunityStore } from '../_hooks/useCommunityStore'
 
 interface RoundsListProps {
   clubId: string
@@ -21,6 +22,7 @@ interface RoundsListProps {
  * 전역 상태에서 clubId와 isTeamLeader를 가져옵니다.
  */
 export default function RoundsList({ clubId }: RoundsListProps) {
+  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
   // 열린 라운드 ID를 추적하는 상태 (기본값: 첫 번째 라운드 열림)
   const [openRoundIds, setOpenRoundIds] = useState<Set<string>>(() => {
     return new Set()
@@ -195,7 +197,7 @@ export default function RoundsList({ clubId }: RoundsListProps) {
   // 라운드 목록 렌더링
   return (
     <div className={styles['rounds-list-container']}>
-      {!isAddingRound && (
+      {!isAddingRound && isTeamLeader && (
         <StrokeButton
           className={styles['add-round-button']}
           type="button"

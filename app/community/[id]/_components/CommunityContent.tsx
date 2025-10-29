@@ -76,7 +76,7 @@ export default function CommunityContent({
     <div className={styles['content-wrapper']}>
       <StudyProfile id={clubId} />
       <NotificationLink clubId={clubId} />
-      {isTeamLeader && <RoundsList clubId={clubId} />}
+      {isTeamLeader || (isMember && <RoundsList clubId={clubId} />)}
     </div>
   )
 }

@@ -9,6 +9,7 @@ import styles from './RoundsList.module.css'
 import { StrokeButton } from '@/components/ui'
 import { toast } from 'sonner'
 import roundCardStyles from './RoundCard.module.css'
+import { fromDatetimeLocalString } from '@/lib/utils'
 
 interface RoundsListProps {
   clubId: string
@@ -76,8 +77,8 @@ export default function RoundsList({ clubId }: RoundsListProps) {
       const result = await createRound({
         clubId,
         // roundNumber를 보내지 않으면 서버에서 자동으로 계산함 (소프트 삭제 고려)
-        startDate: newRoundForm.startDate || null,
-        endDate: newRoundForm.endDate || null,
+        startDate: newRoundForm.startDate ? fromDatetimeLocalString(newRoundForm.startDate) : null,
+        endDate: newRoundForm.endDate ? fromDatetimeLocalString(newRoundForm.endDate) : null,
         location: newRoundForm.location || null,
       })
 

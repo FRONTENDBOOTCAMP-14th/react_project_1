@@ -7,7 +7,7 @@ import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import styles from './StudyCarousel.module.css'
-import { formatDateRange } from '@/lib/utils'
+import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
 
 interface StudyCarouselProps {
   selectedDate: number | null
@@ -23,6 +23,12 @@ export default function StudyCarousel({
   subscribedCommunities,
 }: StudyCarouselProps) {
   const [itemsPerView, setItemsPerView] = useState(3)
+  const [serverTime, setServerTime] = useState<Date | null>(null)
+
+  // 서버 시간 가져오기
+  useEffect(() => {
+    getServerTime().then(setServerTime)
+  }, [])
 
   // useCallback으로 함수 메모이제이션 (불필요한 리스너 재등록 방지)
   const updateItemsPerView = useCallback(() => {
@@ -44,25 +50,23 @@ export default function StudyCarousel({
   }, [updateItemsPerView])
 
   if (!selectedDate || !userId) return null
+  if (!serverTime) return null // 서버 시간 로딩 중
 
   const selectedDateRounds = (() => {
-    if (!selectedDate) return []
+    if (!selectedDate || !serverTime) return []
 
-    const targetDate = new Date()
-    targetDate.setHours(0, 0, 0, 0)
-    targetDate.setDate(selectedDate)
+    // UTC 기준으로 targetDate 생성
+    const targetDate = new Date(serverTime)
+    targetDate.setUTCDate(selectedDate)
+    targetDate.setUTCHours(0, 0, 0, 0)
 
-    const dayStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
-    const dayEnd = new Date(
-      targetDate.getFullYear(),
-      targetDate.getMonth(),
-      targetDate.getDate() + 1
-    )
+    // UTC 기준 하루 범위 (00:00:00 ~ 23:59:59.999)
+    const { start: dayStart, end: dayEnd } = getUTCDayRange(targetDate)
 
     return upcomingRounds.filter(round => {
       if (!round.startDate) return false
       const roundDate = new Date(round.startDate)
-      return roundDate >= dayStart && roundDate < dayEnd
+      return roundDate >= dayStart && roundDate <= dayEnd
     })
   })()
 
@@ -112,7 +116,7 @@ export default function StudyCarousel({
 
                   {round.startDate && round.endDate && (
                     <div className={styles['study-date']}>
-                      {formatDateRange(round.startDate, round.endDate)}
+                      {formatDateRangeUTC(round.startDate, round.endDate)}
                     </div>
                   )}
 

@@ -82,7 +82,6 @@
   border-radius: var(--inner-card-radius);
   font-size: var(--font-sm);
   font-weight: var(--font-weight-medium);
-  cursor: pointer;
 }
 
 .edit-save-button {

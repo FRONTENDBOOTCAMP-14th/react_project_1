@@ -28,10 +28,10 @@ export default function NotificationLink({ clubId, notifications }: Notification
     <Link
       href={ROUTES.COMMUNITY.NOTIFICATION(clubId)}
       className={styles['notification-link']}
-      aria-label="커뮤니티 공지로 이동"
+      aria-label={MESSAGES.LABEL.COMMUNITY_NOTIFICATION_LINK}
     >
       <span className={styles['notification-label']}>{MESSAGES.LABEL.NOTIFICATION}</span>{' '}
-      {latestNotification ? latestNotification.title : '등록된 공지가 없습니다'}
+      {latestNotification ? latestNotification.title : MESSAGES.LABEL.NO_REGISTERED_NOTIFICATIONS}
     </Link>
   )
 }

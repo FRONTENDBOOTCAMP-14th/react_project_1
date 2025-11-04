@@ -75,7 +75,7 @@ export default function RoundCard({
   }
 
   return (
-    <article className={styles['round-card-wrapper']} aria-label="회차 카드">
+    <article className={styles['round-card-wrapper']} aria-label={MESSAGES.LABEL.ROUND_CARD}>
       <RoundCardHeader
         round={round}
         isOpen={isOpen}
@@ -240,11 +240,11 @@ function RoundCardHeader({
 
   if (isEditing && round) {
     return (
-      <header aria-label="회차 편집">
+      <header aria-label={MESSAGES.LABEL.ROUND_EDIT}>
         <form onSubmit={handleEditSubmit} className={styles['round-edit-form']}>
           <div className={styles['round-edit-fields']}>
             <div className={styles['edit-field']}>
-              <label htmlFor="round-number">회차 번호:</label>
+              <label htmlFor="round-number">{MESSAGES.LABEL.ROUND_NUMBER}:</label>
               <input
                 id="round-number"
                 type="number"
@@ -257,11 +257,11 @@ function RoundCardHeader({
                 aria-describedby="round-number-description"
               />
               <span id="round-number-description" className="sr-only">
-                회차 번호를 입력하세요 (1 이상의 숫자)
+                {MESSAGES.LABEL.ROUND_NUMBER_ARIA}
               </span>
             </div>
             <div className={styles['edit-field']}>
-              <label htmlFor="start-date">시작일:</label>
+              <label htmlFor="start-date">{MESSAGES.LABEL.ROUND_START_DATE}:</label>
               <input
                 id="start-date"
                 type="datetime-local"
@@ -270,11 +270,11 @@ function RoundCardHeader({
                 aria-describedby="start-date-description"
               />
               <span id="start-date-description" className="sr-only">
-                회차 시작 일시를 선택하세요
+                {MESSAGES.LABEL.ROUND_START_DATE_ARIA}
               </span>
             </div>
             <div className={styles['edit-field']}>
-              <label htmlFor="end-date">종료일:</label>
+              <label htmlFor="end-date">{MESSAGES.LABEL.ROUND_END_DATE}:</label>
               <input
                 id="end-date"
                 type="datetime-local"
@@ -283,34 +283,34 @@ function RoundCardHeader({
                 aria-describedby="end-date-description"
               />
               <span id="end-date-description" className="sr-only">
-                회차 종료 일시를 선택하세요
+                {MESSAGES.LABEL.ROUND_END_DATE_ARIA}
               </span>
             </div>
             <div className={styles['edit-field']}>
-              <label htmlFor="location">장소:</label>
+              <label htmlFor="location">{MESSAGES.LABEL.ROUND_LOCATION}:</label>
               <input
                 id="location"
                 type="text"
                 value={editForm.location}
                 onChange={e => setEditForm(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="스터디 장소를 입력하세요"
+                placeholder={MESSAGES.LABEL.ROUND_LOCATION_INPUT_PLACEHOLDER}
                 aria-describedby="location-description"
               />
               <span id="location-description" className="sr-only">
-                스터디가 진행될 장소를 입력하세요
+                {MESSAGES.LABEL.ROUND_LOCATION_ARIA}
               </span>
             </div>
           </div>
           <div className={styles['round-edit-actions']}>
             <button type="submit" className={styles['edit-save-button']}>
-              저장
+              {MESSAGES.ACTION.SAVE}
             </button>
             <button
               type="button"
               onClick={handleCancelEdit}
               className={styles['edit-cancel-button']}
             >
-              취소
+              {MESSAGES.ACTION.CANCEL}
             </button>
           </div>
         </form>

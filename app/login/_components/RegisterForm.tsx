@@ -1,6 +1,7 @@
 'use client'
 
 import { registerAction } from '@/app/actions/auth'
+import { MESSAGES } from '@/constants'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import React from 'react'
@@ -163,7 +164,7 @@ export function RegisterForm() {
               value={formData.email}
               onChange={e => handleInputChange('email', e.target.value)}
               onBlur={() => checkEmail(formData.email)}
-              placeholder="email@example.com"
+              placeholder={MESSAGES.LABEL.EMAIL_PLACEHOLDER}
               required
               aria-describedby="email-error email-success"
               aria-invalid={!!errors.email}
@@ -173,14 +174,16 @@ export function RegisterForm() {
               onClick={() => checkEmail(formData.email)}
               disabled={!formData.email || emailStatus === 'checking'}
               className={styles['check-button']}
-              aria-label="이메일 중복 확인"
+              aria-label={MESSAGES.LABEL.EMAIL_DUPLICATE_CHECK}
             >
-              {emailStatus === 'checking' ? '확인중…' : '중복확인'}
+              {emailStatus === 'checking'
+                ? MESSAGES.LABEL.CHECKING
+                : MESSAGES.LABEL.DUPLICATE_CHECK}
             </button>
           </div>
           {emailStatus === 'available' && !errors.email && (
             <span id="email-success" className={styles['success-text']}>
-              사용 가능한 이메일입니다.
+              {MESSAGES.SUCCESS.EMAIL_AVAILABLE}
             </span>
           )}
           {errors.email && (
@@ -198,7 +201,7 @@ export function RegisterForm() {
               value={formData.nickname}
               onChange={e => handleInputChange('nickname', e.target.value)}
               onBlur={() => checkNickname(formData.nickname)}
-              placeholder="닉네임을 입력하세요"
+              placeholder={MESSAGES.LABEL.NICKNAME_PLACEHOLDER}
               required
               aria-describedby="nickname-error nickname-success"
               aria-invalid={!!errors.nickname}
@@ -208,14 +211,16 @@ export function RegisterForm() {
               onClick={() => checkNickname(formData.nickname)}
               disabled={!formData.nickname || nicknameStatus === 'checking'}
               className={styles['check-button']}
-              aria-label="닉네임 중복 확인"
+              aria-label={MESSAGES.LABEL.NICKNAME_DUPLICATE_CHECK}
             >
-              {nicknameStatus === 'checking' ? '확인중…' : '중복확인'}
+              {nicknameStatus === 'checking'
+                ? MESSAGES.LABEL.CHECKING
+                : MESSAGES.LABEL.DUPLICATE_CHECK}
             </button>
           </div>
           {nicknameStatus === 'available' && !errors.nickname && (
             <span id="nickname-success" className={styles['success-text']}>
-              사용 가능한 닉네임입니다.
+              {MESSAGES.SUCCESS.NICKNAME_AVAILABLE}
             </span>
           )}
           {errors.nickname && (
@@ -232,9 +237,9 @@ export function RegisterForm() {
               className={styles.input}
               value={formData.username}
               onChange={e => handleInputChange('username', e.target.value)}
-              placeholder="이름"
+              placeholder={MESSAGES.LABEL.NAME_PLACEHOLDER}
               required
-              aria-label="이름 입력"
+              aria-label={MESSAGES.LABEL.NAME_INPUT_ARIA}
             />
           </div>
         </label>
@@ -251,7 +256,7 @@ export function RegisterForm() {
           className={styles['submit-button']}
           aria-describedby="submit-help"
         >
-          {loading ? '가입 중...' : '가입하기'}
+          {loading ? MESSAGES.LABEL.SIGNING_UP : MESSAGES.LABEL.SIGN_UP}
         </button>
 
         {isSubmitDisabled && !loading && (

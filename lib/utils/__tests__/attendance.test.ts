@@ -3,9 +3,9 @@
  */
 
 import {
-  buildAttendanceWhereClause,
-  buildAttendanceUpdateData,
   buildAttendanceCreateData,
+  buildAttendanceUpdateData,
+  buildAttendanceWhereClause,
   calculateAttendanceStats,
   formatAttendanceGroupByStats,
 } from '../attendance'
@@ -54,8 +54,8 @@ describe('attendance utilities', () => {
     })
 
     it('날짜 범위 필터를 적용해야 함', () => {
-      const startDate = '2024-01-01T00:00:00Z'
-      const endDate = '2024-01-31T23:59:59Z'
+      const startDate = new Date('2024-01-01T00:00:00Z')
+      const endDate = new Date('2024-01-31T23:59:59Z')
       const whereClause = buildAttendanceWhereClause({
         startDate,
         endDate,
@@ -71,7 +71,7 @@ describe('attendance utilities', () => {
     })
 
     it('startDate만 적용해야 함', () => {
-      const startDate = '2024-01-01T00:00:00Z'
+      const startDate = new Date('2024-01-01T00:00:00Z')
       const whereClause = buildAttendanceWhereClause({
         startDate,
       })
@@ -85,7 +85,7 @@ describe('attendance utilities', () => {
     })
 
     it('endDate만 적용해야 함', () => {
-      const endDate = '2024-01-31T23:59:59Z'
+      const endDate = new Date('2024-01-31T23:59:59Z')
       const whereClause = buildAttendanceWhereClause({
         endDate,
       })

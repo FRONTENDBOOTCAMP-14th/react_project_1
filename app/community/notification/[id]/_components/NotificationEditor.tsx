@@ -1,6 +1,7 @@
 import { Checkbox, FillButton, StrokeButton, TextInput } from '@/components/ui'
 import { Check, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { MESSAGES } from '@/constants'
 import styles from './NotificationEditor.module.css'
 
 interface NotificationEditorProps {
@@ -37,9 +38,7 @@ export default function NotificationEditor({
 
     // 이미 고정 공지사항이 있는데 새로 고정하려는 경우 경고
     if (isPinned && hasPinnedNotification) {
-      const confirmed = confirm(
-        '이미 고정된 공지사항이 있습니다. 기존 고정을 해제하고 새로 고정하시겠습니까?'
-      )
+      const confirmed = confirm(MESSAGES.ERROR.CONFIRM_PIN_REPLACE)
       if (!confirmed) {
         return
       }
@@ -71,56 +70,61 @@ export default function NotificationEditor({
   return (
     <form className={styles.editor} onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
       <div className={styles.header}>
-        <label htmlFor="notification-title">제목</label>
+        <label htmlFor="notification-title">{MESSAGES.LABEL.NOTIFICATION_TITLE}</label>
         <TextInput
           ref={titleInputRef}
           id="notification-title"
           type="text"
           value={title}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-          placeholder="공지사항 제목을 입력하세요"
+          placeholder={MESSAGES.LABEL.NOTIFICATION_TITLE_PLACEHOLDER}
           className={styles['title-input']}
           disabled={isSaving}
-          aria-label="공지사항 제목"
+          aria-label={MESSAGES.LABEL.NOTIFICATION_TITLE_LABEL}
         />
       </div>
 
       <div className={styles.body}>
-        <label htmlFor="notification-content">내용</label>
+        <label htmlFor="notification-content">{MESSAGES.LABEL.NOTIFICATION_CONTENT}</label>
         <textarea
           id="notification-content"
           value={content}
           onChange={e => setContent(e.target.value)}
-          placeholder="공지사항 내용을 입력하세요"
+          placeholder={MESSAGES.LABEL.NOTIFICATION_CONTENT_PLACEHOLDER}
           className={styles['content-input']}
           disabled={isSaving}
           rows={5}
-          aria-label="공지사항 내용"
+          aria-label={MESSAGES.LABEL.NOTIFICATION_CONTENT_LABEL}
         />
       </div>
 
       <div className={styles.footer}>
-        <Checkbox label="상단 고정" checked={isPinned} onChange={setIsPinned} disabled={isSaving} />
+        <Checkbox
+          label={MESSAGES.LABEL.NOTIFICATION_PIN_TOP}
+          checked={isPinned}
+          onChange={setIsPinned}
+          disabled={isSaving}
+        />
 
         <div className={styles.actions}>
           <FillButton
             type="submit"
             disabled={!title.trim() || isSaving}
             className={styles['save-button']}
-            aria-label="저장"
+            aria-label={MESSAGES.ACTION.SAVE}
           >
             <Check size={16} />
-            <span>저장</span>
+            <span>{MESSAGES.ACTION.SAVE}</span>
           </FillButton>
           <StrokeButton
             type="button"
             onClick={onCancel}
             disabled={isSaving}
             className={styles['cancel-button']}
-            aria-label="취소"
+            aria-label={MESSAGES.ACTION.CANCEL}
           >
             <X size={16} />
-            <span>취소</span>
+            <span>{MESSAGES.ACTION.CANCEL}</span>
           </StrokeButton>
         </div>
       </div>

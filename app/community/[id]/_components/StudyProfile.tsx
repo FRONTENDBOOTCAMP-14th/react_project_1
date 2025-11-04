@@ -302,7 +302,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
           cancelButtonType="stroke"
         >
           <FormField
-            label="커뮤니티 이름"
+            label={MESSAGES.LABEL.COMMUNITY_NAME}
             type="text"
             value={editForm.name}
             onChange={value =>
@@ -312,13 +312,13 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
               }))
             }
             required
-            placeholder="커뮤니티 이름을 입력하세요"
+            placeholder={MESSAGES.LABEL.COMMUNITY_NAME_PLACEHOLDER}
             fieldId="community-name-edit"
-            ariaDescription="커뮤니티 이름을 입력하세요"
+            ariaDescription={MESSAGES.LABEL.COMMUNITY_NAME_ARIA}
           />
 
           <FormField
-            label="설명"
+            label={MESSAGES.LABEL.COMMUNITY_DESCRIPTION}
             type="textarea"
             value={editForm.description}
             onChange={value =>
@@ -327,14 +327,14 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
                 description: typeof value === 'string' ? value : String(value),
               }))
             }
-            placeholder="커뮤니티 설명을 입력하세요"
+            placeholder={MESSAGES.LABEL.COMMUNITY_DESCRIPTION_PLACEHOLDER}
             rows={4}
             fieldId="community-description-edit"
-            ariaDescription="커뮤니티에 대한 상세 설명을 입력하세요"
+            ariaDescription={MESSAGES.LABEL.COMMUNITY_DESCRIPTION_ARIA}
           />
 
           <FormField
-            label="태그"
+            label={MESSAGES.LABEL.COMMUNITY_TAGS}
             type="text"
             value={editForm.tags}
             onChange={value =>
@@ -343,13 +343,13 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
                 tags: typeof value === 'string' ? value : String(value),
               }))
             }
-            placeholder=",로 구분하여 입력 (예: 알고리즘, 독서, CS)"
+            placeholder={MESSAGES.LABEL.COMMUNITY_TAGS_PLACEHOLDER}
             fieldId="community-tags-edit"
-            ariaDescription="커뮤니티 특성을 나타내는 태그를 쉼표로 구분하여 입력하세요"
+            ariaDescription={MESSAGES.LABEL.COMMUNITY_TAGS_ARIA}
           />
 
           <FormField
-            label="지역"
+            label={MESSAGES.LABEL.COMMUNITY_REGION}
             type="select"
             value={region}
             onChange={value => {
@@ -360,14 +360,14 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
               value: regionData.region,
               label: regionData.region,
             }))}
-            placeholder="지역을 선택하세요"
+            placeholder={MESSAGES.LABEL.COMMUNITY_REGION_PLACEHOLDER}
             fieldId="community-region-edit"
-            ariaDescription="커뮤니티가 활동할 주요 지역을 선택하세요"
+            ariaDescription={MESSAGES.LABEL.COMMUNITY_REGION_ARIA}
           />
 
           {region && (
             <FormField
-              label="하위 지역"
+              label={MESSAGES.LABEL.COMMUNITY_SUBREGION}
               type="select"
               value={subRegion}
               onChange={value => setSubRegion(typeof value === 'string' ? value : String(value))}
@@ -376,10 +376,10 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
                   .find(regionData => regionData.region === region)
                   ?.subRegion.map(sub => ({ value: sub, label: sub })) || []
               }
-              placeholder="하위 지역을 선택하세요"
+              placeholder={MESSAGES.LABEL.COMMUNITY_SUBREGION_PLACEHOLDER}
               required
               fieldId="community-subregion-edit"
-              ariaDescription="커뮤니티가 활동할 구체적인 하위 지역을 선택하세요"
+              ariaDescription={MESSAGES.LABEL.COMMUNITY_SUBREGION_ARIA}
             />
           )}
         </SharedForm>

@@ -1,6 +1,7 @@
 'use client'
 
 import { ErrorState } from '@/components/common'
+import { MESSAGES } from '@/constants'
 
 export default function CommunityError({
   error: _error,
@@ -9,5 +10,5 @@ export default function CommunityError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  return <ErrorState message="커뮤니티 정보를 불러오는 중 오류가 발생했습니다" onRetry={reset} />
+  return <ErrorState message={MESSAGES.ERROR.COMMUNITY_LOAD_ERROR} onRetry={reset} />
 }

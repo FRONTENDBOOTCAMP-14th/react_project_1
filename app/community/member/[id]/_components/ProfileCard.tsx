@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { MESSAGES } from '@/constants'
 import styles from './ProfileCard.module.css'
 import Link from 'next/link'
 
@@ -26,10 +27,10 @@ export default function ProfileCard({ member }: ProfileCardProps) {
   // 역할 뱃지
   const roleLabel =
     {
-      owner: '소유자',
-      admin: '관리자',
-      member: '멤버',
-    }[member.role] || '멤버'
+      owner: MESSAGES.LABEL.ROLE_OWNER,
+      admin: MESSAGES.LABEL.ROLE_ADMIN,
+      member: MESSAGES.LABEL.ROLE_MEMBER,
+    }[member.role] || MESSAGES.LABEL.ROLE_MEMBER
 
   // 역할별 CSS 클래스
   const getRoleBadgeClass = () => {

@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { MESSAGES } from '@/constants'
 import styles from './DashboardLayout.module.css'
 
 interface DashboardLayoutProps {
@@ -13,7 +14,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({
   title,
   children,
-  emptyMessage = '표시할 항목이 없습니다.',
+  emptyMessage = MESSAGES.EMPTY.NO_ITEMS,
   isEmpty = false,
 }: DashboardLayoutProps) {
   return (

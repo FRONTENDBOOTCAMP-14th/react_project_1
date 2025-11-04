@@ -6,6 +6,7 @@ import { useState } from 'react'
 import FieldInput from '@/app/community/new/_components/FieldInput'
 import Dropdown from '@/components/ui/Dropdown'
 import FillButton from '@/components/ui/FillButton'
+import { MESSAGES } from '@/constants'
 import regionData from '@/lib/json/region.json'
 import type { CreateCommunityInput } from '@/lib/types/community'
 import { useRouter } from 'next/navigation'
@@ -48,7 +49,7 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
     e.preventDefault()
 
     if (!studyName.trim()) {
-      toast.error('모임명을 입력해주세요')
+      toast.error(MESSAGES.ERROR.COMMUNITY_NAME_REQUIRED)
       return
     }
 
@@ -71,13 +72,13 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
       })
 
       if (result.success) {
-        toast.success('커뮤니티가 성공적으로 생성되었습니다!')
+        toast.success(MESSAGES.SUCCESS.COMMUNITY_CREATE)
         router.push(`/community/${result.data?.clubId}`)
       } else {
-        toast.error(result.error || '커뮤니티 생성에 실패했습니다')
+        toast.error(result.error || MESSAGES.ERROR.COMMUNITY_CREATE_FAILED)
       }
     } catch (_error) {
-      toast.error('커뮤니티 생성 중 오류가 발생했습니다')
+      toast.error(MESSAGES.ERROR.COMMUNITY_CREATE_ERROR)
     } finally {
       setIsSubmitting(false)
     }
@@ -88,14 +89,14 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
       <section>
         <ul className={styles.ul}>
           <li className={styles.li}>
-            <h2 className="sr-only">스터디명</h2>
+            <h2 className="sr-only">{MESSAGES.LABEL.STUDY_NAME}</h2>
             <FieldInput
               id="study-name"
-              label="모임명"
+              label={MESSAGES.LABEL.STUDY_NAME}
               icon={<User size={20} fill="black" stroke="white" strokeWidth={0} />}
               value={studyName}
               onChange={e => setStudyName(e.target.value)}
-              placeholder="스터디명을 입력하세요"
+              placeholder={MESSAGES.LABEL.STUDY_NAME_PLACEHOLDER}
               required={true}
               type="text"
               className={styles.input}
@@ -103,50 +104,50 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
           </li>
 
           <li className={styles.li}>
-            <h2 className="sr-only">스터디지역</h2>
+            <h2 className="sr-only">{MESSAGES.LABEL.STUDY_REGION}</h2>
             <label htmlFor="study-region" className={styles.label}>
               <MapPin size={20} fill="black" stroke="white" strokeWidth={2} />
-              지역
+              {MESSAGES.LABEL.REGION}
             </label>
             <div className={styles.region}>
               <Dropdown
                 options={options}
                 value={studyRegion}
                 onChange={setStudyRegion}
-                placeholder="광역시/도"
+                placeholder={MESSAGES.LABEL.REGION_PLACEHOLDER}
               />
               <Dropdown
                 options={subOptions}
                 value={subRegion}
                 onChange={setSubRegion}
-                placeholder="시/구/군"
+                placeholder={MESSAGES.LABEL.SUB_REGION_PLACEHOLDER}
               />
             </div>
           </li>
 
           <li className={styles.li}>
-            <h2 className="sr-only">스터디설명</h2>
+            <h2 className="sr-only">{MESSAGES.LABEL.STUDY_DESCRIPTION}</h2>
             <FieldInput
               id="study-description"
-              label="설명"
+              label={MESSAGES.LABEL.DESCRIPTION}
               icon={<ClipboardList size={20} fill="black" stroke="white" strokeWidth={1.5} />}
               value={studyDescription}
               onChange={e => setStudyDescription(e.target.value)}
-              placeholder="스터디에 대한 설명을 입력하세요"
+              placeholder={MESSAGES.LABEL.STUDY_DESCRIPTION_PLACEHOLDER}
               type="textarea"
               rows={5}
             />
           </li>
 
           <li className={styles.li}>
-            <h2 className="sr-only">관련태그</h2>
+            <h2 className="sr-only">{MESSAGES.LABEL.STUDY_TAG}</h2>
             <FieldInput
               id="study-tag"
-              label="태그"
+              label={MESSAGES.LABEL.TAG}
               icon={<Tag size={20} fill="black" stroke="white" strokeWidth={2} />}
               value={studyTag}
               onChange={e => setStudyTags(e.target.value)}
-              placeholder=",(쉼표)로 태그를 구분해주세요"
+              placeholder={MESSAGES.LABEL.TAG_PLACEHOLDER}
               required={false}
               type="text"
               className={styles.input}
@@ -156,9 +157,9 @@ export default function CommunityCreate({ onSubmit }: CommunityCreateProps) {
       </section>
 
       <section className={styles.submit}>
-        <h2 className="sr-only">생성버튼</h2>
+        <h2 className="sr-only">{MESSAGES.LABEL.CREATE_BUTTON}</h2>
         <FillButton type="submit" formAction="" disabled={isSubmitting}>
-          {isSubmitting ? '생성 중...' : '생성'}
+          {isSubmitting ? MESSAGES.LOADING.CREATING : MESSAGES.ACTION.CREATE}
         </FillButton>
       </section>
     </form>

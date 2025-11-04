@@ -1,7 +1,8 @@
 'use client'
 
-import { Checkbox, Popover, type PopoverAction } from '@/components/ui'
 import { FormField, SharedForm } from '@/components/common'
+import { Checkbox, Popover, type PopoverAction } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
 import { Ellipsis } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -178,11 +179,13 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
             type="text"
             value={title}
             onChange={value => setTitle(typeof value === 'string' ? value : String(value))}
-            placeholder={onSave ? '새 목표를 입력하세요' : '목표를 입력하세요'}
+            placeholder={
+              onSave ? MESSAGES.LABEL.NEW_GOAL_PLACEHOLDER : MESSAGES.LABEL.GOAL_PLACEHOLDER
+            }
             disabled={isSaving}
-            aria-label="목표 입력"
+            aria-label={MESSAGES.LABEL.GOAL_INPUT}
             fieldId="goal-title-edit"
-            ariaDescription={onSave ? '새로운 목표를 입력하세요' : '목표를 수정하여 입력하세요'}
+            ariaDescription={onSave ? MESSAGES.LABEL.NEW_GOAL_ARIA : MESSAGES.LABEL.EDIT_GOAL_ARIA}
           />
         </SharedForm>
       </div>
@@ -196,7 +199,7 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
         <Checkbox
           checked={goal.isComplete}
           onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
-          aria-label={`${goal.title} 완료 표시`}
+          aria-label={MESSAGES.LABEL.GOAL_COMPLETE_ARIA(goal.title)}
           disabled={isTeam}
         />
         <p className={styles['goal-description']}>{goal.title}</p>

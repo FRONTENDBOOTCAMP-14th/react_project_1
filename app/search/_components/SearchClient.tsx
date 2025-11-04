@@ -1,12 +1,12 @@
 'use client'
 
+import type { SearchCommunityResult } from '@/lib/search/searchServer'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useTransition } from 'react'
+import style from '../page.module.css'
 import CommunitySearchResults from './CommunitySearchResults'
 import SearchRegion from './SearchRegion'
 import WordSearch from './WordSearch'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useTransition } from 'react'
-import type { SearchCommunityResult } from '@/lib/search/searchServer'
-import style from './page.module.css'
 
 interface SearchClientProps {
   initialResults: SearchCommunityResult

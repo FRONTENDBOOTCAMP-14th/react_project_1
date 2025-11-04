@@ -1,3 +1,4 @@
+import { MESSAGES } from '@/constants'
 import { DashboardLayout } from './_components'
 
 export default function DashboardLoading() {
@@ -11,7 +12,7 @@ export default function DashboardLoading() {
           minHeight: '200px',
         }}
       >
-        <div>스터디 목록을 불러오는 중입니다...</div>
+        <div>{MESSAGES.LOADING.STUDY_LIST}</div>
       </div>
     </DashboardLayout>
   )

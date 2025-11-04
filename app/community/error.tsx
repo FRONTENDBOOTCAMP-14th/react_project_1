@@ -1,5 +1,6 @@
 'use client'
 
+import { MESSAGES } from '@/constants'
 import { StrokeButton } from '@/components/ui'
 import styles from './community.module.css'
 
@@ -12,9 +13,9 @@ export default function CommunitiesError({
 }) {
   return (
     <div className={styles.error}>
-      <h2>커뮤니티를 불러올 수 없습니다</h2>
-      <p>일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
-      <StrokeButton onClick={() => reset()}>다시 시도</StrokeButton>
+      <h2>{MESSAGES.ERROR.COMMUNITY_LOAD_FAILED}</h2>
+      <p>{MESSAGES.ERROR.COMMUNITY_TEMPORARY_ERROR}</p>
+      <StrokeButton onClick={() => reset()}>{MESSAGES.ACTION.RETRY}</StrokeButton>
     </div>
   )
 }

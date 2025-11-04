@@ -3,6 +3,7 @@ import type { Notification } from '@/lib/types/notification'
 import { formatDate } from '@/lib/utils'
 import { Pin, Trash2 } from 'lucide-react'
 import { memo, useCallback } from 'react'
+import { MESSAGES } from '@/constants'
 import styles from './NotificationCard.module.css'
 
 interface NotificationCardProps {
@@ -33,7 +34,7 @@ function NotificationCard({ notification, onDelete, onTogglePin, isAdmin }: Noti
       <div className={styles.header}>
         <div className={styles.title}>
           {isPinned && (
-            <span className={styles['pin-badge']} aria-label="고정됨">
+            <span className={styles['pin-badge']} aria-label={MESSAGES.LABEL.PINNED}>
               <Pin size={14} />
             </span>
           )}
@@ -44,12 +45,16 @@ function NotificationCard({ notification, onDelete, onTogglePin, isAdmin }: Noti
           <div className={styles.actions}>
             <IconButton
               onClick={handleTogglePin}
-              title={isPinned ? '고정 해제' : '상단 고정'}
-              aria-label={isPinned ? '고정 해제' : '상단 고정'}
+              title={isPinned ? MESSAGES.ACTION.UNPIN : MESSAGES.ACTION.PIN}
+              aria-label={isPinned ? MESSAGES.ACTION.UNPIN : MESSAGES.ACTION.PIN}
             >
               <Pin size={16} className={isPinned ? styles.active : ''} />
             </IconButton>
-            <IconButton onClick={handleDelete} title="삭제" aria-label="삭제">
+            <IconButton
+              onClick={handleDelete}
+              title={MESSAGES.ACTION.DELETE}
+              aria-label={MESSAGES.ACTION.DELETE}
+            >
               <Trash2 size={16} />
             </IconButton>
           </div>

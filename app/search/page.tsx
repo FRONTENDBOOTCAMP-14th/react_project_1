@@ -1,5 +1,5 @@
 import { searchCommunities } from '@/lib/search/searchServer'
-import SearchClient from './SearchClient'
+import SearchClient from './_components/SearchClient'
 
 interface SearchPageProps {
   searchParams: Promise<{

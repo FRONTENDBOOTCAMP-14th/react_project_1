@@ -1,6 +1,7 @@
 'use client'
 
 import { useCommunity } from '@/lib/hooks'
+import { MESSAGES } from '@/constants'
 import type { CreateCommunityInput } from '@/lib/types/community'
 import ImageUploader from '@/app/community/new/_components/ImageUploader'
 import CommunityCreate from '@/app/community/new/_components/CommunityCreate'
@@ -22,7 +23,7 @@ export default function NewCommunity() {
 
   return (
     <main className={styles.container}>
-      <h1 className="sr-only">새 커뮤니티 생성</h1>
+      <h1 className="sr-only">{MESSAGES.LABEL.NEW_COMMUNITY_CREATE}</h1>
       {/* 1. 이미지 업로드 UI */}
       <section>
         <ImageUploader onImageChange={setImageUrl} />

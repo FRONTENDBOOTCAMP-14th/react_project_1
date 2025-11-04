@@ -1,6 +1,7 @@
 'use client'
 
 import type { Community } from '@/lib/types/community'
+import { MESSAGES } from '@/constants'
 import CommunityCard from './CommunityCard'
 import styles from '../community.module.css'
 
@@ -12,8 +13,8 @@ export default function CommunitiesClient({ communities }: CommunitiesClientProp
   return (
     <>
       <div className={styles.header}>
-        <h1>전체 커뮤니티</h1>
-        <p>참여 가능한 모든 커뮤니티를 확인하세요</p>
+        <h1>{MESSAGES.LABEL.ALL_COMMUNITIES}</h1>
+        <p>{MESSAGES.LABEL.COMMUNITY_DESCRIPTION}</p>
       </div>
 
       <div className={styles.content}>
@@ -24,7 +25,7 @@ export default function CommunitiesClient({ communities }: CommunitiesClientProp
             ))}
           </div>
         ) : (
-          <div className={styles.empty}>등록된 커뮤니티가 없습니다</div>
+          <div className={styles.empty}>{MESSAGES.EMPTY.NO_REGISTERED_COMMUNITIES}</div>
         )}
       </div>
     </>

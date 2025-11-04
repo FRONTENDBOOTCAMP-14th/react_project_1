@@ -27,7 +27,7 @@ export default function StudyCarousel({
 
   // 서버 시간 가져오기
   useEffect(() => {
-    getServerTime().then(setServerTime)
+    setServerTime(getServerTime())
   }, [])
 
   // useCallback으로 함수 메모이제이션 (불필요한 리스너 재등록 방지)

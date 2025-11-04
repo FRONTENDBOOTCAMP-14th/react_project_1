@@ -60,9 +60,9 @@ function GoalsSection({
 }: GoalsSectionProps) {
   return (
     isOpen && (
-      <section className={styles['goals-section']} aria-label="목표 섹션">
+      <section className={styles['goals-section']} aria-label={MESSAGES.LABEL.GOALS_SECTION}>
         <GoalsContainer
-          title="그룹목표"
+          title={MESSAGES.LABEL.TEAM_GOALS}
           goals={teamGoals}
           onToggle={onToggle}
           isTeam={true}
@@ -73,7 +73,7 @@ function GoalsSection({
           onDelete={onDelete}
         />
         <GoalsContainer
-          title="개인목표"
+          title={MESSAGES.LABEL.PERSONAL_GOALS}
           goals={personalGoals}
           onToggle={onToggle}
           isTeam={false}

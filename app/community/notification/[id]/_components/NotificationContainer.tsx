@@ -1,6 +1,7 @@
 'use client'
 
 import { IconButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import { useNotifications } from '@/lib/hooks'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -34,11 +35,11 @@ export default function NotificationContainer({
 
   const handleAddClick = () => {
     if (!userId) {
-      toast.error('로그인이 필요합니다')
+      toast.error(MESSAGES.ERROR.LOGIN_REQUIRED)
       return
     }
     if (!isAdmin) {
-      toast.error('팀장 권한이 필요합니다')
+      toast.error(MESSAGES.ERROR.ADMIN_REQUIRED)
       return
     }
     setIsEditing(true)
@@ -46,7 +47,7 @@ export default function NotificationContainer({
 
   const handleSave = async (title: string, content: string, isPinned: boolean) => {
     if (!userId) {
-      toast.error('로그인이 필요합니다')
+      toast.error(MESSAGES.ERROR.LOGIN_REQUIRED)
       return
     }
 
@@ -62,14 +63,14 @@ export default function NotificationContainer({
       if (isPinned && result.data) {
         const pinResult = await smartTogglePin(result.data.notificationId, false)
         if (!pinResult.success) {
-          toast.error(pinResult.error || '고정 설정에 실패했습니다')
+          toast.error(pinResult.error || MESSAGES.ERROR.NOTIFICATION_PIN_FAILED)
           return
         }
       }
-      toast.success('공지사항이 작성되었습니다')
+      toast.success(MESSAGES.SUCCESS.NOTIFICATION_CREATE)
       setIsEditing(false)
     } else {
-      toast.error(result.error || '공지사항 작성에 실패했습니다')
+      toast.error(result.error || MESSAGES.ERROR.NOTIFICATION_CREATE_FAILED)
     }
   }
 
@@ -78,27 +79,29 @@ export default function NotificationContainer({
   }
 
   const handleDelete = async (notificationId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return
+    if (!confirm(MESSAGES.ERROR.CONFIRM_DELETE)) return
 
     const result = await deleteNotification(notificationId)
     if (result.success) {
-      toast.success('공지사항이 삭제되었습니다')
+      toast.success(MESSAGES.SUCCESS.NOTIFICATION_DELETE)
     } else {
-      toast.error(result.error || '삭제에 실패했습니다')
+      toast.error(result.error || MESSAGES.ERROR.NOTIFICATION_DELETE_FAILED)
     }
   }
 
   const handleTogglePin = async (notificationId: string, currentPinned: boolean) => {
     const result = await smartTogglePin(notificationId, currentPinned)
     if (result.success) {
-      toast.success(currentPinned ? '고정 해제되었습니다' : '상단에 고정되었습니다')
+      toast.success(
+        currentPinned ? MESSAGES.SUCCESS.NOTIFICATION_UNPIN : MESSAGES.SUCCESS.NOTIFICATION_PIN
+      )
     } else {
-      toast.error(result.error || '처리에 실패했습니다')
+      toast.error(result.error || MESSAGES.ERROR.NOTIFICATION_PROCESS_FAILED)
     }
   }
 
   if (!userId) {
-    return <div className={styles.message}>로그인이 필요합니다</div>
+    return <div className={styles.message}>{MESSAGES.ERROR.LOGIN_REQUIRED}</div>
   }
 
   return (
@@ -108,9 +111,9 @@ export default function NotificationContainer({
         className={styles['add-button']}
         onClick={handleAddClick}
         disabled={!isAdmin || isEditing}
-        title={!isAdmin ? '팀장 권한이 필요합니다' : '공지사항 작성'}
+        title={!isAdmin ? MESSAGES.ERROR.ADMIN_REQUIRED : MESSAGES.LABEL.WRITE_NOTIFICATION}
       >
-        쓰기
+        {MESSAGES.ACTION.WRITE}
       </IconButton>
 
       <div className={styles.content}>
@@ -123,12 +126,12 @@ export default function NotificationContainer({
           />
         )}
 
-        {loading && <div className={styles.message}>로딩 중...</div>}
+        {loading && <div className={styles.message}>{MESSAGES.LABEL.LOADING}</div>}
 
         {error && <div className={styles.error}>{error}</div>}
 
         {!loading && !error && notifications.length === 0 && (
-          <div className={styles.message}>작성된 공지사항이 없습니다</div>
+          <div className={styles.message}>{MESSAGES.EMPTY.NO_NOTIFICATIONS}</div>
         )}
 
         {!loading &&

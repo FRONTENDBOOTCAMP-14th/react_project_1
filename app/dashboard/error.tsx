@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { MESSAGES } from '@/constants'
 import { DashboardLayout } from './_components'
 
 interface ErrorProps {
@@ -16,7 +17,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
   return (
     <DashboardLayout
       title="오류가 발생했습니다"
-      emptyMessage="대시보드를 불러오는 중 오류가 발생했습니다."
+      emptyMessage={MESSAGES.ERROR.DASHBOARD_LOAD_FAILED}
       isEmpty={true}
     >
       <div
@@ -38,7 +39,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
             marginTop: 'var(--spacing-md)',
           }}
         >
-          다시 시도
+          {MESSAGES.ACTION.RETRY}
         </button>
       </div>
     </DashboardLayout>

@@ -1,6 +1,7 @@
 'use client'
 
 import { CommunityProvider } from '../_context/CommunityContext'
+import { MESSAGES } from '@/constants'
 import type { CommunityContentProps } from '../types'
 import CommunityLayout from './CommunityLayout'
 import CommunitySection from './CommunitySection'
@@ -23,16 +24,16 @@ export default function CommunityContent({
   return (
     <CommunityProvider clubId={clubId} isAdmin={isAdmin} isMember={isMember}>
       <CommunityLayout clubId={clubId}>
-        <CommunitySection title="커뮤니티 프로필" sectionId="profile">
+        <CommunitySection title={MESSAGES.LABEL.COMMUNITY_PROFILE} sectionId="profile">
           <StudyProfile id={clubId} community={community} />
         </CommunitySection>
 
-        <CommunitySection title="커뮤니티 공지사항" sectionId="notifications">
+        <CommunitySection title={MESSAGES.LABEL.COMMUNITY_NOTIFICATIONS} sectionId="notifications">
           <NotificationLink clubId={clubId} notifications={community.notifications} />
         </CommunitySection>
 
         {(isAdmin || isMember) && (
-          <CommunitySection title="스터디 회차" sectionId="rounds">
+          <CommunitySection title={MESSAGES.LABEL.STUDY_ROUNDS} sectionId="rounds">
             <RoundsList clubId={clubId} rounds={community.rounds} />
           </CommunitySection>
         )}

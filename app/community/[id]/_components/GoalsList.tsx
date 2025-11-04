@@ -2,6 +2,7 @@
 
 import { memo, useState } from 'react'
 import { StrokeButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
 import GoalItem from './GoalItem'
 import styles from './GoalItem.module.css'
@@ -100,7 +101,7 @@ function GoalsList({
           className={styles['add-button']}
           onClick={handleAddClick}
           type="button"
-          aria-label="목표 추가"
+          aria-label={MESSAGES.LABEL.GOAL_ADD}
           disabled={isAdding}
         >
           +

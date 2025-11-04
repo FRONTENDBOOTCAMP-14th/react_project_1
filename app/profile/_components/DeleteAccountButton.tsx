@@ -2,6 +2,7 @@
 
 import { deleteAccountAction } from '@/app/actions/profile'
 import { FillButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import { signOut } from 'next-auth/react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
@@ -13,7 +14,7 @@ export default function DeleteAccountButton() {
   const onDelete = async () => {
     if (isPending) return
 
-    const ok = window.confirm('정말로 회원탈퇴 하시겠습니까? 이 작업은 되돌릴 수 없습니다.')
+    const ok = window.confirm(MESSAGES.LABEL.DELETE_ACCOUNT_CONFIRM)
     if (!ok) return
 
     startTransition(async () => {
@@ -24,14 +25,14 @@ export default function DeleteAccountButton() {
         // 세션도 명시적으로 종료
         await signOut({ callbackUrl: '/login' })
       } else {
-        toast.error(result.error || '회원탈퇴에 실패했습니다')
+        toast.error(result.error || MESSAGES.ERROR.DELETE_ACCOUNT_FAILED)
       }
     })
   }
 
   return (
     <FillButton className={styles.button} type="button" onClick={onDelete} disabled={isPending}>
-      {isPending ? '처리 중…' : '회원탈퇴'}
+      {isPending ? MESSAGES.LABEL.DELETING_ACCOUNT : MESSAGES.LABEL.DELETE_ACCOUNT}
     </FillButton>
   )
 }

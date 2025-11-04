@@ -2,6 +2,7 @@
 
 import { ErrorState, FormField, LoadingState, SharedForm } from '@/components/common'
 import { StrokeButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import type { CommunityDetail } from '@/lib/community/communityServer'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import { toDatetimeLocalString } from '@/lib/utils'
@@ -99,7 +100,7 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
   }
 
   if (loading) {
-    return <LoadingState message="회차 목록을 불러오는 중..." />
+    return <LoadingState message={MESSAGES.LABEL.ROUNDS_LOADING} />
   }
 
   if (error) {
@@ -115,20 +116,20 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
               className={styles['add-round-button']}
               onClick={() => setIsAddingRound(true)}
             >
-              새 회차 추가
+              {MESSAGES.ACTION.ADD_ROUND}
             </StrokeButton>
           ) : (
             <SharedForm
               onSubmit={handleCreateRound}
-              submitText="생성"
-              cancelText="취소"
+              submitText={MESSAGES.ACTION.CREATE}
+              cancelText={MESSAGES.ACTION.CANCEL}
               onCancel={() => setIsAddingRound(false)}
               variant="inline"
               submitButtonType="fill"
               cancelButtonType="stroke"
             >
               <FormField
-                label="회차 번호"
+                label={MESSAGES.LABEL.ROUND_NUMBER}
                 type="number"
                 value={String(newRoundForm.roundNumber || 1)}
                 onChange={value =>
@@ -137,13 +138,13 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
                     roundNumber: typeof value === 'number' ? value : parseInt(value) || 1,
                   }))
                 }
-                placeholder="회차 번호"
+                placeholder={MESSAGES.LABEL.ROUND_NUMBER_PLACEHOLDER}
                 min={1}
                 fieldId="round-number-create"
-                ariaDescription="회차 번호를 입력하세요 (1 이상의 숫자)"
+                ariaDescription={MESSAGES.LABEL.ROUND_NUMBER_ARIA}
               />
               <FormField
-                label="시작일"
+                label={MESSAGES.LABEL.ROUND_START_DATE}
                 type="datetime-local"
                 value={
                   typeof newRoundForm.startDate === 'string'
@@ -156,12 +157,12 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
                     startDate: typeof value === 'string' ? value : String(value),
                   }))
                 }
-                placeholder="시작일"
+                placeholder={MESSAGES.LABEL.ROUND_START_DATE_PLACEHOLDER}
                 fieldId="start-date-create"
-                ariaDescription="회차 시작 일시를 선택하세요"
+                ariaDescription={MESSAGES.LABEL.ROUND_START_DATE_ARIA}
               />
               <FormField
-                label="종료일"
+                label={MESSAGES.LABEL.ROUND_END_DATE}
                 type="datetime-local"
                 value={
                   typeof newRoundForm.endDate === 'string'
@@ -174,12 +175,12 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
                     endDate: typeof value === 'string' ? value : String(value),
                   }))
                 }
-                placeholder="종료일"
+                placeholder={MESSAGES.LABEL.ROUND_END_DATE_PLACEHOLDER}
                 fieldId="end-date-create"
-                ariaDescription="회차 종료 일시를 선택하세요"
+                ariaDescription={MESSAGES.LABEL.ROUND_END_DATE_ARIA}
               />
               <FormField
-                label="장소"
+                label={MESSAGES.LABEL.ROUND_LOCATION}
                 type="text"
                 value={newRoundForm.location || ''}
                 onChange={value =>
@@ -188,9 +189,9 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
                     location: typeof value === 'string' ? value : String(value),
                   }))
                 }
-                placeholder="장소"
+                placeholder={MESSAGES.LABEL.ROUND_LOCATION_PLACEHOLDER}
                 fieldId="location-create"
-                ariaDescription="스터디가 진행될 장소를 입력하세요"
+                ariaDescription={MESSAGES.LABEL.ROUND_LOCATION_ARIA}
               />
             </SharedForm>
           )}

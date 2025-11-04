@@ -10,9 +10,10 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
 
   const member =
     id.length > 35
-      ? await prisma.communityMember.findUnique({
+      ? await prisma.communityMember.findFirst({
           where: {
             id,
+            deletedAt: null,
           },
           select: memberDetailSelect,
         })
@@ -26,6 +27,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     .findMany({
       where: {
         userId: member.user.userId,
+        deletedAt: null,
       },
     })
     .then(attendance => attendance.length)

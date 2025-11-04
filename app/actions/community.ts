@@ -61,9 +61,10 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
       // 관리자 권한 확인
       await checkPermission(userId, clubId, 'admin')
 
-      // 커뮤니티 삭제
-      await prisma.community.delete({
-        where: { clubId },
+      // 커뮤니티 소프트 삭제
+      await prisma.community.update({
+        where: { clubId, deletedAt: null },
+        data: { deletedAt: new Date() },
       })
 
       revalidatePath('/community')
@@ -88,9 +89,9 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      // 이미 가입했는지 확인
+      // 이미 가입했는지 확인 (deletedAt 필터 포함)
       const existingMember = await prisma.communityMember.findFirst({
-        where: { clubId, userId },
+        where: { clubId, userId, deletedAt: null },
       })
 
       if (existingMember) {

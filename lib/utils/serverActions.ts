@@ -124,6 +124,7 @@ export async function checkPermission(
     where: {
       clubId,
       userId,
+      deletedAt: null, // 삭제된 멤버십 제외
       ...(requiredRole === 'admin' && { role: 'admin' }),
     },
   })

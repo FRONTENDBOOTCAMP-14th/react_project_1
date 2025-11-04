@@ -10,7 +10,13 @@ export default async function DashboardPage() {
   if (!userId) {
     redirect('/login')
   }
+
   const user = await prisma.user.findUnique({ where: { userId } })
+
+  // 삭제된 사용자는 로그인 페이지로 리다이렉트
+  if (!user || user.deletedAt) {
+    redirect('/login')
+  }
 
   const subscribedCommunities = await prisma.community.findMany({
     where: {

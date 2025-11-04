@@ -8,8 +8,11 @@ export default async function ProfilePage() {
   if (!userId) {
     redirect('/login')
   }
+
   const user = await prisma.user.findUnique({ where: { userId } })
-  if (!user) {
+
+  // 삭제된 사용자는 로그인 페이지로 리다이렉트
+  if (!user || user.deletedAt) {
     redirect('/login')
   }
 

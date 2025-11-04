@@ -94,9 +94,10 @@ export async function deleteRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, 'admin')
 
-      // 라운드 삭제
-      await prisma.round.delete({
-        where: { roundId },
+      // 라운드 소프트 삭제
+      await prisma.round.update({
+        where: { roundId, deletedAt: null },
+        data: { deletedAt: new Date() },
       })
 
       revalidatePath(`/community/${clubId}`)
@@ -120,9 +121,9 @@ export async function markAttendanceAction(
       // 멤버십 확인
       await checkPermission(userId, clubId, 'member')
 
-      // 출석 기록 확인
+      // 출석 기록 확인 (deletedAt 필터 포함)
       const existingAttendance = await prisma.attendance.findFirst({
-        where: { roundId, userId },
+        where: { roundId, userId, deletedAt: null },
       })
 
       if (existingAttendance) {

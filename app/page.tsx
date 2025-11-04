@@ -22,7 +22,15 @@ function RecommendedStudiesLoading() {
 
 export default async function HomePage() {
   const userId = await getCurrentUserId()
-  const user = userId ? await prisma.user.findUnique({ where: { userId } }) : null
+  let user = null
+
+  if (userId) {
+    user = await prisma.user.findUnique({ where: { userId } })
+    // 삭제된 사용자는 null로 처리
+    if (user?.deletedAt) {
+      user = null
+    }
+  }
 
   return (
     <main className={styles.main}>

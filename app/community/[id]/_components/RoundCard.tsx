@@ -8,16 +8,16 @@ import type { CustomSession } from '@/lib/types'
 import type { Round } from '@/lib/types/round'
 import {
   formatDateRangeUTC,
+  fromDatetimeLocalString,
   renderWithError,
   renderWithLoading,
   toDatetimeLocalString,
-  fromDatetimeLocalString,
 } from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
+import { useCommunityContext } from '../_context/CommunityContext'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import GoalsSection from './GoalsSection'
 import styles from './RoundCard.module.css'
@@ -375,9 +375,8 @@ interface RoundCardBodyProps {
  * @param props - RoundCardBodyProps
  */
 function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
-  // 전역 상태에서 커뮤니티 컴텍스트 가져오기
-  const clubId = useCommunityStore(state => state.clubId)
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
+  // Context에서 커뮤니티 정보 가져오기
+  const { clubId, isAdmin } = useCommunityContext()
   const { data: session } = useSession()
   const { goals, loading, error, refetch, createGoal, updateGoal, deleteGoal } = useGoals(
     clubId || '',
@@ -461,7 +460,7 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
         teamGoals={optimisticGoals.team}
         personalGoals={optimisticGoals.personal}
         onToggle={handleToggleComplete}
-        isTeamLeader={isTeamLeader}
+        isAdmin={isAdmin}
         onAddGoal={handleAddGoal}
         onEdit={handleEditGoal}
         onDelete={handleDeleteGoal}

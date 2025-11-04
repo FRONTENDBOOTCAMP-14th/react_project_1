@@ -1,13 +1,13 @@
-export { checkIsTeamLeader, checkIsMember, checkMembershipAndRole } from './permissions'
 export {
+  authMiddleware,
+  checkAuth,
+  getCurrentUserId,
+  getSession,
+  getUserRole,
+  hasPermission,
   requireAuth,
   requireMembership,
   requireTeamLeader,
   validateCommunity,
-  authMiddleware,
-  getSession,
-  getCurrentUserId,
-  checkAuth,
-  getUserRole,
-  hasPermission,
 } from '../middleware/auth'
+export { checkIsMember, checkMembershipAndRole, checkisAdmin } from './permissions'

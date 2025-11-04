@@ -12,11 +12,11 @@ import NotificationEditor from './NotificationEditor'
 export default function NotificationContainer({
   clubId,
   userId,
-  isTeamLeader,
+  isAdmin,
 }: {
   clubId: string
   userId: string
-  isTeamLeader: boolean
+  isAdmin: boolean
 }) {
   const [isEditing, setIsEditing] = useState(false)
 
@@ -37,7 +37,7 @@ export default function NotificationContainer({
       toast.error('로그인이 필요합니다')
       return
     }
-    if (!isTeamLeader) {
+    if (!isAdmin) {
       toast.error('팀장 권한이 필요합니다')
       return
     }
@@ -107,8 +107,8 @@ export default function NotificationContainer({
       <IconButton
         className={styles['add-button']}
         onClick={handleAddClick}
-        disabled={!isTeamLeader || isEditing}
-        title={!isTeamLeader ? '팀장 권한이 필요합니다' : '공지사항 작성'}
+        disabled={!isAdmin || isEditing}
+        title={!isAdmin ? '팀장 권한이 필요합니다' : '공지사항 작성'}
       >
         쓰기
       </IconButton>
@@ -118,7 +118,7 @@ export default function NotificationContainer({
           <NotificationEditor
             onSave={handleSave}
             onCancel={handleCancel}
-            isTeamLeader={isTeamLeader}
+            isAdmin={isAdmin}
             hasPinnedNotification={pinnedNotifications.length > 0}
           />
         )}
@@ -139,7 +139,7 @@ export default function NotificationContainer({
               notification={notification}
               onDelete={handleDelete}
               onTogglePin={handleTogglePin}
-              isTeamLeader={isTeamLeader}
+              isAdmin={isAdmin}
             />
           ))}
       </div>

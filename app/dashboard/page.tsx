@@ -1,9 +1,9 @@
-import prisma from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import styles from './page.module.css'
-import { StudyCardListItem } from './_components'
+import prisma from '@/lib/prisma'
 import type { CommunityInfo } from '@/lib/types/community'
+import { redirect } from 'next/navigation'
+import { StudyCardListItem } from './_components'
+import styles from './page.module.css'
 
 export default async function DashboardPage() {
   const userId = await getCurrentUserId()
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
           <ul className={styles.list}>
             {subscribedCommunities.map((community: CommunityInfo) => {
               const currentMember = community.communityMembers?.[0]
-              const isTeamLeader = currentMember?.role === 'admin'
+              const isAdmin = currentMember?.role === 'admin'
 
               return (
                 <StudyCardListItem
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
                   region={community.region || ''}
                   subRegion={community.subRegion || ''}
                   imageUrl={community.imageUrl || ''}
-                  isTeamLeader={isTeamLeader}
+                  isAdmin={isAdmin}
                 />
               )
             })}

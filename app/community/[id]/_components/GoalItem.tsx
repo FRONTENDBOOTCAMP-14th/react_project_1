@@ -61,7 +61,7 @@ export interface GoalItemProps {
 function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }: GoalItemProps) {
   const { data: session } = useSession()
   const userId = (session as CustomSession)?.userId
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
+  const isAdmin = useCommunityStore(state => state.isAdmin)
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -209,7 +209,7 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
           checked={goal.isComplete}
           onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
           aria-label={`${goal.title} 완료 표시`}
-          disabled={!userId || (!isTeamLeader && isTeam)}
+          disabled={!userId || (!isAdmin && isTeam)}
         />
         <p className={styles['goal-description']}>{goal.title}</p>
       </div>

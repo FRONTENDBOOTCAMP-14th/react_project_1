@@ -1,22 +1,22 @@
 'use client'
 
-import { memo, useMemo, useState, useCallback, type ReactNode } from 'react'
-import styles from './StudyProfile.module.css'
 import communityCardStyles from '@/app/_components/CommunityCard.module.css'
-import type { Community, UpdateCommunityInput } from '@/lib/types/community'
-import { Ellipsis, MapPin, Users } from 'lucide-react'
+import { ErrorState, LoadingState } from '@/components/common'
+import { Dropdown, IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
+import { MESSAGES, ROUTES, UI_CONSTANTS } from '@/constants'
 import { useCommunity } from '@/lib/hooks'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
-import { renderWithLoading, renderWithError } from '@/lib/utils'
-import { LoadingState, ErrorState } from '@/components/common'
-import { UI_CONSTANTS, MESSAGES, ROUTES } from '@/constants'
-import { StrokeButton, Popover, type PopoverAction, IconLink, Dropdown } from '@/components/ui'
-import CommunityImageUploader from './CommunityImageUploader'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import regions from '@/lib/json/region.json'
-import { useSession } from 'next-auth/react'
+import type { Community, UpdateCommunityInput } from '@/lib/types/community'
+import { renderWithError, renderWithLoading } from '@/lib/utils'
+import { Ellipsis, MapPin, Users } from 'lucide-react'
 import type { Session } from 'next-auth'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { toast } from 'sonner'
+import { useCommunityContext } from '../_context/CommunityContext'
+import CommunityImageUploader from './CommunityImageUploader'
+import styles from './StudyProfile.module.css'
 
 interface CustomSession extends Session {
   userId?: string
@@ -41,16 +41,16 @@ interface StudyProfileProps {
 }
 
 /**
- * 정보 행 컴포넌트 (순수 컴포넌트)
+ * 정보 행 컴포넌트
  */
-const InfoRow = memo(({ icon, text }: InfoRowProps) => {
+function InfoRow({ icon, text }: InfoRowProps) {
   return (
     <section className={styles['info-row']} aria-label={text}>
       {icon}
       <p>{text}</p>
     </section>
   )
-})
+}
 
 /**
  * 커뮤니티 정보 컴포넌트에 전달되는 속성
@@ -61,9 +61,9 @@ interface ProfileInfoProps {
 }
 
 /**
- * 커뮤니티 정보 컴포넌트 (순수 컴포넌트)
+ * 커뮤니티 정보 컴포넌트
  */
-const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
+function ProfileInfo({ community }: ProfileInfoProps) {
   const iconSize = UI_CONSTANTS.ICON_SIZE.SMALL
   const memberCount = community._count?.communityMembers || 0
 
@@ -93,7 +93,7 @@ const ProfileInfo = memo(({ community }: ProfileInfoProps) => {
       )}
     </div>
   )
-})
+}
 
 /**
  * 커뮤니티 콘텐츠 컴포넌트에 전달되는 속성
@@ -111,12 +111,11 @@ interface CommunityContentProps {
 }
 
 /**
- * 커뮤니티 콘텐츠 컴포넌트 (순수 컴포넌트)
+ * 커뮤니티 콘텐츠 컴포넌트
  */
-const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityContentProps) => {
+function CommunityContent({ community, onUpdate, onDelete }: CommunityContentProps) {
   const router = useRouter()
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
-  const isMember = useCommunityStore(state => state.isMember)
+  const { isAdmin, isMember } = useCommunityContext()
   const [region, setRegion] = useState(community.region || '')
   const [subRegion, setSubRegion] = useState(community.subRegion || '')
 
@@ -392,11 +391,11 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
             currentImageUrl={community.imageUrl}
             communityName={community.name}
             onImageUpdate={handleImageUpdate}
-            isAdmin={isTeamLeader}
+            isAdmin={isAdmin}
           />
           <ProfileInfo community={community} />
         </div>
-        {isTeamLeader && (
+        {isAdmin && (
           <div className={styles['header-right']}>
             <Popover trigger={<Ellipsis />} actions={actions} />
           </div>
@@ -414,7 +413,7 @@ const CommunityContent = memo(({ community, onUpdate, onDelete }: CommunityConte
       </div>
     </div>
   )
-})
+}
 
 /**
  * 커뮤니티 프로필 메인 컴포넌트

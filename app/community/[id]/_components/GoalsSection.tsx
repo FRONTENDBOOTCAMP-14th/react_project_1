@@ -1,10 +1,10 @@
 'use client'
 
-import { memo } from 'react'
+import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
+import { memo } from 'react'
 import GoalsContainer from './GoalsContainer'
 import styles from './GoalsSection.module.css'
-import { MESSAGES } from '@/constants'
 
 /**
  * 목표 섹션 컴포넌트에 전달되는 속성
@@ -25,7 +25,7 @@ export interface GoalsSectionProps {
   /**
    * 팀장 여부에 따라 그룹 목표 추가 버튼 노출
    */
-  isTeamLeader?: boolean
+  isAdmin?: boolean
   /**
    * 목표 추가 핸들러 (새 목표 저장 시)
    */
@@ -52,7 +52,7 @@ function GoalsSection({
   teamGoals,
   personalGoals,
   onToggle,
-  isTeamLeader,
+  isAdmin,
   onAddGoal,
   onEdit,
   onDelete,
@@ -66,7 +66,7 @@ function GoalsSection({
           goals={teamGoals}
           onToggle={onToggle}
           isTeam={true}
-          showAddButton={!!isTeamLeader}
+          showAddButton={!!isAdmin}
           emptyMessage={MESSAGES.EMPTY.TEAM_GOALS}
           onAddGoal={onAddGoal ? async title => onAddGoal(title, true) : undefined}
           onEdit={onEdit}

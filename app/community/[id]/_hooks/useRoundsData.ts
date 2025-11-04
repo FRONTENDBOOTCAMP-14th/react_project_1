@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { RoundService } from '../_services/roundService'
 import type { Round, CreateRoundRequest } from '@/lib/types/round'
+import { parseApiError } from '../_utils/errorHandling'
+import { toast } from 'sonner'
 
 interface UseRoundsDataResult {
   rounds: Round[]
@@ -9,6 +11,7 @@ interface UseRoundsDataResult {
   createRound: (data: CreateRoundRequest) => Promise<void>
   deleteRound: (roundId: string) => Promise<void>
   refetch: () => Promise<void>
+  isEmpty: boolean
 }
 
 /**
@@ -21,7 +24,11 @@ export function useRoundsData(clubId: string): UseRoundsDataResult {
   const [error, setError] = useState<string | null>(null)
 
   const fetchRounds = useCallback(async () => {
-    if (!clubId) return
+    if (!clubId) {
+      setRounds([])
+      setLoading(false)
+      return
+    }
 
     try {
       setLoading(true)
@@ -29,8 +36,11 @@ export function useRoundsData(clubId: string): UseRoundsDataResult {
       const data = await RoundService.getRounds(clubId)
       setRounds(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load rounds')
+      const parsedError = parseApiError(err)
+      const errorMessage = parsedError.message
+      setError(errorMessage)
       setRounds([])
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -43,9 +53,13 @@ export function useRoundsData(clubId: string): UseRoundsDataResult {
       try {
         const newRound = await RoundService.createRound({ ...data, clubId })
         setRounds(prev => [...prev, newRound])
+        toast.success('새로운 회차가 생성되었습니다')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create round')
-        throw err
+        const parsedError = parseApiError(err)
+        const errorMessage = parsedError.message
+        setError(errorMessage)
+        toast.error(errorMessage)
+        throw parsedError
       }
     },
     [clubId]
@@ -55,15 +69,21 @@ export function useRoundsData(clubId: string): UseRoundsDataResult {
     try {
       await RoundService.deleteRound(roundId)
       setRounds(prev => prev.filter(round => round.roundId !== roundId))
+      toast.success('회차가 삭제되었습니다')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete round')
-      throw err
+      const parsedError = parseApiError(err)
+      const errorMessage = parsedError.message
+      setError(errorMessage)
+      toast.error(errorMessage)
+      throw parsedError
     }
   }, [])
 
   useEffect(() => {
     fetchRounds()
   }, [fetchRounds])
+
+  const isEmpty = useMemo(() => rounds.length === 0, [rounds.length])
 
   return {
     rounds,
@@ -72,5 +92,6 @@ export function useRoundsData(clubId: string): UseRoundsDataResult {
     createRound,
     deleteRound,
     refetch: fetchRounds,
+    isEmpty,
   }
 }

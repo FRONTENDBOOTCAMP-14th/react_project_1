@@ -1,6 +1,6 @@
 import { ROUTES } from '@/constants'
-import { checkMembershipAndRole } from '@/lib/auth/permissions'
 import { getCurrentUserId } from '@/lib/auth'
+import { checkMembershipAndRole } from '@/lib/auth/permissions'
 import { redirect } from 'next/navigation'
 import CommunityContent from './_components/CommunityContent'
 
@@ -23,7 +23,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const userId = await getCurrentUserId()
 
   // 한 번의 쿼리로 멤버십과 역할 확인
-  const { isMember, isTeamLeader } = await checkMembershipAndRole(userId, clubId)
+  const { isMember, isAdmin } = await checkMembershipAndRole(userId, clubId)
 
-  return <CommunityContent clubId={clubId} isTeamLeader={isTeamLeader} isMember={isMember} />
+  return <CommunityContent clubId={clubId} isAdmin={isAdmin} isMember={isMember} />
 }

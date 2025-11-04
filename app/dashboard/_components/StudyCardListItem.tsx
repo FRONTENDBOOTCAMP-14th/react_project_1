@@ -1,13 +1,13 @@
 'use client'
 
-import { memo } from 'react'
-import styles from './StudyCardListItem.module.css'
-import Link from 'next/link'
+import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 import { Popover, type PopoverAction } from '@/components/ui'
 import { EllipsisVertical } from 'lucide-react'
-import { toast } from 'sonner'
 import Image from 'next/image'
-import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
+import Link from 'next/link'
+import { memo } from 'react'
+import { toast } from 'sonner'
+import styles from './StudyCardListItem.module.css'
 
 interface StudyCardListItemProps {
   clubId: string
@@ -17,7 +17,7 @@ interface StudyCardListItemProps {
   region: string
   subRegion: string
   imageUrl?: string
-  isTeamLeader: boolean
+  isAdmin: boolean
 }
 
 function StudyCardListItem({
@@ -28,7 +28,7 @@ function StudyCardListItem({
   region,
   subRegion,
   imageUrl,
-  isTeamLeader,
+  isAdmin,
 }: StudyCardListItemProps) {
   const handleLeaveCommunity = async (clubId: string) => {
     try {
@@ -97,7 +97,7 @@ function StudyCardListItem({
             />
             <div className={styles['link-data']}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {name} <span className={styles.badge}>{isTeamLeader ? '팀장' : '멤버'}</span>
+                {name} <span className={styles.badge}>{isAdmin ? '팀장' : '멤버'}</span>
               </div>
               <span className={styles.description}>{description}</span>
               <span className={styles.description}>

@@ -3,8 +3,8 @@
 import { ErrorState, LoadingState } from '@/components/common'
 import { StrokeButton } from '@/components/ui'
 import type { CreateRoundRequest } from '@/lib/types/round'
-import { memo, useState } from 'react'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
+import { useState } from 'react'
+import { useCommunityContext } from '../_context/CommunityContext'
 import { useRoundsData } from '../_hooks/useRoundsData'
 import RoundCard from './RoundCard'
 import styles from './RoundsList.module.css'
@@ -14,13 +14,13 @@ interface RoundsListProps {
 }
 
 /**
- * 라운드 목록 컨테이너 컴포넌트
- * useRoundsData 훅을 사용하여 전체 라운드 목록을 가져와 각 라운드를 RoundCard로 렌더링합니다.
- * 전역 상태에서 clubId와 isTeamLeader를 가져옵니다.
+ * 라운드 목록 컴포넌트
+ * - 라운드 목록 조회 및 생성 기능 제공
+ * - 팀장에게만 생성 권한 부여
  */
-function RoundsListComponent({ clubId }: RoundsListProps) {
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
-  const { rounds, loading, error, createRound } = useRoundsData(clubId)
+export default function RoundsList({ clubId }: RoundsListProps) {
+  const { isAdmin } = useCommunityContext()
+  const { rounds, loading, error, createRound, isEmpty } = useRoundsData(clubId)
 
   // 열린 라운드 ID를 추적하는 상태
   const [openRoundIds, setOpenRoundIds] = useState<Set<string>>(() => new Set())
@@ -83,7 +83,7 @@ function RoundsListComponent({ clubId }: RoundsListProps) {
 
   return (
     <div className={styles['rounds-list-container']}>
-      {isTeamLeader && (
+      {isAdmin && (
         <div className={styles['add-round-section']}>
           {!isAddingRound ? (
             <StrokeButton
@@ -158,7 +158,7 @@ function RoundsListComponent({ clubId }: RoundsListProps) {
         </div>
       )}
 
-      {rounds.length === 0 ? (
+      {isEmpty ? (
         <div className={styles['no-rounds']}>
           <p>아직 생성된 회차가 없습니다.</p>
         </div>
@@ -177,5 +177,3 @@ function RoundsListComponent({ clubId }: RoundsListProps) {
     </div>
   )
 }
-
-export default memo(RoundsListComponent)

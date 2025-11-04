@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from 'react'
+import { Checkbox, FillButton, StrokeButton, TextInput } from '@/components/ui'
 import { Check, X } from 'lucide-react'
-import { Checkbox, TextInput, FillButton, StrokeButton } from '@/components/ui'
+import { useEffect, useRef, useState } from 'react'
 import styles from './NotificationEditor.module.css'
 
 interface NotificationEditorProps {
   onSave: (title: string, content: string, isPinned: boolean) => Promise<void>
   onCancel: () => void
-  isTeamLeader: boolean
+  isAdmin: boolean
   hasPinnedNotification: boolean
 }
 
@@ -16,7 +16,7 @@ interface NotificationEditorProps {
 export default function NotificationEditor({
   onSave,
   onCancel,
-  isTeamLeader,
+  isAdmin,
   hasPinnedNotification,
 }: NotificationEditorProps) {
   const [title, setTitle] = useState('')
@@ -64,7 +64,7 @@ export default function NotificationEditor({
     }
   }
 
-  if (!isTeamLeader) {
+  if (!isAdmin) {
     return null
   }
 

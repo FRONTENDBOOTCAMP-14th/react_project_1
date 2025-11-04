@@ -4,6 +4,7 @@ import { ErrorState, FormField, LoadingState, SharedForm } from '@/components/co
 import { StrokeButton } from '@/components/ui'
 import type { CommunityDetail } from '@/lib/community/communityServer'
 import type { CreateRoundRequest } from '@/lib/types/round'
+import { toDatetimeLocalString } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useCommunityContext } from '../_context/CommunityContext'
@@ -147,9 +148,7 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
                 value={
                   typeof newRoundForm.startDate === 'string'
                     ? newRoundForm.startDate
-                    : newRoundForm.startDate
-                      ? new Date(newRoundForm.startDate).toISOString().slice(0, 16)
-                      : ''
+                    : toDatetimeLocalString(newRoundForm.startDate)
                 }
                 onChange={value =>
                   setNewRoundForm((prev: CreateRoundRequest) => ({
@@ -167,9 +166,7 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
                 value={
                   typeof newRoundForm.endDate === 'string'
                     ? newRoundForm.endDate
-                    : newRoundForm.endDate
-                      ? new Date(newRoundForm.endDate).toISOString().slice(0, 16)
-                      : ''
+                    : toDatetimeLocalString(newRoundForm.endDate)
                 }
                 onChange={value =>
                   setNewRoundForm((prev: CreateRoundRequest) => ({

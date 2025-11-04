@@ -4,6 +4,7 @@ import { LoadingState } from '@/components/common'
 import { useUserCommunities } from '@/lib/hooks'
 import { useMemo, useState } from 'react'
 import styles from './CalendarSection.module.css'
+import { toLocalTime } from '@/lib/utils'
 
 interface CalendarSectionProps {
   onDateSelect: (date: number) => void
@@ -32,7 +33,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
       // 해당 날짜의 라운드들
       const dayRounds = upcomingRounds.filter(round => {
         if (!round.startDate) return false
-        const roundDate = new Date(round.startDate)
+        const roundDate = toLocalTime(new Date(round.startDate))
         return roundDate >= dayStart && roundDate < dayEnd
       })
 

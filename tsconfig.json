@@ -7,6 +7,7 @@
       "@/app/*": ["app/*"],
       "@/styles/*": ["styles/*"],
       "@/types/*": ["lib/types/*"],
+      "@/jest/*": ["jest/*"],
       "@/constants": ["constants"],
       "@/constants/*": ["constants/*"]
     },
@@ -14,6 +15,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+    "types": ["jest"],
     "strict": true,
     "noEmit": true,
     "incremental": true,

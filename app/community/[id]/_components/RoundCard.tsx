@@ -1,5 +1,6 @@
 'use client'
 
+import { deleteRoundAction, markAttendanceAction, updateRoundAction } from '@/app/actions/rounds'
 import { ErrorState, LoadingState } from '@/components/common'
 import { IconButton, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES } from '@/constants'
@@ -17,7 +18,6 @@ import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { deleteRoundAction, markAttendanceAction, updateRoundAction } from '@/app/actions/rounds'
 import { useCommunityContext } from '../_context/CommunityContext'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import GoalsSection from './GoalsSection'
@@ -138,7 +138,7 @@ function RoundCardHeader({
   })
   const [hasAttended, setHasAttended] = useState(false)
   const [checkingAttendance, setCheckingAttendance] = useState(false)
-  const now = new Date()
+  const now = new Date() // 임시: 클라이언트 시간 사용 (추후 동기화 로직 개선)
   const start = round?.startDate ? new Date(round.startDate) : null
   const end = round?.endDate ? new Date(round.endDate) : null
   const isWithinWindow = start && end ? now >= start && now <= end : false

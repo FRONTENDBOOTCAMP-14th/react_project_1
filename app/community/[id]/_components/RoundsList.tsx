@@ -2,10 +2,10 @@
 
 import { ErrorState, LoadingState } from '@/components/common'
 import { StrokeButton } from '@/components/ui'
+import { useRounds } from '@/lib/hooks'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import { useState } from 'react'
 import { useCommunityContext } from '../_context/CommunityContext'
-import { useRoundsData } from '../_hooks/useRoundsData'
 import RoundCard from './RoundCard'
 import styles from './RoundsList.module.css'
 
@@ -20,7 +20,8 @@ interface RoundsListProps {
  */
 export default function RoundsList({ clubId }: RoundsListProps) {
   const { isAdmin } = useCommunityContext()
-  const { rounds, loading, error, createRound, isEmpty } = useRoundsData(clubId)
+  const { rounds, loading, error, createRound, refetch } = useRounds(clubId)
+  const isEmpty = rounds.length === 0
 
   // 열린 라운드 ID를 추적하는 상태
   const [openRoundIds, setOpenRoundIds] = useState<Set<string>>(() => new Set())
@@ -170,6 +171,7 @@ export default function RoundsList({ clubId }: RoundsListProps) {
               round={round}
               isOpen={openRoundIds.has(round.roundId)}
               onToggleOpen={() => handleToggleRound(round.roundId)}
+              onRefetch={refetch}
             />
           ))}
         </div>

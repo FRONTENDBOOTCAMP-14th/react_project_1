@@ -12,7 +12,7 @@ import { Ellipsis, MapPin, Users } from 'lucide-react'
 import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, useState, useTransition, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { useCommunityContext } from '../_context/CommunityContext'
 import CommunityImageUploader from './CommunityImageUploader'
@@ -250,6 +250,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
    * 커뮤니티 가입
    */
   const { data: session } = useSession()
+  const [, startTransition] = useTransition()
   const handleJoinClick = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
@@ -261,34 +262,23 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
         return
       }
 
-      try {
-        const response = await fetch('/api/members', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            clubId: community.clubId,
-            userId,
-            role: 'member',
-          }),
+      startTransition(async () => {
+        const { createMemberAction } = await import('@/app/actions/members')
+        const result = await createMemberAction({
+          clubId: community.clubId,
+          userId,
+          role: 'member',
         })
 
-        const data = await response.json()
-
-        if (response.ok && data.success) {
+        if (result.success) {
           toast.success('커뮤니티에 가입되었습니다')
-          // 페이지 새로고침으로 멤버십 상태 업데이트
-          window.location.reload()
+          router.refresh()
         } else {
-          toast.error(data.error || '가입에 실패했습니다')
+          toast.error(result.error || '가입에 실패했습니다')
         }
-      } catch (error) {
-        console.error('Failed to join community:', error)
-        toast.error('가입 중 오류가 발생했습니다')
-      }
+      })
     },
-    [community.clubId, session]
+    [community.clubId, session, router]
   )
 
   // 팀장 전용 액션 메뉴

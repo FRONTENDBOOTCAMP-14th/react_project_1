@@ -15,8 +15,9 @@ import {
 } from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import { deleteRoundAction, markAttendanceAction, updateRoundAction } from '@/app/actions/rounds'
 import { useCommunityContext } from '../_context/CommunityContext'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import GoalsSection from './GoalsSection'
@@ -38,6 +39,10 @@ interface RoundCardProps {
    * 라운드 카드 열림/닫힘 토글 핸들러
    */
   onToggleOpen: () => void
+  /**
+   * 라운드 데이터 재조회 함수
+   */
+  onRefetch?: () => Promise<void>
 }
 
 /**
@@ -45,30 +50,28 @@ interface RoundCardProps {
  * 라운드 정보를 보여주고, 라운드에 속한 목표(그룹/개인)를 렌더링합니다.
  * @param props - RoundCardProps
  */
-export default function RoundCard({ round, isOpen = false, onToggleOpen }: RoundCardProps) {
+export default function RoundCard({
+  round,
+  isOpen = false,
+  onToggleOpen,
+  onRefetch,
+}: RoundCardProps) {
+  const { clubId } = useCommunityContext()
+  const [, startTransition] = useTransition()
+
   const handleDelete = async () => {
     if (!round) return
 
-    try {
-      const response = await fetch(`/api/rounds/${round.roundId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const result = await response.json()
+    startTransition(async () => {
+      const result = await deleteRoundAction(round.roundId, clubId)
 
       if (result.success) {
         toast.success('회차가 삭제되었습니다')
-        // 페이지를 새로고침하거나 상태 업데이트
-        window.location.reload()
+        await onRefetch?.()
       } else {
         toast.error(result.error || '삭제에 실패했습니다')
       }
-    } catch (_error) {
-      toast.error('삭제 중 오류가 발생했습니다')
-    }
+    })
   }
 
   return (
@@ -78,6 +81,7 @@ export default function RoundCard({ round, isOpen = false, onToggleOpen }: Round
         isOpen={isOpen}
         onToggleOpen={onToggleOpen}
         onDelete={handleDelete}
+        onRefetch={onRefetch}
       />
       <RoundCardBody roundId={round?.roundId} isOpen={isOpen} />
     </article>
@@ -104,15 +108,27 @@ interface RoundCardHeaderProps {
    * 라운드 삭제 핸들러
    */
   onDelete?: () => void
+  /**
+   * 라운드 데이터 재조회 함수
+   */
+  onRefetch?: () => Promise<void>
 }
 
 /**
  * 라운드 헤더 컴포넌트
  * @param props - RoundCardHeaderProps
  */
-function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHeaderProps) {
+function RoundCardHeader({
+  round,
+  isOpen,
+  onToggleOpen,
+  onDelete,
+  onRefetch,
+}: RoundCardHeaderProps) {
   const { data: session } = useSession()
+  const { clubId } = useCommunityContext()
   const userId = (session as CustomSession)?.userId
+  const [, startTransition] = useTransition()
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
     roundNumber: round?.roundNumber || 1,
@@ -174,33 +190,22 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
     e.preventDefault()
     if (!round) return
 
-    try {
-      const response = await fetch(`/api/rounds/${round.roundId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundNumber: editForm.roundNumber,
-          startDate: editForm.startDate ? fromDatetimeLocalString(editForm.startDate) : null,
-          endDate: editForm.endDate ? fromDatetimeLocalString(editForm.endDate) : null,
-          location: editForm.location || null,
-        }),
+    startTransition(async () => {
+      const result = await updateRoundAction(round.roundId, clubId, {
+        roundNumber: editForm.roundNumber,
+        startDate: editForm.startDate ? fromDatetimeLocalString(editForm.startDate) : null,
+        endDate: editForm.endDate ? fromDatetimeLocalString(editForm.endDate) : null,
+        location: editForm.location || null,
       })
-
-      const result = await response.json()
 
       if (result.success) {
         toast.success('회차가 수정되었습니다')
         setIsEditing(false)
-        // 페이지를 새로고침하거나 상태 업데이트
-        window.location.reload()
+        await onRefetch?.()
       } else {
         toast.error(result.error || '수정에 실패했습니다')
       }
-    } catch (_error) {
-      toast.error('수정 중 오류가 발생했습니다')
-    }
+    })
   }
 
   const handleCancelEdit = () => {
@@ -221,30 +226,16 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
       return
     }
 
-    try {
-      const response = await fetch(`/api/attendance`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundId: round.roundId,
-          userId,
-          attendanceType: 'present',
-        }),
-      })
-
-      const result = await response.json()
+    startTransition(async () => {
+      const result = await markAttendanceAction(round.roundId, clubId)
 
       if (result.success) {
         toast.success('출석처리 되었습니다')
-        window.location.reload()
+        setHasAttended(true)
       } else {
         toast.error(result.error || '출석 처리에 실패했습니다')
       }
-    } catch (_error) {
-      toast.error('출석 처리 중 오류가 발생했습니다')
-    }
+    })
   }
 
   if (isEditing && round) {

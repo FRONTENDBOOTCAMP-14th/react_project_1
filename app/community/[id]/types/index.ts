@@ -8,12 +8,14 @@ import type { Round } from '@/lib/types/round'
  * 라운드 카드 props 타입
  */
 export interface RoundCardProps {
-  /** 표시할 라운드 정보 (null이 아님) */
-  round: Round
+  /** 표시할 라운드 정보 */
+  round: Round | null
   /** 라운드 카드가 열려있는지 여부 */
   isOpen: boolean
   /** 라운드 카드 열림/닫힘 토글 핸들러 */
   onToggleOpen: () => void
+  /** 라운드 데이터 재조회 함수 */
+  onRefetch?: () => Promise<void>
 }
 
 /**
@@ -21,11 +23,15 @@ export interface RoundCardProps {
  */
 export interface RoundCardHeaderProps {
   /** 라운드 정보 */
-  round: Round
+  round: Round | null
   /** 라운드 카드가 열려있는지 여부 */
   isOpen: boolean
   /** 라운드 카드 열림/닫힘 토글 핸들러 */
   onToggleOpen: () => void
+  /** 라운드 삭제 핸들러 */
+  onDelete?: () => void
+  /** 라운드 데이터 재조회 함수 */
+  onRefetch?: () => Promise<void>
 }
 
 /**

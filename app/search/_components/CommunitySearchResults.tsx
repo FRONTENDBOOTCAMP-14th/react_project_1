@@ -1,6 +1,7 @@
 'use client'
 
 import { FillButton, IconButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import type { CommunitySearchItem } from '@/lib/search/search'
 import { Calendar, ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import Link from 'next/link'
@@ -27,7 +28,7 @@ export default function CommunitySearchResults({
 }: CommunitySearchResultsProps) {
   if (loading) {
     return (
-      <section className={styles.results} aria-label="검색 결과">
+      <section className={styles.results} aria-label={MESSAGES.SEARCH.SEARCH_RESULTS_ARIA}>
         <div className={styles.loading}>
           <div className={styles['loading-spinner']} />
           <p>커뮤니티를 검색하는 중...</p>
@@ -38,7 +39,7 @@ export default function CommunitySearchResults({
 
   if (items.length === 0) {
     return (
-      <section className={styles.results} aria-label="검색 결과">
+      <section className={styles.results} aria-label={MESSAGES.SEARCH.SEARCH_RESULTS_ARIA}>
         <div className={styles.empty}>
           <p>검색 결과가 없습니다.</p>
           <p>다른 검색어로 시도해보세요.</p>
@@ -48,7 +49,7 @@ export default function CommunitySearchResults({
   }
 
   return (
-    <section className={styles.results} aria-label="검색 결과">
+    <section className={styles.results} aria-label={MESSAGES.SEARCH.SEARCH_RESULTS_ARIA}>
       <div className={styles['results-header']}>
         <h2>검색 결과</h2>
         <span className={styles['results-count']}>
@@ -95,7 +96,7 @@ export default function CommunitySearchResults({
 
       {/* 페이지네이션 */}
       {pagination && pagination.totalPages > 1 && (
-        <nav className={styles.pagination} aria-label="페이지네이션">
+        <nav className={styles.pagination} aria-label={MESSAGES.SEARCH.PAGINATION_ARIA}>
           <div className={styles['pagination-info']}>
             <span>
               {pagination.page} / {pagination.totalPages} 페이지
@@ -142,7 +143,7 @@ export default function CommunitySearchResults({
             <IconButton
               onClick={() => onPageChange?.(pagination.page + 1)}
               disabled={!pagination.hasNext}
-              aria-label="다음 페이지"
+              aria-label={MESSAGES.SEARCH.NEXT_PAGE_ARIA}
             >
               <ChevronRight size={16} />
             </IconButton>

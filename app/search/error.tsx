@@ -1,6 +1,7 @@
 'use client'
 
 import { ErrorState } from '@/components/common'
+import { MESSAGES } from '@/constants'
 
 export default function SearchError({
   error: _error,
@@ -9,5 +10,5 @@ export default function SearchError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  return <ErrorState message="검색 중 오류가 발생했습니다" onRetry={reset} />
+  return <ErrorState message={MESSAGES.SEARCH.SEARCH_ERROR} onRetry={reset} />
 }

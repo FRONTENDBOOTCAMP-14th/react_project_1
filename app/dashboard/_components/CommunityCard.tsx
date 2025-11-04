@@ -2,6 +2,7 @@
 
 import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 import { Popover, type PopoverAction } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import { EllipsisVertical } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -35,7 +36,7 @@ const CommunityCard = memo(
         ? [
             {
               id: `leave-${clubId}`,
-              label: '탈퇴',
+              label: MESSAGES.DASHBOARD.LEAVE_COMMUNITY,
               onClick: () => onLeave(clubId),
               isDanger: true,
             },

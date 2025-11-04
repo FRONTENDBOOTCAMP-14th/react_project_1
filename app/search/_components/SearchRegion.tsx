@@ -1,6 +1,7 @@
 'use client'
 
 import { Dropdown, IconButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import type { Region } from '@/lib/types'
 import { Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -78,23 +79,28 @@ export default function SearchRegion({
   return (
     <section className={styles['search-section']}>
       <h2 className="sr-only" id="search-heading">
-        검색
+        {MESSAGES.SEARCH.SEARCH_HEADING}
       </h2>
       <div className={styles['search-controls']}>
         <Dropdown
           options={regionOptions}
           value={region}
           onChange={onChangeRegion}
-          placeholder="지역을 선택하세요 (선택사항)"
+          placeholder={MESSAGES.SEARCH.REGION_PLACEHOLDER}
         />
         <Dropdown
           options={subRegionOptions}
           value={subRegion}
           onChange={onChangeSubRegion}
-          placeholder="세부 지역을 선택하세요 (선택사항)"
+          placeholder={MESSAGES.SEARCH.SUBREGION_PLACEHOLDER}
         />
         {onSearch && (
-          <IconButton type="button" onClick={onSearch} disabled={loading} aria-label="검색 버튼">
+          <IconButton
+            type="button"
+            onClick={onSearch}
+            disabled={loading}
+            aria-label={MESSAGES.SEARCH.SEARCH_BUTTON_ARIA}
+          >
             <Search strokeWidth="1" size={20} color="var(--primary-color)" />
           </IconButton>
         )}

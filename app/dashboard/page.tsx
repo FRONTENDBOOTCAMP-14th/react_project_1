@@ -1,4 +1,5 @@
 import { getCurrentUserId } from '@/lib/auth'
+import { MESSAGES } from '@/constants'
 import prisma from '@/lib/prisma'
 import type { CommunityInfo } from '@/lib/types/community'
 import { redirect } from 'next/navigation'
@@ -70,7 +71,7 @@ export default async function DashboardPage() {
   return (
     <StudyCardList
       communities={subscribedCommunities as CommunityInfo[]}
-      username={user?.username || '사용자'}
+      username={user?.username || MESSAGES.DASHBOARD.DEFAULT_USERNAME}
     />
   )
 }

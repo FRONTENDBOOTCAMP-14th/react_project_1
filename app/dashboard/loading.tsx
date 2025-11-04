@@ -3,7 +3,7 @@ import { DashboardLayout } from './_components'
 
 export default function DashboardLoading() {
   return (
-    <DashboardLayout title="로딩 중..." emptyMessage="" isEmpty={false}>
+    <DashboardLayout title={MESSAGES.LOADING.DEFAULT} emptyMessage="" isEmpty={false}>
       <div
         style={{
           display: 'flex',

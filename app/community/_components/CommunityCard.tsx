@@ -1,11 +1,11 @@
 'use client'
 
-import { IconLink } from '@/components/ui'
-import { ROUTES, MESSAGES } from '@/constants'
-import type { Community } from '@/lib/types'
-import styles from './CommunityCard.module.css'
-import Image from 'next/image'
 import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
+import { IconLink } from '@/components/ui'
+import { MESSAGES, ROUTES } from '@/constants'
+import type { Community } from '@/lib/types'
+import Image from 'next/image'
+import styles from './CommunityCard.module.css'
 
 /**
  * 커뮤니티 카드 컴포넌트 Props
@@ -26,11 +26,7 @@ export default function CommunityCard({ community, className }: CommunityCardPro
       <h2 className="sr-only">{MESSAGES.LABEL.COMMUNITY_INTRO}</h2>
 
       <div className={styles.content}>
-        <IconLink
-          href={ROUTES.COMMUNITY.DETAIL(community.clubId)}
-          className={styles.title}
-          style={{ cursor: 'pointer' }}
-        >
+        <IconLink href={ROUTES.COMMUNITY.DETAIL(community.clubId)} className={styles.title}>
           {community.name}
         </IconLink>
         <p className={styles.desc}>{community.description || MESSAGES.EMPTY.NO_DESCRIPTION}</p>

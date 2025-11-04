@@ -2,6 +2,7 @@
 
 import { CommunityCard } from './CommunityCard'
 import { DashboardLayout } from './DashboardLayout'
+import { MESSAGES } from '@/constants'
 import { useCommunityActions } from './useCommunityActions'
 import { memo } from 'react'
 import type { CommunityInfo } from '@/lib/types/community'
@@ -28,8 +29,8 @@ function StudyCardList({ communities, username }: StudyCardListProps) {
 
   return (
     <DashboardLayout
-      title={`${username}님의 스터디 목록`}
-      emptyMessage="구독한 커뮤니티가 없습니다."
+      title={MESSAGES.DASHBOARD.STUDY_LIST_TITLE(username)}
+      emptyMessage={MESSAGES.DASHBOARD.EMPTY_COMMUNITIES}
       isEmpty={communities.length === 0}
     >
       {communities.map(community => {

@@ -140,6 +140,7 @@ export const MESSAGES = {
     UNSUPPORTED_FILE_TYPE: '지원하지 않는 파일 형식입니다. (JPG, PNG, WEBP, GIF만 가능)',
     FILE_SIZE_TOO_LARGE: '파일 크기가 너무 큽니다. (최대 5MB)',
     THUMBNAIL_DELETE_CLICK: '썸네일 클릭 - 삭제',
+    IMAGE_UPLOAD_FAILED: '이미지 업로드에 실패했습니다.',
 
     // 공지사항 관련
     NOTIFICATION_CREATE_FAILED: '공지사항 작성에 실패했습니다',
@@ -168,12 +169,20 @@ export const MESSAGES = {
   },
 
   LOADING: {
+    STUDY_LIST: '스터디 목록을 불러오는 중...',
+    COMMUNITY_LIST: '커뮤니티 목록을 불러오는 중...',
+    COMMUNITY_DETAIL: '커뮤니티 정보를 불러오는 중...',
+    COMMUNITY_MEMBERS: '커뮤니티 멤버를 불러오는 중...',
+    NOTIFICATIONS: '공지사항을 불러오는 중...',
+    ROUNDS: '라운드 목록을 불러오는 중...',
+    PROFILE: '프로필을 불러오는 중...',
+    SEARCH: '검색 중...',
+    DEFAULT: '로딩 중...',
     GOALS: '목표를 불러오는 중...',
     COMMUNITY: '커뮤니티 정보를 불러오는 중...',
     COMMUNITIES: '커뮤니티 목록을 불러오는 중...',
     ATTENDANCE: '출석 정보를 불러오는 중...',
     DASHBOARD: '대시보드를 불러오는 중...',
-    STUDY_LIST: '스터디 목록을 불러오는 중입니다...',
     CREATING: '생성 중...',
     UPLOADING: '업로드 중...',
     REACTION_CREATING: '리액션을 생성 중입니다',
@@ -358,5 +367,35 @@ export const MESSAGES = {
     DELETING_ACCOUNT: '처리 중…',
     DELETE_ACCOUNT: '회원탈퇴',
     DELETE_ACCOUNT_FAILED: '회원탈퇴에 실패했습니다',
+  },
+
+  // 검색 관련
+  SEARCH: {
+    SEARCH_PLACEHOLDER: '검색어를 입력하세요',
+    SEARCH_INPUT_ARIA: '검색어 입력',
+    SEARCH_BUTTON_ARIA: '검색 버튼',
+    REGION_PLACEHOLDER: '지역을 선택하세요 (선택사항)',
+    SUBREGION_PLACEHOLDER: '세부 지역을 선택하세요 (선택사항)',
+    SEARCH_RESULTS_ARIA: '검색 결과',
+    PAGINATION_ARIA: '페이지네이션',
+    PREVIOUS_PAGE_ARIA: '이전 페이지',
+    NEXT_PAGE_ARIA: '다음 페이지',
+    SEARCH_ERROR: '검색 중 오류가 발생했습니다',
+    SEARCH_HEADING: '지역 검색',
+  },
+
+  // 캘린더 관련
+  CALENDAR: {
+    DAY_NAMES: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+  },
+
+  // 대시보드 관련
+  DASHBOARD: {
+    DEFAULT_USERNAME: '사용자',
+    STUDY_LIST_TITLE: (username: string) => `${username}님의 스터디 목록`,
+    EMPTY_COMMUNITIES: '구독한 커뮤니티가 없습니다.',
+    LEAVE_COMMUNITY: '탈퇴',
+    ERROR_TITLE: '오류가 발생했습니다',
+    RETRY_MESSAGE: '다시 시도해주세요.',
   },
 } as const

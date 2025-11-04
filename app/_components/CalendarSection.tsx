@@ -1,6 +1,7 @@
 'use client'
 
 import { LoadingState } from '@/components/common'
+import { MESSAGES } from '@/constants'
 import { useUserCommunities } from '@/lib/hooks'
 import { useMemo, useState } from 'react'
 import styles from './CalendarSection.module.css'
@@ -20,7 +21,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
   // useMemo로 days 계산 최적화 (매 렌더링마다 재계산 방지)
   const days = useMemo(() => {
     const today = new Date()
-    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+    const dayNames = MESSAGES.CALENDAR.DAY_NAMES
 
     return Array.from({ length: 3 }, (_, i) => {
       const date = new Date(today)

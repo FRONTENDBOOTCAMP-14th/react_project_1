@@ -1,6 +1,7 @@
 'use client'
 
 import { IconButton, TextInput } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import { Search, X } from 'lucide-react'
 import { useMemo } from 'react'
 import Style from './WordSearch.module.css'
@@ -89,16 +90,16 @@ export default function WordSearch({
       >
         <div className={Style['input-wrapper']}>
           <TextInput
+            placeholder={MESSAGES.SEARCH.SEARCH_PLACEHOLDER}
+            aria-label={MESSAGES.SEARCH.SEARCH_INPUT_ARIA}
             value={query}
             onChange={e => onChangeQuery(e.currentTarget.value)}
-            placeholder="검색어를 입력하세요"
-            aria-label="검색어 입력"
           />
           <IconButton
             type="button"
             onClick={handleLocalSearch}
             disabled={loading}
-            aria-label="검색 버튼"
+            aria-label={MESSAGES.SEARCH.SEARCH_BUTTON_ARIA}
           >
             <Search strokeWidth="2.5" size={40} color="var(--third-color)" />
           </IconButton>

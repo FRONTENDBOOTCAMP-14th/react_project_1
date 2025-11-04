@@ -16,7 +16,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
 
   return (
     <DashboardLayout
-      title="오류가 발생했습니다"
+      title={MESSAGES.DASHBOARD.ERROR_TITLE}
       emptyMessage={MESSAGES.ERROR.DASHBOARD_LOAD_FAILED}
       isEmpty={true}
     >
@@ -26,7 +26,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
           padding: 'var(--spacing-lg)',
         }}
       >
-        <p>다시 시도해주세요.</p>
+        <p>{MESSAGES.DASHBOARD.RETRY_MESSAGE}</p>
         <button
           onClick={reset}
           style={{

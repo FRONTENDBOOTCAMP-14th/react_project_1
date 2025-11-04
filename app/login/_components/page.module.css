@@ -23,7 +23,9 @@
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .kakao-button:hover {
@@ -74,7 +76,9 @@
   border-radius: 8px;
   padding: 0 12px;
   font-size: var(--font-sm);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .input:focus {
@@ -182,16 +186,16 @@
     padding: var(--spacing-xs);
     gap: var(--spacing-xs);
   }
-  
+
   .form {
     max-width: 100%;
   }
-  
+
   .input-row {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  
+
   .check-button {
     width: 100%;
   }

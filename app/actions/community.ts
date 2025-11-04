@@ -10,6 +10,7 @@ import {
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
+import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -130,8 +131,34 @@ export async function uploadCommunityImageAction(
         throw new Error('이미지 파일이 없습니다')
       }
 
-      // TODO: 실제 이미지 업로드 로직 구현 (S3, Cloudinary 등)
-      const imageUrl = '/placeholder-image.jpg'
+      // Supabase Storage에 이미지 업로드
+      const supabaseUrl = process.env.SUPABASE_URL
+      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase 환경 변수가 설정되지 않았습니다')
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `community-images/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('community-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) {
+        throw new Error(`이미지 업로드 실패: ${uploadError.message}`)
+      }
+
+      const { data: urlData } = supabase.storage.from('community-images').getPublicUrl(filePath)
+
+      const imageUrl = urlData.publicUrl
 
       // 커뮤니티 이미지 URL 업데이트
       await prisma.community.update({

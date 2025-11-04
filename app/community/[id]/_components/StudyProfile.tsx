@@ -4,8 +4,9 @@ import communityCardStyles from '@/app/community/_components/CommunityCard.modul
 import { FormField, SharedForm } from '@/components/common'
 import { IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES, ROUTES, UI_CONSTANTS } from '@/constants'
+import type { CommunityDetail } from '@/lib/community/communityServer'
 import regions from '@/lib/json/region.json'
-import type { Community, UpdateCommunityInput } from '@/lib/types/community'
+import type { UpdateCommunityInput } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
 import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
@@ -37,7 +38,7 @@ interface StudyProfileProps {
   /** 커뮤니티 ID */
   id: string
   /** 커뮤니티 상세 정보 (서버에서 페칭됨) */
-  community: import('@/lib/community/communityServer').CommunityDetail
+  community: CommunityDetail
 }
 
 /**
@@ -57,7 +58,7 @@ function InfoRow({ icon, text }: InfoRowProps) {
  */
 interface ProfileInfoProps {
   /** 커뮤니티 데이터 */
-  community: Community
+  community: CommunityDetail
 }
 
 /**
@@ -65,7 +66,7 @@ interface ProfileInfoProps {
  */
 function ProfileInfo({ community }: ProfileInfoProps) {
   const iconSize = UI_CONSTANTS.ICON_SIZE.SMALL
-  const memberCount = community._count?.communityMembers || 0
+  const memberCount = community.memberCount || 0
 
   return (
     <div className={styles['profile-info']}>
@@ -100,7 +101,7 @@ function ProfileInfo({ community }: ProfileInfoProps) {
  */
 interface CommunityContentProps {
   /** 커뮤니티 데이터 */
-  community: Community
+  community: CommunityDetail
   /** 커뮤니티 수정 함수 */
   onUpdate: (input: UpdateCommunityInput) => Promise<{ success: boolean; error?: string }>
   /** 커뮤니티 삭제 함수 */

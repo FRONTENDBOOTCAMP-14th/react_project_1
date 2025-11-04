@@ -5,6 +5,7 @@
 
 import { getCurrentUserId } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * Server Action 응답 타입
@@ -40,29 +41,40 @@ export async function withServerAction<T>(
   options: {
     requireAuth?: boolean
     errorMessage?: string
+    actionName?: string
   } = {}
 ): Promise<ServerActionResponse<T>> {
+  const actionName = options.actionName || 'UnknownAction'
+
   try {
+    logger.debug(`Server Action started: ${actionName}`)
+
     // 인증 확인
     if (options.requireAuth !== false) {
       const userId = await getCurrentUserId()
       if (!userId) {
+        logger.warn(`Authentication failed for action: ${actionName}`)
         return {
           success: false,
           error: '인증이 필요합니다',
         }
       }
+      logger.debug(`Authentication successful for action: ${actionName}`, { userId })
     }
 
     // 비즈니스 로직 실행
     const data = await action()
+
+    logger.info(`Server Action completed successfully: ${actionName}`)
 
     return {
       success: true,
       data,
     }
   } catch (error) {
-    console.error('Server Action Error:', error)
+    logger.actionError(actionName, error instanceof Error ? error.message : String(error), {
+      options,
+    })
 
     // ServerActionError 처리
     if (error instanceof ServerActionError) {

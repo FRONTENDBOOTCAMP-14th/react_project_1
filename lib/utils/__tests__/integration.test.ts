@@ -2,9 +2,9 @@
  * 시간 관련 통합 테스트
  */
 
-import { fromDatetimeLocalString, toDatetimeLocalString, fetchServerTime } from '../utcHelpers'
 import { timeSync } from '../timeSync'
 import { getTimezoneInfo, toLocalTime, toUTCTime } from '../timezone'
+import { fromDatetimeLocalString, toDatetimeLocalString } from '../utcHelpers'
 
 // Mock fetch for server time
 global.fetch = jest.fn()
@@ -114,7 +114,7 @@ describe('시간 관련 통합 테스트', () => {
       const utcTime = fromDatetimeLocalString(koreaTime)
 
       // 미국 사용자가 볼 때 로컬 시간으로 변환
-      const usLocalTime = toLocalTime(utcTime)
+      const _usLocalTime = toLocalTime(utcTime)
 
       // 뉴욕 타임존으로 변환 (mock)
       const timezoneInfo = getTimezoneInfo()

@@ -3,6 +3,8 @@
  */
 
 // Mock prisma
+import { buildRoundWhereClause, createPaginationInfo } from '../rounds'
+
 jest.mock('@/lib/prisma', () => ({
   __esModule: true,
   default: {
@@ -16,8 +18,6 @@ jest.mock('@/lib/prisma', () => ({
     },
   },
 }))
-
-import { buildRoundWhereClause, createPaginationInfo } from '../rounds'
 
 describe('rounds utilities', () => {
   describe('buildRoundWhereClause', () => {

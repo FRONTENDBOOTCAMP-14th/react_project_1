@@ -3,12 +3,12 @@
  */
 
 import {
-    getBooleanParam,
-    getPaginationParams,
-    getStringParam,
-    validateGoalCreation,
-    validateMemberCreation,
-    withPagination,
+  getBooleanParam,
+  getPaginationParams,
+  getStringParam,
+  validateGoalCreation,
+  validateMemberCreation,
+  withPagination,
 } from '../apiHelpers'
 
 // Mock NextRequest

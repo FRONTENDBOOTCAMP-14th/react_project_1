@@ -2,7 +2,7 @@
  * 시간 동기화 유틸리티 테스트
  */
 
-import { timeSync } from '../timeSync';
+import { timeSync } from '../timeSync'
 
 // Mock fetch
 global.fetch = jest.fn()

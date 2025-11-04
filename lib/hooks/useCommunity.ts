@@ -6,6 +6,7 @@ import type {
   UpdateCommunityInput,
 } from '@/lib/types/community'
 import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import { logger } from '@/lib/utils/logger'
 
 interface UseCommunityResult {
   community: Community | null
@@ -37,21 +38,33 @@ export const useCommunity = (id: string): UseCommunityResult => {
       setLoading(true)
       setError(null)
 
+      logger.debug(`Fetching community: ${id}`)
+
       const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(id))
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const errorMessage = `HTTP ${response.status}: ${response.statusText}`
+        logger.apiError(API_ENDPOINTS.COMMUNITIES.BY_ID(id), 'GET', errorMessage)
+        throw new Error(errorMessage)
       }
 
       const result: CommunityResponse = await response.json()
 
       if (result.success && result.data) {
         setCommunity(result.data)
+        logger.info(`Community loaded successfully: ${id}`)
       } else {
-        setError(result.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND)
+        const errorMessage = result.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND
+        logger.warn(`Failed to load community: ${id}`, { error: result.error })
+        setError(errorMessage)
       }
     } catch (err) {
-      console.error('Failed to fetch community:', err)
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      logger.error(
+        'Failed to fetch community',
+        { communityId: id },
+        err instanceof Error ? err : new Error(errorMessage)
+      )
       setError(MESSAGES.ERROR.FAILED_TO_LOAD_COMMUNITY)
     } finally {
       setLoading(false)

@@ -166,6 +166,10 @@ export const MESSAGES = {
     INVALID_ROLE: '유효하지 않은 역할입니다.',
     FAILED_TO_LOAD_REGIONS: '지역 정보를 불러오는데 실패했습니다.',
     NETWORK_ERROR: '네트워크 오류가 발생했습니다.',
+    PAGE_LOAD_FAILED: '페이지를 불러올 수 없습니다',
+    PAGE_TEMPORARY_ERROR: '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+    UNEXPECTED_ERROR: '예기치 않은 오류가 발생했습니다.',
+    TEMPORARY_ERROR: '일시적인 오류입니다. 잠시 후 다시 시도해주세요.',
   },
 
   LOADING: {
@@ -187,6 +191,7 @@ export const MESSAGES = {
     UPLOADING: '업로드 중...',
     REACTION_CREATING: '리액션을 생성 중입니다',
     REACTION_DELETING: 'reaction을 삭제 중입니다',
+    RETRYING: '다시 시도 중...',
   },
 
   EMPTY: {

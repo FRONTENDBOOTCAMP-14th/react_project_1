@@ -1,8 +1,9 @@
 'use client'
 
 import type { SearchCommunityResult } from '@/lib/search/searchServer'
+import { debounce } from '@/lib/utils/loading'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useTransition } from 'react'
+import { useCallback, useMemo, useTransition } from 'react'
 import style from '../page.module.css'
 import CommunitySearchResults from './CommunitySearchResults'
 import SearchRegion from './SearchRegion'
@@ -66,12 +67,20 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
     [updateSearchParams]
   )
 
-  // 검색어 변경 핸들러
+  // 검색어 변경 핸들러 (debounced - 500ms)
+  const debouncedUpdateSearch = useMemo(
+    () =>
+      debounce((search: string) => {
+        updateSearchParams({ search, page: undefined })
+      }, 500),
+    [updateSearchParams]
+  )
+
   const handleSearchChange = useCallback(
     (search: string) => {
-      updateSearchParams({ search, page: undefined })
+      debouncedUpdateSearch(search)
     },
-    [updateSearchParams]
+    [debouncedUpdateSearch]
   )
 
   // 태그 변경 핸들러
@@ -109,7 +118,6 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
         subRegion={initialParams.subRegion}
         onChangeRegion={handleRegionChange}
         onChangeSubRegion={handleSubRegionChange}
-        onSearch={() => {}} // URL 기반이므로 빈 함수
         loading={isPending}
       />
 
@@ -118,7 +126,6 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
         searchTags={initialParams.searchTags}
         onChangeQuery={handleSearchChange}
         onChangeSearchTags={handleTagsChange}
-        onSearch={() => {}} // URL 기반이므로 빈 함수
         loading={isPending}
       />
 

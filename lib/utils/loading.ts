@@ -8,13 +8,13 @@ import type { GenericFunction, LoadingState } from '@/lib/types/loading'
 /**
  * 지연 로딩 (debounce)
  */
-export function debounce<T extends GenericFunction>(
-  func: T,
+export function debounce<TArgs extends unknown[]>(
+  func: (...args: TArgs) => void,
   wait: number
-): (...args: Parameters<T>) => void {
+): (...args: TArgs) => void {
   let timeout: NodeJS.Timeout | null = null
 
-  return (...args: Parameters<T>) => {
+  return (...args: TArgs) => {
     if (timeout) {
       clearTimeout(timeout)
     }

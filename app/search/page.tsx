@@ -1,3 +1,5 @@
+import ErrorState from '@/components/common/ErrorState'
+import { getErrorMessage } from '@/lib/errors'
 import { searchCommunities } from '@/lib/search/searchServer'
 import SearchClient from './_components/SearchClient'
 
@@ -18,38 +20,55 @@ interface SearchPageProps {
  * - SEO 최적화 (검색 결과가 서버에서 렌더링)
  */
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const params = await searchParams
+  try {
+    const params = await searchParams
 
-  // searchTags 배열 변환
-  const searchTags = params.searchTags
-    ? Array.isArray(params.searchTags)
-      ? params.searchTags
-      : [params.searchTags]
-    : []
+    // searchTags 배열 변환
+    const searchTags = params.searchTags
+      ? Array.isArray(params.searchTags)
+        ? params.searchTags
+        : [params.searchTags]
+      : []
 
-  const page = params.page ? parseInt(params.page, 10) : 1
+    // 페이지 번호 검증
+    let page = params.page ? parseInt(params.page, 10) : 1
+    if (isNaN(page) || page < 1) {
+      page = 1
+    }
 
-  // 서버에서 데이터 페칭
-  const result = await searchCommunities({
-    region: params.region,
-    subRegion: params.subRegion,
-    search: params.search,
-    searchTags,
-    page,
-    limit: 6,
-  })
+    // 서버에서 데이터 페칭
+    const result = await searchCommunities({
+      region: params.region,
+      subRegion: params.subRegion,
+      search: params.search,
+      searchTags,
+      page,
+      limit: 6,
+    })
 
-  // 클라이언트 컴포넌트에 초기 데이터와 파라미터 전달
-  return (
-    <SearchClient
-      initialResults={result}
-      initialParams={{
-        region: params.region || '',
-        subRegion: params.subRegion || '',
-        search: params.search || '',
-        searchTags,
-        page,
-      }}
-    />
-  )
+    // 클라이언트 컴포넌트에 초기 데이터와 파라미터 전달
+    return (
+      <SearchClient
+        initialResults={result}
+        initialParams={{
+          region: params.region || '',
+          subRegion: params.subRegion || '',
+          search: params.search || '',
+          searchTags,
+          page,
+        }}
+      />
+    )
+  } catch (error) {
+    // 에러 발생 시 ErrorState 표시
+    return (
+      <main style={{ padding: '2rem' }}>
+        <ErrorState
+          message={getErrorMessage(error, '검색 중 오류가 발생했습니다.')}
+          onRetry={() => window.location.reload()}
+          retryText="새로고침"
+        />
+      </main>
+    )
+  }
 }

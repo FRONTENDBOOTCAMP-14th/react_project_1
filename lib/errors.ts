@@ -17,3 +17,37 @@ export function hasErrorCode<T extends string = string>(
   if (typeof obj.code !== 'string') return false
   return code ? obj.code === code : true
 }
+
+/**
+ * 검색 관련 커스텀 에러 클래스
+ */
+export class SearchError extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+    public statusCode?: number
+  ) {
+    super(message)
+    this.name = 'SearchError'
+  }
+}
+
+/**
+ * 검색 입력 검증 에러
+ */
+export class SearchValidationError extends SearchError {
+  constructor(message: string) {
+    super(message, 'SEARCH_VALIDATION_ERROR', 400)
+    this.name = 'SearchValidationError'
+  }
+}
+
+/**
+ * 검색 결과 없음 에러
+ */
+export class SearchNotFoundError extends SearchError {
+  constructor(message: string = '검색 결과가 없습니다.') {
+    super(message, 'SEARCH_NOT_FOUND', 404)
+    this.name = 'SearchNotFoundError'
+  }
+}

@@ -1,47 +1,21 @@
 import { API_ENDPOINTS, HTTP_HEADERS } from '@/constants'
 import type { Community, CommunityListResponse } from '@/lib/types/community'
+import type { CommunitySearchParams, SearchPagination, SearchResultItem } from '@/lib/types/search'
 
 /**
- * 커뮤니티 검색 파라미터 인터페이스
+ * 커뮤니티 검색 아이템 (레거시 호환)
+ * @deprecated SearchResultItem 사용 권장
  */
-export interface CommunitySearchParams {
-  region?: string
-  subRegion?: string
-  search?: string
-  searchTags?: string[]
-  page?: number
-  limit?: number
-  isPublic?: boolean
-  signal?: AbortSignal
-}
+export type CommunitySearchItem = SearchResultItem
 
 /**
- * 커뮤니티 검색 결과 인터페이스 (기존 호환성을 위해)
- */
-export interface CommunitySearchItem {
-  id: string
-  title: string
-  region: string | null
-  subRegion: string | null
-  tags: string[]
-  description?: string | null
-  isPublic: boolean
-  createdAt: Date
-}
-
-/**
- * 커뮤니티 검색 응답 인터페이스 (기존 호환성을 위해)
+ * 커뮤니티 검색 응답 (레거시 호환)
+ * @deprecated SearchResult<SearchResultItem> 사용 권장
  */
 export interface CommunitySearchResponse {
-  items: CommunitySearchItem[]
+  items: SearchResultItem[]
   total: number
-  pagination?: {
-    page: number
-    limit: number
-    totalPages: number
-    hasNext: boolean
-    hasPrev: boolean
-  }
+  pagination?: SearchPagination
 }
 
 /**
@@ -66,9 +40,9 @@ function buildCommunitySearchQuery(params: CommunitySearchParams): string {
 }
 
 /**
- * Community 타입을 CommunitySearchItem으로 변환
+ * Community 타입을 SearchResultItem으로 변환
  */
-function transformCommunityToSearchItem(community: Community): CommunitySearchItem {
+function transformCommunityToSearchItem(community: Community): SearchResultItem {
   return {
     id: community.clubId,
     title: community.name,

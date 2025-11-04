@@ -1,11 +1,11 @@
 'use client'
 
 import { Checkbox, Popover, type PopoverAction } from '@/components/ui'
+import { FormField, SharedForm } from '@/components/common'
 import type { StudyGoal } from '@/lib/types/goal'
 import { Ellipsis } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import styles from './GoalItem.module.css'
-import { FormField, SharedForm } from './SharedForm'
 
 /**
  * 개별 목표 아이템 컴포넌트에 전달되는 속성

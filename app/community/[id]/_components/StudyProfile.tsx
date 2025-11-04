@@ -1,6 +1,7 @@
 'use client'
 
 import communityCardStyles from '@/app/_components/CommunityCard.module.css'
+import { FormField, SharedForm } from '@/components/common'
 import { IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES, ROUTES, UI_CONSTANTS } from '@/constants'
 import regions from '@/lib/json/region.json'
@@ -13,7 +14,6 @@ import { useCallback, useMemo, useState, useTransition, type ReactNode } from 'r
 import { toast } from 'sonner'
 import { useCommunityContext } from '../_context/CommunityContext'
 import CommunityImageUploader from './CommunityImageUploader'
-import { FormField, SharedForm } from './SharedForm'
 import styles from './StudyProfile.module.css'
 
 interface CustomSession extends Session {

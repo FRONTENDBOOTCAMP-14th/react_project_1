@@ -33,7 +33,9 @@ export default function ReactionListItem({
       if (result.success) {
         toast.dismiss()
         toast.success('reaction이 삭제되었습니다')
-        window.location.reload()
+        // Next.js 방식으로 페이지 새로고침
+        const { revalidatePath } = await import('next/cache')
+        revalidatePath(`/community/member-profile/${memberId}`)
       } else {
         toast.dismiss()
         toast.error(result.error || 'reaction 삭제에 실패했습니다')

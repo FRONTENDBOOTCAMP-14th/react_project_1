@@ -36,7 +36,9 @@ export default function ReactionForm({ memberId }: ReactionFormProps) {
       if (data.success) {
         toast.dismiss()
         toast.success('리액션을 성공적으로 생성했습니다')
-        window.location.reload()
+        // Next.js 방식으로 페이지 새로고침
+        const { revalidatePath } = await import('next/cache')
+        revalidatePath(`/community/member-profile/${memberId}`)
       } else {
         toast.dismiss()
         throw new Error(data.error)

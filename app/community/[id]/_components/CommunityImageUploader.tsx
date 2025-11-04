@@ -1,11 +1,11 @@
 'use client'
 
+import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 import { Camera } from 'lucide-react'
-import { toast } from 'sonner'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 import styles from './CommunityImageUploader.module.css'
-import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
 
 interface CommunityImageUploaderProps {
   currentImageUrl?: string | null

@@ -11,7 +11,9 @@ export function useCommunityActions() {
 
       if (result.success) {
         toast.success('커뮤니티를 탈퇴했습니다')
-        window.location.reload()
+        // Next.js 방식으로 페이지 새로고침
+        const { revalidatePath } = await import('next/cache')
+        revalidatePath('/dashboard')
       } else {
         toast.error(result.error || '커뮤니티 탈퇴에 실패했습니다')
       }

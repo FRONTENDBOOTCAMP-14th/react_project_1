@@ -1,9 +1,10 @@
 'use client'
 
-import { ErrorState, LoadingState, FormField, SharedForm } from '@/components/common'
+import { ErrorState, FormField, LoadingState, SharedForm } from '@/components/common'
 import { StrokeButton } from '@/components/ui'
 import type { CommunityDetail } from '@/lib/community/communityServer'
 import type { CreateRoundRequest } from '@/lib/types/round'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useCommunityContext } from '../_context/CommunityContext'
 import RoundCard from './RoundCard'
@@ -22,6 +23,7 @@ interface RoundsListProps {
  */
 export default function RoundsList({ clubId, rounds }: RoundsListProps) {
   const { isAdmin } = useCommunityContext()
+  const router = useRouter()
   const isEmpty = rounds.length === 0
   const loading = false
   const error = null
@@ -33,8 +35,12 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
   }
 
   const refetch = async () => {
-    // Server Actions로 데이터 리프레치 (필요시 구현)
-    console.log('Refetch rounds')
+    try {
+      // Next.js router.refresh()로 페이지 데이터 새로고침
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to refetch rounds:', error)
+    }
   }
 
   // 열린 라운드 ID를 추적하는 상태
@@ -83,6 +89,9 @@ export default function RoundsList({ clubId, rounds }: RoundsListProps) {
         endDate: '',
         location: '',
       })
+
+      // 라운드 생성 후 데이터 리프레치
+      await refetch()
     } catch (_error) {
       // 에러는 useRoundsData 훅에서 처리됨
     }

@@ -69,11 +69,6 @@ class TimeSync {
         isSynced: true,
       }
 
-      console.log('시간 동기화 완료:', {
-        offset: `${this.offset}ms`,
-        roundTripTime: `${roundTripTime}ms`,
-      })
-
       return result
     } catch (error) {
       console.error('시간 동기화 실패:', error)

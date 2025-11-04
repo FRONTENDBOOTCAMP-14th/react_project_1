@@ -1,0 +1,90 @@
+/* 공용 폼 스타일 */
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-field label {
+  font-weight: 500;
+  color: var(--gray-700);
+  font-size: var(--font-sm);
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  transition: border-color 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+.form-actions button {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* 인라인 폼 스타일 (가로 정렬) */
+.form-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.form-inline .form-field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* 컴팩트 폼 스타일 */
+.form-compact {
+  gap: var(--spacing-sm);
+}
+
+.form-compact .form-fields {
+  gap: var(--spacing-sm);
+}
+
+.form-compact .form-actions {
+  margin-top: var(--spacing-sm);
+}
+
+.form-compact .form-field {
+  gap: var(--spacing-xs);
+}

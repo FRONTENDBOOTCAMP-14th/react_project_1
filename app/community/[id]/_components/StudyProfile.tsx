@@ -1,13 +1,10 @@
 'use client'
 
 import communityCardStyles from '@/app/_components/CommunityCard.module.css'
-import { ErrorState, LoadingState } from '@/components/common'
-import { Dropdown, IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
+import { IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES, ROUTES, UI_CONSTANTS } from '@/constants'
-import { useCommunity } from '@/lib/hooks'
 import regions from '@/lib/json/region.json'
 import type { Community, UpdateCommunityInput } from '@/lib/types/community'
-import { renderWithError, renderWithLoading } from '@/lib/utils'
 import { Ellipsis, MapPin, Users } from 'lucide-react'
 import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
@@ -16,6 +13,7 @@ import { useCallback, useMemo, useState, useTransition, type ReactNode } from 'r
 import { toast } from 'sonner'
 import { useCommunityContext } from '../_context/CommunityContext'
 import CommunityImageUploader from './CommunityImageUploader'
+import { FormField, SharedForm } from './SharedForm'
 import styles from './StudyProfile.module.css'
 
 interface CustomSession extends Session {
@@ -38,6 +36,8 @@ interface InfoRowProps {
 interface StudyProfileProps {
   /** 커뮤니티 ID */
   id: string
+  /** 커뮤니티 상세 정보 (서버에서 페칭됨) */
+  community: import('@/lib/community/communityServer').CommunityDetail
 }
 
 /**
@@ -102,10 +102,7 @@ interface CommunityContentProps {
   /** 커뮤니티 데이터 */
   community: Community
   /** 커뮤니티 수정 함수 */
-  onUpdate: (
-    clubId: string,
-    input: UpdateCommunityInput
-  ) => Promise<{ success: boolean; error?: string }>
+  onUpdate: (input: UpdateCommunityInput) => Promise<{ success: boolean; error?: string }>
   /** 커뮤니티 삭제 함수 */
   onDelete: (clubId: string) => Promise<{ success: boolean; error?: string }>
 }
@@ -116,6 +113,7 @@ interface CommunityContentProps {
 function CommunityContent({ community, onUpdate, onDelete }: CommunityContentProps) {
   const router = useRouter()
   const { isAdmin, isMember } = useCommunityContext()
+  const clubId = community.clubId // clubId 추출
   const [region, setRegion] = useState(community.region || '')
   const [subRegion, setSubRegion] = useState(community.subRegion || '')
 
@@ -174,7 +172,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
           .map(t => t.trim())
           .filter(Boolean)
 
-        const result = await onUpdate(community.clubId, {
+        const result = await onUpdate({
           name: editForm.name.trim(),
           description: editForm.description.trim() || null,
           region: region || null,
@@ -192,15 +190,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
         toast.error('수정 중 오류가 발생했습니다')
       }
     },
-    [
-      editForm.name,
-      editForm.description,
-      editForm.tags,
-      region,
-      subRegion,
-      onUpdate,
-      community.clubId,
-    ]
+    [editForm.name, editForm.description, editForm.tags, region, subRegion, onUpdate]
   )
 
   /**
@@ -212,7 +202,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
     }
 
     try {
-      const result = await onDelete(community.clubId)
+      const result = await onDelete(clubId)
 
       if (result.success) {
         toast.success('커뮤니티가 삭제되었습니다')
@@ -223,7 +213,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
     } catch (_error) {
       toast.error('삭제 중 오류가 발생했습니다')
     }
-  }, [onDelete, community.clubId, router])
+  }, [onDelete, clubId, router])
 
   /**
    * 커뮤니티 이미지 업데이트
@@ -231,7 +221,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
   const handleImageUpdate = useCallback(
     async (imageUrl: string) => {
       try {
-        const result = await onUpdate(community.clubId, {
+        const result = await onUpdate({
           imageUrl,
         })
 
@@ -243,7 +233,7 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
         throw error
       }
     },
-    [onUpdate, community.clubId]
+    [onUpdate]
   )
 
   /**
@@ -303,71 +293,96 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
   if (isEditing) {
     return (
       <div className={styles['profile-wrapper']}>
-        <form onSubmit={handleSaveEdit} className={styles['edit-form']}>
-          <div className={styles['edit-fields']}>
-            <div className={styles['edit-field']}>
-              <label>커뮤니티 이름</label>
-              <input
-                type="text"
-                value={editForm.name}
-                onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                required
-                placeholder="커뮤니티 이름을 입력하세요"
-              />
-            </div>
-            <div className={styles['edit-field']}>
-              <label>설명</label>
-              <textarea
-                value={editForm.description}
-                onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="커뮤니티 설명을 입력하세요"
-                rows={4}
-              />
-            </div>
-            <div className={styles['edit-field']}>
-              <label>태그</label>
-              <input
-                type="text"
-                value={editForm.tags}
-                onChange={e => setEditForm(prev => ({ ...prev, tags: e.target.value }))}
-                placeholder=",로 구분하여 입력 (예: 알고리즘, 독서, CS)"
-              />
-            </div>
-            <div className={styles['edit-field']}>
-              <label>지역</label>
-              <Dropdown
-                options={regions.map(regionData => ({
-                  value: regionData.region,
-                  label: regionData.region,
-                }))}
-                value={region}
-                onChange={value => {
-                  setRegion(value)
-                  setSubRegion('') // 지역 변경 시 하위 지역 초기화
-                }}
-                placeholder="지역을 선택하세요"
-              />
-              <Dropdown
-                options={
-                  regions
-                    .find(regionData => regionData.region === region)
-                    ?.subRegion.map(sub => ({ value: sub, label: sub })) || []
-                }
-                value={subRegion}
-                onChange={setSubRegion}
-                placeholder="하위 지역을 선택하세요"
-              />
-            </div>
-          </div>
-          <div className={styles['edit-actions']}>
-            <button type="submit" className={styles['save-button']}>
-              저장
-            </button>
-            <button type="button" onClick={handleCancelEdit} className={styles['cancel-button']}>
-              취소
-            </button>
-          </div>
-        </form>
+        <SharedForm
+          onSubmit={handleSaveEdit}
+          submitText="저장"
+          cancelText="취소"
+          onCancel={handleCancelEdit}
+          submitButtonType="accent"
+          cancelButtonType="stroke"
+        >
+          <FormField
+            label="커뮤니티 이름"
+            type="text"
+            value={editForm.name}
+            onChange={value =>
+              setEditForm(prev => ({
+                ...prev,
+                name: typeof value === 'string' ? value : String(value),
+              }))
+            }
+            required
+            placeholder="커뮤니티 이름을 입력하세요"
+            fieldId="community-name-edit"
+            ariaDescription="커뮤니티 이름을 입력하세요"
+          />
+
+          <FormField
+            label="설명"
+            type="textarea"
+            value={editForm.description}
+            onChange={value =>
+              setEditForm(prev => ({
+                ...prev,
+                description: typeof value === 'string' ? value : String(value),
+              }))
+            }
+            placeholder="커뮤니티 설명을 입력하세요"
+            rows={4}
+            fieldId="community-description-edit"
+            ariaDescription="커뮤니티에 대한 상세 설명을 입력하세요"
+          />
+
+          <FormField
+            label="태그"
+            type="text"
+            value={editForm.tags}
+            onChange={value =>
+              setEditForm(prev => ({
+                ...prev,
+                tags: typeof value === 'string' ? value : String(value),
+              }))
+            }
+            placeholder=",로 구분하여 입력 (예: 알고리즘, 독서, CS)"
+            fieldId="community-tags-edit"
+            ariaDescription="커뮤니티 특성을 나타내는 태그를 쉼표로 구분하여 입력하세요"
+          />
+
+          <FormField
+            label="지역"
+            type="select"
+            value={region}
+            onChange={value => {
+              setRegion(typeof value === 'string' ? value : String(value))
+              setSubRegion('') // 지역 변경 시 하위 지역 초기화
+            }}
+            options={regions.map(regionData => ({
+              value: regionData.region,
+              label: regionData.region,
+            }))}
+            placeholder="지역을 선택하세요"
+            fieldId="community-region-edit"
+            ariaDescription="커뮤니티가 활동할 주요 지역을 선택하세요"
+          />
+
+          {region && (
+            <FormField
+              label="하위 지역"
+              type="select"
+              value={subRegion}
+              onChange={value => setSubRegion(typeof value === 'string' ? value : String(value))}
+              options={
+                regions
+                  .find(regionData => regionData.region === region)
+                  ?.subRegion.map(sub => ({ value: sub, label: sub })) || []
+              }
+              placeholder="하위 지역을 선택하세요"
+              required
+              fieldId="community-subregion-edit"
+              ariaDescription="커뮤니티가 활동할 구체적인 하위 지역을 선택하세요"
+            />
+          )}
+        </SharedForm>
       </div>
     )
   }
@@ -407,27 +422,23 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
 
 /**
  * 커뮤니티 프로필 메인 컴포넌트
- * - 커스텀 훅으로 데이터 fetching/상태 관리
- * - 선언적 조건부 렌더링
+ * - Server Component에서 전달받은 데이터 사용
+ * - 클라이언트 fetch 불필요
+ * - Server Actions로 데이터 수정
  */
-export default function StudyProfile({ id }: StudyProfileProps) {
-  const { community, loading, error, updateCommunity, deleteCommunity } = useCommunity(id)
+export default function StudyProfile({ id, community }: StudyProfileProps) {
+  // Server Actions로 데이터 수정 함수들
+  const updateCommunity = async (input: UpdateCommunityInput) => {
+    const { updateCommunityAction } = await import('@/app/actions/community')
+    return updateCommunityAction(id, input)
+  }
 
-  return renderWithLoading(
-    loading,
-    <LoadingState message={MESSAGES.LOADING.COMMUNITY} />,
-    renderWithError(
-      error,
-      <ErrorState message={error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND} />,
-      community ? (
-        <CommunityContent
-          community={community}
-          onUpdate={updateCommunity}
-          onDelete={deleteCommunity}
-        />
-      ) : (
-        <ErrorState message={MESSAGES.ERROR.COMMUNITY_NOT_FOUND} />
-      )
-    )
+  const deleteCommunity = async () => {
+    const { deleteCommunityAction } = await import('@/app/actions/community')
+    return deleteCommunityAction(id)
+  }
+
+  return (
+    <CommunityContent community={community} onUpdate={updateCommunity} onDelete={deleteCommunity} />
   )
 }

@@ -68,4 +68,6 @@ export interface CommunityContentProps {
   isAdmin: boolean
   /** 멤버 여부 (서버에서 확인됨) */
   isMember: boolean
+  /** 커뮤니티 상세 정보 (서버에서 페칭됨) */
+  community: import('@/lib/community/communityServer').CommunityDetail
 }

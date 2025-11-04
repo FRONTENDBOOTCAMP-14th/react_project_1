@@ -244,8 +244,9 @@ function RoundCardHeader({
         <form onSubmit={handleEditSubmit} className={styles['round-edit-form']}>
           <div className={styles['round-edit-fields']}>
             <div className={styles['edit-field']}>
-              <label>회차 번호:</label>
+              <label htmlFor="round-number">회차 번호:</label>
               <input
+                id="round-number"
                 type="number"
                 min="1"
                 value={editForm.roundNumber}
@@ -253,32 +254,51 @@ function RoundCardHeader({
                   setEditForm(prev => ({ ...prev, roundNumber: parseInt(e.target.value) || 1 }))
                 }
                 required
+                aria-describedby="round-number-description"
               />
+              <span id="round-number-description" className="sr-only">
+                회차 번호를 입력하세요 (1 이상의 숫자)
+              </span>
             </div>
             <div className={styles['edit-field']}>
-              <label>시작일:</label>
+              <label htmlFor="start-date">시작일:</label>
               <input
+                id="start-date"
                 type="datetime-local"
                 value={editForm.startDate}
                 onChange={e => setEditForm(prev => ({ ...prev, startDate: e.target.value }))}
+                aria-describedby="start-date-description"
               />
+              <span id="start-date-description" className="sr-only">
+                회차 시작 일시를 선택하세요
+              </span>
             </div>
             <div className={styles['edit-field']}>
-              <label>종료일:</label>
+              <label htmlFor="end-date">종료일:</label>
               <input
+                id="end-date"
                 type="datetime-local"
                 value={editForm.endDate}
                 onChange={e => setEditForm(prev => ({ ...prev, endDate: e.target.value }))}
+                aria-describedby="end-date-description"
               />
+              <span id="end-date-description" className="sr-only">
+                회차 종료 일시를 선택하세요
+              </span>
             </div>
             <div className={styles['edit-field']}>
-              <label>장소:</label>
+              <label htmlFor="location">장소:</label>
               <input
+                id="location"
                 type="text"
                 value={editForm.location}
                 onChange={e => setEditForm(prev => ({ ...prev, location: e.target.value }))}
                 placeholder="스터디 장소를 입력하세요"
+                aria-describedby="location-description"
               />
+              <span id="location-description" className="sr-only">
+                스터디가 진행될 장소를 입력하세요
+              </span>
             </div>
           </div>
           <div className={styles['round-edit-actions']}>

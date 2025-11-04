@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import styles from './CommunityContent.module.css'
 import { ROUTES, MESSAGES } from '@/constants'
-import { useNotifications } from '@/lib/hooks'
+import type { CommunityDetail } from '@/lib/community/communityServer'
 
 /**
  * 공지 링크 컴포넌트에 전달되는 속성
@@ -11,21 +11,18 @@ import { useNotifications } from '@/lib/hooks'
 interface NotificationLinkProps {
   /** 커뮤니티 식별자 */
   clubId: string
+  /** 공지사항 목록 (서버에서 페칭됨) */
+  notifications: CommunityDetail['notifications']
 }
 
 /**
  * 공지 링크 컴포넌트
- * 커뮤니티 공지 페이지로 이동하는 링크를 렌더링합니다.
- * useNotifications 훅을 사용하여 최신 공지사항을 표시합니다.
+ * - Server Component에서 전달받은 공지사항 데이터 사용
+ * - 클라이언트 fetch 불필요
  */
-export default function NotificationLink({ clubId }: NotificationLinkProps) {
-  const { pinnedNotifications, notifications } = useNotifications({
-    clubId,
-    limit: 1,
-  })
-
+export default function NotificationLink({ clubId, notifications }: NotificationLinkProps) {
   // 고정 공지사항 우선, 없으면 최신 공지사항 표시
-  const latestNotification = pinnedNotifications[0] || notifications[0]
+  const latestNotification = notifications.find(n => n.isPinned) || notifications[0]
 
   return (
     <Link

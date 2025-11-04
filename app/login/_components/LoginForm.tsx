@@ -4,6 +4,7 @@ import { MESSAGES } from '@/constants'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import styles from './page.module.css'
+import formStyles from './LoginForm.module.css'
 
 export function LoginForm() {
   return (
@@ -14,7 +15,7 @@ export function LoginForm() {
         width={96}
         height={96}
         priority
-        style={{ marginBottom: 24 }}
+        className={formStyles.logo}
       />
       <h1 className={styles['brand-title']}>{MESSAGES.LABEL.BRAND_NAME}</h1>
       <button

@@ -6,3 +6,8 @@
   gap: 24px;
   padding: 24px;
 }
+
+.flex-container {
+  display: flex;
+  gap: 16px;
+}

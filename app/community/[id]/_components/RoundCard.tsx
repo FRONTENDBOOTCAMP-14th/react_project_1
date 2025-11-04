@@ -339,7 +339,7 @@ function RoundCardHeader({
               {formatDateRangeUTC(round.startDate, round.endDate)}
             </p>
           )}
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className={styles['location-container']}>
             {round?.location && (
               <p className={styles['round-location']}>
                 <MapPin /> {round.location}

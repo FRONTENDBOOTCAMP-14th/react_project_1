@@ -52,7 +52,7 @@ export default function Page() {
       <FillLink href="/">Fill Link</FillLink>
       <StrokeLink href="/">Stroke Link</StrokeLink>
       <AccentLink href="/">Accent Link</AccentLink>
-      <div style={{ display: 'flex', gap: '16px' }}>
+      <div className={styles['flex-container']}>
         <IconButton type="button" onClick={() => alert('Button Clicked!')}>
           <Image src="/svg/logo.svg" alt="" width={40} height={40} />
         </IconButton>
@@ -68,7 +68,7 @@ export default function Page() {
       </div>
       <ParticipateRate name="사용자" value={75} max={100} />
 
-      <div style={{ display: 'flex', gap: '16px' }}>
+      <div className={styles['flex-container']}>
         <Checkbox checked={isChecked1} onChange={setIsChecked1} />
         <Checkbox checked={isChecked2} onChange={setIsChecked2} />
       </div>

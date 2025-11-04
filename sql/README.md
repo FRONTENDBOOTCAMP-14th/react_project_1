@@ -163,5 +163,8 @@
 
 ## 주의사항
 
-- 소프트 삭제(`deleted_at`) 컬럼이 있는 테이블은 기본 조회에서 반드시 `WHERE deleted_at IS NULL` 조건을 적용하세요.
+- **소프트 삭제 자동화**: `lib/prisma/middleware.ts`에서 Prisma 미들웨어로 소프트 삭제가 자동 처리됩니다
+  - find 계열 쿼리: 자동으로 `WHERE deleted_at IS NULL` 조건 추가
+  - delete 쿼리: 자동으로 `UPDATE SET deleted_at = NOW()`로 변환
+  - 비즈니스 로직에서 `deletedAt` 필터를 수동으로 추가할 필요 없음
 - 부분 유니크 인덱스는 Prisma 스키마에 반영되지 않습니다. 스키마 드리프트를 막기 위해 README와 SQL을 소스오브트루스로 유지하세요.

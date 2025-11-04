@@ -103,6 +103,53 @@ export const API_ENDPOINTS = {
 } as const
 
 /**
+ * Revalidate 경로 상수
+ */
+export const REVALIDATE_PATHS = {
+  COMMUNITY: (clubId: string) => `/community/${clubId}`,
+  COMMUNITY_ROUNDS: (clubId: string) => `/community/${clubId}/rounds`,
+  COMMUNITY_GOALS: (clubId: string) => `/community/${clubId}/goals`,
+  DASHBOARD: '/dashboard',
+  PROFILE: '/profile',
+} as const
+
+/**
+ * Revalidate 태그 상수
+ */
+export const REVALIDATE_TAGS = {
+  COMMUNITIES: 'communities',
+  ROUNDS: 'rounds',
+  GOALS: 'goals',
+  MEMBERS: 'members',
+  PROFILE: 'profile',
+} as const
+
+/**
+ * 권한 레벨 상수
+ */
+export const PERMISSION_LEVELS = {
+  ADMIN: 'admin',
+  MEMBER: 'member',
+} as const
+
+/**
+ * 출석 타입 상수
+ */
+export const ATTENDANCE_TYPES = {
+  PRESENT: 'present',
+  ABSENT: 'absent',
+  LATE: 'late',
+} as const
+
+/**
+ * 목표 상태 상수
+ */
+export const GOAL_STATUS = {
+  ACTIVE: false,
+  COMPLETED: true,
+} as const
+
+/**
  * HTTP 헤더 상수
  */
 export const HTTP_HEADERS = {

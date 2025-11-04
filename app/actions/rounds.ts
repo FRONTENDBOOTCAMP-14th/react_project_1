@@ -1,5 +1,6 @@
 'use server'
 
+import { ATTENDANCE_TYPES, MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { CreateRoundRequest } from '@/lib/types/round'
@@ -18,10 +19,10 @@ export async function createRoundAction(data: CreateRoundRequest): Promise<Serve
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
       // 관리자 권한 확인
-      await checkPermission(userId, data.clubId, 'admin')
+      await checkPermission(userId, data.clubId, PERMISSION_LEVELS.ADMIN)
 
       // 라운드 생성
       const round = await prisma.round.create({
@@ -34,10 +35,10 @@ export async function createRoundAction(data: CreateRoundRequest): Promise<Serve
         },
       })
 
-      revalidatePath(`/community/${data.clubId}`)
+      revalidatePath(REVALIDATE_PATHS.COMMUNITY(data.clubId))
       return round
     },
-    { errorMessage: '라운드 생성에 실패했습니다' }
+    { errorMessage: MESSAGES.ERROR.ROUND_CREATE_FAILED }
   )
 }
 
@@ -52,10 +53,10 @@ export async function updateRoundAction(
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
       // 관리자 권한 확인
-      await checkPermission(userId, clubId, 'admin')
+      await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
       // 라운드 업데이트
       const round = await prisma.round.update({
@@ -72,10 +73,10 @@ export async function updateRoundAction(
         },
       })
 
-      revalidatePath(`/community/${clubId}`)
+      revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
       return round
     },
-    { errorMessage: '라운드 수정에 실패했습니다' }
+    { errorMessage: MESSAGES.ERROR.ROUND_UPDATE_FAILED }
   )
 }
 
@@ -89,10 +90,10 @@ export async function deleteRoundAction(
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
       // 관리자 권한 확인
-      await checkPermission(userId, clubId, 'admin')
+      await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
       // 라운드 소프트 삭제
       await prisma.round.update({
@@ -100,9 +101,9 @@ export async function deleteRoundAction(
         data: { deletedAt: new Date() },
       })
 
-      revalidatePath(`/community/${clubId}`)
+      revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
     },
-    { errorMessage: '라운드 삭제에 실패했습니다' }
+    { errorMessage: MESSAGES.ERROR.ROUND_DELETE_FAILED }
   )
 }
 
@@ -116,10 +117,10 @@ export async function markAttendanceAction(
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
       // 멤버십 확인
-      await checkPermission(userId, clubId, 'member')
+      await checkPermission(userId, clubId, PERMISSION_LEVELS.MEMBER)
 
       // 출석 기록 확인 (deletedAt 필터 포함)
       const existingAttendance = await prisma.attendance.findFirst({
@@ -127,7 +128,7 @@ export async function markAttendanceAction(
       })
 
       if (existingAttendance) {
-        throw new Error('이미 출석 처리되었습니다')
+        throw new Error(MESSAGES.ERROR.ALREADY_ATTENDED)
       }
 
       // 라운드 시간 확인
@@ -136,14 +137,14 @@ export async function markAttendanceAction(
         select: { startDate: true, endDate: true },
       })
 
-      assertExists(round, '라운드를 찾을 수 없습니다')
+      assertExists(round, MESSAGES.ERROR.ROUND_NOT_FOUND)
 
       const now = new Date()
       const isWithinWindow =
         round.startDate && round.endDate && now >= round.startDate && now <= round.endDate
 
       if (!isWithinWindow) {
-        throw new Error('출석 가능 시간이 아닙니다')
+        throw new Error(MESSAGES.ERROR.ATTENDANCE_TIME_INVALID)
       }
 
       // 출석 생성
@@ -151,13 +152,13 @@ export async function markAttendanceAction(
         data: {
           roundId,
           userId,
-          attendanceType: 'present',
+          attendanceType: ATTENDANCE_TYPES.PRESENT,
           attendanceDate: now,
         },
       })
 
-      revalidatePath(`/community/${clubId}`)
+      revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
     },
-    { errorMessage: '출석 처리에 실패했습니다' }
+    { errorMessage: MESSAGES.ERROR.ATTENDANCE_FAILED }
   )
 }

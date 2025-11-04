@@ -1,6 +1,6 @@
 'use server'
 
-import { ROUTES } from '@/constants'
+import { MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS, REVALIDATE_TAGS, ROUTES } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { UpdateCommunityInput } from '@/lib/types/community'
@@ -24,10 +24,10 @@ export async function updateCommunityAction(
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
       // 관리자 권한 확인
-      await checkPermission(userId, clubId, 'admin')
+      await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
       // 커뮤니티 업데이트
       await prisma.community.update({
@@ -42,10 +42,10 @@ export async function updateCommunityAction(
         },
       })
 
-      revalidatePath(`/community/${clubId}`)
-      revalidateTag('communities')
+      revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
+      revalidateTag(REVALIDATE_TAGS.COMMUNITIES)
     },
-    { errorMessage: '커뮤니티 업데이트에 실패했습니다' }
+    { errorMessage: MESSAGES.ERROR.COMMUNITY_UPDATE_FAILED }
   )
 }
 

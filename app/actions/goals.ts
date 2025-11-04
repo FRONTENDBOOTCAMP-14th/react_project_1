@@ -8,6 +8,7 @@ import {
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
+import { MESSAGES, GOAL_STATUS, REVALIDATE_PATHS } from '@/constants'
 import { revalidatePath } from 'next/cache'
 
 /**
@@ -17,7 +18,7 @@ export async function createGoalAction(data: CreateGoalInput): Promise<ServerAct
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
       // 날짜 변환
       const start = data.startDate instanceof Date ? data.startDate : new Date(data.startDate)
@@ -30,8 +31,8 @@ export async function createGoalAction(data: CreateGoalInput): Promise<ServerAct
           roundId: data.roundId || null,
           title: data.title,
           description: data.description || null,
-          isTeam: data.isTeam || false,
-          isComplete: data.isComplete || false,
+          isTeam: data.isTeam || GOAL_STATUS.ACTIVE,
+          isComplete: data.isComplete || GOAL_STATUS.ACTIVE,
           startDate: start,
           endDate: end,
         },
@@ -39,12 +40,12 @@ export async function createGoalAction(data: CreateGoalInput): Promise<ServerAct
 
       // 연관된 경로 재검증
       if (data.clubId) {
-        revalidatePath(`/community/${data.clubId}`)
+        revalidatePath(REVALIDATE_PATHS.COMMUNITY(data.clubId))
       }
 
       return newGoal
     },
-    { errorMessage: '목표 생성에 실패했습니다' }
+    { errorMessage: MESSAGES.ERROR.GOAL_CREATE_FAILED }
   )
 }
 

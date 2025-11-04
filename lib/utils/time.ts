@@ -65,10 +65,13 @@ export function isToday(date: Date | string): boolean {
   const today = new Date()
   const target = new Date(date)
 
+  // UTC 시간을 로컬 시간으로 변환하여 비교
+  const localTarget = new Date(target.getTime() + target.getTimezoneOffset() * 60000)
+
   return (
-    today.getFullYear() === target.getFullYear() &&
-    today.getMonth() === target.getMonth() &&
-    today.getDate() === target.getDate()
+    today.getFullYear() === localTarget.getFullYear() &&
+    today.getMonth() === localTarget.getMonth() &&
+    today.getDate() === localTarget.getDate()
   )
 }
 
@@ -79,6 +82,9 @@ export function isThisWeek(date: Date | string): boolean {
   const today = new Date()
   const target = new Date(date)
 
+  // UTC 시간을 로컬 시간으로 변환
+  const localTarget = new Date(target.getTime() + target.getTimezoneOffset() * 60000)
+
   // 이번 주 시작일 (일요일)
   const startOfWeek = new Date(today)
   startOfWeek.setDate(today.getDate() - today.getDay())
@@ -86,8 +92,10 @@ export function isThisWeek(date: Date | string): boolean {
 
   // 이번 주 종료일 (토요일)
   const endOfWeek = new Date(startOfWeek)
+  endOfWeek.setDate(startOfWeek.getDate() + 6)
+  endOfWeek.setHours(23, 59, 59, 999)
 
-  return target >= startOfWeek && target <= endOfWeek
+  return localTarget >= startOfWeek && localTarget <= endOfWeek
 }
 
 /**
@@ -107,10 +115,14 @@ export function getDaysDifference(startDate: Date | string, endDate: Date | stri
   const start = new Date(startDate)
   const end = new Date(endDate)
 
-  start.setHours(0, 0, 0, 0)
-  end.setHours(0, 0, 0, 0)
+  // UTC 시간을 로컬 시간으로 변환
+  const localStart = new Date(start.getTime() + start.getTimezoneOffset() * 60000)
+  const localEnd = new Date(end.getTime() + end.getTimezoneOffset() * 60000)
 
-  const diffTime = end.getTime() - start.getTime()
+  localStart.setHours(0, 0, 0, 0)
+  localEnd.setHours(0, 0, 0, 0)
+
+  const diffTime = localEnd.getTime() - localStart.getTime()
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
@@ -134,7 +146,9 @@ export function formatRoundPeriod(startDate: Date | string, endDate: Date | stri
  */
 export function formatTime(date: Date | string): string {
   const targetDate = new Date(date)
-  const hours = String(targetDate.getHours()).padStart(2, '0')
-  const minutes = String(targetDate.getMinutes()).padStart(2, '0')
+  // UTC 시간을 로컬 시간으로 변환
+  const localDate = new Date(targetDate.getTime() + targetDate.getTimezoneOffset() * 60000)
+  const hours = String(localDate.getHours()).padStart(2, '0')
+  const minutes = String(localDate.getMinutes()).padStart(2, '0')
   return `${hours}:${minutes}`
 }

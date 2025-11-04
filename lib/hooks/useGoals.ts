@@ -1,7 +1,7 @@
 import { API_ENDPOINTS, MESSAGES } from '@/constants'
 import type { CreateGoalInput, StudyGoal, UpdateGoalInput } from '@/lib/types/goal'
 import { fetcher } from '@/lib/utils/swr'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import useSWR, { mutate } from 'swr'
 
 interface GoalsState {
@@ -63,11 +63,14 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
   // 에러 상태 (둘 중 하나라도 에러가 있으면 해당 에러)
   const error = teamError || personalError
 
-  // 목표 데이터 상태
-  const goals: GoalsState = {
-    team: teamData || [],
-    personal: personalData || [],
-  }
+  // 목표 데이터 상태 (메모이제이션으로 불필요한 재렌더링 방지)
+  const goals: GoalsState = useMemo(
+    () => ({
+      team: teamData || [],
+      personal: personalData || [],
+    }),
+    [teamData, personalData]
+  )
 
   // 재조회 함수
   const refetch = useCallback(async () => {

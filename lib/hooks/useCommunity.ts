@@ -1,9 +1,5 @@
 import { API_ENDPOINTS, MESSAGES } from '@/constants'
-import type {
-  Community,
-  CreateCommunityInput,
-  UpdateCommunityInput
-} from '@/lib/types/community'
+import type { Community, CreateCommunityInput, UpdateCommunityInput } from '@/lib/types/community'
 import { logger } from '@/lib/utils/logger'
 import { deleter, fetcher, patcher, poster } from '@/lib/utils/swr'
 import { useCallback } from 'react'

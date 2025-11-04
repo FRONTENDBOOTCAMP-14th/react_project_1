@@ -1,13 +1,13 @@
 'use client'
 
-import { memo, useState } from 'react'
 import { StrokeButton } from '@/components/ui'
 import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
+import { renderWithEmpty } from '@/lib/utils'
+import { memo, useState } from 'react'
+import { isGoalsEmpty } from '../_utils'
 import GoalItem from './GoalItem'
 import styles from './GoalItem.module.css'
-import { renderWithEmpty } from '@/lib/utils'
-import { isGoalsEmpty } from '../_utils'
 
 /**
  * 목표 리스트 컴포넌트에 전달되는 속성
@@ -63,6 +63,9 @@ function GoalsList({
 }: GoalsListProps) {
   const [isAdding, setIsAdding] = useState(false)
 
+  // 방어 코드: goals가 배열이 아닌 경우 빈 배열로 처리
+  const safeGoals = Array.isArray(goals) ? goals : null
+
   const handleAddClick = () => {
     setIsAdding(true)
   }
@@ -117,11 +120,11 @@ function GoalsList({
         />
       )}
       {renderWithEmpty(
-        isGoalsEmpty(goals),
+        isGoalsEmpty(safeGoals || []),
         <p className={styles['goal-card']} role="status">
           {emptyMessage}
         </p>,
-        goals.map(goal => (
+        safeGoals?.map(goal => (
           <GoalItem
             key={goal.goalId}
             goal={goal}

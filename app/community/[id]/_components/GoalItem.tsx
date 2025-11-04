@@ -5,8 +5,8 @@ import type { CustomSession } from '@/lib/types'
 import type { StudyGoal } from '@/lib/types/goal'
 import { Check, Ellipsis, X } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { memo, useEffect, useRef, useState } from 'react'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
+import { useEffect, useRef, useState } from 'react'
+import { useCommunityContext } from '../_context/CommunityContext'
 import styles from './GoalItem.module.css'
 
 /**
@@ -61,7 +61,7 @@ export interface GoalItemProps {
 function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }: GoalItemProps) {
   const { data: session } = useSession()
   const userId = (session as CustomSession)?.userId
-  const isAdmin = useCommunityStore(state => state.isAdmin)
+  const { isAdmin } = useCommunityContext()
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -218,4 +218,4 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
   )
 }
 
-export default memo(GoalItem)
+export default GoalItem

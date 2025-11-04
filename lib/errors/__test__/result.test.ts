@@ -4,6 +4,7 @@ import {
   err,
   firstErr,
   firstOk,
+  flatten,
   ok,
   tryCatch,
   tryCatchAsync,
@@ -288,6 +289,195 @@ describe('Result', () => {
 
       expect(stringErr.isErr()).toBe(true)
       expect(numberErr.isErr()).toBe(true)
+    })
+  })
+
+  describe('orElse', () => {
+    it('Ok는 대안을 무시하고 원본을 반환한다', () => {
+      const result = ok('성공').orElse(() => ok('대안'))
+      expect(result.isOk()).toBe(true)
+      expect(result.unwrap()).toBe('성공')
+    })
+
+    it('Err는 대안 Result를 반환한다', () => {
+      const result = err<string, string>('실패').orElse(() => ok('대안'))
+      expect(result.isOk()).toBe(true)
+      expect(result.unwrap()).toBe('대안')
+    })
+
+    it('Err에서 다른 Err로 대안 반환이 가능하다', () => {
+      const result = err<string, string>('첫번째 실패').orElse(e => err(`${e}에서 두번째 실패`))
+      expect(result.isErr()).toBe(true)
+      expect(result.match({ ok: v => v, err: e => e })).toBe('첫번째 실패에서 두번째 실패')
+    })
+
+    it('오류 타입을 변환할 수 있다', () => {
+      const result = err<string, string>('실패').orElse<number>(() => err<string, number>(404))
+      expect(result.isErr()).toBe(true)
+      expect(result.match({ ok: v => v, err: e => String(e) })).toBe('404')
+    })
+  })
+
+  describe('bimap', () => {
+    it('Ok는 성공 변환 함수를 적용한다', () => {
+      const result = ok(5).bimap(
+        n => n * 2,
+        (e: string) => e.toUpperCase()
+      )
+      expect(result.isOk()).toBe(true)
+      expect(result.unwrap()).toBe(10)
+    })
+
+    it('Err는 오류 변환 함수를 적용한다', () => {
+      const result = err<number, string>('error').bimap(
+        (n: number) => n * 2,
+        e => e.toUpperCase()
+      )
+      expect(result.isErr()).toBe(true)
+      expect(result.match({ ok: (v: number) => v.toString(), err: e => e })).toBe('ERROR')
+    })
+
+    it('성공과 오류 타입을 동시에 변환할 수 있다', () => {
+      const okResult = ok<string, number>('5').bimap(
+        s => parseInt(s),
+        n => `Error: ${n}`
+      )
+      expect(okResult.isOk()).toBe(true)
+      expect(okResult.unwrap()).toBe(5)
+
+      const errResult = err<string, number>(404).bimap(
+        (s: string) => parseInt(s),
+        n => `Error: ${n}`
+      )
+      expect(errResult.isErr()).toBe(true)
+      expect(errResult.match({ ok: (v: number) => v.toString(), err: e => e })).toBe('Error: 404')
+    })
+  })
+
+  describe('inspect', () => {
+    it('Ok는 사이드 이펙트를 실행하고 원본을 반환한다', () => {
+      let sideEffect = ''
+      const result = ok('안녕하세요')
+        .inspect(val => {
+          sideEffect = val
+        })
+        .map(s => s.length)
+
+      expect(sideEffect).toBe('안녕하세요')
+      expect(result.isOk()).toBe(true)
+      expect(result.unwrap()).toBe(5)
+    })
+
+    it('Err는 사이드 이펙트를 실행하지 않는다', () => {
+      let sideEffect = ''
+      const result = err<string, string>('실패').inspect(val => {
+        sideEffect = val
+      })
+
+      expect(sideEffect).toBe('')
+      expect(result.isErr()).toBe(true)
+    })
+
+    it('체이닝 중간에 디버깅을 위해 사용할 수 있다', () => {
+      const logs: number[] = []
+      const result = ok(1)
+        .map(n => n + 1)
+        .inspect(n => logs.push(n))
+        .map(n => n * 2)
+        .inspect(n => logs.push(n))
+        .map(n => n + 10)
+
+      expect(logs).toEqual([2, 4])
+      expect(result.unwrap()).toBe(14)
+    })
+  })
+
+  describe('zip', () => {
+    it('두 Ok를 튜플로 결합한다', () => {
+      const result1 = ok(1)
+      const result2 = ok('a')
+      const zipped = result1.zip(result2)
+
+      expect(zipped.isOk()).toBe(true)
+      expect(zipped.unwrap()).toEqual([1, 'a'])
+    })
+
+    it('첫 번째가 Err면 Err를 반환한다', () => {
+      const result1 = err<number, string>('오류')
+      const result2 = ok('a')
+      const zipped = result1.zip(result2)
+
+      expect(zipped.isErr()).toBe(true)
+      expect(zipped.match({ ok: (v: [number, string]) => v.toString(), err: e => e })).toBe('오류')
+    })
+
+    it('두 번째가 Err면 Err를 반환한다', () => {
+      const result1: Result<number, string> = ok(1)
+      const result2: Result<string, string> = err<string, string>('오류')
+      const zipped = result1.zip<string>(result2)
+
+      expect(zipped.isErr()).toBe(true)
+      expect(zipped.match({ ok: (v: [number, string]) => v.toString(), err: e => e })).toBe('오류')
+    })
+
+    it('둘 다 Err면 첫 번째 Err를 반환한다', () => {
+      const result1 = err<number, string>('첫번째 오류')
+      const result2 = err<string, string>('두번째 오류')
+      const zipped = result1.zip(result2)
+
+      expect(zipped.isErr()).toBe(true)
+      expect(zipped.match({ ok: (v: [number, string]) => v.toString(), err: e => e })).toBe(
+        '첫번째 오류'
+      )
+    })
+
+    it('여러 번 체이닝할 수 있다', () => {
+      const r1 = ok(1)
+      const r2 = ok('a')
+      const r3 = ok(true)
+
+      const zipped = r1
+        .zip(r2)
+        .andThen(([n, s]) => ok([n, s, r3.unwrap()] as [number, string, boolean]))
+
+      expect(zipped.isOk()).toBe(true)
+      expect(zipped.unwrap()).toEqual([1, 'a', true])
+    })
+  })
+
+  describe('flatten', () => {
+    it('중첩된 Ok를 평탄화한다', () => {
+      const nested = ok(ok(5))
+      const flat = flatten(nested)
+
+      expect(flat.isOk()).toBe(true)
+      expect(flat.unwrap()).toBe(5)
+    })
+
+    it('내부가 Err인 Ok를 평탄화한다', () => {
+      const nested = ok(err<number, string>('실패'))
+      const flat = flatten(nested)
+
+      expect(flat.isErr()).toBe(true)
+      expect(flat.match({ ok: (v: number) => v.toString(), err: e => e })).toBe('실패')
+    })
+
+    it('외부가 Err면 Err를 반환한다', () => {
+      const nested = err<Result<number, string>, string>('외부 실패')
+      const flat = flatten(nested)
+
+      expect(flat.isErr()).toBe(true)
+      expect(flat.match({ ok: (v: number) => v.toString(), err: e => e })).toBe('외부 실패')
+    })
+
+    it('andThen과 함께 사용할 수 있다', () => {
+      const result = ok('5')
+        .andThen(s => ok(parseInt(s)))
+        .andThen(n => ok(ok(n * 2)))
+
+      const flat = flatten(result)
+      expect(flat.isOk()).toBe(true)
+      expect(flat.unwrap()).toBe(10)
     })
   })
 })

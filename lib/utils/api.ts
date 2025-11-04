@@ -3,6 +3,8 @@
  * 에러 처리, 응답 변환, 타임아웃, 재시도 로직
  */
 
+import { tryCatchAsync, type AsyncResult } from '@/lib/errors/result'
+
 /**
  * API 에러 타입 정의
  */
@@ -56,12 +58,12 @@ export function getErrorTypeFromStatusCode(statusCode: number): ApiErrorType {
 }
 
 /**
- * 에러 객체를 ApiError로 변환
+ * 에러 객체를 ApiError로 변환 (동기 버전)
  */
-export async function parseApiError(
+export function parseApiErrorSync(
   error: unknown,
   fallbackMessage: string = '알 수 없는 오류가 발생했습니다.'
-): Promise<ApiError> {
+): ApiError {
   // Next.js API 에러
   if (error instanceof Error) {
     return {
@@ -71,13 +73,9 @@ export async function parseApiError(
     }
   }
 
-  // Fetch API 에러
-  if (error instanceof Response) {
-    return {
-      type: getErrorTypeFromStatusCode(error.status),
-      message: await getErrorMessageFromResponse(error),
-      statusCode: error.status,
-    }
+  // ApiError 타입이 이미 있는 경우
+  if (typeof error === 'object' && error !== null && 'type' in error && 'message' in error) {
+    return error as ApiError
   }
 
   // Supabase 에러
@@ -98,6 +96,26 @@ export async function parseApiError(
     message: typeof error === 'string' ? error : fallbackMessage,
     originalError: typeof error === 'object' ? error : undefined,
   }
+}
+
+/**
+ * 에러 객체를 ApiError로 변환 (async 버전 - Response 처리용)
+ */
+export async function parseApiError(
+  error: unknown,
+  fallbackMessage: string = '알 수 없는 오류가 발생했습니다.'
+): Promise<ApiError> {
+  // Fetch API 에러 (Response 객체)
+  if (error instanceof Response) {
+    return {
+      type: getErrorTypeFromStatusCode(error.status),
+      message: await getErrorMessageFromResponse(error),
+      statusCode: error.status,
+    }
+  }
+
+  // 나머지는 동기 버전 사용
+  return parseApiErrorSync(error, fallbackMessage)
 }
 
 /**
@@ -224,6 +242,7 @@ export function isErrorResponse(
 
 /**
  * API 호출 래퍼 (에러 처리 포함)
+ * @deprecated apiCallWithResult 사용을 권장
  */
 export async function withApiErrorHandling<T>(
   apiCall: () => Promise<T>,
@@ -236,4 +255,53 @@ export async function withApiErrorHandling<T>(
     const apiError = await parseApiError(error, fallbackMessage)
     return { success: false, error: apiError }
   }
+}
+
+/**
+ * API 호출 래퍼 (Result 패턴)
+ */
+export async function apiCallWithResult<T>(
+  apiCall: () => Promise<T>,
+  fallbackMessage?: string
+): AsyncResult<T, ApiError> {
+  return tryCatchAsync(apiCall, error => parseApiErrorSync(error, fallbackMessage))
+}
+
+/**
+ * Fetch 요청을 Result로 래핑
+ */
+export async function fetchWithResult<T>(
+  url: string,
+  options?: RequestInit,
+  fallbackMessage?: string
+): AsyncResult<T, ApiError> {
+  return tryCatchAsync(
+    async () => {
+      const response = await fetch(url, options)
+
+      if (!response.ok) {
+        const error: ApiError = {
+          type: getErrorTypeFromStatusCode(response.status),
+          message: await getErrorMessageFromResponse(response),
+          statusCode: response.status,
+        }
+        throw error
+      }
+
+      const data = await response.json()
+      return data as T
+    },
+    error => parseApiErrorSync(error, fallbackMessage)
+  )
+}
+
+/**
+ * Result를 기존 success/error 형식으로 변환
+ */
+export function resultToResponse<T>(
+  result: AsyncResult<T, ApiError>
+): Promise<{ success: true; data: T } | { success: false; error: ApiError }> {
+  return result.then(r =>
+    r.isOk() ? { success: true, data: r.unwrap() } : { success: false, error: r.error }
+  )
 }

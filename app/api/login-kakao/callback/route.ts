@@ -2,7 +2,6 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { exchangeToken, getKakaoUserInfo } from '@/lib/oauth/kakao'
 import { findByProviderId } from '@/lib/repositories/user'
-import { getErrorMessage } from '@/lib/errors'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -26,37 +25,61 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'server_misconfig' }, { status: 500 })
   }
 
-  try {
-    const token = await exchangeToken({ code, clientId, redirectUri, clientSecret })
-    const me = await getKakaoUserInfo(token.access_token)
-    const provider = 'kakao'
-    const providerId = String(me.id)
-    const email = me.kakao_account?.email ?? null
+  // Result 패턴을 사용한 카카오 OAuth 처리
+  const tokenResult = await exchangeToken({ code, clientId, redirectUri, clientSecret })
 
-    const existing = await findByProviderId(provider, providerId)
-    if (existing) {
-      // TODO: 세션 발급/유지 구현(NextAuth 또는 커스텀 세션)
-      // 현재는 임시로 리다이렉트만 수행
-      const next = process.env.LOGIN_SUCCESS_REDIRECT || '/'
-      return NextResponse.redirect(new URL(next, req.url))
-    }
-
-    // 미가입: 프런트에서 회원가입 페이지로 연결할 수 있도록 최소 정보 반환
-    return NextResponse.json({
-      success: true,
-      needsRegistration: true,
-      data: {
-        provider,
-        providerId,
-        email,
-        // username은 정책상 kakao_<id> 제안(중복 허용)
-        suggestedUsername: `kakao_${providerId}`,
-      },
-    })
-  } catch (e: unknown) {
+  if (tokenResult.isErr()) {
+    const error = tokenResult.error
     return NextResponse.json(
-      { success: false, error: 'callback_failed', detail: getErrorMessage(e, 'Unknown error') },
-      { status: 500 }
+      {
+        success: false,
+        error: 'token_exchange_failed',
+        detail: error.message,
+        debugInfo: error.details,
+      },
+      { status: error.statusCode || 500 }
     )
   }
+
+  const token = tokenResult.unwrap()
+  const userInfoResult = await getKakaoUserInfo(token.access_token)
+
+  if (userInfoResult.isErr()) {
+    const error = userInfoResult.error
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'user_info_failed',
+        detail: error.message,
+        debugInfo: error.details,
+      },
+      { status: error.statusCode || 500 }
+    )
+  }
+
+  const me = userInfoResult.unwrap()
+  const provider = 'kakao'
+  const providerId = String(me.id)
+  const email = me.kakao_account?.email ?? null
+
+  const existing = await findByProviderId(provider, providerId)
+  if (existing) {
+    // TODO: 세션 발급/유지 구현(NextAuth 또는 커스텀 세션)
+    // 현재는 임시로 리다이렉트만 수행
+    const next = process.env.LOGIN_SUCCESS_REDIRECT || '/'
+    return NextResponse.redirect(new URL(next, req.url))
+  }
+
+  // 미가입: 프런트에서 회원가입 페이지로 연결할 수 있도록 최소 정보 반환
+  return NextResponse.json({
+    success: true,
+    needsRegistration: true,
+    data: {
+      provider,
+      providerId,
+      email,
+      // username은 정책상 kakao_<id> 제안(중복 허용)
+      suggestedUsername: `kakao_${providerId}`,
+    },
+  })
 }

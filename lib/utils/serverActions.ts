@@ -4,6 +4,7 @@
  */
 
 import { getCurrentUserId } from '@/lib/auth'
+import { tryCatchAsync, type AsyncResult } from '@/lib/errors/result'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/utils/logger'
 
@@ -163,4 +164,122 @@ export function assertExists<T>(
   if (!data) {
     throw new ServerActionError(errorMessage, 'NOT_FOUND', 404)
   }
+}
+
+/**
+ * Server Action 에러 타입 (Result 패턴용)
+ */
+export interface ServerActionErrorResult {
+  type: 'auth' | 'permission' | 'validation' | 'not_found' | 'database' | 'unknown'
+  message: string
+  code?: string
+  statusCode?: number
+}
+
+/**
+ * Server Action을 Result 패턴으로 감싸는 래퍼
+ * @param action - 실행할 비즈니스 로직
+ * @param options - 옵션 (인증 필요 여부 등)
+ * @returns Result<T, ServerActionErrorResult>
+ */
+export async function withServerActionResult<T>(
+  action: () => Promise<T>,
+  options: {
+    requireAuth?: boolean
+    errorMessage?: string
+    actionName?: string
+  } = {}
+): AsyncResult<T, ServerActionErrorResult> {
+  const actionName = options.actionName || 'UnknownAction'
+
+  return tryCatchAsync(
+    async () => {
+      logger.debug(`Server Action started: ${actionName}`)
+
+      // 인증 확인
+      if (options.requireAuth !== false) {
+        const userId = await getCurrentUserId()
+        if (!userId) {
+          logger.warn(`Authentication failed for action: ${actionName}`)
+          throw {
+            type: 'auth',
+            message: '인증이 필요합니다',
+            code: 'UNAUTHORIZED',
+            statusCode: 401,
+          }
+        }
+        logger.debug(`Authentication successful for action: ${actionName}`, { userId })
+      }
+
+      // 비즈니스 로직 실행
+      const data = await action()
+
+      logger.info(`Server Action completed successfully: ${actionName}`)
+
+      return data
+    },
+    (error): ServerActionErrorResult => {
+      logger.actionError(actionName, error instanceof Error ? error.message : String(error), {
+        options,
+      })
+
+      // ServerActionErrorResult가 이미 throw된 경우
+      if (typeof error === 'object' && error !== null && 'type' in error && 'message' in error) {
+        return error as ServerActionErrorResult
+      }
+
+      // ServerActionError 처리
+      if (error instanceof ServerActionError) {
+        return {
+          type:
+            error.statusCode === 403
+              ? 'permission'
+              : error.statusCode === 404
+                ? 'not_found'
+                : 'unknown',
+          message: error.message,
+          code: error.code,
+          statusCode: error.statusCode,
+        }
+      }
+
+      // Prisma 에러 처리
+      if (error && typeof error === 'object' && 'code' in error) {
+        const prismaError = error as { code: string; meta?: unknown }
+
+        switch (prismaError.code) {
+          case 'P2002':
+            return {
+              type: 'database',
+              message: '이미 존재하는 데이터입니다',
+              code: prismaError.code,
+            }
+          case 'P2025':
+            return {
+              type: 'not_found',
+              message: '데이터를 찾을 수 없습니다',
+              code: prismaError.code,
+            }
+          case 'P2003':
+            return {
+              type: 'database',
+              message: '관련된 데이터를 찾을 수 없습니다',
+              code: prismaError.code,
+            }
+          default:
+            return {
+              type: 'database',
+              message: options.errorMessage || '데이터베이스 오류가 발생했습니다',
+              code: prismaError.code,
+            }
+        }
+      }
+
+      // 일반 에러 처리
+      return {
+        type: 'unknown',
+        message: options.errorMessage || '알 수 없는 오류가 발생했습니다',
+      }
+    }
+  )
 }

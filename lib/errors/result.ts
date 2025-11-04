@@ -100,7 +100,7 @@ export class Ok<T, E> {
    * @returns 원본 Ok (타입만 변경)
    */
   mapErr<F>(_f: (error: E) => F): Result<T, F> {
-    return new Ok(this.value) as unknown as Ok<T, F>
+    return ok(this.value)
   }
 
   /**
@@ -169,6 +169,83 @@ export class Ok<T, E> {
    */
   unwrapOr(_default: T): T {
     return this.value
+  }
+
+  /**
+   * 실패 시 대안 Result 반환 (성공은 그대로 전파)
+   *
+   * @template F - 대안 오류의 타입
+   * @param _f - 대안 Result를 반환하는 함수 (Ok에서는 사용되지 않음)
+   * @returns 원본 Ok
+   * @example
+   * ```typescript
+   * const result = ok("성공").orElse(() => ok("대안"));
+   * // Result: ok("성공")
+   * ```
+   */
+  orElse<F>(_f: (error: E) => Result<T, F>): Result<T, F> {
+    return ok(this.value)
+  }
+
+  /**
+   * Ok와 Err를 동시에 변환
+   *
+   * @template R - 변환된 성공 값의 타입
+   * @template F - 변환된 오류의 타입
+   * @param okFn - 성공 값 변환 함수
+   * @param _errFn - 오류 변환 함수 (Ok에서는 사용되지 않음)
+   * @returns 변환된 Result
+   * @example
+   * ```typescript
+   * const result = ok(5).bimap(
+   *   n => n * 2,
+   *   err => err.toUpperCase()
+   * );
+   * // Result: ok(10)
+   * ```
+   */
+  bimap<R, F>(okFn: (value: T) => R, _errFn: (error: E) => F): Result<R, F> {
+    return ok(okFn(this.value))
+  }
+
+  /**
+   * 사이드 이펙트 실행 (디버깅용)
+   *
+   * @param f - 사이드 이펙트 함수
+   * @returns 원본 Result
+   * @example
+   * ```typescript
+   * const result = ok("안녕하세요")
+   *   .inspect(val => console.log("값:", val))
+   *   .map(s => s.length);
+   * // 콘솔: "값: 안녕하세요"
+   * // Result: ok(5)
+   * ```
+   */
+  inspect(f: (value: T) => void): Result<T, E> {
+    f(this.value)
+    return this
+  }
+
+  /**
+   * 다른 Result와 결합하여 튜플로 반환
+   *
+   * @template U - 다른 Result의 성공 값 타입
+   * @param other - 결합할 Result
+   * @returns 튜플로 결합된 Result
+   * @example
+   * ```typescript
+   * const result1 = ok(1);
+   * const result2 = ok("a");
+   * const zipped = result1.zip(result2);
+   * // Result: ok([1, "a"])
+   * ```
+   */
+  zip<U>(other: Result<U, E>): Result<[T, U], E> {
+    if (other.isErr()) {
+      return other as unknown as Result<[T, U], E>
+    }
+    return ok([this.value, other.unwrap()] as [T, U])
   }
 
   /**
@@ -282,6 +359,79 @@ export class Err<T, E> {
    */
   unwrapOrElse(f: (error: E) => T): T {
     return f(this.error)
+  }
+
+  /**
+   * 실패 시 대안 Result 반환
+   *
+   * @template F - 대안 오류의 타입
+   * @param f - 대안 Result를 반환하는 함수
+   * @returns 대안 Result
+   * @example
+   * ```typescript
+   * const result = err("실패").orElse(() => ok("대안"));
+   * // Result: ok("대안")
+   * ```
+   */
+  orElse<F>(f: (error: E) => Result<T, F>): Result<T, F> {
+    return f(this.error)
+  }
+
+  /**
+   * Ok와 Err를 동시에 변환
+   *
+   * @template R - 변환된 성공 값의 타입
+   * @template F - 변환된 오류의 타입
+   * @param _okFn - 성공 값 변환 함수 (Err에서는 사용되지 않음)
+   * @param errFn - 오류 변환 함수
+   * @returns 변환된 Result
+   * @example
+   * ```typescript
+   * const result = err("실패").bimap(
+   *   n => n * 2,
+   *   err => err.toUpperCase()
+   * );
+   * // Result: err("실패")
+   * ```
+   */
+  bimap<R, F>(_okFn: (value: T) => R, errFn: (error: E) => F): Result<R, F> {
+    return err(errFn(this.error))
+  }
+
+  /**
+   * 사이드 이펙트 실행 (디버깅용)
+   *
+   * @param _f - 사이드 이펙트 함수 (Err에서는 사용되지 않음)
+   * @returns 원본 Result
+   * @example
+   * ```typescript
+   * const result = err("실패")
+   *   .inspect(val => console.log("값:", val))
+   *   .mapErr(e => e.toUpperCase());
+   * // 콘솔 출력 없음
+   * // Result: err("실패")
+   * ```
+   */
+  inspect(_f: (value: T) => void): Result<T, E> {
+    return this
+  }
+
+  /**
+   * 다른 Result와 결합하여 튜플로 반환 (Err는 전파)
+   *
+   * @template U - 다른 Result의 성공 값 타입
+   * @param _other - 결합할 Result (Err에서는 사용되지 않음)
+   * @returns 원본 Err (타입만 변경)
+   * @example
+   * ```typescript
+   * const result1 = err("오류");
+   * const result2 = ok("a");
+   * const zipped = result1.zip(result2);
+   * // Result: err("오류")
+   * ```
+   */
+  zip<U>(_other: Result<U, E>): Result<[T, U], E> {
+    return new Err<[T, U], E>(this.error)
   }
 }
 
@@ -462,4 +612,30 @@ export function firstErr<T, E>(results: Result<T, E>[]): Result<T, E> | null {
     }
   }
   return null
+}
+
+/**
+ * 중첩된 Result를 평탄화
+ *
+ * @template T - 내부 성공 값의 타입
+ * @template E - 오류 값의 타입
+ * @param result - 중첩된 Result
+ * @returns 평탄화된 Result
+ * @example
+ * ```typescript
+ * const nested = ok(ok(5));
+ * const flat = flatten(nested); // ok(5)
+ *
+ * const nestedErr = ok(err("실패"));
+ * const flatErr = flatten(nestedErr); // err("실패")
+ *
+ * const outerErr = err("외부 실패");
+ * const flatOuterErr = flatten(outerErr); // err("외부 실패")
+ * ```
+ */
+export function flatten<T, E>(result: Result<Result<T, E>, E>): Result<T, E> {
+  if (result.isErr()) {
+    return result as unknown as Result<T, E>
+  }
+  return result.unwrap()
 }

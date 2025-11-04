@@ -1,6 +1,6 @@
 'use client'
 
-import communityCardStyles from '@/app/_components/CommunityCard.module.css'
+import communityCardStyles from '@/app/community/_components/CommunityCard.module.css'
 import { FormField, SharedForm } from '@/components/common'
 import { IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES, ROUTES, UI_CONSTANTS } from '@/constants'

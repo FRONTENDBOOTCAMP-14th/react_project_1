@@ -387,7 +387,7 @@ interface RoundCardBodyProps {
  */
 function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
   // Context에서 커뮤니티 정보 가져오기
-  const { clubId, isAdmin } = useCommunityContext()
+  const { clubId } = useCommunityContext()
   const { data: session } = useSession()
   const { goals, loading, error, refetch, createGoal, updateGoal, deleteGoal } = useGoals(
     clubId || '',
@@ -465,16 +465,12 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
     loading,
     <LoadingState message={MESSAGES.LOADING.GOALS} />,
     renderWithError(
-      error?.message || null,
-      <ErrorState
-        message={error?.message || MESSAGES.ERROR.FAILED_TO_LOAD_GOALS}
-        onRetry={refetch}
-      />,
+      error,
+      <ErrorState message={error || MESSAGES.ERROR.FAILED_TO_LOAD_GOALS} onRetry={refetch} />,
       <GoalsSection
         teamGoals={optimisticGoals.team}
         personalGoals={optimisticGoals.personal}
         onToggle={handleToggleComplete}
-        isAdmin={isAdmin}
         onAddGoal={handleAddGoal}
         onEdit={handleEditGoal}
         onDelete={handleDeleteGoal}

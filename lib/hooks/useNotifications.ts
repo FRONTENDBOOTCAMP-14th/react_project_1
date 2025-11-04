@@ -1,12 +1,10 @@
-import { API_ENDPOINTS, MESSAGES } from '@/constants'
+import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 import type {
   CreateNotificationInput,
   Notification,
   UpdateNotificationRequest,
 } from '@/lib/types/notification'
-import { deleter, fetcher, patcher, poster } from '@/lib/utils/swr'
-import { useCallback } from 'react'
-import useSWR, { mutate } from 'swr'
+import { useCallback, useEffect, useState } from 'react'
 
 interface UseNotificationsOptions {
   clubId: string
@@ -20,7 +18,7 @@ interface UseNotificationsResult {
   pinnedNotifications: Notification[]
   regularNotifications: Notification[]
   loading: boolean
-  error: Error | undefined
+  error: string | null
   pagination: {
     page: number
     limit: number
@@ -45,19 +43,8 @@ interface UseNotificationsResult {
   ) => Promise<{ success: boolean; error?: string }>
 }
 
-// API 응답 타입 정의
-interface NotificationsResponse {
-  data: Notification[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
-}
-
 /**
- * 공지사항 데이터를 관리하는 SWR 기반 커스텀 훅
+ * 공지사항 데이터를 관리하는 커스텀 훅
  *
  * @param options - 공지사항 조회 옵션
  * @param options.clubId - 커뮤니티 ID (필수)
@@ -89,29 +76,54 @@ export const useNotifications = ({
   page = 1,
   limit = 20,
 }: UseNotificationsOptions): UseNotificationsResult => {
-  // URL 구성
-  const url = API_ENDPOINTS.NOTIFICATIONS.WITH_PARAMS({
-    clubId,
-    isPinned,
-    page,
-    limit,
-  })
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [pagination, setPagination] = useState<{
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  } | null>(null)
 
-  // SWR로 데이터 페칭
-  const { data: responseData, error, isLoading } = useSWR<NotificationsResponse>(url, fetcher)
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  // 데이터 추출
-  const notifications = responseData?.data || []
-  const pagination = responseData?.pagination || null
+      const response = await fetch(
+        API_ENDPOINTS.NOTIFICATIONS.WITH_PARAMS({
+          clubId,
+          isPinned,
+          page,
+          limit,
+        })
+      )
+      const result = await response.json()
 
-  // 고정 공지사항과 일반 공지사항 분리
-  const pinnedNotifications = notifications.filter(n => n.isPinned)
-  const regularNotifications = notifications.filter(n => !n.isPinned)
+      if (result.success && result.data) {
+        // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
+        const notificationsList = Array.isArray(result.data) ? result.data : result.data.data
+        setNotifications(notificationsList || [])
 
-  // 재조회 함수
-  const refetch = useCallback(async () => {
-    await mutate(url)
-  }, [url])
+        // pagination은 result.data.pagination에 있음
+        if (result.data.pagination) {
+          setPagination(result.data.pagination)
+        }
+      } else {
+        setNotifications([])
+        setPagination(null)
+        setError(result.error || MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err)
+      setError(MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
+      setNotifications([])
+      setPagination(null)
+    } finally {
+      setLoading(false)
+    }
+  }, [clubId, isPinned, page, limit])
 
   /**
    * 특정 공지사항 상세 조회
@@ -120,14 +132,16 @@ export const useNotifications = ({
    */
   const getNotificationById = useCallback(async (notificationId: string) => {
     try {
-      const data = await fetcher<Notification>(API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId))
-      return { success: true, data }
+      const response = await fetch(API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId))
+      const result = await response.json()
+
+      if (result.success) {
+        return { success: true, data: result.data }
+      }
+      return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS }
     } catch (err) {
       console.error('Failed to fetch notification:', err)
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS,
-      }
+      return { success: false, error: MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS }
     }
   }, [])
 
@@ -139,23 +153,29 @@ export const useNotifications = ({
   const createNotification = useCallback(
     async (input: CreateNotificationInput) => {
       try {
-        const data = await poster<Notification>(API_ENDPOINTS.NOTIFICATIONS.BASE, {
-          ...input,
-          clubId,
+        const response = await fetch(API_ENDPOINTS.NOTIFICATIONS.BASE, {
+          method: 'POST',
+          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
+          body: JSON.stringify({ ...input, clubId }),
         })
 
-        // 성공 시 캐시 무효화 및 재조회
-        await refetch()
-        return { success: true, data }
-      } catch (err) {
-        console.error('Failed to create notification:', err)
+        const result = await response.json()
+
+        if (result.success) {
+          // 성공 시 목록 재조회
+          await fetchNotifications()
+          return { success: true, data: result.data }
+        }
         return {
           success: false,
-          error: err instanceof Error ? err.message : MESSAGES.ERROR.CREATING_NOTIFICATION_ERROR,
+          error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_NOTIFICATION,
         }
+      } catch (err) {
+        console.error('Failed to create notification:', err)
+        return { success: false, error: MESSAGES.ERROR.CREATING_NOTIFICATION_ERROR }
       }
     },
-    [clubId, refetch]
+    [clubId, fetchNotifications]
   )
 
   /**
@@ -167,23 +187,29 @@ export const useNotifications = ({
   const updateNotification = useCallback(
     async (notificationId: string, input: UpdateNotificationRequest) => {
       try {
-        const data = await patcher<Notification>(
-          API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId),
-          input
-        )
+        const response = await fetch(API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId), {
+          method: 'PATCH',
+          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
+          body: JSON.stringify(input),
+        })
 
-        // 성공 시 캐시 무효화 및 재조회
-        await refetch()
-        return { success: true, data }
-      } catch (err) {
-        console.error('Failed to update notification:', err)
+        const result = await response.json()
+
+        if (result.success) {
+          // 성공 시 목록 재조회
+          await fetchNotifications()
+          return { success: true, data: result.data }
+        }
         return {
           success: false,
-          error: err instanceof Error ? err.message : MESSAGES.ERROR.UPDATING_NOTIFICATION_ERROR,
+          error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_NOTIFICATION,
         }
+      } catch (err) {
+        console.error('Failed to update notification:', err)
+        return { success: false, error: MESSAGES.ERROR.UPDATING_NOTIFICATION_ERROR }
       }
     },
-    [refetch]
+    [fetchNotifications]
   )
 
   /**
@@ -194,20 +220,27 @@ export const useNotifications = ({
   const deleteNotification = useCallback(
     async (notificationId: string) => {
       try {
-        await deleter(API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId))
+        const response = await fetch(API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId), {
+          method: 'DELETE',
+        })
 
-        // 성공 시 캐시 무효화 및 재조회
-        await refetch()
-        return { success: true }
-      } catch (err) {
-        console.error('Failed to delete notification:', err)
+        const result = await response.json()
+
+        if (result.success) {
+          // 성공 시 목록 재조회
+          await fetchNotifications()
+          return { success: true }
+        }
         return {
           success: false,
-          error: err instanceof Error ? err.message : MESSAGES.ERROR.DELETING_NOTIFICATION_ERROR,
+          error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_NOTIFICATION,
         }
+      } catch (err) {
+        console.error('Failed to delete notification:', err)
+        return { success: false, error: MESSAGES.ERROR.DELETING_NOTIFICATION_ERROR }
       }
     },
-    [refetch]
+    [fetchNotifications]
   )
 
   /**
@@ -223,14 +256,22 @@ export const useNotifications = ({
     [updateNotification]
   )
 
+  useEffect(() => {
+    fetchNotifications()
+  }, [fetchNotifications])
+
+  // 고정 공지사항과 일반 공지사항 분리
+  const pinnedNotifications = notifications.filter(n => n.isPinned)
+  const regularNotifications = notifications.filter(n => !n.isPinned)
+
   return {
     notifications,
     pinnedNotifications,
     regularNotifications,
-    loading: isLoading,
+    loading,
     error,
     pagination,
-    refetch,
+    refetch: fetchNotifications,
     getNotificationById,
     createNotification,
     updateNotification,

@@ -5,13 +5,13 @@ import { Camera } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useCommunityContext } from '../_context/CommunityContext'
 import styles from './CommunityImageUploader.module.css'
 
 interface CommunityImageUploaderProps {
   currentImageUrl?: string | null
   communityName: string
   onImageUpdate: (imageUrl: string) => Promise<void>
-  isAdmin: boolean
 }
 
 /**
@@ -23,8 +23,8 @@ export default function CommunityImageUploader({
   currentImageUrl,
   communityName,
   onImageUpdate,
-  isAdmin,
 }: CommunityImageUploaderProps) {
+  const { isAdmin } = useCommunityContext()
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 

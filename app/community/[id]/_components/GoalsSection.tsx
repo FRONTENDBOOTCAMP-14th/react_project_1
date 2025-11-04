@@ -3,6 +3,7 @@
 import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
 import { memo } from 'react'
+import { useCommunityContext } from '../_context/CommunityContext'
 import GoalsContainer from './GoalsContainer'
 import styles from './GoalsSection.module.css'
 
@@ -22,10 +23,6 @@ export interface GoalsSectionProps {
    * 완료 토글 콜백
    */
   onToggle: (goalId: string, isComplete: boolean, isTeam: boolean) => Promise<void>
-  /**
-   * 팀장 여부에 따라 그룹 목표 추가 버튼 노출
-   */
-  isAdmin?: boolean
   /**
    * 목표 추가 핸들러 (새 목표 저장 시)
    */
@@ -52,12 +49,12 @@ function GoalsSection({
   teamGoals,
   personalGoals,
   onToggle,
-  isAdmin,
   onAddGoal,
   onEdit,
   onDelete,
   isOpen,
 }: GoalsSectionProps) {
+  const { isAdmin } = useCommunityContext()
   return (
     isOpen && (
       <section className={styles['goals-section']} aria-label={MESSAGES.LABEL.GOALS_SECTION}>

@@ -13,7 +13,6 @@ import RoundCard from './RoundCard'
 import styles from './RoundsList.module.css'
 
 interface RoundsListProps {
-  clubId: string
   rounds: CommunityDetail['rounds']
 }
 
@@ -23,8 +22,8 @@ interface RoundsListProps {
  * - 클라이언트 fetch 불필요
  * - Server Actions로 라운드 생성
  */
-export default function RoundsList({ clubId, rounds }: RoundsListProps) {
-  const { isAdmin } = useCommunityContext()
+export default function RoundsList({ rounds }: RoundsListProps) {
+  const { clubId, isAdmin } = useCommunityContext()
   const router = useRouter()
   const isEmpty = rounds.length === 0
   const loading = false

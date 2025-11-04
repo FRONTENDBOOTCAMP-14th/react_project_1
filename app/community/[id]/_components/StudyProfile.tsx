@@ -397,7 +397,6 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
             currentImageUrl={community.imageUrl}
             communityName={community.name}
             onImageUpdate={handleImageUpdate}
-            isAdmin={isAdmin}
           />
           <ProfileInfo community={community} />
         </div>

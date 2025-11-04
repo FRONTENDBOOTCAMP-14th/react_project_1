@@ -1,8 +1,6 @@
 import { API_ENDPOINTS, MESSAGES } from '@/constants'
 import type { CreateGoalInput, StudyGoal, UpdateGoalInput } from '@/lib/types/goal'
-import { fetcher } from '@/lib/utils/swr'
-import { useCallback, useMemo } from 'react'
-import useSWR, { mutate } from 'swr'
+import { useCallback, useEffect, useState } from 'react'
 
 interface GoalsState {
   team: StudyGoal[]
@@ -12,7 +10,7 @@ interface GoalsState {
 interface UseGoalsData {
   goals: GoalsState
   loading: boolean
-  error: Error | undefined
+  error: string | null
   refetch: () => Promise<void>
   createGoal: (
     input: CreateGoalInput
@@ -25,57 +23,66 @@ interface UseGoalsData {
 }
 
 /**
- * 목표 데이터를 가져오는 SWR 기반 커스텀 훅
+ * 목표 데이터를 병렬로 가져오는 커스텀 훅
  * @param clubId - 클럽 ID
  * @param roundId - 라운드 ID (선택, 없으면 전체 목표 조회)
  * @returns 목표 데이터, 로딩 상태, 에러, 재조회 함수
  */
 export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
-  // 팀 목표 조회
-  const teamUrl = API_ENDPOINTS.GOALS.WITH_PARAMS({
-    clubId,
-    isTeam: true,
-    ...(roundId && { roundId }),
-  })
+  const [goals, setGoals] = useState<GoalsState>({ team: [], personal: [] })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const {
-    data: teamData,
-    error: teamError,
-    isLoading: teamLoading,
-  } = useSWR<StudyGoal[]>(teamUrl, fetcher)
+  const fetchGoals = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  // 개인 목표 조회
-  const personalUrl = API_ENDPOINTS.GOALS.WITH_PARAMS({
-    clubId,
-    isTeam: false,
-    ...(roundId && { roundId }),
-  })
+      // 쿼리 파라미터 구성
+      const params: { clubId: string; isTeam: boolean; roundId?: string } = {
+        clubId,
+        isTeam: true,
+      }
+      if (roundId) {
+        params.roundId = roundId
+      }
 
-  const {
-    data: personalData,
-    error: personalError,
-    isLoading: personalLoading,
-  } = useSWR<StudyGoal[]>(personalUrl, fetcher)
+      // 병렬 호출로 성능 최적화
+      const [teamResponse, personalResponse] = await Promise.all([
+        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS(params)),
+        fetch(API_ENDPOINTS.GOALS.WITH_PARAMS({ ...params, isTeam: false })),
+      ])
 
-  // 로딩 상태 (둘 중 하나라도 로딩 중이면 true)
-  const loading = teamLoading || personalLoading
+      const [teamResult, personalResult] = await Promise.all([
+        teamResponse.json(),
+        personalResponse.json(),
+      ])
 
-  // 에러 상태 (둘 중 하나라도 에러가 있으면 해당 에러)
-  const error = teamError || personalError
+      // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
+      const teamList =
+        teamResult.success && teamResult.data
+          ? Array.isArray(teamResult.data)
+            ? teamResult.data
+            : teamResult.data.data
+          : []
+      const personalList =
+        personalResult.success && personalResult.data
+          ? Array.isArray(personalResult.data)
+            ? personalResult.data
+            : personalResult.data.data
+          : []
 
-  // 목표 데이터 상태 (메모이제이션으로 불필요한 재렌더링 방지)
-  const goals: GoalsState = useMemo(
-    () => ({
-      team: teamData || [],
-      personal: personalData || [],
-    }),
-    [teamData, personalData]
-  )
-
-  // 재조회 함수
-  const refetch = useCallback(async () => {
-    await Promise.all([mutate(teamUrl), mutate(personalUrl)])
-  }, [teamUrl, personalUrl])
+      setGoals({
+        team: teamList || [],
+        personal: personalList || [],
+      })
+    } catch (err) {
+      console.error('Failed to fetch goals:', err)
+      setError(MESSAGES.ERROR.FAILED_TO_LOAD_GOALS)
+    } finally {
+      setLoading(false)
+    }
+  }, [clubId, roundId])
 
   /**
    * 새로운 목표 생성
@@ -89,8 +96,8 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         const result = await createGoalAction(input)
 
         if (result.success) {
-          // 성공 시 캐시 무효화 및 재조회
-          await refetch()
+          // 성공 시 목록 재조회
+          await fetchGoals()
           return { success: true, data: result.data as StudyGoal }
         }
         return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_GOAL }
@@ -99,7 +106,7 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         return { success: false, error: MESSAGES.ERROR.CREATING_GOAL_ERROR }
       }
     },
-    [refetch]
+    [fetchGoals]
   )
 
   /**
@@ -115,8 +122,8 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         const result = await updateGoalAction(goalId, input)
 
         if (result.success) {
-          // 성공 시 캐시 무효화 및 재조회
-          await refetch()
+          // 성공 시 목록 재조회
+          await fetchGoals()
           return { success: true, data: result.data as StudyGoal }
         }
         return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_GOAL }
@@ -125,7 +132,7 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         return { success: false, error: MESSAGES.ERROR.UPDATING_GOAL_ERROR }
       }
     },
-    [refetch]
+    [fetchGoals]
   )
 
   /**
@@ -140,8 +147,8 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         const result = await deleteGoalAction(goalId)
 
         if (result.success) {
-          // 성공 시 캐시 무효화 및 재조회
-          await refetch()
+          // 성공 시 목록 재조회
+          await fetchGoals()
           return { success: true }
         }
         return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_GOAL }
@@ -150,14 +157,18 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
         return { success: false, error: MESSAGES.ERROR.DELETING_GOAL_ERROR }
       }
     },
-    [refetch]
+    [fetchGoals]
   )
+
+  useEffect(() => {
+    fetchGoals()
+  }, [fetchGoals])
 
   return {
     goals,
     loading,
     error,
-    refetch,
+    refetch: fetchGoals,
     createGoal,
     updateGoal,
     deleteGoal,

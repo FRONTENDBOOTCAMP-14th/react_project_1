@@ -23,18 +23,18 @@ export default function CommunityContent({
 }: CommunityContentProps) {
   return (
     <CommunityProvider clubId={clubId} isAdmin={isAdmin} isMember={isMember}>
-      <CommunityLayout clubId={clubId}>
+      <CommunityLayout>
         <CommunitySection title={MESSAGES.LABEL.COMMUNITY_PROFILE} sectionId="profile">
           <StudyProfile id={clubId} community={community} />
         </CommunitySection>
 
         <CommunitySection title={MESSAGES.LABEL.COMMUNITY_NOTIFICATIONS} sectionId="notifications">
-          <NotificationLink clubId={clubId} notifications={community.notifications} />
+          <NotificationLink notifications={community.notifications} />
         </CommunitySection>
 
         {(isAdmin || isMember) && (
           <CommunitySection title={MESSAGES.LABEL.STUDY_ROUNDS} sectionId="rounds">
-            <RoundsList clubId={clubId} rounds={community.rounds} />
+            <RoundsList rounds={community.rounds} />
           </CommunitySection>
         )}
       </CommunityLayout>

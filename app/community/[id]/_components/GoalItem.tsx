@@ -6,6 +6,7 @@ import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
 import { Ellipsis } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useCommunityContext } from '../_context/CommunityContext'
 import styles from './GoalItem.module.css'
 
 /**
@@ -58,6 +59,7 @@ export interface GoalItemProps {
  * @param props - GoalItemProps
  */
 function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }: GoalItemProps) {
+  const { isAdmin } = useCommunityContext()
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -200,7 +202,7 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
           checked={goal.isComplete}
           onChange={() => onToggle(goal.goalId, !goal.isComplete, isTeam)}
           aria-label={MESSAGES.LABEL.GOAL_COMPLETE_ARIA(goal.title)}
-          disabled={isTeam}
+          disabled={isTeam && !isAdmin}
         />
         <p className={styles['goal-description']}>{goal.title}</p>
       </div>

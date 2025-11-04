@@ -1,12 +1,14 @@
-import { useEffect, useState, useCallback } from 'react'
-import type { Round, CreateRoundRequest, UpdateRoundRequest } from '@/lib/types/round'
-import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import { API_ENDPOINTS, MESSAGES } from '@/constants'
+import type { CreateRoundRequest, Round, UpdateRoundRequest } from '@/lib/types/round'
+import { deleter, fetcher, patcher, poster } from '@/lib/utils/swr'
+import { useCallback } from 'react'
+import useSWR, { mutate } from 'swr'
 
 interface UseRoundsResult {
   rounds: Round[]
   currentRound: Round | null
   loading: boolean
-  error: string | null
+  error: Error | undefined
   refetch: () => Promise<void>
   createRound: (
     input: CreateRoundRequest
@@ -18,8 +20,14 @@ interface UseRoundsResult {
   deleteRound: (roundId: string) => Promise<{ success: boolean; error?: string }>
 }
 
+// API 응답 타입 정의
+interface RoundsResponse {
+  data: Round[]
+  count: number
+}
+
 /**
- * 라운드 데이터를 가져오는 커스텀 훅
+ * 라운드 데이터를 가져오는 SWR 기반 커스텀 훅
  *
  * @param clubId - 커뮤니티 ID (필수)
  * - 빈 문자열일 경우 데이터를 조회하지 않고 에러 상태를 반환합니다.
@@ -28,45 +36,22 @@ interface UseRoundsResult {
  * @returns 라운드 목록, 현재 라운드, 로딩 상태, 에러, CRUD 함수
  */
 export const useRounds = (clubId: string): UseRoundsResult => {
-  const [rounds, setRounds] = useState<Round[]>([])
-  const [currentRound, setCurrentRound] = useState<Round | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // URL 구성 - clubId가 없으면 요청하지 않음
+  const url = clubId ? API_ENDPOINTS.ROUNDS.WITH_PARAMS({ clubId }) : null
 
-  const fetchRounds = useCallback(async () => {
-    // clubId가 없으면 데이터 조회하지 않음
-    if (!clubId) {
-      setRounds([])
-      setCurrentRound(null)
-      setLoading(false)
-      setError('커뮤니티 ID가 필요합니다')
-      return
+  // SWR로 데이터 페칭
+  const { data, error, isLoading } = useSWR<RoundsResponse>(url, fetcher)
+
+  // 데이터 추출 및 처리
+  const rounds = data?.data || []
+  const currentRound = rounds.length > 0 ? rounds[0] : null
+
+  // 재조회 함수
+  const refetch = useCallback(async () => {
+    if (url) {
+      await mutate(url)
     }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(API_ENDPOINTS.ROUNDS.WITH_PARAMS({ clubId }))
-      const result = await response.json()
-
-      if (result.success && result.data) {
-        // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
-        const roundsList = Array.isArray(result.data) ? result.data : result.data.data
-        setRounds(roundsList || [])
-        // 첫 번째 라운드를 현재 라운드로 설정
-        setCurrentRound(roundsList && roundsList.length > 0 ? roundsList[0] : null)
-      } else {
-        setRounds([])
-        setCurrentRound(null)
-      }
-    } catch (err) {
-      console.error('Failed to fetch rounds:', err)
-      setError(MESSAGES.ERROR.FAILED_TO_LOAD_ROUNDS)
-    } finally {
-      setLoading(false)
-    }
-  }, [clubId])
+  }, [url])
 
   /**
    * 새로운 라운드 생성
@@ -76,26 +61,20 @@ export const useRounds = (clubId: string): UseRoundsResult => {
   const createRound = useCallback(
     async (input: CreateRoundRequest) => {
       try {
-        const response = await fetch(API_ENDPOINTS.ROUNDS.BASE, {
-          method: 'POST',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
+        const data = await poster<Round>(API_ENDPOINTS.ROUNDS.BASE, input)
 
-        const result = await response.json()
-
-        if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchRounds()
-          return { success: true, data: result.data }
-        }
-        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_ROUND }
+        // 성공 시 캐시 무효화 및 재조회
+        await refetch()
+        return { success: true, data }
       } catch (err) {
         console.error('Failed to create round:', err)
-        return { success: false, error: MESSAGES.ERROR.CREATING_ROUND_ERROR }
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : MESSAGES.ERROR.CREATING_ROUND_ERROR,
+        }
       }
     },
-    [fetchRounds]
+    [refetch]
   )
 
   /**
@@ -107,26 +86,20 @@ export const useRounds = (clubId: string): UseRoundsResult => {
   const updateRound = useCallback(
     async (roundId: string, input: UpdateRoundRequest) => {
       try {
-        const response = await fetch(API_ENDPOINTS.ROUNDS.BY_ID(roundId), {
-          method: 'PATCH',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
+        const data = await patcher<Round>(API_ENDPOINTS.ROUNDS.BY_ID(roundId), input)
 
-        const result = await response.json()
-
-        if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchRounds()
-          return { success: true, data: result.data }
-        }
-        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_ROUND }
+        // 성공 시 캐시 무효화 및 재조회
+        await refetch()
+        return { success: true, data }
       } catch (err) {
         console.error('Failed to update round:', err)
-        return { success: false, error: MESSAGES.ERROR.UPDATING_ROUND_ERROR }
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : MESSAGES.ERROR.UPDATING_ROUND_ERROR,
+        }
       }
     },
-    [fetchRounds]
+    [refetch]
   )
 
   /**
@@ -137,36 +110,28 @@ export const useRounds = (clubId: string): UseRoundsResult => {
   const deleteRound = useCallback(
     async (roundId: string) => {
       try {
-        const response = await fetch(API_ENDPOINTS.ROUNDS.BY_ID(roundId), {
-          method: 'DELETE',
-        })
+        await deleter(API_ENDPOINTS.ROUNDS.BY_ID(roundId))
 
-        const result = await response.json()
-
-        if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchRounds()
-          return { success: true }
-        }
-        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_ROUND }
+        // 성공 시 캐시 무효화 및 재조회
+        await refetch()
+        return { success: true }
       } catch (err) {
         console.error('Failed to delete round:', err)
-        return { success: false, error: MESSAGES.ERROR.DELETING_ROUND_ERROR }
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : MESSAGES.ERROR.DELETING_ROUND_ERROR,
+        }
       }
     },
-    [fetchRounds]
+    [refetch]
   )
-
-  useEffect(() => {
-    fetchRounds()
-  }, [fetchRounds])
 
   return {
     rounds,
     currentRound,
-    loading,
-    error,
-    refetch: fetchRounds,
+    loading: isLoading,
+    error: clubId && !url ? new Error('커뮤니티 ID가 필요합니다') : error,
+    refetch,
     createRound,
     updateRound,
     deleteRound,

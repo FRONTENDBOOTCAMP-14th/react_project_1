@@ -1,14 +1,16 @@
+import type { PaginationInfo } from '@/lib/types'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
-import type { PaginationInfo } from '@/lib/types'
-import { useCallback, useEffect, useState } from 'react'
+import { fetcher } from '@/lib/utils/swr'
+import { useCallback } from 'react'
+import useSWR, { mutate } from 'swr'
 
 interface UseUserCommunitiesResult {
   subscribedCommunities: Community[]
   upcomingRounds: Round[]
   pagination: PaginationInfo | null
   loading: boolean
-  error: string | null
+  error: Error | undefined
   refetch: () => Promise<void>
 }
 
@@ -19,7 +21,7 @@ interface UserCommunitiesResponse {
 }
 
 /**
- * 사용자가 구독한 커뮤니티와 다가오는 라운드들을 가져오는 커스텀 훅
+ * 사용자가 구독한 커뮤니티와 다가오는 라운드들을 가져오는 SWR 기반 커스텀 훅
  *
  * @param userId - 사용자 ID
  * @param options - 페이지네이션 옵션
@@ -30,7 +32,7 @@ interface UserCommunitiesResponse {
  * const { subscribedCommunities, upcomingRounds, loading, error, refetch } = useUserCommunities('user-123')
  *
  * if (loading) return <div>Loading...</div>
- * if (error) return <div>Error: {error}</div>
+ * if (error) return <div>Error: {error.message}</div>
  *
  * return (
  *   <div>
@@ -56,70 +58,41 @@ export const useUserCommunities = (
     limit?: number
   } = {}
 ): UseUserCommunitiesResult => {
-  const [subscribedCommunities, setSubscribedCommunities] = useState<Community[]>([])
-  const [upcomingRounds, setUpcomingRounds] = useState<Round[]>([])
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // URL 구성
+  const constructUrl = useCallback(() => {
+    if (!userId) return null
 
-  const fetchUserCommunities = useCallback(async () => {
-    if (!userId) {
-      setSubscribedCommunities([])
-      setUpcomingRounds([])
-      setPagination(null)
-      setLoading(false)
-      setError('사용자 ID가 필요합니다')
-      return
-    }
+    const params = new URLSearchParams()
+    if (options.page) params.append('page', options.page.toString())
+    if (options.limit) params.append('limit', options.limit.toString())
 
-    try {
-      setLoading(true)
-      setError(null)
-
-      // 쿼리 파라미터 구성
-      const params = new URLSearchParams()
-      if (options.page) params.append('page', options.page.toString())
-      if (options.limit) params.append('limit', options.limit.toString())
-
-      const queryString = params.toString()
-      const apiUrl = `/api/user/communities${queryString ? `?${queryString}` : ''}`
-
-      // API 호출로 변경
-      const response = await fetch(apiUrl)
-      const result = await response.json()
-
-      if (result.success) {
-        const data = result.data as UserCommunitiesResponse
-        setSubscribedCommunities(data.subscribedCommunities)
-        setUpcomingRounds(data.upcomingRounds)
-        setPagination(data.pagination)
-      } else {
-        setSubscribedCommunities([])
-        setUpcomingRounds([])
-        setPagination(null)
-        setError(result.error || '커뮤니티 정보를 불러오는데 실패했습니다')
-      }
-    } catch (err) {
-      console.error('Failed to fetch user communities:', err)
-      setError('커뮤니티 정보를 불러오는데 실패했습니다')
-      setSubscribedCommunities([])
-      setUpcomingRounds([])
-      setPagination(null)
-    } finally {
-      setLoading(false)
-    }
+    const queryString = params.toString()
+    return `/api/user/communities${queryString ? `?${queryString}` : ''}`
   }, [userId, options.page, options.limit])
 
-  useEffect(() => {
-    fetchUserCommunities()
-  }, [fetchUserCommunities])
+  const url = constructUrl()
+
+  // SWR로 데이터 페칭
+  const { data: responseData, error, isLoading } = useSWR<UserCommunitiesResponse>(url, fetcher)
+
+  // 데이터 추출
+  const subscribedCommunities = responseData?.subscribedCommunities || []
+  const upcomingRounds = responseData?.upcomingRounds || []
+  const pagination = responseData?.pagination || null
+
+  // 재조회 함수
+  const refetch = useCallback(async () => {
+    if (url) {
+      await mutate(url)
+    }
+  }, [url])
 
   return {
     subscribedCommunities,
     upcomingRounds,
     pagination,
-    loading,
-    error,
-    refetch: fetchUserCommunities,
+    loading: isLoading,
+    error: userId && !url ? new Error('사용자 ID가 필요합니다') : error,
+    refetch,
   }
 }

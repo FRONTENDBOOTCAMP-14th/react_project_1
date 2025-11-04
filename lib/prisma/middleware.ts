@@ -1,11 +1,13 @@
 /**
- * Prisma 미들웨어 - 소프트 삭제 자동화
+ * Prisma Extensions - 소프트 삭제 자동화
  *
  * 기능:
  * 1. find 계열 쿼리에 자동으로 deletedAt: null 조건 추가
  * 2. delete 쿼리를 소프트 삭제로 자동 변환
  * 3. 비즈니스 로직에서 deletedAt을 신경 쓸 필요 없음
  */
+
+import { Prisma, type PrismaClient } from '@prisma/client'
 
 // 소프트 삭제가 적용된 모델 목록
 const SOFT_DELETE_MODELS = [
@@ -43,7 +45,7 @@ function addSoftDeleteCondition(args: Record<string, unknown>): Record<string, u
     }
   }
 
-  // where 조건이 없는 경우 새로 추가
+  // where 조건이 없는 경우 새로 생성
   return {
     ...args,
     where: {
@@ -52,82 +54,52 @@ function addSoftDeleteCondition(args: Record<string, unknown>): Record<string, u
   }
 }
 
-// Prisma 미들웨어 파라미터 타입 정의
-interface MiddlewareParams {
-  model?: string
-  action: string
-  args: Record<string, unknown>
-  dataPath: string[]
-  query: (args: Record<string, unknown>) => Promise<unknown>
-}
+/**
+ * 소프트 삭제를 위한 Prisma Extension
+ */
+export const softDeleteExtension = Prisma.defineExtension({
+  name: 'soft-delete',
+  query: {
+    $allModels: {
+      async $allOperations({ model, operation, args, query }) {
+        // 소프트 삭제 대상 모델이 아닌 경우 원래대로 실행
+        if (!model || !isSoftDeleteModel(model)) {
+          return query(args)
+        }
+
+        // find 계열 쿼리에 deletedAt: null 조건 추가
+        if (operation.startsWith('find')) {
+          const modifiedArgs = addSoftDeleteCondition(args)
+          return query(modifiedArgs)
+        }
+
+        // delete 쿼리를 소프트 삭제로 변환
+        if (operation === 'delete') {
+          // Prisma Extension 내에서는 query 함수를 사용해야 함
+          return query({
+            ...args,
+            data: { deletedAt: new Date() },
+          })
+        }
+
+        // deleteMany 쿼리를 소프트 삭제로 변환
+        if (operation === 'deleteMany') {
+          return query({
+            ...args,
+            data: { deletedAt: new Date() },
+          })
+        }
+
+        // 그 외 쿼리는 원래대로 실행
+        return query(args)
+      },
+    },
+  },
+})
 
 /**
- * Prisma 미들웨어
+ * Prisma 클라이언트에 소프트 삭제 확장 적용하는 함수
  */
-export const softDeleteMiddleware = async (
-  params: MiddlewareParams,
-  next: (params: MiddlewareParams) => Promise<unknown>
-) => {
-  const { model, action, args } = params
-
-  // 소프트 삭제 대상 모델이 아닌 경우 원래 쿼리 실행
-  if (!model || !isSoftDeleteModel(model)) {
-    return next(params)
-  }
-
-  // Find 계열 쿼리에 deletedAt: null 조건 추가
-  switch (action) {
-    case 'findUnique':
-    case 'findFirst':
-    case 'findMany':
-    case 'count':
-    case 'aggregate':
-      return next({
-        ...params,
-        args: addSoftDeleteCondition(args),
-      })
-
-    // Delete 쿼리를 소프트 삭제로 변환
-    case 'delete':
-      return next({
-        ...params,
-        action: 'update',
-        args: {
-          ...args,
-          data: { deletedAt: new Date() },
-        },
-      })
-
-    // DeleteMany 쿼리를 소프트 삭제로 변환
-    case 'deleteMany':
-      return next({
-        ...params,
-        action: 'updateMany',
-        args: {
-          ...args,
-          data: { deletedAt: new Date() },
-        },
-      })
-
-    // 그 외 쿼리는 원래대로 실행
-    default:
-      return next(params)
-  }
-}
-
-// Prisma 클라이언트 타입 정의
-interface PrismaClientWithMiddleware {
-  $use: (
-    middleware: (
-      params: MiddlewareParams,
-      next: (params: MiddlewareParams) => Promise<unknown>
-    ) => Promise<unknown>
-  ) => void
-}
-
-/**
- * Prisma 클라이언트에 미들웨어 적용하는 함수
- */
-export function applySoftDeleteMiddleware(prisma: PrismaClientWithMiddleware) {
-  prisma.$use(softDeleteMiddleware)
+export function applySoftDeleteExtension(prisma: PrismaClient) {
+  return prisma.$extends(softDeleteExtension)
 }

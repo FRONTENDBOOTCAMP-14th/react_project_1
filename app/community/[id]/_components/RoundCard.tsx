@@ -465,8 +465,11 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
     loading,
     <LoadingState message={MESSAGES.LOADING.GOALS} />,
     renderWithError(
-      error,
-      <ErrorState message={error || MESSAGES.ERROR.FAILED_TO_LOAD_GOALS} onRetry={refetch} />,
+      error?.message || null,
+      <ErrorState
+        message={error?.message || MESSAGES.ERROR.FAILED_TO_LOAD_GOALS}
+        onRetry={refetch}
+      />,
       <GoalsSection
         teamGoals={optimisticGoals.team}
         personalGoals={optimisticGoals.personal}

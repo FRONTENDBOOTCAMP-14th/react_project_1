@@ -1,46 +1,51 @@
-import { useEffect, useState, useCallback } from 'react'
+import { API_ENDPOINTS } from '@/constants'
 import type { Region } from '@/lib/types/common'
-import { API_ENDPOINTS, MESSAGES } from '@/constants'
+import { fetcher } from '@/lib/utils/swr'
+import useSWR from 'swr'
 
-export const useRegion = () => {
-  const [regions, setRegions] = useState<Region[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+interface UseRegionResult {
+  regions: Region[]
+  loading: boolean
+  error: Error | undefined
+  refetch: () => Promise<void>
+}
 
-  const fetchRegions = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
+/**
+ * 지역 데이터를 가져오는 SWR 기반 커스텀 훅
+ * @returns 지역 목록, 로딩 상태, 에러, 재조회 함수
+ *
+ * @example
+ * ```tsx
+ * const { regions, loading, error, refetch } = useRegion()
+ *
+ * if (loading) return <div>Loading...</div>
+ * if (error) return <div>Error: {error.message}</div>
+ *
+ * return (
+ *   <select>
+ *     {regions.map(region => (
+ *       <option key={region.id} value={region.id}>
+ *         {region.name}
+ *       </option>
+ *     ))}
+ *   </select>
+ * )
+ * ```
+ */
+export const useRegion = (): UseRegionResult => {
+  const { data, error, isLoading } = useSWR<Region[]>(API_ENDPOINTS.REGION.BASE, fetcher)
 
-      const response = await fetch(API_ENDPOINTS.REGION.BASE)
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-
-      const result: Region[] = await response.json()
-
-      if (result) {
-        setRegions(result)
-      } else {
-        setError(MESSAGES.ERROR.FAILED_TO_LOAD_REGIONS)
-      }
-    } catch (err) {
-      console.error('Failed to fetch regions:', err)
-      setError(MESSAGES.ERROR.FAILED_TO_LOAD_REGIONS)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchRegions()
-  }, [fetchRegions])
+  // 재조회 함수
+  const refetch = async () => {
+    // SWR의 mutate를 사용하여 캐시 무효화 및 재조회
+    const { mutate } = await import('swr')
+    await mutate(API_ENDPOINTS.REGION.BASE)
+  }
 
   return {
-    regions,
-    loading,
+    regions: data || [],
+    loading: isLoading,
     error,
-    refetch: fetchRegions,
+    refetch,
   }
 }

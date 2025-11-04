@@ -1,17 +1,18 @@
-import { useEffect, useState, useCallback } from 'react'
+import { API_ENDPOINTS, MESSAGES } from '@/constants'
 import type {
   Community,
-  CommunityResponse,
   CreateCommunityInput,
-  UpdateCommunityInput,
+  UpdateCommunityInput
 } from '@/lib/types/community'
-import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 import { logger } from '@/lib/utils/logger'
+import { deleter, fetcher, patcher, poster } from '@/lib/utils/swr'
+import { useCallback } from 'react'
+import useSWR, { mutate } from 'swr'
 
 interface UseCommunityResult {
   community: Community | null
   loading: boolean
-  error: string | null
+  error: Error | undefined
   refetch: () => Promise<void>
   createCommunity: (
     input: CreateCommunityInput
@@ -24,52 +25,23 @@ interface UseCommunityResult {
 }
 
 /**
- * 커뮤니티 데이터를 가져오는 커스텀 훅
+ * 커뮤니티 데이터를 가져오는 SWR 기반 커스텀 훅
  * @param id - 커뮤니티 ID
  * @returns 커뮤니티 데이터, 로딩 상태, 에러, 재조회 함수
  */
 export const useCommunity = (id: string): UseCommunityResult => {
-  const [community, setCommunity] = useState<Community | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // URL 구성 - id가 없으면 요청하지 않음
+  const url = id ? API_ENDPOINTS.COMMUNITIES.BY_ID(id) : null
 
-  const fetchCommunity = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
+  // SWR로 데이터 페칭
+  const { data, error, isLoading } = useSWR<Community>(url, fetcher)
 
-      logger.debug(`Fetching community: ${id}`)
-
-      const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(id))
-
-      if (!response.ok) {
-        const errorMessage = `HTTP ${response.status}: ${response.statusText}`
-        logger.apiError(API_ENDPOINTS.COMMUNITIES.BY_ID(id), 'GET', errorMessage)
-        throw new Error(errorMessage)
-      }
-
-      const result: CommunityResponse = await response.json()
-
-      if (result.success && result.data) {
-        setCommunity(result.data)
-        logger.info(`Community loaded successfully: ${id}`)
-      } else {
-        const errorMessage = result.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND
-        logger.warn(`Failed to load community: ${id}`, { error: result.error })
-        setError(errorMessage)
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err)
-      logger.error(
-        'Failed to fetch community',
-        { communityId: id },
-        err instanceof Error ? err : new Error(errorMessage)
-      )
-      setError(MESSAGES.ERROR.FAILED_TO_LOAD_COMMUNITY)
-    } finally {
-      setLoading(false)
+  // 재조회 함수
+  const refetch = useCallback(async () => {
+    if (url) {
+      await mutate(url)
     }
-  }, [id])
+  }, [url])
 
   /**
    * 새로운 커뮤니티 생성
@@ -78,21 +50,18 @@ export const useCommunity = (id: string): UseCommunityResult => {
    */
   const createCommunity = useCallback(async (input: CreateCommunityInput) => {
     try {
-      const response = await fetch(API_ENDPOINTS.COMMUNITIES.BASE, {
-        method: 'POST',
-        headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-        body: JSON.stringify(input),
-      })
+      logger.debug('Creating community', { input })
 
-      const result = await response.json()
+      const data = await poster<Community>(API_ENDPOINTS.COMMUNITIES.BASE, input)
 
-      if (result.success) {
-        return { success: true, data: result.data }
-      }
-      return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_COMMUNITY }
+      logger.info('Community created successfully', { communityId: data.clubId })
+      return { success: true, data }
     } catch (err) {
-      console.error('Failed to create community:', err)
-      return { success: false, error: MESSAGES.ERROR.CREATING_COMMUNITY_ERROR }
+      logger.error('Failed to create community', { input }, err as Error)
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : MESSAGES.ERROR.CREATING_COMMUNITY_ERROR,
+      }
     }
   }, [])
 
@@ -105,28 +74,27 @@ export const useCommunity = (id: string): UseCommunityResult => {
   const updateCommunity = useCallback(
     async (clubId: string, input: UpdateCommunityInput) => {
       try {
-        const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(clubId), {
-          method: 'PATCH',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
+        logger.debug('Updating community', { clubId, input })
 
-        const result = await response.json()
+        const data = await patcher<Community>(API_ENDPOINTS.COMMUNITIES.BY_ID(clubId), input)
 
-        if (result.success) {
-          // 현재 조회 중인 커뮤니티면 상태 업데이트
-          if (clubId === id) {
-            await fetchCommunity()
-          }
-          return { success: true, data: result.data }
+        logger.info('Community updated successfully', { clubId })
+
+        // 현재 조회 중인 커뮤니티면 캐시 무효화 및 재조회
+        if (clubId === id) {
+          await refetch()
         }
-        return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_COMMUNITY }
+
+        return { success: true, data }
       } catch (err) {
-        console.error('Failed to update community:', err)
-        return { success: false, error: MESSAGES.ERROR.UPDATING_COMMUNITY_ERROR }
+        logger.error('Failed to update community', { clubId, input }, err as Error)
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : MESSAGES.ERROR.UPDATING_COMMUNITY_ERROR,
+        }
       }
     },
-    [id, fetchCommunity]
+    [id, refetch]
   )
 
   /**
@@ -136,31 +104,26 @@ export const useCommunity = (id: string): UseCommunityResult => {
    */
   const deleteCommunity = useCallback(async (clubId: string) => {
     try {
-      const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(clubId), {
-        method: 'DELETE',
-      })
+      logger.debug('Deleting community', { clubId })
 
-      const result = await response.json()
+      await deleter(API_ENDPOINTS.COMMUNITIES.BY_ID(clubId))
 
-      if (result.success) {
-        return { success: true }
-      }
-      return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_DELETE_COMMUNITY }
+      logger.info('Community deleted successfully', { clubId })
+      return { success: true }
     } catch (err) {
-      console.error('Failed to delete community:', err)
-      return { success: false, error: MESSAGES.ERROR.DELETING_COMMUNITY_ERROR }
+      logger.error('Failed to delete community', { clubId }, err as Error)
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : MESSAGES.ERROR.DELETING_COMMUNITY_ERROR,
+      }
     }
   }, [])
 
-  useEffect(() => {
-    fetchCommunity()
-  }, [fetchCommunity])
-
   return {
-    community,
-    loading,
-    error,
-    refetch: fetchCommunity,
+    community: data || null,
+    loading: isLoading,
+    error: id && !url ? new Error('커뮤니티 ID가 필요합니다') : error,
+    refetch,
     createCommunity,
     updateCommunity,
     deleteCommunity,

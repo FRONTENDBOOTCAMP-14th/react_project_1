@@ -127,13 +127,12 @@ export default function NotificationContainer({
         )}
 
         {loading && <div className={styles.message}>{MESSAGES.LABEL.LOADING}</div>}
-
-        {error && <div className={styles.error}>{error}</div>}
-
+        {error && (
+          <div className={styles.error}>{error?.message || '알 수 없는 오류가 발생했습니다'}</div>
+        )}
         {!loading && !error && notifications.length === 0 && (
           <div className={styles.message}>{MESSAGES.EMPTY.NO_NOTIFICATIONS}</div>
         )}
-
         {!loading &&
           !error &&
           notifications.map(notification => (

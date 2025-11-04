@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, memo } from 'react'
+import { ErrorState, LoadingState } from '@/components/common'
+import { StrokeButton } from '@/components/ui'
+import type { CreateRoundRequest } from '@/lib/types/round'
+import { memo, useState } from 'react'
+import { useCommunityStore } from '../_hooks/useCommunityStore'
 import { useRoundsData } from '../_hooks/useRoundsData'
-import { LoadingState, ErrorState } from '@/components/common'
 import RoundCard from './RoundCard'
 import styles from './RoundsList.module.css'
-import { StrokeButton } from '@/components/ui'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
-import type { CreateRoundRequest } from '@/lib/types/round'
 
 interface RoundsListProps {
   clubId: string
@@ -86,7 +86,12 @@ function RoundsListComponent({ clubId }: RoundsListProps) {
       {isTeamLeader && (
         <div className={styles['add-round-section']}>
           {!isAddingRound ? (
-            <StrokeButton onClick={() => setIsAddingRound(true)}>새 회차 추가</StrokeButton>
+            <StrokeButton
+              className={styles['add-round-button']}
+              onClick={() => setIsAddingRound(true)}
+            >
+              새 회차 추가
+            </StrokeButton>
           ) : (
             <div className={styles['round-form']}>
               <input

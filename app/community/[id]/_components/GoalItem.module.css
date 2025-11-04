@@ -52,7 +52,6 @@
   padding: var(--spacing-xs);
   border: none;
   background-color: transparent;
-  cursor: pointer;
   border-radius: var(--inner-card-radius);
 }
 

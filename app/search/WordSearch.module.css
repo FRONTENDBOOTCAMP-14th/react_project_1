@@ -11,7 +11,6 @@
 
 .icon-button {
   display: flex;
-  cursor: pointer;
   align-items: center;
 }
 
@@ -35,7 +34,6 @@
   padding: var(--spacing-xxs) var(--spacing-xs);
   background-color: var(--background-color-2);
   border-radius: var(--radius-sm);
-  cursor: pointer;
   border: 1px solid var(--border-color-2);
   transition: all 0.2s ease;
 }
@@ -72,7 +70,6 @@
   border: none;
   color: var(--danger-color);
   font-size: var(--font-xs);
-  cursor: pointer;
   padding: 0;
   text-decoration: underline;
 }

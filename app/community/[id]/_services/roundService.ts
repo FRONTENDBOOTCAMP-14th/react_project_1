@@ -20,7 +20,8 @@ export class RoundService {
       throw new Error(`Failed to fetch rounds: ${response.statusText}`)
     }
 
-    return response.json()
+    const result = await response.json()
+    return result.data.data
   }
 
   /**

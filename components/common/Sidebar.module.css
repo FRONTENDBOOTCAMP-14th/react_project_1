@@ -62,7 +62,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   color: var(--gray-500);
   transition: color 0.2s ease;
 }

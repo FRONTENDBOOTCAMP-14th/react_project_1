@@ -34,7 +34,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 /* Page title used in Header.tsx */
@@ -76,7 +75,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 /* Icon hover: swap to active asset */

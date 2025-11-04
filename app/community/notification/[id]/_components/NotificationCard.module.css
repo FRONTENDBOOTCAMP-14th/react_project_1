@@ -54,7 +54,6 @@
 .action-button {
   display: flex;
   color: var(--gray-500);
-  cursor: pointer;
 }
 
 .action-button:hover {

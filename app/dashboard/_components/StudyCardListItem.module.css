@@ -66,3 +66,24 @@
   padding: 0.25rem 0.75rem;
   border: 1px solid var(--accent-color);
 }
+
+.menuButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--inner-card-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.menuButton:hover {
+  background-color: var(--background-color-hover);
+}
+
+.menuButton:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}

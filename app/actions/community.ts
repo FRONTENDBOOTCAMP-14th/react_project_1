@@ -11,7 +11,7 @@ import {
   withServerAction,
 } from '@/lib/utils/serverActions'
 import { createClient } from '@supabase/supabase-js'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 /**
@@ -43,6 +43,7 @@ export async function updateCommunityAction(
       })
 
       revalidatePath(`/community/${clubId}`)
+      revalidateTag('communities')
     },
     { errorMessage: '커뮤니티 업데이트에 실패했습니다' }
   )
@@ -66,6 +67,7 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
       })
 
       revalidatePath('/community')
+      revalidateTag('communities')
     },
     { errorMessage: '커뮤니티 삭제에 실패했습니다' }
   )
@@ -105,6 +107,7 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
       })
 
       revalidatePath(`/community/${clubId}`)
+      revalidateTag('communities')
     },
     { errorMessage: '커뮤니티 가입에 실패했습니다' }
   )
@@ -167,6 +170,7 @@ export async function uploadCommunityImageAction(
       })
 
       revalidatePath(`/community/${clubId}`)
+      revalidateTag('communities')
       return { imageUrl }
     },
     { errorMessage: '이미지 업로드에 실패했습니다' }

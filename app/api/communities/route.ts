@@ -18,6 +18,7 @@ import {
   withPagination,
 } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { revalidateTag } from 'next/cache'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -241,6 +242,9 @@ export async function POST(req: NextRequest) {
 
       return community
     })
+
+    // 커뮤니티 목록 캐시 무효화
+    revalidateTag('communities')
 
     return createSuccessResponse(created, 201)
   } catch (err: unknown) {

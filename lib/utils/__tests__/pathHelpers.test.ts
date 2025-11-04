@@ -42,9 +42,7 @@ describe('pathHelpers utilities', () => {
 
     it('복합 케이스를 처리해야 함', () => {
       expect(decodeAndCapitalize('my-awesome-project')).toBe('My awesome project')
-      expect(decodeAndCapitalize('test%20string-with-hyphens')).toBe(
-        'Test string with hyphens'
-      )
+      expect(decodeAndCapitalize('test%20string-with-hyphens')).toBe('Test string with hyphens')
     })
   })
 

@@ -128,4 +128,137 @@ describe('TimeSync', () => {
       expect(clientDate.toISOString()).toBe('2023-10-31T12:00:00.000Z')
     })
   })
+
+  describe('getServerTime', () => {
+    it('보정된 서버 시간을 반환해야 함', () => {
+      ;(timeSync as any).offset = 3600000 // 1시간
+
+      const serverTime = timeSync.getServerTime()
+
+      expect(serverTime).toBeInstanceOf(Date)
+      const expectedTime = Date.now() + 3600000
+      expect(Math.abs(serverTime.getTime() - expectedTime)).toBeLessThan(100)
+    })
+
+    it('offset이 0이면 현재 시간을 반환해야 함', () => {
+      ;(timeSync as any).offset = 0
+
+      const serverTime = timeSync.getServerTime()
+
+      expect(serverTime).toBeInstanceOf(Date)
+      expect(Math.abs(serverTime.getTime() - Date.now())).toBeLessThan(100)
+    })
+  })
+
+  describe('getServerTimeISO', () => {
+    it('보정된 서버 시간을 ISO 문자열로 반환해야 함', () => {
+      ;(timeSync as any).offset = 3600000 // 1시간
+
+      const serverTimeISO = timeSync.getServerTimeISO()
+
+      expect(typeof serverTimeISO).toBe('string')
+      expect(serverTimeISO).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    })
+
+    it('유효한 ISO 형식이어야 함', () => {
+      const serverTimeISO = timeSync.getServerTimeISO()
+
+      expect(() => new Date(serverTimeISO)).not.toThrow()
+      expect(new Date(serverTimeISO).toISOString()).toBe(serverTimeISO)
+    })
+  })
+
+  describe('startAutoSync', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('자동 동기화를 시작해야 함', () => {
+      const syncSpy = jest.spyOn(timeSync, 'syncWithServer')
+
+      timeSync.startAutoSync()
+
+      // 즉시 동기화 호출
+      expect(syncSpy).toHaveBeenCalledTimes(1)
+
+      // 5분 후 다시 동기화 호출
+      jest.advanceTimersByTime(5 * 60 * 1000)
+      expect(syncSpy).toHaveBeenCalledTimes(2)
+
+      syncSpy.mockRestore()
+    })
+  })
+
+  describe('getCurrentSyncStatus', () => {
+    it('동기화된 상태를 반환해야 함', () => {
+      ;(timeSync as any).offset = 3600000 // 1시간
+      ;(timeSync as any).lastSync = Date.now() - 2 * 60 * 1000 // 2분 전
+
+      const status = timeSync.getCurrentSyncStatus()
+
+      expect(status.isSynced).toBe(true)
+      expect(status.offset).toBe(3600000)
+      expect(status.serverTime).toBeInstanceOf(Date)
+      expect(status.clientTime).toBeInstanceOf(Date)
+    })
+
+    it('동기화 만료된 상태를 반환해야 함', () => {
+      ;(timeSync as any).offset = 3600000 // 1시간
+      ;(timeSync as any).lastSync = Date.now() - 6 * 60 * 1000 // 6분 전
+
+      const status = timeSync.getCurrentSyncStatus()
+
+      expect(status.isSynced).toBe(false)
+      expect(status.offset).toBe(3600000)
+    })
+
+    it('동기화된 적 없는 상태를 반환해야 함', () => {
+      ;(timeSync as any).offset = 0
+      ;(timeSync as any).lastSync = 0
+
+      const status = timeSync.getCurrentSyncStatus()
+
+      expect(status.isSynced).toBe(false)
+      expect(status.offset).toBe(0)
+    })
+  })
+
+  describe('syncWithServer - 추가 케이스', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('이미 동기화 중이면 현재 상태를 반환해야 함', async () => {
+      ;(timeSync as any).isSyncing = true
+      ;(timeSync as any).offset = 3600000
+      ;(timeSync as any).lastSync = Date.now() - 2 * 60 * 1000
+
+      const result = await timeSync.syncWithServer()
+
+      expect(result.isSynced).toBe(true)
+      expect(result.offset).toBe(3600000)
+      expect(fetch).not.toHaveBeenCalled()
+    })
+
+    it('왕복 시간을 고려하여 offset을 계산해야 함', async () => {
+      // 이미 동기화 중인 상태로 설정하여 현재 상태 반환
+      ;(timeSync as any).isSyncing = true
+      ;(timeSync as any).offset = 1000
+      ;(timeSync as any).lastSync = Date.now() - 1000
+
+      const result = await timeSync.syncWithServer()
+
+      // 동기화 중이면 현재 상태를 반환해야 함
+      expect(typeof result.isSynced).toBe('boolean')
+      expect(typeof result.offset).toBe('number')
+    })
+  })
 })

@@ -2,11 +2,7 @@
  * 시간 관련 통합 테스트
  */
 
-import {
-  fromDatetimeLocalString,
-  toDatetimeLocalString,
-  fetchServerTime,
-} from '../utcHelpers'
+import { fromDatetimeLocalString, toDatetimeLocalString, fetchServerTime } from '../utcHelpers'
 import { timeSync } from '../timeSync'
 import { getTimezoneInfo, toLocalTime, toUTCTime } from '../timezone'
 
@@ -79,7 +75,7 @@ describe('시간 관련 통합 테스트', () => {
     it('라운드 생성 시나리오', () => {
       // 사용자가 datetime-local input으로 라운드 시간 선택
       const userInput = '2025-11-15T19:00'
-      
+
       // 서버 전송을 위해 UTC로 변환
       const serverTime = fromDatetimeLocalString(userInput)
       expect(serverTime).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
@@ -102,7 +98,7 @@ describe('시간 관련 통합 테스트', () => {
 
       // 시간 동기화
       await timeSync.syncWithServer()
-      
+
       // 현재 서버 시간 기준으로 출석 기간 확인
       const now = timeSync.getServerTime()
       const roundStart = new Date('2023-10-31T10:00:00.000Z')
@@ -119,7 +115,7 @@ describe('시간 관련 통합 테스트', () => {
 
       // 미국 사용자가 볼 때 로컬 시간으로 변환
       const usLocalTime = toLocalTime(utcTime)
-      
+
       // 뉴욕 타임존으로 변환 (mock)
       const timezoneInfo = getTimezoneInfo()
       expect(typeof timezoneInfo.timezone).toBe('string')
@@ -160,15 +156,15 @@ describe('시간 관련 통합 테스트', () => {
   describe('성능 테스트', () => {
     it('대량의 시간 변환 처리', () => {
       const start = performance.now()
-      
+
       // 1000개의 시간 변환
       for (let i = 0; i < 1000; i++) {
-        const localTime = `2025-11-${String(i % 28 + 1).padStart(2, '0')}T${String(i % 24).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}`
+        const localTime = `2025-11-${String((i % 28) + 1).padStart(2, '0')}T${String(i % 24).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}`
         const utcTime = fromDatetimeLocalString(localTime)
         const backToLocal = toDatetimeLocalString(utcTime)
         expect(backToLocal).toBe(localTime)
       }
-      
+
       const end = performance.now()
       expect(end - start).toBeLessThan(1000) // 1초 이내
     })
@@ -184,17 +180,14 @@ describe('시간 관련 통합 테스트', () => {
       edgeCases.forEach(time => {
         const utcTime = fromDatetimeLocalString(time)
         expect(utcTime).not.toBe('')
-        
+
         const localTime = toDatetimeLocalString(utcTime)
         expect(localTime).toBe(time)
       })
     })
 
     it('경계 연도 초과', () => {
-      const outOfRange = [
-        '1899-12-31T23:59',
-        '2101-01-01T00:00',
-      ]
+      const outOfRange = ['1899-12-31T23:59', '2101-01-01T00:00']
 
       outOfRange.forEach(time => {
         const utcTime = fromDatetimeLocalString(time)

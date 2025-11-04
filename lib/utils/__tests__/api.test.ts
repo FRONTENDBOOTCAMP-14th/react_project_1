@@ -14,7 +14,7 @@ describe('API 시간 처리 테스트', () => {
     it('서버 시간 반환', async () => {
       const mockServerTime = '2023-10-31T12:30:32.000Z'
       const mockTimestamp = new Date(mockServerTime).getTime()
-      
+
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({
@@ -50,7 +50,7 @@ describe('API 시간 처리 테스트', () => {
     it('응답 시간이 1초 이내인지 확인', async () => {
       const mockServerTime = '2023-10-31T12:30:32.000Z'
       const mockTimestamp = new Date(mockServerTime).getTime()
-      
+
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({
@@ -93,7 +93,7 @@ describe('API 시간 처리 테스트', () => {
     it('다양한 시간대에서의 서버 시간 형식', async () => {
       const mockServerTime = '2023-10-31T12:30:32.000Z'
       const mockTimestamp = new Date(mockServerTime).getTime()
-      
+
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({
@@ -123,7 +123,7 @@ describe('API 시간 처리 테스트', () => {
     it('여러 요청 동시 처리', async () => {
       const mockServerTime = '2023-10-31T12:30:32.000Z'
       const mockTimestamp = new Date(mockServerTime).getTime()
-      
+
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({

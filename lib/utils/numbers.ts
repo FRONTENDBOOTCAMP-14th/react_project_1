@@ -25,7 +25,6 @@ export function calculateProgress(completed: number, total: number): number {
   return Math.round((completed / total) * 1000) / 10 // 소수점 첫째자리
 }
 
-
 /**
  * 범위 제한 (min-max)
  */
@@ -72,4 +71,3 @@ export function calculateMin(numbers: number[]): number {
   if (numbers.length === 0) return 0
   return Math.min(...numbers)
 }
-

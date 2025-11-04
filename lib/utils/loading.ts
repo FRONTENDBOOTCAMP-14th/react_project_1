@@ -104,7 +104,6 @@ export function generateSkeletonMembers(count: number = 8) {
   })
 }
 
-
 /**
  * 로딩 상태 생성자
  */
@@ -163,4 +162,3 @@ export async function withLoadingState<T>(
     throw error
   }
 }
-

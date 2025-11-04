@@ -3,7 +3,15 @@
  * 특히 datetime-local 변환 함수의 시간대 처리를 검증
  */
 
-import { fromDatetimeLocalString, toDatetimeLocalString } from '../utcHelpers'
+import {
+  fetchServerTime,
+  fromDatetimeLocalString,
+  fromUTC,
+  getUTCDayRange,
+  getUTCMonthRange,
+  toDatetimeLocalString,
+  toUTC,
+} from '../utcHelpers'
 
 describe('UTC Helpers - datetime-local 변환', () => {
   describe('toDatetimeLocalString', () => {
@@ -125,6 +133,152 @@ describe('UTC Helpers - datetime-local 변환', () => {
       // And: 다시 UTC로 변환하면 동일한 시점을 가리켜야 함
       const backToUTC = fromDatetimeLocalString(localDisplay)
       expect(new Date(backToUTC).getTime()).toBe(new Date(serverUTC).getTime())
+    })
+  })
+})
+
+describe('UTC Helpers - 기타 함수들', () => {
+  describe('fetchServerTime', () => {
+    beforeEach(() => {
+      global.fetch = jest.fn()
+    })
+
+    afterEach(() => {
+      jest.resetAllMocks()
+    })
+
+    it('서버 시간을 성공적으로 가져와야 함', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          timestamp: 1698744000000, // 2023-10-31T12:00:00.000Z
+        }),
+      }
+      ;(global.fetch as jest.Mock).mockResolvedValue(mockResponse)
+
+      const result = await fetchServerTime()
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/server-time')
+      expect(result).toBeInstanceOf(Date)
+      expect(result.getTime()).toBe(1698744000000)
+    })
+
+    it('서버 응답 실패 시 클라이언트 시간을 반환해야 함', async () => {
+      const mockResponse = {
+        ok: false,
+      }
+      ;(global.fetch as jest.Mock).mockResolvedValue(mockResponse)
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+      const result = await fetchServerTime()
+
+      expect(consoleSpy).toHaveBeenCalledWith('서버 시간 가져오기 실패:', expect.any(Error))
+      expect(result).toBeInstanceOf(Date)
+      expect(Math.abs(result.getTime() - Date.now())).toBeLessThan(1000)
+
+      consoleSpy.mockRestore()
+    })
+
+    it('네트워크 에러 시 클라이언트 시간을 반환해야 함', async () => {
+      ;(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+      const result = await fetchServerTime()
+
+      expect(consoleSpy).toHaveBeenCalledWith('서버 시간 가져오기 실패:', expect.any(Error))
+      expect(result).toBeInstanceOf(Date)
+
+      consoleSpy.mockRestore()
+    })
+  })
+
+  describe('toUTC', () => {
+    it('로컬 Date를 UTC 기준으로 변환해야 함', () => {
+      const localDate = new Date(2025, 9, 20, 14, 30, 0, 0) // 2025-10-20 14:30:00 로컬
+      const utcDate = toUTC(localDate)
+
+      expect(utcDate).toBeInstanceOf(Date)
+      expect(utcDate.getUTCFullYear()).toBe(2025)
+      expect(utcDate.getUTCMonth()).toBe(9) // 0-based, 9 = 10월
+      expect(utcDate.getUTCDate()).toBe(20)
+      expect(utcDate.getUTCHours()).toBe(14)
+      expect(utcDate.getUTCMinutes()).toBe(30)
+    })
+
+    it('밀리초도 보존해야 함', () => {
+      const localDate = new Date(2025, 9, 20, 14, 30, 45, 123)
+      const utcDate = toUTC(localDate)
+
+      expect(utcDate.getUTCSeconds()).toBe(45)
+      expect(utcDate.getUTCMilliseconds()).toBe(123)
+    })
+  })
+
+  describe('fromUTC', () => {
+    it('ISO 문자열을 Date 객체로 파싱해야 함', () => {
+      const isoString = '2025-10-20T14:30:00.000Z'
+      const date = fromUTC(isoString)
+
+      expect(date).toBeInstanceOf(Date)
+      expect(date.toISOString()).toBe(isoString)
+    })
+
+    it('다양한 ISO 형식을 처리해야 함', () => {
+      const cases = [
+        '2025-10-20T14:30:00Z',
+        '2025-10-20T14:30:00.123Z',
+        '2025-10-20T14:30:00+00:00',
+      ]
+
+      cases.forEach(isoString => {
+        const date = fromUTC(isoString)
+        expect(date).toBeInstanceOf(Date)
+        expect(date.getTime()).not.toBeNaN()
+      })
+    })
+  })
+
+  describe('getUTCDayRange', () => {
+    it('해당 날짜의 UTC 시작과 끝을 반환해야 함', () => {
+      const date = new Date('2025-10-20T14:30:00.000Z')
+      const { start, end } = getUTCDayRange(date)
+
+      expect(start.toISOString()).toBe('2025-10-20T00:00:00.000Z')
+      expect(end.toISOString()).toBe('2025-10-20T23:59:59.999Z')
+    })
+
+    it('다른 날짜도 올바르게 처리해야 함', () => {
+      const date = new Date('2025-01-01T12:00:00.000Z')
+      const { start, end } = getUTCDayRange(date)
+
+      expect(start.toISOString()).toBe('2025-01-01T00:00:00.000Z')
+      expect(end.toISOString()).toBe('2025-01-01T23:59:59.999Z')
+    })
+  })
+
+  describe('getUTCMonthRange', () => {
+    it('해당 월의 UTC 시작과 끝을 반환해야 함', () => {
+      const date = new Date('2025-10-20T14:30:00.000Z')
+      const { start, end } = getUTCMonthRange(date)
+
+      expect(start.toISOString()).toBe('2025-10-01T00:00:00.000Z')
+      expect(end.toISOString()).toBe('2025-10-31T23:59:59.999Z')
+    })
+
+    it('2월도 올바르게 처리해야 함 (윤년)', () => {
+      const date = new Date('2024-02-15T12:00:00.000Z') // 윤년
+      const { start, end } = getUTCMonthRange(date)
+
+      expect(start.toISOString()).toBe('2024-02-01T00:00:00.000Z')
+      expect(end.toISOString()).toBe('2024-02-29T23:59:59.999Z')
+    })
+
+    it('2월도 올바르게 처리해야 함 (평년)', () => {
+      const date = new Date('2023-02-15T12:00:00.000Z') // 평년
+      const { start, end } = getUTCMonthRange(date)
+
+      expect(start.toISOString()).toBe('2023-02-01T00:00:00.000Z')
+      expect(end.toISOString()).toBe('2023-02-28T23:59:59.999Z')
     })
   })
 })

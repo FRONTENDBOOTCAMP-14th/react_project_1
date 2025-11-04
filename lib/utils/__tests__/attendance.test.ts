@@ -367,9 +367,7 @@ describe('attendance utilities', () => {
     })
 
     it('단일 타입만 있는 경우를 처리해야 함', () => {
-      const groupByResults = [
-        { attendanceType: 'present', _count: { attendanceId: 20 } },
-      ]
+      const groupByResults = [{ attendanceType: 'present', _count: { attendanceId: 20 } }]
 
       const stats = formatAttendanceGroupByStats(groupByResults)
 
@@ -382,9 +380,7 @@ describe('attendance utilities', () => {
     })
 
     it('0개인 경우도 올바르게 처리해야 함', () => {
-      const groupByResults = [
-        { attendanceType: 'absent', _count: { attendanceId: 0 } },
-      ]
+      const groupByResults = [{ attendanceType: 'absent', _count: { attendanceId: 0 } }]
 
       const stats = formatAttendanceGroupByStats(groupByResults)
 

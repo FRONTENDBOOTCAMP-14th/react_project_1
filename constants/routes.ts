@@ -11,10 +11,6 @@ export const ROUTES = {
     ROUND: (clubId: string) => `/community/round/${clubId}`,
     MEMBERS: (clubId: string) => `/community/member/${clubId}`,
   },
-  GOAL: {
-    CREATE: '/goal/create',
-    DETAIL: (goalId: string) => `/goal/${goalId}`,
-  },
   NOTIFICATIONS: '/notifications',
   LOGIN: '/login',
 } as const

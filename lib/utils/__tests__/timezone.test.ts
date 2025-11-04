@@ -3,13 +3,11 @@
  */
 
 import {
-    formatTimezoneInfo,
-    getCommonTimezones,
-    getTimezoneInfo,
-    getTimezoneOffset,
-    toLocalTime,
-    toTimezone,
-    toUTCTime,
+  formatTimezoneInfo,
+  getTimezoneInfo,
+  toLocalTime,
+  toTimezone,
+  toUTCTime,
 } from '../timezone'
 
 // Mock Intl.DateTimeFormat
@@ -109,24 +107,6 @@ describe('Timezone Utils', () => {
     })
   })
 
-  describe('getTimezoneOffset', () => {
-    it('타임존 오프셋 계산', () => {
-      mockDateTimeFormat.mockReturnValue({
-        formatToParts: () => [
-          { type: 'year', value: '2023' },
-          { type: 'month', value: '10' },
-          { type: 'day', value: '31' },
-          { type: 'hour', value: '21' },
-          { type: 'minute', value: '00' },
-          { type: 'second', value: '00' },
-        ],
-      } as any)
-
-      const offset = getTimezoneOffset('Asia/Seoul')
-      expect(typeof offset).toBe('number')
-    })
-  })
-
   describe('formatTimezoneInfo', () => {
     it('타임존 정보 포맷팅', () => {
       const info = {
@@ -152,26 +132,6 @@ describe('Timezone Utils', () => {
 
       const formatted = formatTimezoneInfo(info)
       expect(formatted).toBe('미국 동부 표준시 GMT-04:00 (DST)')
-    })
-  })
-
-  describe('getCommonTimezones', () => {
-    it('일반적인 타임존 목록 반환', () => {
-      const timezones = getCommonTimezones()
-
-      expect(Array.isArray(timezones)).toBe(true)
-      expect(timezones.length).toBeGreaterThan(0)
-
-      const firstTimezone = timezones[0]
-      expect(firstTimezone).toHaveProperty('value')
-      expect(firstTimezone).toHaveProperty('label')
-      expect(firstTimezone).toHaveProperty('offset')
-
-      // 한국 타임존 포함 확인
-      const koreaTimezone = timezones.find(tz => tz.value === 'Asia/Seoul')
-      expect(koreaTimezone).toBeDefined()
-      expect(koreaTimezone?.label).toBe('대한민국')
-      expect(koreaTimezone?.offset).toBe('GMT+09:00')
     })
   })
 

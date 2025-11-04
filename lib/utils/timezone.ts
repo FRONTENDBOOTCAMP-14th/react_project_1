@@ -123,15 +123,6 @@ export function toTimezone(date: Date, timezone: string): Date {
 }
 
 /**
- * 타임존 오프셋을 계산합니다.
- */
-export function getTimezoneOffset(timezone: string, date: Date = new Date()): number {
-  const utcDate = new Date(date.toISOString())
-  const timezoneDate = toTimezone(utcDate, timezone)
-  return (timezoneDate.getTime() - utcDate.getTime()) / (1000 * 60) // 분 단위
-}
-
-/**
  * 타임존 정보를 포맷팅하여 표시합니다.
  */
 export function formatTimezoneInfo(info: TimezoneInfo): string {
@@ -166,25 +157,4 @@ export function useTimezone() {
     toTimezone,
     formatTimezoneInfo: () => formatTimezoneInfo(timezoneInfo),
   }
-}
-
-/**
- * 타임존 목록을 반환합니다. (선택용)
- */
-export function getCommonTimezones(): Array<{ value: string; label: string; offset: string }> {
-  const timezones = [
-    { value: 'Asia/Seoul', label: '대한민국', offset: 'GMT+09:00' },
-    { value: 'Asia/Tokyo', label: '일본', offset: 'GMT+09:00' },
-    { value: 'Asia/Shanghai', label: '중국', offset: 'GMT+08:00' },
-    { value: 'Asia/Singapore', label: '싱가포르', offset: 'GMT+08:00' },
-    { value: 'America/New_York', label: '미국 동부', offset: 'GMT-05:00' },
-    { value: 'America/Los_Angeles', label: '미국 태평양', offset: 'GMT-08:00' },
-    { value: 'America/Chicago', label: '미국 중부', offset: 'GMT-06:00' },
-    { value: 'Europe/London', label: '영국', offset: 'GMT+00:00' },
-    { value: 'Europe/Paris', label: '프랑스', offset: 'GMT+01:00' },
-    { value: 'Europe/Berlin', label: '독일', offset: 'GMT+01:00' },
-    { value: 'Australia/Sydney', label: '호주', offset: 'GMT+11:00' },
-  ]
-
-  return timezones
 }

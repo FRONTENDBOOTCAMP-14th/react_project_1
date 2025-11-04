@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useTransition } from 'react'
+import { updateProfileAction } from '@/app/actions/profile'
 import { DeleteAccountButton, EditButton } from '.'
 import { toast } from 'sonner'
 import { StrokeButton, FillButton } from '@/components/ui'
@@ -20,7 +21,7 @@ interface ProfileContentProps {
 
 export default function ProfileContent({ user }: ProfileContentProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [editForm, setEditForm] = useState({
     username: user.username,
     nickname: user.nickname || '',
@@ -51,36 +52,20 @@ export default function ProfileContent({ user }: ProfileContentProps) {
         return
       }
 
-      setIsLoading(true)
-
-      try {
-        const response = await fetch('/api/user', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: editForm.username.trim(),
-            nickname: editForm.nickname.trim() || null,
-          }),
+      startTransition(async () => {
+        const result = await updateProfileAction({
+          username: editForm.username,
+          nickname: editForm.nickname || null,
         })
 
-        const data = await response.json()
-
-        if (response.ok && data.success) {
+        if (result.success) {
           toast.success('프로필이 수정되었습니다')
           setIsEditing(false)
-          // 페이지 새로고침으로 업데이트된 데이터 반영
-          window.location.reload()
+          // revalidatePath가 자동으로 페이지 갱신
         } else {
-          toast.error(data.error || '프로필 수정에 실패했습니다')
+          toast.error(result.error || '프로필 수정에 실패했습니다')
         }
-      } catch (error) {
-        console.error('Failed to update profile:', error)
-        toast.error('프로필 수정 중 오류가 발생했습니다')
-      } finally {
-        setIsLoading(false)
-      }
+      })
     },
     [editForm.username, editForm.nickname]
   )
@@ -128,12 +113,12 @@ export default function ProfileContent({ user }: ProfileContentProps) {
                 className={button.button}
                 type="button"
                 onClick={handleCancelEdit}
-                disabled={isLoading}
+                disabled={isPending}
               >
                 취소
               </StrokeButton>
-              <FillButton className={button.button} type="submit" disabled={isLoading}>
-                {isLoading ? '저장 중...' : '저장'}
+              <FillButton className={button.button} type="submit" disabled={isPending}>
+                {isPending ? '저장 중...' : '저장'}
               </FillButton>
             </div>
           </form>

@@ -1,6 +1,6 @@
+import type { PaginationInfo } from '@/lib/types'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
-import type { PaginationInfo } from '@/lib/types'
 import { useCallback, useEffect, useState } from 'react'
 
 interface UseUserCommunitiesResult {

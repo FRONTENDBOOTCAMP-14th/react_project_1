@@ -1,10 +1,11 @@
 'use client'
 
-import { formatDiffFromNow } from '@/lib/utils'
-import styles from './ReactionListItem.module.css'
 import { Popover } from '@/components/ui'
+import { MESSAGES } from '@/constants'
+import { formatDiffFromNow } from '@/lib/utils'
 import { Ellipsis } from 'lucide-react'
 import { toast } from 'sonner'
+import styles from './ReactionListItem.module.css'
 
 interface ReactionListItemProps {
   nickname: string
@@ -12,6 +13,7 @@ interface ReactionListItemProps {
   createdAt: Date
   reaction: string
   reactionId: string
+  memberId: string
 }
 
 export default function ReactionListItem({
@@ -20,10 +22,11 @@ export default function ReactionListItem({
   createdAt,
   reaction,
   reactionId,
+  memberId,
 }: ReactionListItemProps) {
   const deleteReaction = async () => {
     try {
-      toast.loading('reaction을 삭제 중입니다')
+      toast.loading(MESSAGES.LOADING.REACTION_DELETING)
       const response = await fetch(`/api/reactions/${reactionId}`, {
         method: 'DELETE',
       })
@@ -32,11 +35,13 @@ export default function ReactionListItem({
 
       if (result.success) {
         toast.dismiss()
-        toast.success('reaction이 삭제되었습니다')
-        window.location.reload()
+        toast.success(MESSAGES.SUCCESS.REACTION_DELETE)
+        // Next.js 방식으로 페이지 새로고침
+        const { revalidatePath } = await import('next/cache')
+        revalidatePath(`/community/member-profile/${memberId}`)
       } else {
         toast.dismiss()
-        toast.error(result.error || 'reaction 삭제에 실패했습니다')
+        toast.error(result.error || MESSAGES.ERROR.REACTION_DELETE_FAILED)
       }
     } catch (error) {
       toast.dismiss()
@@ -56,7 +61,14 @@ export default function ReactionListItem({
         {isOwner && (
           <Popover
             trigger={<Ellipsis size={30} />}
-            actions={[{ id: 'delete', label: '삭제', onClick: deleteReaction, isDanger: true }]}
+            actions={[
+              {
+                id: 'delete',
+                label: MESSAGES.ACTION.DELETE,
+                onClick: deleteReaction,
+                isDanger: true,
+              },
+            ]}
           />
         )}
       </div>

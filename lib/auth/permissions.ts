@@ -10,7 +10,7 @@ import prisma from '@/lib/prisma'
  * @param clubId - 커뮤니티 ID
  * @returns 팀장 여부
  */
-export async function checkIsTeamLeader(
+export async function checkisAdmin(
   userId: string | null | undefined,
   clubId: string
 ): Promise<boolean> {
@@ -65,14 +65,14 @@ export async function checkIsMember(
  * 한 번의 쿼리로 멤버 여부와 팀장 여부 확인
  * @param userId - 사용자 ID
  * @param clubId - 커뮤니티 ID
- * @returns { isMember: boolean, isTeamLeader: boolean }
+ * @returns { isMember: boolean, isAdmin: boolean }
  */
 export async function checkMembershipAndRole(
   userId: string | null | undefined,
   clubId: string
-): Promise<{ isMember: boolean; isTeamLeader: boolean }> {
+): Promise<{ isMember: boolean; isAdmin: boolean }> {
   if (!userId || !clubId) {
-    return { isMember: false, isTeamLeader: false }
+    return { isMember: false, isAdmin: false }
   }
 
   try {
@@ -88,15 +88,15 @@ export async function checkMembershipAndRole(
     })
 
     if (!member) {
-      return { isMember: false, isTeamLeader: false }
+      return { isMember: false, isAdmin: false }
     }
 
     return {
       isMember: true,
-      isTeamLeader: member.role === 'admin',
+      isAdmin: member.role === 'admin',
     }
   } catch (error) {
     console.error('Error checking membership and role:', error)
-    return { isMember: false, isTeamLeader: false }
+    return { isMember: false, isAdmin: false }
   }
 }

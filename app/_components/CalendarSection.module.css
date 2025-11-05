@@ -14,7 +14,6 @@
   align-items: center;
   font-size: var(--font-sm);
   color: var(--gray-500);
-  cursor: pointer;
   padding: var(--spacing-xs);
   background: none;
   border: none;

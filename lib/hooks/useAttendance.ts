@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, HTTP_HEADERS } from '@/constants/routes'
 import type {
   Attendance,
   AttendanceFilterOptions,
@@ -7,8 +8,8 @@ import type {
   CreateAttendanceInput,
   UpdateAttendanceInput,
 } from '@/lib/types/attendance'
+import { fetchWithResult, getUserFriendlyErrorMessage } from '@/lib/utils/api'
 import { useCallback, useEffect, useState } from 'react'
-import { API_ENDPOINTS, HTTP_HEADERS } from '@/constants/routes'
 
 interface UseAttendanceResult {
   attendance: Attendance | null
@@ -88,60 +89,66 @@ export const useAttendance = (
   } | null>(null)
 
   const fetchAttendance = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
     if (attendanceId) {
       // 특정 출석 조회
-      try {
-        setLoading(true)
-        setError(null)
+      const result = await fetchWithResult<AttendanceResponse>(
+        API_ENDPOINTS.ATTENDANCE.BY_ID(attendanceId),
+        undefined,
+        '출석 정보를 불러오는데 실패했습니다'
+      )
 
-        const response = await fetch(API_ENDPOINTS.ATTENDANCE.BY_ID(attendanceId))
-        const result = await response.json()
-
-        if (result.success) {
-          setAttendance(result.data)
+      if (result.isOk()) {
+        const data = result.unwrap()
+        if (data.success && data.data) {
+          setAttendance(data.data)
         } else {
-          setError(result.error || '출석 정보를 불러오는데 실패했습니다')
+          setError(data.error || '출석 정보를 불러오는데 실패했습니다')
         }
-      } catch (err) {
-        console.error('Failed to fetch attendance:', err)
-        setError('출석 정보를 불러오는데 실패했습니다')
-      } finally {
-        setLoading(false)
+      } else {
+        setError(getUserFriendlyErrorMessage(result.error))
       }
     } else {
       // 출석 목록 조회
-      try {
-        setLoading(true)
-        setError(null)
+      const params = new URLSearchParams()
+      if (initialFilters) {
+        Object.entries(initialFilters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.append(key, value.toString())
+          }
+        })
+      }
 
-        const params = new URLSearchParams()
-        if (initialFilters) {
-          Object.entries(initialFilters).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-              params.append(key, value.toString())
-            }
-          })
-        }
+      const result = await fetchWithResult<AttendanceListResponse>(
+        `${API_ENDPOINTS.ATTENDANCE.BASE}?${params}`,
+        undefined,
+        '출석 목록을 불러오는데 실패했습니다'
+      )
 
-        const response = await fetch(`${API_ENDPOINTS.ATTENDANCE.BASE}?${params}`)
-        const result = await response.json()
-
-        if (result.success) {
-          setAttendanceList(result.data.data)
-          setPagination(result.data.pagination)
-          setStats(result.data.stats)
+      if (result.isOk()) {
+        const data = result.unwrap()
+        if (data.success && data.data) {
+          setAttendanceList(data.data.data || [])
+          if (data.data.pagination) {
+            setPagination({ ...data.data.pagination, total: data.data.count || 0 })
+          }
+          // stats는 선택적 필드
+          if (data.data.stats) {
+            setStats(data.data.stats)
+          }
         } else {
           setAttendanceList([])
-          setError(result.error || '출석 목록을 불러오는데 실패했습니다')
+          setError(data.error || '출석 목록을 불러오는데 실패했습니다')
         }
-      } catch (err) {
-        console.error('Failed to fetch attendance list:', err)
-        setError('출석 목록을 불러오는데 실패했습니다')
+      } else {
+        setError(getUserFriendlyErrorMessage(result.error))
         setAttendanceList([])
-      } finally {
-        setLoading(false)
       }
     }
+
+    setLoading(false)
   }, [attendanceId, initialFilters])
 
   /**
@@ -149,25 +156,25 @@ export const useAttendance = (
    */
   const createAttendance = useCallback(
     async (input: CreateAttendanceInput) => {
-      try {
-        const response = await fetch(API_ENDPOINTS.ATTENDANCE.BASE, {
+      const result = await fetchWithResult<AttendanceResponse>(
+        API_ENDPOINTS.ATTENDANCE.BASE,
+        {
           method: 'POST',
           headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
-        })
+        },
+        '출석 생성에 실패했습니다'
+      )
 
-        const result = await response.json()
-
-        if (result.success) {
-          // 생성 후 목록 새로고침
+      if (result.isOk()) {
+        const data = result.unwrap()
+        if (data.success) {
           await fetchAttendance()
-          return { success: true, data: result.data }
+          return { success: true, data: data.data }
         }
-        return { success: false, error: result.error || '출석 생성에 실패했습니다' }
-      } catch (err) {
-        console.error('Failed to create attendance:', err)
-        return { success: false, error: '출석 생성 중 오류가 발생했습니다' }
+        return { success: false, error: data.error || '출석 생성에 실패했습니다' }
       }
+      return { success: false, error: getUserFriendlyErrorMessage(result.error) }
     },
     [fetchAttendance]
   )
@@ -177,27 +184,27 @@ export const useAttendance = (
    */
   const updateAttendance = useCallback(
     async (id: string, input: UpdateAttendanceInput) => {
-      try {
-        const response = await fetch(API_ENDPOINTS.ATTENDANCE.BY_ID(id), {
+      const result = await fetchWithResult<AttendanceResponse>(
+        API_ENDPOINTS.ATTENDANCE.BY_ID(id),
+        {
           method: 'PATCH',
           headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
           body: JSON.stringify(input),
-        })
+        },
+        '출석 수정에 실패했습니다'
+      )
 
-        const result = await response.json()
-
-        if (result.success) {
-          // 수정 후 데이터 새로고침
+      if (result.isOk()) {
+        const data = result.unwrap()
+        if (data.success) {
           if (attendanceId === id) {
             await fetchAttendance()
           }
-          return { success: true, data: result.data }
+          return { success: true, data: data.data }
         }
-        return { success: false, error: result.error || '출석 수정에 실패했습니다' }
-      } catch (err) {
-        console.error('Failed to update attendance:', err)
-        return { success: false, error: '출석 수정 중 오류가 발생했습니다' }
+        return { success: false, error: data.error || '출석 수정에 실패했습니다' }
       }
+      return { success: false, error: getUserFriendlyErrorMessage(result.error) }
     },
     [attendanceId, fetchAttendance]
   )
@@ -207,23 +214,21 @@ export const useAttendance = (
    */
   const deleteAttendance = useCallback(
     async (id: string) => {
-      try {
-        const response = await fetch(API_ENDPOINTS.ATTENDANCE.BY_ID(id), {
-          method: 'DELETE',
-        })
+      const result = await fetchWithResult<{ success: boolean; error?: string }>(
+        API_ENDPOINTS.ATTENDANCE.BY_ID(id),
+        { method: 'DELETE' },
+        '출석 삭제에 실패했습니다'
+      )
 
-        const result = await response.json()
-
-        if (result.success) {
-          // 삭제 후 목록 새로고침
+      if (result.isOk()) {
+        const data = result.unwrap()
+        if (data.success) {
           await fetchAttendance()
           return { success: true }
         }
-        return { success: false, error: result.error || '출석 삭제에 실패했습니다' }
-      } catch (err) {
-        console.error('Failed to delete attendance:', err)
-        return { success: false, error: '출석 삭제 중 오류가 발생했습니다' }
+        return { success: false, error: data.error || '출석 삭제에 실패했습니다' }
       }
+      return { success: false, error: getUserFriendlyErrorMessage(result.error) }
     },
     [fetchAttendance]
   )

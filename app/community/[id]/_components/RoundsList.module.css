@@ -11,6 +11,18 @@
   color: var(--gray-500);
 }
 
+.no-rounds {
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--gray-500);
+}
+
+.rounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
 .add-round-button {
   width: 100%;
 }

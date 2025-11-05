@@ -28,7 +28,7 @@ export interface WithGoalId {
  * 팀장 권한을 확인하는 컴포넌트의 공통 Props
  */
 export interface WithTeamLeaderPermission {
-  isTeamLeader?: boolean
+  isAdmin?: boolean
 }
 
 /**

@@ -4,25 +4,26 @@
  */
 
 /**
- * 서버로부터 현재 UTC 시간을 가져옵니다.
- * 네트워크 실패 시 클라이언트 시간을 fallback으로 사용합니다.
+ * 서버의 현재 UTC 시간을 가져옵니다.
  *
- * @returns Promise<Date> - 서버의 UTC 시간
+ * @returns Promise<Date> - 서버의 현재 UTC 시간
  *
  * @example
- * const serverTime = await getServerTime()
+ * const serverTime = await fetchServerTime()
  * console.log(serverTime.toISOString())
  */
-export async function getServerTime(): Promise<Date> {
+export async function fetchServerTime(): Promise<Date> {
   try {
     const response = await fetch('/api/server-time')
     if (!response.ok) {
-      throw new Error('Failed to fetch server time')
+      throw new Error('서버 시간 요청 실패')
     }
+
     const data = await response.json()
-    return new Date(data.serverTime)
+    return new Date(data.timestamp)
   } catch (error) {
-    console.warn('Failed to get server time, using client time as fallback:', error)
+    console.error('서버 시간 가져오기 실패:', error)
+    // 실패 시 클라이언트 시간 반환
     return new Date()
   }
 }
@@ -112,14 +113,15 @@ export function getUTCMonthRange(date: Date): { start: Date; end: Date } {
 
 /**
  * Date를 datetime-local input 형식으로 변환합니다.
- * UTC 시간을 그대로 "YYYY-MM-DDTHH:mm" 형식으로 반환합니다.
+ * UTC 시간을 사용자의 로컬 시간대로 변환하여 "YYYY-MM-DDTHH:mm" 형식으로 반환합니다.
  *
- * @param dateInput - Date 객체 또는 ISO 날짜 문자열
- * @returns datetime-local input용 문자열
+ * @param dateInput - Date 객체 또는 ISO 날짜 문자열 (UTC)
+ * @returns datetime-local input용 문자열 (로컬 시간대)
  *
  * @example
- * toDatetimeLocalString('2025-10-20T14:30:00.000Z')
- * // "2025-10-20T14:30"
+ * // 한국 시간대(UTC+9)에서:
+ * toDatetimeLocalString('2025-10-20T05:30:00.000Z')
+ * // "2025-10-20T14:30" (UTC 05:30 → KST 14:30)
  */
 export function toDatetimeLocalString(dateInput: Date | string | null | undefined): string {
   if (!dateInput) {
@@ -132,33 +134,52 @@ export function toDatetimeLocalString(dateInput: Date | string | null | undefine
     return ''
   }
 
-  // UTC 기준으로 추출
-  const year = date.getUTCFullYear()
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(date.getUTCDate()).padStart(2, '0')
-  const hours = String(date.getUTCHours()).padStart(2, '0')
-  const minutes = String(date.getUTCMinutes()).padStart(2, '0')
+  // 로컬 시간대 기준으로 추출 (datetime-local input은 로컬 시간 사용)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
 
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
 /**
  * datetime-local input 값을 UTC ISO string으로 변환합니다.
+ * 브라우저가 입력값을 사용자의 로컬 시간대로 해석하도록 한 후 UTC로 변환합니다.
  *
- * @param datetimeLocalValue - "YYYY-MM-DDTHH:mm" 형식의 문자열
+ * @param datetimeLocalValue - "YYYY-MM-DDTHH:mm" 형식의 문자열 (로컬 시간대)
  * @returns ISO 8601 UTC 문자열
  *
  * @example
+ * // 한국 시간대(UTC+9)에서:
  * fromDatetimeLocalString('2025-10-20T14:30')
- * // "2025-10-20T14:30:00.000Z"
+ * // "2025-10-20T05:30:00.000Z" (KST 14:30 → UTC 05:30)
  */
 export function fromDatetimeLocalString(datetimeLocalValue: string): string {
   if (!datetimeLocalValue) {
     return ''
   }
 
-  // datetime-local 값을 UTC로 해석
-  const date = new Date(datetimeLocalValue + ':00.000Z')
+  // datetime-local 형식인지 기본적으로 확인
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(datetimeLocalValue)) {
+    return ''
+  }
+
+  // 브라우저가 로컬 시간대로 해석하도록 함 (초 추가)
+  const date = new Date(datetimeLocalValue + ':00')
+
+  // 유효한 날짜인지 확인
+  if (isNaN(date.getTime())) {
+    return ''
+  }
+
+  // 합리적인 날짜 범위인지 확인 (1900-2100년)
+  const year = date.getFullYear()
+  if (year < 1900 || year > 2100) {
+    return ''
+  }
+
   return date.toISOString()
 }
 

@@ -1,11 +1,11 @@
 'use client'
 
-import { IconLink } from '@/components/ui'
-import { ROUTES } from '@/constants'
-import type { Community } from '@/lib/types'
-import styles from './CommunityCard.module.css'
-import Image from 'next/image'
 import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
+import { IconLink } from '@/components/ui'
+import { MESSAGES, ROUTES } from '@/constants'
+import type { Community } from '@/lib/types'
+import Image from 'next/image'
+import styles from './CommunityCard.module.css'
 
 /**
  * 커뮤니티 카드 컴포넌트 Props
@@ -23,23 +23,19 @@ interface CommunityCardProps {
 export default function CommunityCard({ community, className }: CommunityCardProps) {
   return (
     <article className={`${styles.card} ${className || ''}`}>
-      <h2 className="sr-only">커뮤니티 소개</h2>
+      <h2 className="sr-only">{MESSAGES.LABEL.COMMUNITY_INTRO}</h2>
 
       <div className={styles.content}>
-        <IconLink
-          href={ROUTES.COMMUNITY.DETAIL(community.clubId)}
-          className={styles.title}
-          style={{ cursor: 'pointer' }}
-        >
+        <IconLink href={ROUTES.COMMUNITY.DETAIL(community.clubId)} className={styles.title}>
           {community.name}
         </IconLink>
-        <p className={styles.desc}>{community.description || '설명이 없습니다.'}</p>
+        <p className={styles.desc}>{community.description || MESSAGES.EMPTY.NO_DESCRIPTION}</p>
       </div>
 
       <div className={styles.join}>
         <Image
           src={community.imageUrl || DefaultImg.src}
-          alt={`${community.name} 커뮤니티 이미지`}
+          alt={MESSAGES.LABEL.COMMUNITY_IMAGE_ALT(community.name)}
           width={150}
           height={150}
           className={styles.image}

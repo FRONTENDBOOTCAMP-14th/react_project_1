@@ -1,68 +1,26 @@
-'use client'
+import { fetchInitialCommunities } from '@/lib/community/cursorCommunityServer'
+import type { Metadata } from 'next'
+import CursorCommunitiesClient from './_components/CursorCommunitiesClient'
 
-import type { Community, CommunityListResponse } from '@/lib/types/community'
-import { useEffect, useState } from 'react'
-import CommunityCard from './_components/CommunityCard'
-import styles from './community.module.css'
+export const metadata: Metadata = {
+  title: '커뮤니티 목록 | 토끼노트',
+  description:
+    '다양한 스터디 커뮤니티를 탐색하고 참여하세요. 지역별, 관심사별로 원하는 스터디를 찾아보세요.',
+  openGraph: {
+    title: '커뮤니티 목록 | 토끼노트',
+    description: '다양한 스터디 커뮤니티를 탐색하고 참여하세요.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
 
-export default function CommunitiesPage() {
-  const [communities, setCommunities] = useState<Community[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default async function CommunitiesPage() {
+  // 서버에서 초기 데이터 페칭 (커서 기반)
+  const initialResult = await fetchInitialCommunities({ limit: 20 })
 
-  useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        // 전체 커뮤니티 조회 (페이지네이션 없이 모든 커뮤니티)
-        const response = await fetch('/api/communities?limit=100')
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-
-        const result = (await response.json()) as CommunityListResponse
-
-        if (result.success && result.data?.data) {
-          setCommunities(result.data.data)
-        } else {
-          setError(result.error || '커뮤니티 데이터를 불러올 수 없습니다')
-        }
-      } catch (err) {
-        console.error('Error fetching communities:', err)
-        setError('커뮤니티 정보를 불러오는데 실패했습니다')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchCommunities()
-  }, [])
-
-  return (
-    <>
-      <div className={styles.header}>
-        <h1>전체 커뮤니티</h1>
-        <p>참여 가능한 모든 커뮤니티를 확인하세요</p>
-      </div>
-
-      <div className={styles.content}>
-        {isLoading ? (
-          <div className={styles.loading}>로딩 중...</div>
-        ) : error ? (
-          <div className={styles.error}>데이터를 불러올 수 없습니다: {error}</div>
-        ) : communities.length > 0 ? (
-          <div className={styles.grid}>
-            {communities.map(community => (
-              <CommunityCard key={community.clubId} community={community} />
-            ))}
-          </div>
-        ) : (
-          <div className={styles.empty}>등록된 커뮤니티가 없습니다</div>
-        )}
-      </div>
-    </>
-  )
+  return <CursorCommunitiesClient initialResult={initialResult} />
 }

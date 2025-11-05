@@ -1,12 +1,13 @@
 'use client'
 
-import { formatDiffFromNow } from '@/lib/utils'
-import { memo } from 'react'
-import styles from './MemberCard.module.css'
-import Image from 'next/image'
 import { IconButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
+import { formatDiffFromNow } from '@/lib/utils'
 import { ThumbsUp } from 'lucide-react'
+import Image from 'next/image'
+import { memo } from 'react'
 import { toast } from 'sonner'
+import styles from './MemberCard.module.css'
 
 function MemberCard({
   nickname,
@@ -26,19 +27,26 @@ function MemberCard({
           width={90}
           height={90}
           src="/svg/default-profile.svg"
-          alt={`${nickname} 프로필 이미지`}
+          alt={MESSAGES.LABEL.PROFILE_IMAGE_ALT(nickname)}
           className={styles.image}
         />
         <p>{nickname}</p>
       </div>
       <div className={styles['description-container']}>
-        <p className={styles.description}>스터디 가입일: {formatDiffFromNow(joinedAt)}</p>
-        <p className={styles.description}>역할: {role === 'admin' ? '관리자' : '멤버'}</p>
-        <p className={styles.description}>출석: {attendanceCount}회</p>
+        <p className={styles.description}>
+          {MESSAGES.LABEL.STUDY_JOIN_DATE}: {formatDiffFromNow(joinedAt)}
+        </p>
+        <p className={styles.description}>
+          {MESSAGES.LABEL.ROLE}:{' '}
+          {role === 'admin' ? MESSAGES.LABEL.ROLE_ADMIN : MESSAGES.LABEL.ROLE_MEMBER}
+        </p>
+        <p className={styles.description}>
+          {MESSAGES.LABEL.ATTENDANCE}: {MESSAGES.LABEL.ATTENDANCE_COUNT(attendanceCount || 0)}
+        </p>
       </div>
       <IconButton
         onClick={() => {
-          toast.success('좋아요 버튼을 눌렀습니다.')
+          toast.success(MESSAGES.ERROR.LIKE_BUTTON_CLICKED)
         }}
       >
         <ThumbsUp size={30} strokeWidth={1} />

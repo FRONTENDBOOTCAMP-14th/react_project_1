@@ -1,27 +1,23 @@
-import { memo, useCallback } from 'react'
-import type { Notification } from '@/lib/types/notification'
-import { Pin, Trash2 } from 'lucide-react'
 import { IconButton } from '@/components/ui'
-import styles from './NotificationCard.module.css'
+import type { Notification } from '@/lib/types/notification'
 import { formatDate } from '@/lib/utils'
+import { Pin, Trash2 } from 'lucide-react'
+import { memo, useCallback } from 'react'
+import { MESSAGES } from '@/constants'
+import styles from './NotificationCard.module.css'
 
 interface NotificationCardProps {
   notification: Notification
   onDelete: (notificationId: string) => Promise<void>
   onTogglePin: (notificationId: string, currentPinned: boolean) => Promise<void>
-  isTeamLeader: boolean
+  isAdmin: boolean
 }
 
 /**
  * 공지사항 카드 컴포넌트
  * 메모이제이션을 통해 불필요한 리렌더링 방지
  */
-function NotificationCard({
-  notification,
-  onDelete,
-  onTogglePin,
-  isTeamLeader,
-}: NotificationCardProps) {
+function NotificationCard({ notification, onDelete, onTogglePin, isAdmin }: NotificationCardProps) {
   const { notificationId, title, content, isPinned, createdAt } = notification
 
   const handleDelete = useCallback(() => {
@@ -38,23 +34,27 @@ function NotificationCard({
       <div className={styles.header}>
         <div className={styles.title}>
           {isPinned && (
-            <span className={styles['pin-badge']} aria-label="고정됨">
+            <span className={styles['pin-badge']} aria-label={MESSAGES.LABEL.PINNED}>
               <Pin size={14} />
             </span>
           )}
           <h3>{title}</h3>
         </div>
 
-        {isTeamLeader && (
+        {isAdmin && (
           <div className={styles.actions}>
             <IconButton
               onClick={handleTogglePin}
-              title={isPinned ? '고정 해제' : '상단 고정'}
-              aria-label={isPinned ? '고정 해제' : '상단 고정'}
+              title={isPinned ? MESSAGES.ACTION.UNPIN : MESSAGES.ACTION.PIN}
+              aria-label={isPinned ? MESSAGES.ACTION.UNPIN : MESSAGES.ACTION.PIN}
             >
               <Pin size={16} className={isPinned ? styles.active : ''} />
             </IconButton>
-            <IconButton onClick={handleDelete} title="삭제" aria-label="삭제">
+            <IconButton
+              onClick={handleDelete}
+              title={MESSAGES.ACTION.DELETE}
+              aria-label={MESSAGES.ACTION.DELETE}
+            >
               <Trash2 size={16} />
             </IconButton>
           </div>

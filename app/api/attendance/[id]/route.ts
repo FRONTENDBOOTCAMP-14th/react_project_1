@@ -1,9 +1,8 @@
 import prisma from '@/lib/prisma'
 import type { UpdateAttendanceInput } from '@/lib/types/attendance'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import { buildAttendanceUpdateData } from '@/lib/utils/attendance'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { softDeleteHelpers } from '@/lib/utils/softDelete'
-import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
@@ -179,11 +178,19 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return createErrorResponse('출석 ID가 필요합니다.', 400)
     }
 
-    // 소프트 삭제 (일관된 정책 적용)
-    const result = await softDeleteHelpers.deleteAttendance(id)
-    return result.response
-  } catch (error) {
+    // 소프트 삭제 (미들웨어가 자동으로 처리)
+    await prisma.attendance.delete({
+      where: { attendanceId: id },
+    })
+
+    return createSuccessResponse({ message: 'Deleted successfully' })
+  } catch (error: unknown) {
+    // Prisma P2025: Record not found
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+      return createErrorResponse('Record not found or already deleted', 404)
+    }
+
     console.error('Error deleting attendance:', error)
-    return createErrorResponse('출석 삭제에 실패했습니다', 500)
+    return createErrorResponse('Failed to delete', 500)
   }
 }

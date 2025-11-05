@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback } from 'react'
+import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
 import type {
-  Notification,
   CreateNotificationInput,
+  Notification,
   UpdateNotificationRequest,
 } from '@/lib/types/notification'
-import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import { useCallback, useEffect, useState } from 'react'
 
 interface UseNotificationsOptions {
   clubId: string

@@ -1,13 +1,14 @@
 'use client'
 
 import { StrokeButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
 import { memo } from 'react'
 import styles from './button.module.css'
 
 function EditButton({ onClick }: { onClick: () => void }) {
   return (
     <StrokeButton className={styles.button} type="button" onClick={onClick}>
-      편집
+      {MESSAGES.LABEL.PROFILE_EDIT}
     </StrokeButton>
   )
 }

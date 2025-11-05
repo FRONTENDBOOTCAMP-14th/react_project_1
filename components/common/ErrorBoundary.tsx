@@ -8,6 +8,7 @@
 import { MESSAGES } from '@/constants'
 import type { ErrorInfo, ReactNode } from 'react'
 import { Component } from 'react'
+import styles from './ErrorBoundary.module.css'
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -18,6 +19,8 @@ interface ErrorBoundaryProps {
   children: ReactNode
   fallback?: ReactNode
   onError?: (error: Error, errorInfo: ErrorInfo) => void
+  showDetails?: boolean
+  customMessage?: string
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -32,6 +35,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
+
+    // 에러 정보를 상세히 로깅
+    console.error('🔥 ErrorBoundary Details')
+    console.error('Error:', error)
+    console.error('Error Info:', errorInfo)
+    console.error('Component Stack:', errorInfo.componentStack)
+
     this.props.onError?.(error, errorInfo)
   }
 
@@ -39,14 +49,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div className="error-boundary">
-            <h2>오류가 발생했습니다</h2>
-            <p>{MESSAGES.ERROR.NETWORK_ERROR}</p>
+          <div className={styles['error-boundary']}>
+            <h2 className={styles['error-title']}>오류가 발생했습니다</h2>
+            <p className={styles['error-message']}>
+              {this.props.customMessage || MESSAGES.ERROR.UNEXPECTED_ERROR}
+            </p>
+
+            {this.props.showDetails && this.state.error && (
+              <details className={styles['error-details']}>
+                <summary>에러 상세 정보</summary>
+                <pre>{this.state.error.stack}</pre>
+              </details>
+            )}
+
             <button
               onClick={() => this.setState({ hasError: false, error: undefined })}
-              className="retry-button"
+              className={styles['retry-button']}
             >
-              다시 시도
+              {MESSAGES.ACTION.RETRY}
             </button>
           </div>
         )

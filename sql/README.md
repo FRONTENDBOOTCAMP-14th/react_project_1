@@ -10,6 +10,7 @@
 
 - **필요 파일 생성**
   - `./.docker/docker-compose.yml`
+
     ```yaml
     version: '3.9'
     services:
@@ -32,7 +33,9 @@
     volumes:
       pgdata:
     ```
+
   - 프로젝트 루트의 `.env` (또는 기존 `.env`에 추가)
+
     ```dotenv
     DATABASE_URL=postgres://postgres:postgres@localhost:5432/tokkinote
     ```
@@ -57,12 +60,15 @@
 
 - **필요 파일 생성**
   - 프로젝트 루트의 `.env`
+
     ```dotenv
     # 로컬 설치 시 본인 설정에 맞춰 비밀번호/포트 변경
     DATABASE_URL=postgres://postgres:YOUR_PASSWORD@localhost:5432/tokkinote
     ```
+
   - 선택: `sql/schema.local.sql` (순정 Postgres에서 Supabase 함수 미사용 버전)
     - 차이점: `users.user_id DEFAULT auth.uid()` → `DEFAULT gen_random_uuid()`
+
     ```sql
     -- schema.local.sql 예시의 users 일부만 발췌
     CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -100,25 +106,33 @@
 1. 데이터베이스 연결 URL을 준비합니다(`.env` 또는 개인 환경변수):
    - `DATABASE_URL=postgres://user:password@host:5432/dbname`
 2. `schema.sql`을 DB에 적용합니다. 예시:
+
    ```bash
    psql "$DATABASE_URL" -f sql/schema.sql
    ```
+
 3. 변경사항이 있으면 신규 마이그레이션 파일을 추가하고, 동일 방식으로 적용합니다.
 
 ## Docker 빠른 시작(권장)
 
 1. `.env`에 로컬 DB URL 설정(예시는 Docker-compose 기본값):
+
    ```dotenv
    DATABASE_URL=postgres://postgres:postgres@localhost:5432/studyclub
    ```
+
 2. Postgres 컨테이너 실행:
+
    ```bash
    docker compose -f .docker/docker-compose.yml up -d
    ```
+
 3. 스키마 적용:
+
    ```bash
    psql "$DATABASE_URL" -f sql/schema.sql
    ```
+
 4. Prisma 사용 시 `.env`의 `DATABASE_URL`을 그대로 읽어옵니다.
    - 예: `pnpm prisma migrate dev` 또는 `pnpm prisma db push`
 
@@ -149,5 +163,8 @@
 
 ## 주의사항
 
-- 소프트 삭제(`deleted_at`) 컬럼이 있는 테이블은 기본 조회에서 반드시 `WHERE deleted_at IS NULL` 조건을 적용하세요.
+- **소프트 삭제 자동화**: `lib/prisma/middleware.ts`에서 Prisma 미들웨어로 소프트 삭제가 자동 처리됩니다
+  - find 계열 쿼리: 자동으로 `WHERE deleted_at IS NULL` 조건 추가
+  - delete 쿼리: 자동으로 `UPDATE SET deleted_at = NOW()`로 변환
+  - 비즈니스 로직에서 `deletedAt` 필터를 수동으로 추가할 필요 없음
 - 부분 유니크 인덱스는 Prisma 스키마에 반영되지 않습니다. 스키마 드리프트를 막기 위해 README와 SQL을 소스오브트루스로 유지하세요.

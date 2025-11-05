@@ -6,6 +6,10 @@ import Providers from './providers'
 import styles from './layout.module.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  ),
   title: '토끼노트',
   description: '스터디 진행 관리/커뮤니티 플랫폼',
   icons: {

@@ -36,7 +36,11 @@ const PROTECTED_API_ROUTES = [
 /**
  * 인증이 필요한 페이지 경로
  */
-const PROTECTED_PAGE_ROUTES = ['/profile']
+const PROTECTED_PAGE_ROUTES = [
+  '/dashboard', // 대시보드 - 개인 정보
+  '/profile', // 프로필 - 개인 정보
+  '/community/new', // 커뮤니티 생성 - 인증 필수
+]
 
 /**
  * 경로가 보호된 경로인지 확인

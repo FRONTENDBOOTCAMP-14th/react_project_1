@@ -4,11 +4,3 @@
   flex-direction: column;
   gap: var(--spacing-md);
 }
-
-.notification-label {
-  font-weight: bold;
-  padding: var(--spacing-xxs) var(--spacing-sm);
-  border-radius: var(--full-radius);
-  background-color: var(--accent-color);
-  color: var(--primary-color);
-}

@@ -1,4 +1,5 @@
 import { searchCommunities } from '@/lib/search/searchServer'
+import type { Metadata } from 'next'
 import SearchClient from './_components/SearchClient'
 
 interface SearchPageProps {
@@ -9,6 +10,43 @@ interface SearchPageProps {
     searchTags?: string | string[]
     page?: string
   }>
+}
+
+/**
+ * 동적 Metadata 생성 - 검색 결과 SEO 최적화
+ */
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  const params = await searchParams
+
+  const searchTerms: string[] = []
+  if (params.search) searchTerms.push(params.search)
+  if (params.region) searchTerms.push(params.region)
+  if (params.subRegion) searchTerms.push(params.subRegion)
+
+  const title =
+    searchTerms.length > 0
+      ? `${searchTerms.join(' ')} 검색 결과 | 토끼노트`
+      : '커뮤니티 검색 | 토끼노트'
+
+  const description =
+    searchTerms.length > 0
+      ? `${searchTerms.join(' ')} 관련 스터디 커뮤니티를 찾아보세요.`
+      : '원하는 스터디 커뮤니티를 검색하고 참여하세요.'
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      locale: 'ko_KR',
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  }
 }
 
 /**

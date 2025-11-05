@@ -1,9 +1,24 @@
-import { getCurrentUserId } from '@/lib/auth'
 import { MESSAGES } from '@/constants'
+import { getCurrentUserId } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import type { CommunityInfo } from '@/lib/types/community'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { StudyCardList } from './_components'
+
+export const metadata: Metadata = {
+  title: '대시보드 | 토끼노트',
+  description: '내가 참여한 스터디 커뮤니티를 관리하고 확인하세요.',
+  openGraph: {
+    title: '대시보드 | 토끼노트',
+    description: '내가 참여한 스터디 커뮤니티를 관리하고 확인하세요.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  robots: {
+    index: false, // 개인 대시보드는 검색 엔진에 노출하지 않음
+    follow: false,
+  },
+}
 
 export default async function DashboardPage() {
   const userId = await getCurrentUserId()
@@ -63,14 +78,16 @@ export default async function DashboardPage() {
           },
         },
         orderBy: { roundNumber: 'desc' },
+        take: 5, // 최대 5개 라운드만
       },
     },
     orderBy: { createdAt: 'desc' },
+    take: 50, // 최대 50개 커뮤니티
   })
 
   return (
     <StudyCardList
-      communities={subscribedCommunities as CommunityInfo[]}
+      communities={subscribedCommunities}
       username={user?.username || MESSAGES.DASHBOARD.DEFAULT_USERNAME}
     />
   )

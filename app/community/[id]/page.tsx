@@ -2,8 +2,62 @@ import { ROUTES } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
 import { checkMembershipAndRole } from '@/lib/auth/permissions'
 import { getCommunityDetail } from '@/lib/community/communityServer'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import CommunityContent from './_components/CommunityContent'
+
+/**
+ * 동적 Metadata 생성 - SEO 및 OG 태그 최적화
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id: clubId } = await params
+  const community = await getCommunityDetail(clubId)
+
+  if (!community) {
+    return {
+      title: '커뮤니티를 찾을 수 없습니다 | 토끼노트',
+      description: '요청하신 커뮤니티를 찾을 수 없습니다.',
+    }
+  }
+
+  const title = `${community.name} | 토끼노트`
+  const description =
+    community.description ||
+    `${community.name} 스터디 커뮤니티입니다. ${community.region || ''} ${community.subRegion || ''}에서 활동 중입니다.`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: community.name,
+      description,
+      type: 'website',
+      locale: 'ko_KR',
+      ...(community.imageUrl && {
+        images: [
+          {
+            url: community.imageUrl,
+            width: 1200,
+            height: 630,
+            alt: community.name,
+          },
+        ],
+      }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: community.name,
+      description,
+      ...(community.imageUrl && {
+        images: [community.imageUrl],
+      }),
+    },
+  }
+}
 
 /**
  * 커뮤니티 상세 페이지 (서버 컴포넌트)

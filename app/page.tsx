@@ -1,11 +1,43 @@
 import { IconLink } from '@/components/ui'
-import prisma from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import { HomeContent } from './_components'
 import RecommendedStudies from './_components/RecommendedStudies'
 import styles from './page.module.css'
+
+export const metadata: Metadata = {
+  title: '토끼노트 - 스터디 진행 관리/커뮤니티 플랫폼',
+  description:
+    '스터디 그룹을 만들고 관리하세요. 다양한 커뮤니티에 참여하고 함께 성장하는 즐거움을 경험하세요.',
+  openGraph: {
+    title: '토끼노트',
+    description: '스터디 진행 관리/커뮤니티 플랫폼',
+    type: 'website',
+    locale: 'ko_KR',
+    images: [
+      {
+        url: '/images/logo.png',
+        width: 1200,
+        height: 630,
+        alt: '토끼노트 로고',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: '토끼노트',
+    description: '스터디 진행 관리/커뮤니티 플랫폼',
+    images: ['/images/logo.png'],
+  },
+  keywords: ['스터디', '커뮤니티', '스터디 그룹', '학습', '관리'],
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
 
 // 로딩 컴포넌트
 function RecommendedStudiesLoading() {

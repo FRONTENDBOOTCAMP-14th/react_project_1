@@ -3,17 +3,18 @@
 import { LoadingState } from '@/components/common'
 import { MESSAGES } from '@/constants'
 import { useUserCommunities } from '@/lib/hooks'
-import { useMemo, useState } from 'react'
-import styles from './CalendarSection.module.css'
 import { toLocalTime } from '@/lib/utils'
+import { useMemo, useState } from 'react'
+import { useSelectedDate } from '../_hooks/useSelectedDateContext'
+import styles from './CalendarSection.module.css'
 
 interface CalendarSectionProps {
-  onDateSelect: (date: number) => void
   userId?: string | null
 }
 
-export default function CalendarSection({ onDateSelect, userId }: CalendarSectionProps) {
-  const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate())
+export default function CalendarSection({ userId }: CalendarSectionProps) {
+  const { setSelectedDate } = useSelectedDate()
+  const [internalSelectedDate, setInternalSelectedDate] = useState<number>(new Date().getDate())
 
   // useUserCommunities 훅 사용 (userId가 있을 때만)
   const { upcomingRounds, loading } = useUserCommunities(userId || '')
@@ -67,8 +68,8 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
   }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때만 재계산
 
   const handleDateClick = (date: number) => {
+    setInternalSelectedDate(date)
     setSelectedDate(date)
-    onDateSelect(date)
   }
 
   return (
@@ -81,7 +82,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
             key={i}
             type="button"
             onClick={() => handleDateClick(d.date)}
-            className={`${styles['day-box']} ${selectedDate === d.date ? styles['selected-day'] : ''}`}
+            className={`${styles['day-box']} ${internalSelectedDate === d.date ? styles['selected-day'] : ''}`}
           >
             <div className={styles['date']}>{d.date}</div>
             <div className={styles['day']}>{d.day}</div>

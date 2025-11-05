@@ -3,25 +3,25 @@
 import { Carousel, CarouselItem } from '@/components/ui'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
+import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useSelectedDate } from '../_hooks/useSelectedDateContext'
 import styles from './StudyCarousel.module.css'
-import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
 
 interface StudyCarouselProps {
-  selectedDate: number | null
   userId?: string | null
   upcomingRounds: Round[]
   subscribedCommunities: Community[]
 }
 
 export default function StudyCarousel({
-  selectedDate,
   userId,
   upcomingRounds,
   subscribedCommunities,
 }: StudyCarouselProps) {
+  const { selectedDate } = useSelectedDate()
   const [itemsPerView, setItemsPerView] = useState(3)
   const [serverTime, setServerTime] = useState<Date | null>(null)
 

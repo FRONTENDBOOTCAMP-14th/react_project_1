@@ -1,10 +1,10 @@
 'use client'
 
-import Link from 'next/link'
-import styles from './CommunityContent.module.css'
-import { ROUTES, MESSAGES } from '@/constants'
+import { MESSAGES, ROUTES } from '@/constants'
 import type { CommunityDetail } from '@/lib/community/communityServer'
+import Link from 'next/link'
 import { useCommunityContext } from '../_context/CommunityContext'
+import styles from './NotificationLink.module.css'
 
 /**
  * 공지 링크 컴포넌트에 전달되는 속성

@@ -1,7 +1,7 @@
 'use client'
 
-import { CommunityProvider } from '../_context/CommunityContext'
 import { MESSAGES } from '@/constants'
+import { CommunityProvider } from '../_context/CommunityContext'
 import type { CommunityContentProps } from '../types'
 import CommunityLayout from './CommunityLayout'
 import CommunitySection from './CommunitySection'

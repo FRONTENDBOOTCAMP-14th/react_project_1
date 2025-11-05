@@ -1,0 +1,9 @@
+
+.notification-link {
+  display: flex;
+  gap: var(--spacing-xs);
+  text-decoration: none;
+  color: var(--accent-color);
+  width: fit-content;
+  align-items: center;
+}

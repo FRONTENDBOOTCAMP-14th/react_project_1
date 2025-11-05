@@ -1,5 +1,4 @@
 import { IconLink } from '@/components/ui'
-import { ErrorBoundary } from '@/components/common'
 import prisma from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
 import Image from 'next/image'
@@ -47,11 +46,9 @@ export default async function HomePage() {
       </p>
 
       <HomeContent userId={userId}>
-        <ErrorBoundary fallback={<div>추천 스터디를 불러올 수 없습니다.</div>}>
-          <Suspense fallback={<RecommendedStudiesLoading />}>
-            <RecommendedStudies />
-          </Suspense>
-        </ErrorBoundary>
+        <Suspense fallback={<RecommendedStudiesLoading />}>
+          <RecommendedStudies />
+        </Suspense>
       </HomeContent>
     </main>
   )

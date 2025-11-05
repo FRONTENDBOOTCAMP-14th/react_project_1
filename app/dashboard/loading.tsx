@@ -1,19 +1,5 @@
-import { MESSAGES } from '@/constants'
-import { DashboardLayout } from './_components'
+import { LoadingState } from '@/components/common'
 
 export default function DashboardLoading() {
-  return (
-    <DashboardLayout title={MESSAGES.LOADING.DEFAULT} emptyMessage="" isEmpty={false}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '200px',
-        }}
-      >
-        <div>{MESSAGES.LOADING.STUDY_LIST}</div>
-      </div>
-    </DashboardLayout>
-  )
+  return <LoadingState message="대시보드를 불러오는 중..." />
 }

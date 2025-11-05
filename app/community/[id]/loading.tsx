@@ -1,11 +1,5 @@
-import styles from './loading.module.css'
+import { LoadingState } from '@/components/common'
 
 export default function CommunityLoading() {
-  return (
-    <div className={styles['loading-container']}>
-      <div className={`${styles['loading-block']} ${styles['loading-block-large']}`} />
-      <div className={`${styles['loading-block']} ${styles['loading-block-medium']}`} />
-      <div className={`${styles['loading-block']} ${styles['loading-block-small']}`} />
-    </div>
-  )
+  return <LoadingState message="커뮤니티 정보를 불러오는 중..." />
 }

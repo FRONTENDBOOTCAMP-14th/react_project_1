@@ -33,6 +33,34 @@ export class SearchError extends Error {
 }
 
 /**
+ * 알림 관련 커스텀 에러 클래스
+ */
+export class NotificationError extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+    public statusCode?: number
+  ) {
+    super(message)
+    this.name = 'NotificationError'
+  }
+}
+
+/**
+ * 멤버 관련 커스텀 에러 클래스
+ */
+export class MemberError extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+    public statusCode?: number
+  ) {
+    super(message)
+    this.name = 'MemberError'
+  }
+}
+
+/**
  * 검색 입력 검증 에러
  */
 export class SearchValidationError extends SearchError {

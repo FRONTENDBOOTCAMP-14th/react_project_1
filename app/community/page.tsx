@@ -1,6 +1,6 @@
-import { fetchAllCommunities } from '@/lib/community/communityServer'
+import { fetchInitialCommunities } from '@/lib/community/cursorCommunityServer'
 import type { Metadata } from 'next'
-import CommunitiesClient from './_components/CommunitiesClient'
+import CursorCommunitiesClient from './_components/CursorCommunitiesClient'
 
 export const metadata: Metadata = {
   title: '커뮤니티 목록 | 토끼노트',
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
 }
 
 export default async function CommunitiesPage() {
-  // 서버에서 데이터 페칭
-  const communities = await fetchAllCommunities(100)
+  // 서버에서 초기 데이터 페칭 (커서 기반)
+  const initialResult = await fetchInitialCommunities({ limit: 20 })
 
-  return <CommunitiesClient communities={communities} />
+  return <CursorCommunitiesClient initialResult={initialResult} />
 }

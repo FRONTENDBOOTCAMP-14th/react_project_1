@@ -2,7 +2,6 @@ import { MESSAGES } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { StudyCardList } from './_components'
 
 export const metadata: Metadata = {
@@ -21,74 +20,70 @@ export const metadata: Metadata = {
 }
 
 export default async function DashboardPage() {
+  // Middleware에서 인증 확인 - 중복 체크 불필요
   const userId = await getCurrentUserId()
-  if (!userId) {
-    redirect('/login')
-  }
 
-  const user = await prisma.user.findUnique({ where: { userId } })
-
-  // 삭제된 사용자는 로그인 페이지로 리다이렉트
-  if (!user || user.deletedAt) {
-    redirect('/login')
-  }
-
-  const subscribedCommunities = await prisma.community.findMany({
-    where: {
-      deletedAt: null,
-      communityMembers: {
-        some: {
-          userId,
-          deletedAt: null,
-        },
-      },
-    },
-    select: {
-      clubId: true,
-      name: true,
-      description: true,
-      isPublic: true,
-      region: true,
-      subRegion: true,
-      tagname: true,
-      createdAt: true,
-      imageUrl: true,
-      communityMembers: {
-        select: {
-          role: true,
-          userId: true,
-        },
-        where: {
-          userId,
-          deletedAt: null,
-        },
-      },
-      rounds: {
-        select: {
-          roundId: true,
-          roundNumber: true,
-          startDate: true,
-          endDate: true,
-          location: true,
-        },
-        where: {
-          deletedAt: null,
-          startDate: {
-            gte: new Date(),
+  const user = await prisma.user.findUnique({ where: { userId: userId || '' } })
+  // 삭제된 사용자는 null로 처리 (Middleware에서 이미 유효한 사용자만 통과)
+  if (!user?.deletedAt) {
+    // 커뮤니티 데이터 페칭
+    const subscribedCommunities = await prisma.community.findMany({
+      where: {
+        deletedAt: null,
+        communityMembers: {
+          some: {
+            userId: userId || '',
+            deletedAt: null,
           },
         },
-        orderBy: { roundNumber: 'desc' },
-        take: 5, // 최대 5개 라운드만
       },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 50, // 최대 50개 커뮤니티
-  })
+      select: {
+        clubId: true,
+        name: true,
+        description: true,
+        isPublic: true,
+        region: true,
+        subRegion: true,
+        tagname: true,
+        createdAt: true,
+        imageUrl: true,
+        communityMembers: {
+          select: {
+            role: true,
+            userId: true,
+          },
+          where: {
+            userId: userId || '',
+            deletedAt: null,
+          },
+        },
+        rounds: {
+          select: {
+            roundId: true,
+            roundNumber: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+          },
+          where: {
+            deletedAt: null,
+            startDate: {
+              gte: new Date(),
+            },
+          },
+          orderBy: { roundNumber: 'desc' },
+          take: 5, // 최대 5개 라운드만
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50, // 최대 50개 커뮤니티
+    })
 
-  return (
-    <StudyCardList
-      communities={subscribedCommunities}
-      username={user?.username || MESSAGES.DASHBOARD.DEFAULT_USERNAME}
-    />
-  )
+    return (
+      <StudyCardList
+        communities={subscribedCommunities}
+        username={user?.username || MESSAGES.DASHBOARD.DEFAULT_USERNAME}
+      />
+    )
+  }
 }

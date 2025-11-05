@@ -1,7 +1,6 @@
 import prisma from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { ProfileContent } from './_components'
 
 export const metadata: Metadata = {
@@ -20,17 +19,12 @@ export const metadata: Metadata = {
 }
 
 export default async function ProfilePage() {
+  // Middleware에서 인증 확인 - 중복 체크 불필요
   const userId = await getCurrentUserId()
-  if (!userId) {
-    redirect('/login')
+
+  const user = await prisma.user.findUnique({ where: { userId: userId || '' } })
+  // Middleware에서 이미 유효한 사용자만 통과하므로 간단한 체크만
+  if (user && !user.deletedAt) {
+    return <ProfileContent user={user} />
   }
-
-  const user = await prisma.user.findUnique({ where: { userId } })
-
-  // 삭제된 사용자는 로그인 페이지로 리다이렉트
-  if (!user || user.deletedAt) {
-    redirect('/login')
-  }
-
-  return <ProfileContent user={user} />
 }

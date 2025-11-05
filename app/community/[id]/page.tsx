@@ -32,30 +32,6 @@ export async function generateMetadata({
   return {
     title,
     description,
-    openGraph: {
-      title: community.name,
-      description,
-      type: 'website',
-      locale: 'ko_KR',
-      ...(community.imageUrl && {
-        images: [
-          {
-            url: community.imageUrl,
-            width: 1200,
-            height: 630,
-            alt: community.name,
-          },
-        ],
-      }),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: community.name,
-      description,
-      ...(community.imageUrl && {
-        images: [community.imageUrl],
-      }),
-    },
   }
 }
 

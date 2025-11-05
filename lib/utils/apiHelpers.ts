@@ -23,17 +23,24 @@ export function getPaginationParams(request: NextRequest) {
 /**
  * 필터 파라미터 추출 (boolean 타입)
  */
-export function getBooleanParam(searchParams: URLSearchParams, key: string): boolean | null {
+export function getBooleanParam(searchParams: URLSearchParams, key: string): boolean | undefined {
   const value = searchParams.get(key)
-  if (value === null) return null
+  if (value === null) return undefined
   return value === 'true'
 }
 
 /**
  * 필터 파라미터 추출 (string 타입)
  */
-export function getStringParam(searchParams: URLSearchParams, key: string): string | null {
-  return searchParams.get(key)
+export function getStringParam(searchParams: URLSearchParams, key: string): string | undefined {
+  return searchParams.get(key) || undefined
+}
+
+/**
+ * 필터 파라미터 추출 (string array 타입)
+ */
+export function getStringArrayParam(searchParams: URLSearchParams, key: string): string[] {
+  return searchParams.getAll(key).filter(Boolean)
 }
 
 /**

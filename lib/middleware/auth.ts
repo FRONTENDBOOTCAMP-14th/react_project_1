@@ -14,13 +14,52 @@ import prisma from '@/lib/prisma'
 import type { CustomSession } from '@/lib/types'
 import { createErrorResponse } from '@/lib/utils/response'
 import { getServerSession } from 'next-auth'
-import type { NextRequest } from 'next/server'
+import type { NextRequest, NextResponse } from 'next/server'
+
+// 타입 인터페이스 정의
+interface AuthResult {
+  error: NextResponse | null
+  userId: string | null
+}
+
+interface MembershipResult {
+  error: NextResponse | null
+  membership: {
+    id: string
+    role: string
+    joinedAt: Date
+  } | null
+}
+
+interface LeaderResult {
+  error: NextResponse | null
+  isLeader: boolean
+}
+
+interface CommunityResult {
+  error: NextResponse | null
+  community: {
+    clubId: string
+    isPublic: boolean
+  } | null
+}
+
+interface AuthMiddlewareResult {
+  error: NextResponse | null
+  userId: string | null
+  membership: {
+    id: string
+    role: string
+    joinedAt: Date
+  } | null
+}
 
 /**
  * 인증된 사용자인지 확인
- * @returns userId 또는 에러 응답
+ * @param request NextRequest 객체
+ * @returns 인증 결과
  */
-export async function requireAuth() {
+export async function requireAuth(): Promise<AuthResult> {
   const session = await getServerSession(authOptions)
   const userId = (session as CustomSession)?.userId
 
@@ -32,23 +71,36 @@ export async function requireAuth() {
 }
 
 /**
- * 특정 커뮤니티의 멤버인지 확인
+ * CommunityMember 조회 공통 헬퍼 함수
  * @param userId - 사용자 ID
  * @param clubId - 커뮤니티 ID
- * @returns 멤버 여부 또는 에러 응답
+ * @param role - 특정 역할 필터 (선택)
+ * @returns 멤버십 정보
  */
-export async function requireMembership(userId: string, clubId: string) {
-  const membership = await prisma.communityMember.findFirst({
+async function findMembership(userId: string, clubId: string, role?: string) {
+  return await prisma.communityMember.findFirst({
     where: {
       userId,
       clubId,
       deletedAt: null,
+      ...(role && { role }),
     },
     select: {
       id: true,
       role: true,
+      joinedAt: true,
     },
   })
+}
+
+/**
+ * 특정 커뮤니티의 멤버인지 확인
+ * @param userId - 사용자 ID
+ * @param clubId - 커뮤니티 ID
+ * @returns 멤버십 결과
+ */
+export async function requireMembership(userId: string, clubId: string): Promise<MembershipResult> {
+  const membership = await findMembership(userId, clubId)
 
   if (!membership) {
     return {
@@ -64,21 +116,10 @@ export async function requireMembership(userId: string, clubId: string) {
  * 특정 커뮤니티의 팀장인지 확인
  * @param userId - 사용자 ID
  * @param clubId - 커뮤니티 ID
- * @returns 팀장 여부 또는 에러 응답
+ * @returns 팀장 여부 결과
  */
-export async function requireTeamLeader(userId: string, clubId: string) {
-  const membership = await prisma.communityMember.findFirst({
-    where: {
-      userId,
-      clubId,
-      deletedAt: null,
-      role: 'admin',
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  })
+export async function requireTeamLeader(userId: string, clubId: string): Promise<LeaderResult> {
+  const membership = await findMembership(userId, clubId, 'admin')
 
   if (!membership) {
     return {
@@ -93,9 +134,9 @@ export async function requireTeamLeader(userId: string, clubId: string) {
 /**
  * 커뮤니티 존재 여부 및 공개 상태 확인
  * @param clubId - 커뮤니티 ID
- * @returns 커뮤니티 정보 또는 에러 응답
+ * @returns 커뮤니티 결과
  */
-export async function validateCommunity(clubId: string) {
+export async function validateCommunity(clubId: string): Promise<CommunityResult> {
   const community = await prisma.community.findFirst({
     where: {
       clubId,
@@ -120,9 +161,8 @@ export async function validateCommunity(clubId: string) {
 /**
  * 통합 인증 및 권한 검증
  * @param request - Next.js request
- * @param clubId - 커뮤니티 ID (선택)
- * @param requireLeader - 팀장 권한 필요 여부 (기본값: false)
- * @returns 사용자 ID와 멤버십 정보 또는 에러 응답
+ * @param options - 옵션 객체
+ * @returns 인증 및 권한 결과
  */
 export async function authMiddleware(
   request: NextRequest,
@@ -131,7 +171,7 @@ export async function authMiddleware(
     requireLeader?: boolean
     requireMember?: boolean
   }
-) {
+): Promise<AuthMiddlewareResult> {
   // 1. 인증 확인
   const { error: authError, userId } = await requireAuth()
   if (authError) return { error: authError, userId: null, membership: null }
@@ -146,16 +186,24 @@ export async function authMiddleware(
   if (communityError) return { error: communityError, userId: null, membership: null }
 
   // 3. 공개 커뮤니티는 멤버십 확인 불필요 (단, requireMember가 true면 확인)
-  if (community.isPublic && !options.requireMember && !options.requireLeader) {
+  if (community?.isPublic && !options.requireMember && !options.requireLeader) {
     return { error: null, userId, membership: null }
   }
 
   // 4. 멤버십 확인
+  if (!userId) {
+    return {
+      error: createErrorResponse('사용자 ID가 없습니다.', 401),
+      userId: null,
+      membership: null,
+    }
+  }
+
   const { error: memberError, membership } = await requireMembership(userId, options.clubId)
   if (memberError) return { error: memberError, userId: null, membership: null }
 
   // 5. 팀장 권한 확인 (필요한 경우)
-  if (options.requireLeader && membership.role !== 'admin') {
+  if (options.requireLeader && membership?.role !== 'admin') {
     return {
       error: createErrorResponse('팀장만 접근 가능합니다.', 403),
       userId: null,
@@ -208,24 +256,11 @@ export async function checkAuth() {
  * @returns 역할 정보 또는 null
  */
 export async function getUserRole(userId: string, clubId: string) {
-  const membership = await prisma.communityMember.findFirst({
-    where: {
-      userId,
-      clubId,
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      role: true,
-      joinedAt: true,
-    },
-  })
-
-  return membership
+  return await findMembership(userId, clubId)
 }
 
 /**
- * 권한 체크 헬퍼
+ * 권한 체크 헬퍼 (성능 최적화)
  * @param userId - 사용자 ID
  * @param clubId - 커뮤니티 ID
  * @param requiredRole - 필요한 최소 역할 ('member' | 'admin')
@@ -236,18 +271,26 @@ export async function hasPermission(
   clubId: string,
   requiredRole: 'member' | 'admin' = 'member'
 ): Promise<boolean> {
-  const membership = await getUserRole(userId, clubId)
-
-  if (!membership) return false
-
-  // 역할 우선순위: admin(팀장) > member
-  const roleHierarchy: Record<string, number> = {
-    admin: 2,
-    member: 1,
+  // 성능 최적화: 필요한 역할만 바로 조회
+  const whereClause = {
+    userId,
+    clubId,
+    deletedAt: null,
   }
 
-  const userRoleLevel = roleHierarchy[membership.role] ?? 0
-  const requiredRoleLevel = roleHierarchy[requiredRole] ?? 0
+  // admin 권한이 필요하면 admin만 조회
+  if (requiredRole === 'admin') {
+    const adminMembership = await prisma.communityMember.findFirst({
+      where: { ...whereClause, role: 'admin' },
+      select: { id: true },
+    })
+    return !!adminMembership
+  }
 
-  return userRoleLevel >= requiredRoleLevel
+  // member 권한이 필요면 어떤 역할이든 상관없음
+  const membership = await prisma.communityMember.findFirst({
+    where: whereClause,
+    select: { id: true },
+  })
+  return !!membership
 }

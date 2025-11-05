@@ -3,31 +3,31 @@
 import { Carousel, CarouselItem } from '@/components/ui'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
+import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useSelectedDate } from '../_hooks/useSelectedDateContext'
 import styles from './StudyCarousel.module.css'
-import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
 
 interface StudyCarouselProps {
-  selectedDate: number | null
   userId?: string | null
   upcomingRounds: Round[]
   subscribedCommunities: Community[]
 }
 
 export default function StudyCarousel({
-  selectedDate,
   userId,
   upcomingRounds,
   subscribedCommunities,
 }: StudyCarouselProps) {
+  const { selectedDate } = useSelectedDate()
   const [itemsPerView, setItemsPerView] = useState(3)
   const [serverTime, setServerTime] = useState<Date | null>(null)
 
   // 서버 시간 가져오기
   useEffect(() => {
-    getServerTime().then(setServerTime)
+    setServerTime(getServerTime())
   }, [])
 
   // useCallback으로 함수 메모이제이션 (불필요한 리스너 재등록 방지)

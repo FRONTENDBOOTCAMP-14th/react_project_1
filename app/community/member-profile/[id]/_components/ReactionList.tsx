@@ -36,6 +36,7 @@ export default async function ReactionList({ memberId }: { memberId: string }) {
           isOwner={currentUserId === reaction.user.userId}
           createdAt={reaction.createdAt}
           reaction={reaction.reaction}
+          memberId={memberId}
         />
       ))}
     </ul>

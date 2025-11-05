@@ -1,12 +1,13 @@
 'use client'
 
-import { IconButton } from '@/components/ui'
-import { Camera, X } from 'lucide-react'
 import DefaultImg from '@/app/community/new/_components/assets/default-study01.png'
-import styles from './ImageUploader.module.css'
-import { toast } from 'sonner'
+import { IconButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
+import { Camera, X } from 'lucide-react'
 import Image from 'next/image'
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
+import { toast } from 'sonner'
+import styles from './ImageUploader.module.css'
 
 interface ImageUploaderProps {
   onImageChange?: (url: string | null) => void
@@ -32,7 +33,7 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
 
   const handleThumbnailClick = () => {
     // 이미지 삭제
-    toast('썸네일 클릭 - 삭제')
+    toast(MESSAGES.ERROR.THUMBNAIL_DELETE_CLICK)
   }
 
   const handleUploadClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -47,14 +48,13 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
     // 파일 타입 검증
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
-      toast.error('지원하지 않는 파일 형식입니다. (JPG, PNG, WEBP, GIF만 가능)')
+      toast.error(MESSAGES.ERROR.UNSUPPORTED_FILE_TYPE)
       return
     }
 
     // 파일 크기 검증 (5MB)
-    const maxSize = 5 * 1024 * 1024
-    if (file.size > maxSize) {
-      toast.error('파일 크기가 너무 큽니다. (최대 5MB)')
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(MESSAGES.ERROR.FILE_SIZE_TOO_LARGE)
       return
     }
 
@@ -79,15 +79,15 @@ export default function ImageUploader({ onImageChange }: ImageUploaderProps) {
       const result = await response.json()
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || '이미지 업로드에 실패했습니다.')
+        throw new Error(result.error || MESSAGES.ERROR.IMAGE_UPLOAD_FAILED)
       }
 
       setUploadedUrl(result.data.url)
       onImageChange?.(result.data.url)
-      toast.success('이미지가 업로드되었습니다.')
+      toast.success(MESSAGES.SUCCESS.IMAGE_UPLOAD)
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.')
+      toast.error(error instanceof Error ? error.message : MESSAGES.ERROR.IMAGE_UPLOAD_FAILED)
       setPreviewUrl(null)
       if (fileInputRef.current) {
         fileInputRef.current.value = ''

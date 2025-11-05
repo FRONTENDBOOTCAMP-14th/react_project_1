@@ -13,12 +13,19 @@ export function isValidEmail(email: string): boolean {
 
 /**
  * 닉네임 유효성 검증
- * - 2~20자
+ * - 2~20자 (한글 1자, 영문 1자 모두 1로 계산)
  * - 한글, 영문, 숫자, 공백, _ 만 허용
  */
 export function isValidNickname(nickname: string): boolean {
-  const nicknameRegex = /^[가-힣a-zA-Z0-9\s_]{2,20}$/
-  return nicknameRegex.test(nickname)
+  const nicknameRegex = /^[가-힣a-zA-Z0-9\s_]+$/
+
+  // 허용되지 않은 문자가 있는지 확인
+  if (!nicknameRegex.test(nickname)) {
+    return false
+  }
+
+  // 길이 검증 (2~20자)
+  return nickname.length >= 2 && nickname.length <= 20
 }
 
 /**

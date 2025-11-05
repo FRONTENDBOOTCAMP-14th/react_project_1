@@ -1,44 +1,61 @@
 'use client'
 
-import { useState } from 'react'
-import { useRounds } from '@/lib/hooks'
-import { LoadingState, ErrorState } from '@/components/common'
-import RoundCard from './RoundCard'
-import { MESSAGES } from '@/constants'
-import styles from './RoundsList.module.css'
+import { ErrorState, FormField, LoadingState, SharedForm } from '@/components/common'
 import { StrokeButton } from '@/components/ui'
-import { toast } from 'sonner'
-import roundCardStyles from './RoundCard.module.css'
-import { fromDatetimeLocalString } from '@/lib/utils'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
+import { MESSAGES } from '@/constants'
+import type { CommunityDetail } from '@/lib/community/communityServer'
+import type { CreateRoundRequest } from '@/lib/types/round'
+import { toDatetimeLocalString } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useCommunityContext } from '../_context/CommunityContext'
+import RoundCard from './RoundCard'
+import styles from './RoundsList.module.css'
 
 interface RoundsListProps {
-  clubId: string
+  rounds: CommunityDetail['rounds']
 }
 
 /**
- * 라운드 목록 컨테이너 컴포넌트
- * useRounds 훅을 사용하여 전체 라운드 목록을 가져와 각 라운드를 RoundCard로 렌더링합니다.
- * 전역 상태에서 clubId와 isTeamLeader를 가져옵니다.
+ * 라운드 목록 컴포넌트
+ * - Server Component에서 전달받은 라운드 데이터 사용
+ * - 클라이언트 fetch 불필요
+ * - Server Actions로 라운드 생성
  */
-export default function RoundsList({ clubId }: RoundsListProps) {
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
-  // 열린 라운드 ID를 추적하는 상태 (기본값: 첫 번째 라운드 열림)
-  const [openRoundIds, setOpenRoundIds] = useState<Set<string>>(() => {
-    return new Set()
-  })
+export default function RoundsList({ rounds }: RoundsListProps) {
+  const { clubId, isAdmin } = useCommunityContext()
+  const router = useRouter()
+  const isEmpty = rounds.length === 0
+  const loading = false
+  const error = null
+
+  // Server Actions로 라운드 생성
+  const createRound = async (newRoundForm: CreateRoundRequest) => {
+    const { createRoundAction } = await import('@/app/actions/rounds')
+    return createRoundAction(newRoundForm)
+  }
+
+  const refetch = async () => {
+    try {
+      // Next.js router.refresh()로 페이지 데이터 새로고침
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to refetch rounds:', error)
+    }
+  }
+
+  // 열린 라운드 ID를 추적하는 상태
+  const [openRoundIds, setOpenRoundIds] = useState<Set<string>>(() => new Set())
 
   // 라운드 추가 폼 상태
   const [isAddingRound, setIsAddingRound] = useState(false)
-  const [newRoundForm, setNewRoundForm] = useState({
+  const [newRoundForm, setNewRoundForm] = useState<CreateRoundRequest>({
+    clubId,
     roundNumber: 1,
     startDate: '',
     endDate: '',
     location: '',
   })
-
-  // useRounds 훅은 clubId가 없을 때 자동으로 에러 상태를 설정함
-  const { rounds, loading, error, refetch, createRound } = useRounds(clubId || '')
 
   /**
    * 라운드 열림/닫힘 토글 핸들러
@@ -56,165 +73,147 @@ export default function RoundsList({ clubId }: RoundsListProps) {
   }
 
   /**
-   * 라운드 추가 버튼 클릭 핸들러
+   * 라운드 생성 핸들러
    */
-  const handleAddRoundClick = () => {
-    // 서버에서 자동으로 다음 라운드 번호를 계산하도록 비워둠
-    setNewRoundForm({
-      roundNumber: 0, // 0은 임시값, 실제로는 서버에서 자동 계산됨
-      startDate: '',
-      endDate: '',
-      location: '',
-    })
-    setIsAddingRound(true)
-  }
-
-  /**
-   * 라운드 추가 폼 제출 핸들러
-   */
-  const handleAddRoundSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCreateRound = async () => {
+    if (!newRoundForm.startDate || !newRoundForm.endDate) {
+      return
+    }
 
     try {
-      const result = await createRound({
+      await createRound(newRoundForm)
+      setIsAddingRound(false)
+      setNewRoundForm({
         clubId,
-        // roundNumber를 보내지 않으면 서버에서 자동으로 계산함 (소프트 삭제 고려)
-        startDate: newRoundForm.startDate ? fromDatetimeLocalString(newRoundForm.startDate) : null,
-        endDate: newRoundForm.endDate ? fromDatetimeLocalString(newRoundForm.endDate) : null,
-        location: newRoundForm.location || null,
+        roundNumber: 1,
+        startDate: '',
+        endDate: '',
+        location: '',
       })
 
-      if (result.success) {
-        toast.success('회차가 추가되었습니다')
-        setIsAddingRound(false)
-        setNewRoundForm({
-          roundNumber: 0,
-          startDate: '',
-          endDate: '',
-          location: '',
-        })
-      } else {
-        toast.error(result.error || '회차 추가에 실패했습니다')
-      }
+      // 라운드 생성 후 데이터 리프레치
+      await refetch()
     } catch (_error) {
-      toast.error('회차 추가 중 오류가 발생했습니다')
+      // 에러는 useRoundsData 훅에서 처리됨
     }
   }
 
-  /**
-   * 라운드 추가 취소 핸들러
-   */
-  const handleCancelAddRound = () => {
-    setIsAddingRound(false)
-    setNewRoundForm({
-      roundNumber: 1,
-      startDate: '',
-      endDate: '',
-      location: '',
-    })
-  }
-
-  // 로딩 상태
   if (loading) {
-    return <LoadingState message="라운드 목록을 불러오는 중..." />
+    return <LoadingState message={MESSAGES.LABEL.ROUNDS_LOADING} />
   }
 
-  // 에러 상태
   if (error) {
-    return <ErrorState message={error || MESSAGES.ERROR.FAILED_TO_LOAD_ROUNDS} onRetry={refetch} />
+    return <ErrorState message={error} />
   }
 
-  // 라운드 추가 폼 렌더링 함수
-  const renderAddRoundForm = () => {
-    if (!isAddingRound) return null
-
-    return (
-      <div className={roundCardStyles['round-card-wrapper']}>
-        <form onSubmit={handleAddRoundSubmit} className={roundCardStyles['round-edit-form']}>
-          <div className={roundCardStyles['round-edit-fields']}>
-            <div className={roundCardStyles['edit-field']}>
-              <label>시작일:</label>
-              <input
-                type="datetime-local"
-                value={newRoundForm.startDate}
-                onChange={e => setNewRoundForm(prev => ({ ...prev, startDate: e.target.value }))}
-              />
-            </div>
-            <div className={roundCardStyles['edit-field']}>
-              <label>종료일:</label>
-              <input
-                type="datetime-local"
-                value={newRoundForm.endDate}
-                onChange={e => setNewRoundForm(prev => ({ ...prev, endDate: e.target.value }))}
-              />
-            </div>
-            <div className={roundCardStyles['edit-field']}>
-              <label>장소:</label>
-              <input
-                type="text"
-                value={newRoundForm.location}
-                onChange={e => setNewRoundForm(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="스터디 장소를 입력하세요"
-              />
-            </div>
-          </div>
-          <div className={roundCardStyles['round-edit-actions']}>
-            <button type="submit" className={roundCardStyles['edit-save-button']}>
-              저장
-            </button>
-            <button
-              type="button"
-              onClick={handleCancelAddRound}
-              className={roundCardStyles['edit-cancel-button']}
-            >
-              취소
-            </button>
-          </div>
-        </form>
-      </div>
-    )
-  }
-
-  // 라운드가 없는 경우
-  if (rounds.length === 0) {
-    return (
-      <div className={styles['empty-state']}>
-        {!isAddingRound && (
-          <StrokeButton
-            className={styles['add-round-button']}
-            type="button"
-            onClick={handleAddRoundClick}
-          >
-            {MESSAGES.ACTION.ADD_ROUND}
-          </StrokeButton>
-        )}
-        {renderAddRoundForm()}
-        {!isAddingRound && <p>아직 생성된 회차가 없습니다.</p>}
-      </div>
-    )
-  }
-
-  // 라운드 목록 렌더링
   return (
     <div className={styles['rounds-list-container']}>
-      {!isAddingRound && isTeamLeader && (
-        <StrokeButton
-          className={styles['add-round-button']}
-          type="button"
-          onClick={handleAddRoundClick}
-        >
-          {MESSAGES.ACTION.ADD_ROUND}
-        </StrokeButton>
+      {isAdmin && (
+        <div className={styles['add-round-section']}>
+          {!isAddingRound ? (
+            <StrokeButton
+              className={styles['add-round-button']}
+              onClick={() => setIsAddingRound(true)}
+            >
+              {MESSAGES.ACTION.ADD_ROUND}
+            </StrokeButton>
+          ) : (
+            <SharedForm
+              onSubmit={handleCreateRound}
+              submitText={MESSAGES.ACTION.CREATE}
+              cancelText={MESSAGES.ACTION.CANCEL}
+              onCancel={() => setIsAddingRound(false)}
+              variant="inline"
+              submitButtonType="fill"
+              cancelButtonType="stroke"
+            >
+              <FormField
+                label={MESSAGES.LABEL.ROUND_NUMBER}
+                type="number"
+                value={String(newRoundForm.roundNumber || 1)}
+                onChange={value =>
+                  setNewRoundForm((prev: CreateRoundRequest) => ({
+                    ...prev,
+                    roundNumber: typeof value === 'number' ? value : parseInt(value) || 1,
+                  }))
+                }
+                placeholder={MESSAGES.LABEL.ROUND_NUMBER_PLACEHOLDER}
+                min={1}
+                fieldId="round-number-create"
+                ariaDescription={MESSAGES.LABEL.ROUND_NUMBER_ARIA}
+              />
+              <FormField
+                label={MESSAGES.LABEL.ROUND_START_DATE}
+                type="datetime-local"
+                value={
+                  typeof newRoundForm.startDate === 'string'
+                    ? newRoundForm.startDate
+                    : toDatetimeLocalString(newRoundForm.startDate)
+                }
+                onChange={value =>
+                  setNewRoundForm((prev: CreateRoundRequest) => ({
+                    ...prev,
+                    startDate: typeof value === 'string' ? value : String(value),
+                  }))
+                }
+                placeholder={MESSAGES.LABEL.ROUND_START_DATE_PLACEHOLDER}
+                fieldId="start-date-create"
+                ariaDescription={MESSAGES.LABEL.ROUND_START_DATE_ARIA}
+              />
+              <FormField
+                label={MESSAGES.LABEL.ROUND_END_DATE}
+                type="datetime-local"
+                value={
+                  typeof newRoundForm.endDate === 'string'
+                    ? newRoundForm.endDate
+                    : toDatetimeLocalString(newRoundForm.endDate)
+                }
+                onChange={value =>
+                  setNewRoundForm((prev: CreateRoundRequest) => ({
+                    ...prev,
+                    endDate: typeof value === 'string' ? value : String(value),
+                  }))
+                }
+                placeholder={MESSAGES.LABEL.ROUND_END_DATE_PLACEHOLDER}
+                fieldId="end-date-create"
+                ariaDescription={MESSAGES.LABEL.ROUND_END_DATE_ARIA}
+              />
+              <FormField
+                label={MESSAGES.LABEL.ROUND_LOCATION}
+                type="text"
+                value={newRoundForm.location || ''}
+                onChange={value =>
+                  setNewRoundForm((prev: CreateRoundRequest) => ({
+                    ...prev,
+                    location: typeof value === 'string' ? value : String(value),
+                  }))
+                }
+                placeholder={MESSAGES.LABEL.ROUND_LOCATION_PLACEHOLDER}
+                fieldId="location-create"
+                ariaDescription={MESSAGES.LABEL.ROUND_LOCATION_ARIA}
+              />
+            </SharedForm>
+          )}
+        </div>
       )}
-      {renderAddRoundForm()}
-      {rounds.map(round => (
-        <RoundCard
-          key={round.roundId}
-          round={round}
-          isOpen={openRoundIds.has(round.roundId)}
-          onToggleOpen={() => handleToggleRound(round.roundId)}
-        />
-      ))}
+
+      {isEmpty ? (
+        <div className={styles['no-rounds']}>
+          <p>아직 생성된 회차가 없습니다.</p>
+        </div>
+      ) : (
+        <div className={styles['rounds-list']}>
+          {rounds.map(round => (
+            <RoundCard
+              key={round.roundId}
+              round={round}
+              isOpen={openRoundIds.has(round.roundId)}
+              onToggleOpen={() => handleToggleRound(round.roundId)}
+              onRefetch={refetch}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

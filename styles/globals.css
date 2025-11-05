@@ -15,6 +15,10 @@ main {
   max-width: 960px;
 }
 
+button {
+  cursor: pointer;
+}
+
 .error {
   color: var(--error-color);
 }

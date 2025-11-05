@@ -115,3 +115,8 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.location-container {
+  display: flex;
+  justify-content: space-between;
+}

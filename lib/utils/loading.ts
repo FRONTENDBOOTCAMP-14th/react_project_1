@@ -8,13 +8,13 @@ import type { GenericFunction, LoadingState } from '@/lib/types/loading'
 /**
  * 지연 로딩 (debounce)
  */
-export function debounce<T extends GenericFunction>(
-  func: T,
+export function debounce<TArgs extends unknown[]>(
+  func: (...args: TArgs) => void,
   wait: number
-): (...args: Parameters<T>) => void {
+): (...args: TArgs) => void {
   let timeout: NodeJS.Timeout | null = null
 
-  return (...args: Parameters<T>) => {
+  return (...args: TArgs) => {
     if (timeout) {
       clearTimeout(timeout)
     }
@@ -105,23 +105,6 @@ export function generateSkeletonMembers(count: number = 8) {
 }
 
 /**
- * 풀투리프레시 딜레이
- */
-export function withPullToRefreshDelay<T>(
-  action: () => Promise<T>,
-  minDelay: number = 500
-): Promise<T> {
-  const startTime = Date.now()
-
-  return action().then(result => {
-    const elapsed = Date.now() - startTime
-    const remainingDelay = Math.max(0, minDelay - elapsed)
-
-    return delay(remainingDelay).then(() => result)
-  })
-}
-
-/**
  * 로딩 상태 생성자
  */
 export function createLoadingState<T>(initialData: T | null = null): LoadingState<T> {
@@ -177,118 +160,5 @@ export async function withLoadingState<T>(
       })
     )
     throw error
-  }
-}
-
-/**
- * 무한 스크롤을 위한 다음 페이지 로딩
- */
-export function createInfiniteLoader<T>(
-  loadMore: (page: number) => Promise<T[]>,
-  hasMore: (data: T[]) => boolean
-) {
-  let currentPage = 1
-  let allData: T[] = []
-  let loading = false
-
-  return {
-    loadInitial: async () => {
-      if (loading) return []
-      loading = true
-
-      try {
-        const data = await loadMore(1)
-        allData = data
-        currentPage = 2
-        return data
-      } finally {
-        loading = false
-      }
-    },
-
-    loadMore: async () => {
-      if (loading || !hasMore(allData)) return []
-      loading = true
-
-      try {
-        const data = await loadMore(currentPage)
-        allData = [...allData, ...data]
-        currentPage++
-        return data
-      } finally {
-        loading = false
-      }
-    },
-
-    hasMore: () => hasMore(allData),
-    isLoading: () => loading,
-    getAllData: () => allData,
-    reset: () => {
-      currentPage = 1
-      allData = []
-      loading = false
-    },
-  }
-}
-
-/**
- * 이미지 지연 로딩
- */
-export function createLazyImageLoader(threshold: number = 100) {
-  const imageObserver = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement
-          const src = img.dataset.src
-
-          if (src) {
-            img.src = src
-            img.removeAttribute('data-src')
-            imageObserver.unobserve(img)
-          }
-        }
-      })
-    },
-    { rootMargin: `${threshold}px` }
-  )
-
-  return {
-    observe: (img: HTMLImageElement) => {
-      imageObserver.observe(img)
-    },
-
-    unobserve: (img: HTMLImageElement) => {
-      imageObserver.unobserve(img)
-    },
-
-    disconnect: () => {
-      imageObserver.disconnect()
-    },
-  }
-}
-
-/**
- * 콘텐츠 로딩 플레이스홀더
- */
-export function createLoadingPlaceholder(
-  type: 'goal' | 'community' | 'member' | 'notification',
-  count: number = 1
-) {
-  switch (type) {
-    case 'goal':
-      return generateSkeletonGoals(count)
-    case 'community':
-      return generateSkeletonCommunities(count)
-    case 'member':
-      return generateSkeletonMembers(count)
-    case 'notification':
-      return generateSkeletonItems(count, {
-        title: '████████████████████',
-        content: '████████████████████████████████████████',
-        createdAt: new Date().toISOString(),
-      })
-    default:
-      return generateSkeletonItems(count, {})
   }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import type { CreateMemberRequest, UpdateMemberRequest } from '@/lib/types/member'
-import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import { API_ENDPOINTS, MESSAGES } from '@/constants'
 
 /**
  * 멤버 타입 (memberDetailSelect 기반)
@@ -169,18 +169,13 @@ export const useMembers = ({
   const createMember = useCallback(
     async (input: CreateMemberRequest) => {
       try {
-        const response = await fetch(API_ENDPOINTS.MEMBERS.BASE, {
-          method: 'POST',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
-
-        const result = await response.json()
+        const { createMemberAction } = await import('@/app/actions/members')
+        const result = await createMemberAction(input)
 
         if (result.success) {
           // 성공 시 목록 재조회
           await fetchMembers()
-          return { success: true, data: result.data }
+          return { success: true, data: result.data as Member }
         }
         return {
           success: false,
@@ -203,18 +198,13 @@ export const useMembers = ({
   const updateMember = useCallback(
     async (memberId: string, input: UpdateMemberRequest) => {
       try {
-        const response = await fetch(API_ENDPOINTS.MEMBERS.BY_ID(memberId), {
-          method: 'PATCH',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
-
-        const result = await response.json()
+        const { updateMemberAction } = await import('@/app/actions/members')
+        const result = await updateMemberAction(memberId, input)
 
         if (result.success) {
           // 성공 시 목록 재조회
           await fetchMembers()
-          return { success: true, data: result.data }
+          return { success: true, data: result.data as Member }
         }
         return {
           success: false,
@@ -236,11 +226,8 @@ export const useMembers = ({
   const deleteMember = useCallback(
     async (memberId: string) => {
       try {
-        const response = await fetch(API_ENDPOINTS.MEMBERS.BY_ID(memberId), {
-          method: 'DELETE',
-        })
-
-        const result = await response.json()
+        const { deleteMemberAction } = await import('@/app/actions/members')
+        const result = await deleteMemberAction(memberId)
 
         if (result.success) {
           // 성공 시 목록 재조회

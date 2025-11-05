@@ -1,5 +1,6 @@
 import SearchForm from './_components/SearchForm'
 import ProfileCard from './_components/ProfileCard'
+import { MESSAGES } from '@/constants'
 import styles from './page.module.css'
 import prisma from '@/lib/prisma'
 import { memberDetailSelect, activeMemberWhere } from '@/lib/queries'
@@ -54,9 +55,9 @@ export default async function MemberPage({ params, searchParams }: MemberPagePro
   if (!members) {
     return (
       <div className={styles.container}>
-        <SearchForm placeholder="검색어를 입력해주세요" clubId={clubId} />
+        <SearchForm placeholder={MESSAGES.LABEL.SEARCH_PLACEHOLDER} clubId={clubId} />
         <div className={styles.content}>
-          <p className={styles['empty-message']}>멤버 목록을 불러오는데 실패했습니다.</p>
+          <p className={styles['empty-message']}>{MESSAGES.LABEL.MEMBERS_LOAD_FAILED}</p>
         </div>
       </div>
     )
@@ -73,11 +74,11 @@ export default async function MemberPage({ params, searchParams }: MemberPagePro
 
   return (
     <div className={styles.container}>
-      <SearchForm placeholder="검색어를 입력해주세요" clubId={clubId} />
+      <SearchForm placeholder={MESSAGES.LABEL.SEARCH_PLACEHOLDER} clubId={clubId} />
       <div className={styles.content}>
         {filteredMembers.length === 0 ? (
           <p className={styles['empty-message']}>
-            {search ? '검색 결과가 없습니다.' : '멤버가 없습니다.'}
+            {search ? MESSAGES.LABEL.NO_SEARCH_RESULTS : MESSAGES.LABEL.NO_MEMBERS}
           </p>
         ) : (
           filteredMembers.map(member => <ProfileCard key={member.id} member={member} />)

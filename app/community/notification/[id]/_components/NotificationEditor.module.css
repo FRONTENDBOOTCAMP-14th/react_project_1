@@ -71,7 +71,6 @@
 .cancel-button {
   display: flex;
   align-items: center;
-  cursor: pointer;
   transition: all 0.2s;
   padding: var(--spacing-xs);
 }

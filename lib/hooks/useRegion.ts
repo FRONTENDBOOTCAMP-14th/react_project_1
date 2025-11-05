@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
-import type { Region } from '@/lib/types/common'
 import { API_ENDPOINTS, MESSAGES } from '@/constants'
+import type { Region } from '@/lib/types/common'
+import { useCallback, useEffect, useState } from 'react'
 
 export const useRegion = () => {
   const [regions, setRegions] = useState<Region[]>([])

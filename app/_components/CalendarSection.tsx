@@ -1,17 +1,20 @@
 'use client'
 
 import { LoadingState } from '@/components/common'
+import { MESSAGES } from '@/constants'
 import { useUserCommunities } from '@/lib/hooks'
+import { toLocalTime } from '@/lib/utils'
 import { useMemo, useState } from 'react'
+import { useSelectedDate } from '../_hooks/useSelectedDateContext'
 import styles from './CalendarSection.module.css'
 
 interface CalendarSectionProps {
-  onDateSelect: (date: number) => void
   userId?: string | null
 }
 
-export default function CalendarSection({ onDateSelect, userId }: CalendarSectionProps) {
-  const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate())
+export default function CalendarSection({ userId }: CalendarSectionProps) {
+  const { setSelectedDate } = useSelectedDate()
+  const [internalSelectedDate, setInternalSelectedDate] = useState<number>(new Date().getDate())
 
   // useUserCommunities 훅 사용 (userId가 있을 때만)
   const { upcomingRounds, loading } = useUserCommunities(userId || '')
@@ -19,7 +22,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
   // useMemo로 days 계산 최적화 (매 렌더링마다 재계산 방지)
   const days = useMemo(() => {
     const today = new Date()
-    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+    const dayNames = MESSAGES.CALENDAR.DAY_NAMES
 
     return Array.from({ length: 3 }, (_, i) => {
       const date = new Date(today)
@@ -32,7 +35,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
       // 해당 날짜의 라운드들
       const dayRounds = upcomingRounds.filter(round => {
         if (!round.startDate) return false
-        const roundDate = new Date(round.startDate)
+        const roundDate = toLocalTime(new Date(round.startDate))
         return roundDate >= dayStart && roundDate < dayEnd
       })
 
@@ -65,8 +68,8 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
   }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때만 재계산
 
   const handleDateClick = (date: number) => {
+    setInternalSelectedDate(date)
     setSelectedDate(date)
-    onDateSelect(date)
   }
 
   return (
@@ -79,7 +82,7 @@ export default function CalendarSection({ onDateSelect, userId }: CalendarSectio
             key={i}
             type="button"
             onClick={() => handleDateClick(d.date)}
-            className={`${styles['day-box']} ${selectedDate === d.date ? styles['selected-day'] : ''}`}
+            className={`${styles['day-box']} ${internalSelectedDate === d.date ? styles['selected-day'] : ''}`}
           >
             <div className={styles['date']}>{d.date}</div>
             <div className={styles['day']}>{d.day}</div>

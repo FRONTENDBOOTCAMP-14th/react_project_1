@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { DeleteAccountButton, EditButton } from '.'
+import { updateProfileAction } from '@/app/actions/profile'
+import { FillButton, StrokeButton } from '@/components/ui'
+import { MESSAGES } from '@/constants'
+import { useCallback, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { StrokeButton, FillButton } from '@/components/ui'
+import { DeleteAccountButton, EditButton } from '.'
 import styles from './ProfileContent.module.css'
 import button from './button.module.css'
 
@@ -20,7 +22,7 @@ interface ProfileContentProps {
 
 export default function ProfileContent({ user }: ProfileContentProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [editForm, setEditForm] = useState({
     username: user.username,
     nickname: user.nickname || '',
@@ -47,40 +49,24 @@ export default function ProfileContent({ user }: ProfileContentProps) {
       e.preventDefault()
 
       if (!editForm.username.trim()) {
-        toast.error('이름을 입력해주세요')
+        toast.error(MESSAGES.ERROR.NAME_EMPTY_ERROR)
         return
       }
 
-      setIsLoading(true)
-
-      try {
-        const response = await fetch('/api/user', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: editForm.username.trim(),
-            nickname: editForm.nickname.trim() || null,
-          }),
+      startTransition(async () => {
+        const result = await updateProfileAction({
+          username: editForm.username,
+          nickname: editForm.nickname || null,
         })
 
-        const data = await response.json()
-
-        if (response.ok && data.success) {
-          toast.success('프로필이 수정되었습니다')
+        if (result.success) {
+          toast.success(MESSAGES.SUCCESS.PROFILE_UPDATE)
           setIsEditing(false)
-          // 페이지 새로고침으로 업데이트된 데이터 반영
-          window.location.reload()
+          // revalidatePath가 자동으로 페이지 갱신
         } else {
-          toast.error(data.error || '프로필 수정에 실패했습니다')
+          toast.error(result.error || MESSAGES.ERROR.PROFILE_UPDATE_ERROR)
         }
-      } catch (error) {
-        console.error('Failed to update profile:', error)
-        toast.error('프로필 수정 중 오류가 발생했습니다')
-      } finally {
-        setIsLoading(false)
-      }
+      })
     },
     [editForm.username, editForm.nickname]
   )
@@ -89,17 +75,17 @@ export default function ProfileContent({ user }: ProfileContentProps) {
     return (
       <main className={styles.container}>
         <div className={styles['content']}>
-          <h1 className={styles.title}>프로필 편집</h1>
+          <h1 className={styles.title}>{MESSAGES.LABEL.PROFILE_EDIT}</h1>
           <form onSubmit={handleSaveEdit} className={styles.form}>
             <div className={styles['info-item']}>
-              <span className={styles['info-label']}>이메일</span>
+              <span className={styles['info-label']}>{MESSAGES.LABEL.EMAIL}</span>
               <span className={`${styles['info-value']} ${styles['info-value-readonly']}`}>
                 {user.email || '-'}
               </span>
             </div>
             <div className={styles['info-item']}>
               <label htmlFor="username" className={styles['info-label']}>
-                이름 *
+                {MESSAGES.LABEL.NAME_REQUIRED}
               </label>
               <input
                 id="username"
@@ -112,7 +98,7 @@ export default function ProfileContent({ user }: ProfileContentProps) {
             </div>
             <div className={styles['info-item']}>
               <label htmlFor="nickname" className={styles['info-label']}>
-                닉네임
+                {MESSAGES.LABEL.NICKNAME}
               </label>
               <input
                 id="nickname"
@@ -128,12 +114,12 @@ export default function ProfileContent({ user }: ProfileContentProps) {
                 className={button.button}
                 type="button"
                 onClick={handleCancelEdit}
-                disabled={isLoading}
+                disabled={isPending}
               >
-                취소
+                {MESSAGES.ACTION.CANCEL}
               </StrokeButton>
-              <FillButton className={button.button} type="submit" disabled={isLoading}>
-                {isLoading ? '저장 중...' : '저장'}
+              <FillButton className={button.button} type="submit" disabled={isPending}>
+                {isPending ? MESSAGES.LABEL.SAVING : MESSAGES.LABEL.SAVE}
               </FillButton>
             </div>
           </form>
@@ -145,18 +131,18 @@ export default function ProfileContent({ user }: ProfileContentProps) {
   return (
     <main className={styles.container}>
       <div className={styles.content}>
-        <h1 className={styles.title}>프로필</h1>
+        <h1 className={styles.title}>{MESSAGES.LABEL.PROFILE}</h1>
         <div className={styles['info-row']}>
           <div className={styles['info-item']}>
-            <span className={styles['info-label']}>이메일</span>
+            <span className={styles['info-label']}>{MESSAGES.LABEL.EMAIL}</span>
             <span className={styles['info-value']}>{user.email || '-'}</span>
           </div>
           <div className={styles['info-item']}>
-            <span className={styles['info-label']}>이름</span>
+            <span className={styles['info-label']}>{MESSAGES.LABEL.NAME}</span>
             <span className={styles['info-value']}>{user.username || '-'}</span>
           </div>
           <div className={styles['info-item']}>
-            <span className={styles['info-label']}>닉네임</span>
+            <span className={styles['info-label']}>{MESSAGES.LABEL.NICKNAME}</span>
             <span className={styles['info-value']}>{user.nickname || '-'}</span>
           </div>
         </div>

@@ -88,6 +88,7 @@ export interface AttendanceListResponse {
       limit: number
       totalPages: number
     }
+    stats?: AttendanceStats
   }
   error?: string
   message?: string

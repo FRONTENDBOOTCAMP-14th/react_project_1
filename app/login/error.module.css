@@ -1,0 +1,8 @@
+.container {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.errorSection {
+  margin-top: var(--spacing-md);
+}

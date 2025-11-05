@@ -1,5 +1,6 @@
 'use client'
 
+import { deleteRoundAction, markAttendanceAction, updateRoundAction } from '@/app/actions/rounds'
 import { ErrorState, LoadingState } from '@/components/common'
 import { IconButton, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES } from '@/constants'
@@ -8,16 +9,16 @@ import type { CustomSession } from '@/lib/types'
 import type { Round } from '@/lib/types/round'
 import {
   formatDateRangeUTC,
+  fromDatetimeLocalString,
   renderWithError,
   renderWithLoading,
   toDatetimeLocalString,
-  fromDatetimeLocalString,
 } from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { useCommunityStore } from '../_hooks/useCommunityStore'
+import { useCommunityContext } from '../_context/CommunityContext'
 import { useGoalToggle } from '../_hooks/useGoalToggle'
 import GoalsSection from './GoalsSection'
 import styles from './RoundCard.module.css'
@@ -38,6 +39,10 @@ interface RoundCardProps {
    * 라운드 카드 열림/닫힘 토글 핸들러
    */
   onToggleOpen: () => void
+  /**
+   * 라운드 데이터 재조회 함수
+   */
+  onRefetch?: () => Promise<void>
 }
 
 /**
@@ -45,39 +50,38 @@ interface RoundCardProps {
  * 라운드 정보를 보여주고, 라운드에 속한 목표(그룹/개인)를 렌더링합니다.
  * @param props - RoundCardProps
  */
-export default function RoundCard({ round, isOpen = false, onToggleOpen }: RoundCardProps) {
+export default function RoundCard({
+  round,
+  isOpen = false,
+  onToggleOpen,
+  onRefetch,
+}: RoundCardProps) {
+  const { clubId } = useCommunityContext()
+  const [, startTransition] = useTransition()
+
   const handleDelete = async () => {
     if (!round) return
 
-    try {
-      const response = await fetch(`/api/rounds/${round.roundId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const result = await response.json()
+    startTransition(async () => {
+      const result = await deleteRoundAction(round.roundId, clubId)
 
       if (result.success) {
         toast.success('회차가 삭제되었습니다')
-        // 페이지를 새로고침하거나 상태 업데이트
-        window.location.reload()
+        await onRefetch?.()
       } else {
         toast.error(result.error || '삭제에 실패했습니다')
       }
-    } catch (_error) {
-      toast.error('삭제 중 오류가 발생했습니다')
-    }
+    })
   }
 
   return (
-    <article className={styles['round-card-wrapper']} aria-label="회차 카드">
+    <article className={styles['round-card-wrapper']} aria-label={MESSAGES.LABEL.ROUND_CARD}>
       <RoundCardHeader
         round={round}
         isOpen={isOpen}
         onToggleOpen={onToggleOpen}
         onDelete={handleDelete}
+        onRefetch={onRefetch}
       />
       <RoundCardBody roundId={round?.roundId} isOpen={isOpen} />
     </article>
@@ -104,15 +108,27 @@ interface RoundCardHeaderProps {
    * 라운드 삭제 핸들러
    */
   onDelete?: () => void
+  /**
+   * 라운드 데이터 재조회 함수
+   */
+  onRefetch?: () => Promise<void>
 }
 
 /**
  * 라운드 헤더 컴포넌트
  * @param props - RoundCardHeaderProps
  */
-function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHeaderProps) {
+function RoundCardHeader({
+  round,
+  isOpen,
+  onToggleOpen,
+  onDelete,
+  onRefetch,
+}: RoundCardHeaderProps) {
   const { data: session } = useSession()
+  const { clubId } = useCommunityContext()
   const userId = (session as CustomSession)?.userId
+  const [, startTransition] = useTransition()
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
     roundNumber: round?.roundNumber || 1,
@@ -122,7 +138,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
   })
   const [hasAttended, setHasAttended] = useState(false)
   const [checkingAttendance, setCheckingAttendance] = useState(false)
-  const now = new Date()
+  const now = new Date() // 임시: 클라이언트 시간 사용 (추후 동기화 로직 개선)
   const start = round?.startDate ? new Date(round.startDate) : null
   const end = round?.endDate ? new Date(round.endDate) : null
   const isWithinWindow = start && end ? now >= start && now <= end : false
@@ -174,33 +190,22 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
     e.preventDefault()
     if (!round) return
 
-    try {
-      const response = await fetch(`/api/rounds/${round.roundId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundNumber: editForm.roundNumber,
-          startDate: editForm.startDate ? fromDatetimeLocalString(editForm.startDate) : null,
-          endDate: editForm.endDate ? fromDatetimeLocalString(editForm.endDate) : null,
-          location: editForm.location || null,
-        }),
+    startTransition(async () => {
+      const result = await updateRoundAction(round.roundId, clubId, {
+        roundNumber: editForm.roundNumber,
+        startDate: editForm.startDate ? fromDatetimeLocalString(editForm.startDate) : null,
+        endDate: editForm.endDate ? fromDatetimeLocalString(editForm.endDate) : null,
+        location: editForm.location || null,
       })
-
-      const result = await response.json()
 
       if (result.success) {
         toast.success('회차가 수정되었습니다')
         setIsEditing(false)
-        // 페이지를 새로고침하거나 상태 업데이트
-        window.location.reload()
+        await onRefetch?.()
       } else {
         toast.error(result.error || '수정에 실패했습니다')
       }
-    } catch (_error) {
-      toast.error('수정 중 오류가 발생했습니다')
-    }
+    })
   }
 
   const handleCancelEdit = () => {
@@ -221,40 +226,27 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
       return
     }
 
-    try {
-      const response = await fetch(`/api/attendance`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundId: round.roundId,
-          userId,
-          attendanceType: 'present',
-        }),
-      })
-
-      const result = await response.json()
+    startTransition(async () => {
+      const result = await markAttendanceAction(round.roundId, clubId)
 
       if (result.success) {
         toast.success('출석처리 되었습니다')
-        window.location.reload()
+        setHasAttended(true)
       } else {
         toast.error(result.error || '출석 처리에 실패했습니다')
       }
-    } catch (_error) {
-      toast.error('출석 처리 중 오류가 발생했습니다')
-    }
+    })
   }
 
   if (isEditing && round) {
     return (
-      <header aria-label="회차 편집">
+      <header aria-label={MESSAGES.LABEL.ROUND_EDIT}>
         <form onSubmit={handleEditSubmit} className={styles['round-edit-form']}>
           <div className={styles['round-edit-fields']}>
             <div className={styles['edit-field']}>
-              <label>회차 번호:</label>
+              <label htmlFor="round-number">{MESSAGES.LABEL.ROUND_NUMBER}:</label>
               <input
+                id="round-number"
                 type="number"
                 min="1"
                 value={editForm.roundNumber}
@@ -262,44 +254,63 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
                   setEditForm(prev => ({ ...prev, roundNumber: parseInt(e.target.value) || 1 }))
                 }
                 required
+                aria-describedby="round-number-description"
               />
+              <span id="round-number-description" className="sr-only">
+                {MESSAGES.LABEL.ROUND_NUMBER_ARIA}
+              </span>
             </div>
             <div className={styles['edit-field']}>
-              <label>시작일:</label>
+              <label htmlFor="start-date">{MESSAGES.LABEL.ROUND_START_DATE}:</label>
               <input
+                id="start-date"
                 type="datetime-local"
                 value={editForm.startDate}
                 onChange={e => setEditForm(prev => ({ ...prev, startDate: e.target.value }))}
+                aria-describedby="start-date-description"
               />
+              <span id="start-date-description" className="sr-only">
+                {MESSAGES.LABEL.ROUND_START_DATE_ARIA}
+              </span>
             </div>
             <div className={styles['edit-field']}>
-              <label>종료일:</label>
+              <label htmlFor="end-date">{MESSAGES.LABEL.ROUND_END_DATE}:</label>
               <input
+                id="end-date"
                 type="datetime-local"
                 value={editForm.endDate}
                 onChange={e => setEditForm(prev => ({ ...prev, endDate: e.target.value }))}
+                aria-describedby="end-date-description"
               />
+              <span id="end-date-description" className="sr-only">
+                {MESSAGES.LABEL.ROUND_END_DATE_ARIA}
+              </span>
             </div>
             <div className={styles['edit-field']}>
-              <label>장소:</label>
+              <label htmlFor="location">{MESSAGES.LABEL.ROUND_LOCATION}:</label>
               <input
+                id="location"
                 type="text"
                 value={editForm.location}
                 onChange={e => setEditForm(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="스터디 장소를 입력하세요"
+                placeholder={MESSAGES.LABEL.ROUND_LOCATION_INPUT_PLACEHOLDER}
+                aria-describedby="location-description"
               />
+              <span id="location-description" className="sr-only">
+                {MESSAGES.LABEL.ROUND_LOCATION_ARIA}
+              </span>
             </div>
           </div>
           <div className={styles['round-edit-actions']}>
             <button type="submit" className={styles['edit-save-button']}>
-              저장
+              {MESSAGES.ACTION.SAVE}
             </button>
             <button
               type="button"
               onClick={handleCancelEdit}
               className={styles['edit-cancel-button']}
             >
-              취소
+              {MESSAGES.ACTION.CANCEL}
             </button>
           </div>
         </form>
@@ -328,7 +339,7 @@ function RoundCardHeader({ round, isOpen, onToggleOpen, onDelete }: RoundCardHea
               {formatDateRangeUTC(round.startDate, round.endDate)}
             </p>
           )}
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className={styles['location-container']}>
             {round?.location && (
               <p className={styles['round-location']}>
                 <MapPin /> {round.location}
@@ -375,9 +386,8 @@ interface RoundCardBodyProps {
  * @param props - RoundCardBodyProps
  */
 function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
-  // 전역 상태에서 커뮤니티 컴텍스트 가져오기
-  const clubId = useCommunityStore(state => state.clubId)
-  const isTeamLeader = useCommunityStore(state => state.isTeamLeader)
+  // Context에서 커뮤니티 정보 가져오기
+  const { clubId } = useCommunityContext()
   const { data: session } = useSession()
   const { goals, loading, error, refetch, createGoal, updateGoal, deleteGoal } = useGoals(
     clubId || '',
@@ -461,7 +471,6 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
         teamGoals={optimisticGoals.team}
         personalGoals={optimisticGoals.personal}
         onToggle={handleToggleComplete}
-        isTeamLeader={isTeamLeader}
         onAddGoal={handleAddGoal}
         onEdit={handleEditGoal}
         onDelete={handleDeleteGoal}

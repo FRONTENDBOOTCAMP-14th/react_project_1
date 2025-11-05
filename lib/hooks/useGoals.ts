@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, HTTP_HEADERS, MESSAGES } from '@/constants'
+import { API_ENDPOINTS, MESSAGES } from '@/constants'
 import type { CreateGoalInput, StudyGoal, UpdateGoalInput } from '@/lib/types/goal'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -92,18 +92,13 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
   const createGoal = useCallback(
     async (input: CreateGoalInput) => {
       try {
-        const response = await fetch(API_ENDPOINTS.GOALS.BASE, {
-          method: 'POST',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
-
-        const result = await response.json()
+        const { createGoalAction } = await import('@/app/actions/goals')
+        const result = await createGoalAction(input)
 
         if (result.success) {
           // 성공 시 목록 재조회
           await fetchGoals()
-          return { success: true, data: result.data }
+          return { success: true, data: result.data as StudyGoal }
         }
         return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_CREATE_GOAL }
       } catch (err) {
@@ -123,18 +118,13 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
   const updateGoal = useCallback(
     async (goalId: string, input: UpdateGoalInput) => {
       try {
-        const response = await fetch(API_ENDPOINTS.GOALS.BY_ID(goalId), {
-          method: 'PATCH',
-          headers: HTTP_HEADERS.CONTENT_TYPE_JSON,
-          body: JSON.stringify(input),
-        })
-
-        const result = await response.json()
+        const { updateGoalAction } = await import('@/app/actions/goals')
+        const result = await updateGoalAction(goalId, input)
 
         if (result.success) {
           // 성공 시 목록 재조회
           await fetchGoals()
-          return { success: true, data: result.data }
+          return { success: true, data: result.data as StudyGoal }
         }
         return { success: false, error: result.error || MESSAGES.ERROR.FAILED_TO_UPDATE_GOAL }
       } catch (err) {
@@ -153,11 +143,8 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
   const deleteGoal = useCallback(
     async (goalId: string) => {
       try {
-        const response = await fetch(API_ENDPOINTS.GOALS.BY_ID(goalId), {
-          method: 'DELETE',
-        })
-
-        const result = await response.json()
+        const { deleteGoalAction } = await import('@/app/actions/goals')
+        const result = await deleteGoalAction(goalId)
 
         if (result.success) {
           // 성공 시 목록 재조회

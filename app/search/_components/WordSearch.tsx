@@ -2,7 +2,6 @@
 
 import { IconButton, TextInput } from '@/components/ui'
 import { MESSAGES } from '@/constants'
-import { debounce } from '@/lib/utils'
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Style from './WordSearch.module.css'
@@ -20,7 +19,13 @@ export default function WordSearch({
   onSearch,
   loading = false,
 }: WordSearchProps) {
-  const [lazyQuery, setLazyQuery] = useState(query)
+  const [localQuery, setLocalQuery] = useState(query)
+
+  // props의 query가 변경되면 로컬 상태 동기화 (외부에서 변경된 경우)
+  useEffect(() => {
+    setLocalQuery(query)
+  }, [query])
+
   // 검색 실행
   const handleLocalSearch = () => {
     if (onSearch) {
@@ -28,10 +33,10 @@ export default function WordSearch({
     }
   }
 
-  useEffect(() => {
-    const debouncedChangeQuery = debounce(() => onChangeQuery(lazyQuery), 200)
-    debouncedChangeQuery()
-  }, [lazyQuery, onChangeQuery])
+  const handleInputChange = (value: string) => {
+    setLocalQuery(value)
+    onChangeQuery(value)
+  }
 
   return (
     <section className={Style.container}>
@@ -45,10 +50,8 @@ export default function WordSearch({
           <TextInput
             placeholder={MESSAGES.SEARCH.SEARCH_PLACEHOLDER}
             aria-label={MESSAGES.SEARCH.SEARCH_INPUT_ARIA}
-            value={lazyQuery}
-            onChange={e => {
-              setLazyQuery(e.currentTarget.value)
-            }}
+            value={localQuery}
+            onChange={e => handleInputChange(e.currentTarget.value)}
           />
           <IconButton
             type="button"

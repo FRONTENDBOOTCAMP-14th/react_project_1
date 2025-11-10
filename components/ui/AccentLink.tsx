@@ -17,7 +17,7 @@ import styles from './AccentLink.module.css'
  */
 const AccentLink = (props: CustomLinkProps) => {
   return (
-    <Link {...props} className={cn(props.className, styles['accent-link'])}>
+    <Link {...props} className={cn(styles['accent-link'], props.className)}>
       {props.children}
     </Link>
   )

@@ -2,13 +2,13 @@
 
 import { FillButton, IconButton } from '@/components/ui'
 import { MESSAGES } from '@/constants'
-import type { CommunitySearchItem } from '@/lib/search/search'
+import type { SearchResultItem } from '@/lib/types'
 import { Calendar, ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import styles from './CommunitySearchResults.module.css'
 
 interface CommunitySearchResultsProps {
-  items: CommunitySearchItem[]
+  items: SearchResultItem[]
   loading?: boolean
   pagination?: {
     page: number

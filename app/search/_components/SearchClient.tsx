@@ -83,14 +83,6 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
     [debouncedUpdateSearch]
   )
 
-  // 태그 변경 핸들러
-  const handleTagsChange = useCallback(
-    (searchTags: string[]) => {
-      updateSearchParams({ searchTags, page: undefined })
-    },
-    [updateSearchParams]
-  )
-
   // 페이지 변경 핸들러
   const handlePageChange = useCallback(
     (page: number) => {
@@ -99,17 +91,21 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
     [updateSearchParams]
   )
 
-  // Community를 CommunitySearchItem으로 변환
-  const searchItems = initialResults.communities.map(community => ({
-    id: community.clubId,
-    title: community.name,
-    region: community.region || null,
-    subRegion: community.subRegion || null,
-    tags: community.tagname || [],
-    description: community.description,
-    isPublic: community.isPublic,
-    createdAt: new Date(community.createdAt),
-  }))
+  // Community를 CommunitySearchItem으로 변환 (메모이제이션)
+  const searchItems = useMemo(
+    () =>
+      initialResults.communities.map(community => ({
+        id: community.clubId,
+        title: community.name,
+        region: community.region || null,
+        subRegion: community.subRegion || null,
+        tags: community.tagname || [],
+        description: community.description,
+        isPublic: community.isPublic,
+        createdAt: new Date(community.createdAt),
+      })),
+    [initialResults.communities]
+  )
 
   return (
     <main className={style.search}>
@@ -123,9 +119,7 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
 
       <WordSearch
         query={initialParams.search}
-        searchTags={initialParams.searchTags}
         onChangeQuery={handleSearchChange}
-        onChangeSearchTags={handleTagsChange}
         loading={isPending}
       />
 

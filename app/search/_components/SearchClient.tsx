@@ -83,14 +83,6 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
     [debouncedUpdateSearch]
   )
 
-  // 태그 변경 핸들러
-  const handleTagsChange = useCallback(
-    (searchTags: string[]) => {
-      updateSearchParams({ searchTags, page: undefined })
-    },
-    [updateSearchParams]
-  )
-
   // 페이지 변경 핸들러
   const handlePageChange = useCallback(
     (page: number) => {
@@ -123,9 +115,7 @@ export default function SearchClient({ initialResults, initialParams }: SearchCl
 
       <WordSearch
         query={initialParams.search}
-        searchTags={initialParams.searchTags}
         onChangeQuery={handleSearchChange}
-        onChangeSearchTags={handleTagsChange}
         loading={isPending}
       />
 

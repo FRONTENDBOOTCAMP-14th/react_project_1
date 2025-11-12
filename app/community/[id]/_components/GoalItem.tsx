@@ -164,8 +164,8 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
               handleEdit()
             }
           }}
-          submitText=""
-          cancelText=""
+          submitText="저장"
+          cancelText="취소"
           onCancel={() => {
             if (onEdit) {
               setTitle(goal.title || '')

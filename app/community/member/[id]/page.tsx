@@ -1,10 +1,11 @@
-import SearchForm from './_components/SearchForm'
-import ProfileCard from './_components/ProfileCard'
 import { MESSAGES } from '@/constants'
-import styles from './page.module.css'
 import prisma from '@/lib/prisma'
-import { memberDetailSelect, activeMemberWhere } from '@/lib/queries'
+import { activeMemberWhere, memberDetailSelect } from '@/lib/queries'
 import type { Member, PrismaMember } from '@/lib/types/member'
+import type { Metadata } from 'next'
+import ProfileCard from './_components/ProfileCard'
+import SearchForm from './_components/SearchForm'
+import styles from './page.module.css'
 
 interface MemberPageProps {
   params: Promise<{
@@ -13,6 +14,39 @@ interface MemberPageProps {
   searchParams: Promise<{
     search?: string
   }>
+}
+
+/**
+ * 동적 Metadata 생성 - 멤버 목록 SEO 최적화
+ */
+export async function generateMetadata({ params }: MemberPageProps): Promise<Metadata> {
+  const { id: clubId } = await params
+
+  const community = await prisma.community.findFirst({
+    where: { clubId, deletedAt: null },
+    select: { name: true },
+  })
+
+  const title = community ? `${community.name} 멤버 목록 | 토끼노트` : '멤버 목록 | 토끼노트'
+
+  const description = community
+    ? `${community.name} 커뮤니티의 멤버들을 확인하세요.`
+    : '커뮤니티 멤버들을 확인하세요.'
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      locale: 'ko_KR',
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  }
 }
 
 async function getMembers(clubId: string): Promise<Member[] | null> {

@@ -50,6 +50,10 @@ model Community {
   @@index([name], map: "idx_community_name")
   @@index([region], map: "idx_community_region")
   @@index([subRegion], map: "idx_community_sub_region")
+  @@index([deletedAt], map: "idx_community_deleted_at")
+  @@index([createdAt], map: "idx_community_created_at")
+  @@index([tagname], map: "idx_community_tagname_gin", type: Gin)
+  @@index([deletedAt, region, createdAt], map: "idx_community_search_composite")
   @@map("communities")
 }
 

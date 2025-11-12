@@ -20,7 +20,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   // URL 설정 (환경변수 우선, 없으면 기본 도메인)
-  const baseUrl = process.env.NEXTAUTH_URL?.replace(/\/$/, '') || 'https://tokkinote.vercel.app'
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://tokkinote.vercel.app')
 
   // 기본 페이지들
   const staticPages: MetadataRoute.Sitemap = [

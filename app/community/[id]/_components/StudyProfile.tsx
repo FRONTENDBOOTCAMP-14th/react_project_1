@@ -296,8 +296,8 @@ function CommunityContent({ community, onUpdate, onDelete }: CommunityContentPro
       <div className={styles['profile-wrapper']}>
         <SharedForm
           onSubmit={handleSaveEdit}
-          submitText="저장"
-          cancelText="취소"
+          submitText={MESSAGES.ACTION.SAVE}
+          cancelText={MESSAGES.ACTION.CANCEL}
           onCancel={handleCancelEdit}
           submitButtonType="accent"
           cancelButtonType="stroke"

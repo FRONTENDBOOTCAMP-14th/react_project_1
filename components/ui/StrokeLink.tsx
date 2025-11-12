@@ -17,7 +17,7 @@ import styles from './StrokeLink.module.css'
  */
 const StrokeLink = (props: CustomLinkProps) => {
   return (
-    <Link {...props} className={cn(props.className, styles['stroke-link'])}>
+    <Link {...props} className={cn(styles['stroke-link'], props.className)}>
       {props.children}
     </Link>
   )

@@ -56,6 +56,8 @@ export default function SearchRegion({
   loading = false,
 }: SearchRegionProps) {
   const [regions, setRegions] = useState<Region[]>([])
+  const [localRegion, setLocalRegion] = useState(region)
+  const [localSubRegion, setLocalSubRegion] = useState(subRegion)
 
   useEffect(() => {
     import('@/lib/json/region.json').then(regionJson => {
@@ -63,18 +65,29 @@ export default function SearchRegion({
     })
   }, [])
 
+  useEffect(() => {
+    setLocalRegion(region)
+  }, [region])
+
+  useEffect(() => {
+    setLocalSubRegion(subRegion)
+  }, [subRegion])
+
   //첫번째 드롭다운 : region(json)
-  const regionOptions = useMemo(
-    () => regions.map((r: Region) => ({ value: r.region, label: r.region })),
-    [regions]
-  )
+  const regionOptions = useMemo(() => {
+    const regionOptions = regions.map((r: Region) => ({ value: r.region, label: r.region }))
+    regionOptions.unshift({ value: '', label: '전체' })
+    return regionOptions
+  }, [regions])
 
   //두번째 드롭다운: subregion(json)
   const subRegionOptions = useMemo(() => {
-    const found = regions.find(r => r.region === region)
+    const found = regions.find(r => r.region === localRegion)
     if (!found) return []
-    return found.subRegion.map((sr: string) => ({ value: sr, label: sr }))
-  }, [regions, region])
+    const subRegionOptions = found.subRegion.map((sr: string) => ({ value: sr, label: sr }))
+    subRegionOptions.unshift({ value: '', label: '전체' })
+    return subRegionOptions
+  }, [regions, localRegion])
 
   return (
     <section className={styles['search-section']}>
@@ -84,13 +97,13 @@ export default function SearchRegion({
       <div className={styles['search-controls']}>
         <Dropdown
           options={regionOptions}
-          value={region}
+          value={localRegion}
           onChange={onChangeRegion}
           placeholder={MESSAGES.SEARCH.REGION_PLACEHOLDER}
         />
         <Dropdown
           options={subRegionOptions}
-          value={subRegion}
+          value={localSubRegion}
           onChange={onChangeSubRegion}
           placeholder={MESSAGES.SEARCH.SUBREGION_PLACEHOLDER}
         />

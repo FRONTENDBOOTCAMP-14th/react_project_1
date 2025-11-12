@@ -19,7 +19,7 @@ import styles from './AccentButton.module.css'
 const AccentButton = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
   const { children, className, onClick, ...rest } = props
   return (
-    <button className={cn(className, styles['accent-button'])} onClick={onClick} {...rest}>
+    <button className={cn(styles['accent-button'], className)} onClick={onClick} {...rest}>
       {children}
     </button>
   )

@@ -19,7 +19,7 @@ import styles from './FillButton.module.css'
 const FillButton = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
   const { children, className, onClick, ...rest } = props
   return (
-    <button className={cn(className, styles['fill-button'])} onClick={onClick} {...rest}>
+    <button className={cn(styles['fill-button'], className)} onClick={onClick} {...rest}>
       {children}
     </button>
   )

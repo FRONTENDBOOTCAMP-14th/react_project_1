@@ -174,8 +174,8 @@
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--bg-color) !important;
+  color: var(--text-color) !important;
   cursor: pointer;
   transition: all 0.2s ease;
 }

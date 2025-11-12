@@ -19,7 +19,7 @@ import styles from './StrokeButton.module.css'
 const StrokeButton = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
   const { children, className, onClick, ...rest } = props
   return (
-    <button className={cn(className, styles['stroke-button'])} onClick={onClick} {...rest}>
+    <button className={cn(styles['stroke-button'], className)} onClick={onClick} {...rest}>
       {children}
     </button>
   )

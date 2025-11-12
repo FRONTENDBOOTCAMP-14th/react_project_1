@@ -17,7 +17,7 @@ import styles from './FillLink.module.css'
  */
 const FillLink = (props: CustomLinkProps) => {
   return (
-    <Link {...props} className={cn(props.className, styles['fill-link'])}>
+    <Link {...props} className={cn(styles['fill-link'], props.className)}>
       {props.children}
     </Link>
   )

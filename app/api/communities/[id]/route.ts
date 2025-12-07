@@ -7,13 +7,13 @@
  *   - DELETE: 특정 커뮤니티 소프트 삭제
  */
 
-import prisma from '@/lib/prisma'
-import type { NextRequest } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
-import { getErrorMessage, hasErrorCode } from '@/lib/errors'
-import { requireAuthUser } from '@/lib/utils/api-auth'
 import { hasPermission } from '@/lib/auth'
+import { getErrorMessage, hasErrorCode } from '@/lib/errors'
+import prisma from '@/lib/prisma'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/communities/[id]
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })
 
     // 커뮤니티가 없거나 소프트 삭제된 경우
-    if (!community || community.deletedAt !== null) {
+    if (community?.deletedAt !== null) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 

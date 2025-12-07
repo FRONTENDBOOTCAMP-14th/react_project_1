@@ -5,8 +5,10 @@ import { X } from 'lucide-react'
 import type { InputHTMLAttributes } from 'react'
 import styles from './Checkbox.module.css'
 
-export interface CheckboxProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'onChange'> {
+export interface CheckboxProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'onChange'
+> {
   /** 체크박스 레이블 */
   label?: string
   /** 체크 상태 */

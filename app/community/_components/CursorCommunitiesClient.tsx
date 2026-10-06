@@ -6,7 +6,7 @@
  * - Server Actions로 실시간 데이터 페칭
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useInfiniteCursorPagination } from '@/lib/hooks/useCursorPagination'
 import {
   fetchInitialCommunities,
@@ -56,25 +56,30 @@ export default function CursorCommunitiesClient({
     pageSize: 20,
   })
 
-  // 필터 변경 시 초기 데이터 재로드 (서버에서 전달받은 초기 데이터가 없는 경우에만)
-  useEffect(() => {
-    if (!initialResult) {
-      const loadInitialData = async () => {
-        try {
-          const result = await fetchInitialCommunities({
-            ...filters,
-            limit: 20,
-          })
-          setCurrentInitialResult(result)
-          reset()
-        } catch (err) {
-          console.error('Initial communities error:', err)
-        }
-      }
+  const isInitialMount = useRef(true)
 
-      loadInitialData()
+  // 필터 변경 시 초기 데이터 재로드
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
     }
-  }, [filters, reset, initialResult])
+
+    const loadFilteredData = async () => {
+      try {
+        const result = await fetchInitialCommunities({
+          ...filters,
+          limit: 20,
+        })
+        setCurrentInitialResult(result)
+        reset()
+      } catch (err) {
+        console.error('Initial communities error:', err)
+      }
+    }
+
+    loadFilteredData()
+  }, [filters, reset])
 
   /**
    * 필터 업데이트

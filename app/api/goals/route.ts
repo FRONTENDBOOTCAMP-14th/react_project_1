@@ -133,6 +133,10 @@ export async function POST(request: NextRequest) {
     const start = new Date(startDate)
     const end = new Date(endDate)
 
+    if (isTeam && !clubId) {
+      return createErrorResponse('팀 목표는 커뮤니티(clubId) 지정이 필수입니다.', 400)
+    }
+
     // 목표 생성
     const createData = {
       ownerId: finalOwnerId,

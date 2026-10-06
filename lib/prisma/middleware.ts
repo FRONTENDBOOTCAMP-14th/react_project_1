@@ -73,21 +73,11 @@ export const softDeleteExtension = Prisma.defineExtension({
           return query(modifiedArgs)
         }
 
-        // delete 쿼리를 소프트 삭제로 변환
-        if (operation === 'delete') {
-          // Prisma Extension 내에서는 query 함수를 사용해야 함
-          return query({
-            ...args,
-            data: { deletedAt: new Date() },
-          })
-        }
-
-        // deleteMany 쿼리를 소프트 삭제로 변환
-        if (operation === 'deleteMany') {
-          return query({
-            ...args,
-            data: { deletedAt: new Date() },
-          })
+        // delete 쿼리 방어: Prisma delete는 data 필드를 허용하지 않으므로 client update로 위임하거나 data 파라미터 제외
+        if (operation === 'delete' || operation === 'deleteMany') {
+          // 호출 측에서 update({ where, data: { deletedAt: new Date() } }) 패턴을 권장하며,
+          // 잘못된 delete 호출 시 args.data 주입으로 인한 스키마 런타임 크래시를 방지
+          return query(args)
         }
 
         // 그 외 쿼리는 원래대로 실행

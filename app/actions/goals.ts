@@ -24,6 +24,10 @@ export async function createGoalAction(data: CreateGoalInput): Promise<ServerAct
       const start = data.startDate instanceof Date ? data.startDate : new Date(data.startDate)
       const end = data.endDate instanceof Date ? data.endDate : new Date(data.endDate)
 
+      if (data.isTeam && !data.clubId) {
+        throw new Error('팀 목표는 커뮤니티(clubId) 지정이 필수입니다.')
+      }
+
       const newGoal = await prisma.studyGoal.create({
         data: {
           ownerId: userId, // 인증된 사용자로 자동 설정

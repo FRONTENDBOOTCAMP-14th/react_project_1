@@ -12,12 +12,14 @@
 
 import prisma from '@/lib/prisma'
 import { memberDetailSelect, activeMemberWhere } from '@/lib/queries'
-import type { CreateMemberRequest } from '@/lib/types/member'
+import type { CreateMemberRequest, MemberRole } from '@/lib/types/member'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { MESSAGES } from '@/constants/messages'
 import { hasErrorCode } from '@/lib/errors'
 import { getPaginationParams, getStringParam, withPagination } from '@/lib/utils/apiHelpers'
+import { requireAuthUser } from '@/lib/utils/api-auth'
+import { getUserRole } from '@/lib/auth'
 
 /**
  * GET /api/members
@@ -89,6 +91,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const { userId: currentUserId, error: authError } = await requireAuthUser()
+    if (authError || !currentUserId) {
+      return authError || createErrorResponse('인증이 필요합니다.', 401)
+    }
+
     const body = (await request.json()) as CreateMemberRequest
     const { clubId, userId, role = 'member' } = body
 
@@ -98,9 +105,17 @@ export async function POST(request: NextRequest) {
     }
 
     // 역할 검증
-    const validRoles = ['owner', 'admin', 'member']
+    const validRoles: MemberRole[] = ['admin', 'member']
     if (!validRoles.includes(role)) {
       return createErrorResponse(MESSAGES.ERROR.INVALID_ROLE, 400)
+    }
+
+    // 본인이 아닌 타인을 등록하거나, 관리자 권한을 부여하는 경우 현재 사용자가 해당 모임의 admin이어야 함
+    if (role === 'admin' || userId !== currentUserId) {
+      const callerMembership = await getUserRole(currentUserId, clubId)
+      if (callerMembership?.role !== 'admin') {
+        return createErrorResponse('관리자 권한이 필요합니다.', 403)
+      }
     }
 
     // clubId 존재 확인

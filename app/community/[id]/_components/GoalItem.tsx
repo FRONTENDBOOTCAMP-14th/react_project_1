@@ -62,15 +62,8 @@ function GoalItem({ goal, onToggle, isTeam, onSave, onCancel, onEdit, onDelete }
   const { isAdmin } = useCommunityContext()
   const [title, setTitle] = useState(goal.title || '')
   const [isSaving, setIsSaving] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(Boolean(onSave))
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // onSave prop이 있으면 자동으로 편집 모드로 전환 (새 목표 추가 시)
-  useEffect(() => {
-    if (onSave && !isEditing) {
-      setIsEditing(true)
-    }
-  }, [onSave, isEditing])
 
   // 새 목표 추가 시 input에 자동 focus
   useEffect(() => {

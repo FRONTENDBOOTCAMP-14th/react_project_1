@@ -6,9 +6,23 @@ import type { Round } from '@/lib/types/round'
 import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { useSyncExternalStore, useState } from 'react'
 import { useSelectedDate } from '../_hooks/useSelectedDateContext'
 import styles from './StudyCarousel.module.css'
+
+const subscribeResize = (callback: () => void) => {
+  window.addEventListener('resize', callback)
+  return () => window.removeEventListener('resize', callback)
+}
+
+const getItemsPerViewSnapshot = () => {
+  const width = window.innerWidth
+  if (width < 600) return 1
+  if (width < 800) return 2
+  return 3
+}
+
+const getServerItemsPerViewSnapshot = () => 3
 
 interface StudyCarouselProps {
   userId?: string | null
@@ -22,38 +36,18 @@ export default function StudyCarousel({
   subscribedCommunities,
 }: StudyCarouselProps) {
   const { selectedDate } = useSelectedDate()
-  const [itemsPerView, setItemsPerView] = useState(3)
-  const [serverTime, setServerTime] = useState<Date | null>(null)
+  const [serverTime] = useState<Date>(() => getServerTime())
 
-  // 서버 시간 가져오기
-  useEffect(() => {
-    setServerTime(getServerTime())
-  }, [])
-
-  // useCallback으로 함수 메모이제이션 (불필요한 리스너 재등록 방지)
-  const updateItemsPerView = useCallback(() => {
-    const width = window.innerWidth
-    if (width < 600) {
-      setItemsPerView(1)
-    } else if (width < 800) {
-      setItemsPerView(2)
-    } else {
-      setItemsPerView(3)
-    }
-  }, [])
-
-  useEffect(() => {
-    updateItemsPerView()
-    window.addEventListener('resize', updateItemsPerView)
-
-    return () => window.removeEventListener('resize', updateItemsPerView)
-  }, [updateItemsPerView])
+  const itemsPerView = useSyncExternalStore(
+    subscribeResize,
+    getItemsPerViewSnapshot,
+    getServerItemsPerViewSnapshot
+  )
 
   if (!selectedDate || !userId) return null
-  if (!serverTime) return null // 서버 시간 로딩 중
 
   const selectedDateRounds = (() => {
-    if (!selectedDate || !serverTime) return []
+    if (!selectedDate) return []
 
     // UTC 기준으로 targetDate 생성
     const targetDate = new Date(serverTime)

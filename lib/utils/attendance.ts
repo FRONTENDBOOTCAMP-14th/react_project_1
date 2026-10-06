@@ -32,12 +32,21 @@ export function buildAttendanceWhereClause(
 
   // 날짜 범위 필터
   if (filters.startDate || filters.endDate) {
-    whereClause.attendanceDate = {}
+    const dateFilter: Prisma.DateTimeFilter = {}
     if (filters.startDate) {
-      ;(whereClause.attendanceDate as Prisma.DateTimeFilter).gte = new Date(filters.startDate)
+      const startDate = new Date(filters.startDate)
+      if (!isNaN(startDate.getTime())) {
+        dateFilter.gte = startDate
+      }
     }
     if (filters.endDate) {
-      ;(whereClause.attendanceDate as Prisma.DateTimeFilter).lte = new Date(filters.endDate)
+      const endDate = new Date(filters.endDate)
+      if (!isNaN(endDate.getTime())) {
+        dateFilter.lte = endDate
+      }
+    }
+    if (Object.keys(dateFilter).length > 0) {
+      whereClause.attendanceDate = dateFilter
     }
   }
 

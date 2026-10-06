@@ -178,6 +178,14 @@ describe('rounds utilities', () => {
       expect(whereClause.roundNumber).toBe(10)
       expect(typeof whereClause.roundNumber).toBe('number')
     })
+
+    it('숫자가 아닌 roundNumber 문자열은 필터에 추가하지 않아야 함 (NaN 방지)', () => {
+      const whereClause = buildRoundWhereClause(CLUB_ID, {
+        roundNumber: 'invalid-round',
+      })
+
+      expect(whereClause.roundNumber).toBeUndefined()
+    })
   })
 
   describe('createPaginationInfo', () => {

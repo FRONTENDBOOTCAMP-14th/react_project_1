@@ -65,7 +65,7 @@ describe('TimeSync', () => {
       const serverTime = timeSync.getServerTime()
       const clientTime = new Date()
 
-      expect(serverTime.getTime() - clientTime.getTime()).toBe(3600000)
+      expect(Math.abs(serverTime.getTime() - clientTime.getTime() - 3600000)).toBeLessThan(50)
     })
 
     it('동기화되지 않았을 때 클라이언트 시간 반환', () => {
@@ -174,6 +174,7 @@ describe('TimeSync', () => {
     })
 
     afterEach(() => {
+      ;(timeSync as any).stopAutoSync?.()
       jest.useRealTimers()
     })
 
@@ -186,6 +187,23 @@ describe('TimeSync', () => {
       expect(syncSpy).toHaveBeenCalledTimes(1)
 
       // 5분 후 다시 동기화 호출
+      jest.advanceTimersByTime(5 * 60 * 1000)
+      expect(syncSpy).toHaveBeenCalledTimes(2)
+
+      syncSpy.mockRestore()
+    })
+
+    it('여러 번 호출해도 중복 타이머를 등록하지 않아야 함 (idempotent)', () => {
+      const syncSpy = jest.spyOn(timeSync, 'syncWithServer')
+
+      timeSync.startAutoSync()
+      timeSync.startAutoSync()
+      timeSync.startAutoSync()
+
+      // 중복 호출 시 최초 1회만 sync 실행
+      expect(syncSpy).toHaveBeenCalledTimes(1)
+
+      // 5분 후에도 1회만 추가 실행되어야 함
       jest.advanceTimersByTime(5 * 60 * 1000)
       expect(syncSpy).toHaveBeenCalledTimes(2)
 

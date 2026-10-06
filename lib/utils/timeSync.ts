@@ -25,6 +25,7 @@ class TimeSync {
   private lastSync: number = 0
   private syncInterval: number = 5 * 60 * 1000 // 5분마다 동기화
   private isSyncing: boolean = false
+  private syncTimer: ReturnType<typeof setInterval> | null = null
 
   private constructor() {}
 
@@ -111,16 +112,30 @@ class TimeSync {
   }
 
   /**
-   * 자동 동기화를 시작합니다.
+   * 자동 동기화를 시작합니다. (중복 호출 방지)
    */
   startAutoSync(): void {
+    if (this.syncTimer !== null) {
+      return
+    }
+
     // 즉시 동기화
     this.syncWithServer()
 
     // 주기적으로 동기화
-    setInterval(() => {
+    this.syncTimer = setInterval(() => {
       this.syncWithServer()
     }, this.syncInterval)
+  }
+
+  /**
+   * 자동 동기화를 중지합니다.
+   */
+  stopAutoSync(): void {
+    if (this.syncTimer !== null) {
+      clearInterval(this.syncTimer)
+      this.syncTimer = null
+    }
   }
 
   /**

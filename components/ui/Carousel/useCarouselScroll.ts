@@ -215,6 +215,7 @@ export function useCarouselScroll({
     currentIndex,
     canScrollLeft,
     canScrollRight,
+    isDragging,
     scrollTo,
     scrollToIndex,
   }

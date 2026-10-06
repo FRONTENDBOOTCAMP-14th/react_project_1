@@ -19,3 +19,6 @@ public
 # Misc
 .vercel
 .pnpm-store
+
+# Auto-generated types
+next-env.d.ts

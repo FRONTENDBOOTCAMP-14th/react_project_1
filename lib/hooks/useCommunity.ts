@@ -6,7 +6,8 @@ import type {
   UpdateCommunityInput,
 } from '@/lib/types/community'
 import { logger } from '@/lib/utils/logger'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
+import { useAsyncData } from './useAsyncData'
 
 interface UseCommunityResult {
   community: Community | null
@@ -29,35 +30,31 @@ interface UseCommunityResult {
  * @returns 커뮤니티 데이터, 로딩 상태, 에러, 재조회 함수
  */
 export const useCommunity = (id: string): UseCommunityResult => {
-  const [community, setCommunity] = useState<Community | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const fetchCommunity = useCallback(async (): Promise<Community | null> => {
+    if (!id) {
+      return null
+    }
 
-  const fetchCommunity = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
-
       logger.debug(`Fetching community: ${id}`)
-
       const response = await fetch(API_ENDPOINTS.COMMUNITIES.BY_ID(id))
 
       if (!response.ok) {
         const errorMessage = `HTTP ${response.status}: ${response.statusText}`
         logger.apiError(API_ENDPOINTS.COMMUNITIES.BY_ID(id), 'GET', errorMessage)
-        throw new Error(errorMessage)
+        throw new Error(MESSAGES.ERROR.FAILED_TO_LOAD_COMMUNITY)
       }
 
       const result: CommunityResponse = await response.json()
 
       if (result.success && result.data) {
-        setCommunity(result.data)
         logger.info(`Community loaded successfully: ${id}`)
-      } else {
-        const errorMessage = result.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND
-        logger.warn(`Failed to load community: ${id}`, { error: result.error })
-        setError(errorMessage)
+        return result.data
       }
+
+      const errorMessage = result.error || MESSAGES.ERROR.COMMUNITY_NOT_FOUND
+      logger.warn(`Failed to load community: ${id}`, { error: result.error })
+      throw new Error(errorMessage)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       logger.error(
@@ -65,11 +62,22 @@ export const useCommunity = (id: string): UseCommunityResult => {
         { communityId: id },
         err instanceof Error ? err : new Error(errorMessage)
       )
-      setError(MESSAGES.ERROR.FAILED_TO_LOAD_COMMUNITY)
-    } finally {
-      setLoading(false)
+      if (err instanceof Error && err.message === MESSAGES.ERROR.COMMUNITY_NOT_FOUND) {
+        throw err
+      }
+      throw new Error(MESSAGES.ERROR.FAILED_TO_LOAD_COMMUNITY)
     }
   }, [id])
+
+  const {
+    data: community,
+    loading,
+    error,
+    refetch,
+  } = useAsyncData(fetchCommunity, {
+    initialData: null,
+    enabled: Boolean(id),
+  })
 
   /**
    * 새로운 커뮤니티 생성
@@ -114,9 +122,8 @@ export const useCommunity = (id: string): UseCommunityResult => {
         const result = await response.json()
 
         if (result.success) {
-          // 현재 조회 중인 커뮤니티면 상태 업데이트
           if (clubId === id) {
-            await fetchCommunity()
+            await refetch()
           }
           return { success: true, data: result.data }
         }
@@ -126,7 +133,7 @@ export const useCommunity = (id: string): UseCommunityResult => {
         return { success: false, error: MESSAGES.ERROR.UPDATING_COMMUNITY_ERROR }
       }
     },
-    [id, fetchCommunity]
+    [id, refetch]
   )
 
   /**
@@ -152,15 +159,11 @@ export const useCommunity = (id: string): UseCommunityResult => {
     }
   }, [])
 
-  useEffect(() => {
-    fetchCommunity()
-  }, [fetchCommunity])
-
   return {
     community,
     loading,
     error,
-    refetch: fetchCommunity,
+    refetch,
     createCommunity,
     updateCommunity,
     deleteCommunity,

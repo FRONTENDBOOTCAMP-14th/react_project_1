@@ -2,6 +2,12 @@
 
 import { MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS, REVALIDATE_TAGS, ROUTES } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
+import {
+  canDeleteCommunity,
+  canJoinCommunity,
+  prepareCommunityUpdate,
+  prepareImageUpload,
+} from '@/lib/community/community.core'
 import { prisma } from '@/lib/prisma'
 import type { UpdateCommunityInput } from '@/lib/types/community'
 import {
@@ -26,20 +32,16 @@ export async function updateCommunityAction(
       const userId = await getCurrentUserId()
       assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 커뮤니티 업데이트
+      const prepared = prepareCommunityUpdate(input)
+      if (prepared.isErr()) {
+        throw prepared.error
+      }
+
       await prisma.community.update({
         where: { clubId },
-        data: {
-          ...(input.name && { name: input.name }),
-          ...(input.description !== undefined && { description: input.description }),
-          ...(input.region !== undefined && { region: input.region }),
-          ...(input.subRegion !== undefined && { subRegion: input.subRegion }),
-          ...(input.tagname && { tagname: input.tagname }),
-          ...(input.imageUrl && { imageUrl: input.imageUrl }),
-        },
+        data: prepared.value,
       })
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
@@ -56,12 +58,24 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
   const result = await withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 관리자 권한 확인
-      await checkPermission(userId, clubId, 'admin')
+      const community = await prisma.community.findUnique({
+        where: { clubId },
+        select: { deletedAt: true },
+      })
+      assertExists(community, '커뮤니티를 찾을 수 없습니다')
 
-      // 커뮤니티 소프트 삭제
+      await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
+
+      const validation = canDeleteCommunity({
+        isAdmin: true,
+        isDeleted: community.deletedAt !== null,
+      })
+      if (validation.isErr()) {
+        throw validation.error
+      }
+
       await prisma.community.update({
         where: { clubId, deletedAt: null },
         data: { deletedAt: new Date() },
@@ -87,23 +101,25 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 이미 가입했는지 확인 (deletedAt 필터 포함)
       const existingMember = await prisma.communityMember.findFirst({
         where: { clubId, userId, deletedAt: null },
       })
 
-      if (existingMember) {
-        throw new Error('이미 가입된 커뮤니티입니다')
+      const joinDecision = canJoinCommunity({
+        userId,
+        isExistingMember: Boolean(existingMember),
+      })
+      if (joinDecision.isErr()) {
+        throw joinDecision.error
       }
 
-      // 멤버 추가
       await prisma.communityMember.create({
         data: {
           clubId,
-          userId,
-          role: 'member',
+          userId: joinDecision.value.userId,
+          role: joinDecision.value.role,
         },
       })
 
@@ -126,28 +142,35 @@ export async function uploadCommunityImageAction(
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      // 관리자 권한 확인
       await checkPermission(userId, clubId, 'admin')
 
-      // 이미지 파일 확인
-      const file = formData.get('image') as File
+      const file = formData.get('image') as File | null
       if (!file) {
         throw new Error('이미지 파일이 없습니다')
       }
 
-      // Supabase Storage에 이미지 업로드
+      const uploadPreparation = prepareImageUpload(
+        {
+          fileName: file.name,
+          fileSize: file.size,
+        },
+        {
+          timestamp: Date.now(),
+          randomSuffix: Math.random().toString(36).substring(2),
+        }
+      )
+      if (uploadPreparation.isErr()) {
+        throw uploadPreparation.error
+      }
+
       const supabaseUrl = process.env.SUPABASE_URL
       const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
-
       if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error('Supabase 환경 변수가 설정되지 않았습니다')
       }
 
       const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `community-images/${fileName}`
+      const { filePath } = uploadPreparation.value
 
       const { error: uploadError } = await supabase.storage
         .from('community-images')
@@ -161,10 +184,8 @@ export async function uploadCommunityImageAction(
       }
 
       const { data: urlData } = supabase.storage.from('community-images').getPublicUrl(filePath)
-
       const imageUrl = urlData.publicUrl
 
-      // 커뮤니티 이미지 URL 업데이트
       await prisma.community.update({
         where: { clubId },
         data: { imageUrl },

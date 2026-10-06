@@ -1,7 +1,8 @@
 import type { PaginationInfo } from '@/lib/types'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
+import { useAsyncData } from './useAsyncData'
 
 interface UseUserCommunitiesResult {
   subscribedCommunities: Community[]
@@ -16,6 +17,18 @@ interface UserCommunitiesResponse {
   subscribedCommunities: Community[]
   upcomingRounds: Round[]
   pagination: PaginationInfo
+}
+
+interface UserCommunitiesState {
+  subscribedCommunities: Community[]
+  upcomingRounds: Round[]
+  pagination: PaginationInfo | null
+}
+
+const INITIAL_USER_COMMUNITIES: UserCommunitiesState = {
+  subscribedCommunities: [],
+  upcomingRounds: [],
+  pagination: null,
 }
 
 /**
@@ -56,27 +69,12 @@ export const useUserCommunities = (
     limit?: number
   } = {}
 ): UseUserCommunitiesResult => {
-  const [subscribedCommunities, setSubscribedCommunities] = useState<Community[]>([])
-  const [upcomingRounds, setUpcomingRounds] = useState<Round[]>([])
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchUserCommunities = useCallback(async () => {
+  const fetchUserCommunities = useCallback(async (): Promise<UserCommunitiesState> => {
     if (!userId) {
-      setSubscribedCommunities([])
-      setUpcomingRounds([])
-      setPagination(null)
-      setLoading(false)
-      setError('사용자 ID가 필요합니다')
-      return
+      throw new Error('사용자 ID가 필요합니다')
     }
 
     try {
-      setLoading(true)
-      setError(null)
-
-      // 쿼리 파라미터 구성
       const params = new URLSearchParams()
       if (options.page) params.append('page', options.page.toString())
       if (options.limit) params.append('limit', options.limit.toString())
@@ -84,42 +82,35 @@ export const useUserCommunities = (
       const queryString = params.toString()
       const apiUrl = `/api/user/communities${queryString ? `?${queryString}` : ''}`
 
-      // API 호출로 변경
       const response = await fetch(apiUrl)
       const result = await response.json()
 
       if (result.success) {
         const data = result.data as UserCommunitiesResponse
-        setSubscribedCommunities(data.subscribedCommunities)
-        setUpcomingRounds(data.upcomingRounds)
-        setPagination(data.pagination)
-      } else {
-        setSubscribedCommunities([])
-        setUpcomingRounds([])
-        setPagination(null)
-        setError(result.error || '커뮤니티 정보를 불러오는데 실패했습니다')
+        return {
+          subscribedCommunities: data.subscribedCommunities || [],
+          upcomingRounds: data.upcomingRounds || [],
+          pagination: data.pagination || null,
+        }
       }
+      throw new Error(result.error || '커뮤니티 정보를 불러오는데 실패했습니다')
     } catch (err) {
       console.error('Failed to fetch user communities:', err)
-      setError('커뮤니티 정보를 불러오는데 실패했습니다')
-      setSubscribedCommunities([])
-      setUpcomingRounds([])
-      setPagination(null)
-    } finally {
-      setLoading(false)
+      throw new Error('커뮤니티 정보를 불러오는데 실패했습니다')
     }
   }, [userId, options.page, options.limit])
 
-  useEffect(() => {
-    fetchUserCommunities()
-  }, [fetchUserCommunities])
+  const { data, loading, error, refetch } = useAsyncData(fetchUserCommunities, {
+    initialData: INITIAL_USER_COMMUNITIES,
+    enabled: Boolean(userId),
+  })
 
   return {
-    subscribedCommunities,
-    upcomingRounds,
-    pagination,
+    subscribedCommunities: data.subscribedCommunities,
+    upcomingRounds: data.upcomingRounds,
+    pagination: data.pagination,
     loading,
     error,
-    refetch: fetchUserCommunities,
+    refetch,
   }
 }

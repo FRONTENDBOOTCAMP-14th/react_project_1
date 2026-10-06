@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import type { ReactNode } from 'react'
 import styles from './Carousel.module.css'
 import './animations.css'
@@ -68,7 +68,7 @@ const Carousel = ({
   effect = 'slide',
   className,
 }: CarouselProps) => {
-  const [itemCount, setItemCount] = useState(0)
+  const itemCount = Array.isArray(children) ? children.length : 1
   const [_isPending, startTransition] = useTransition() // 나중에 로딩 UI에 활용 가능
 
   const {
@@ -104,12 +104,6 @@ const Carousel = ({
       scrollToIndex(index)
     })
   }
-
-  // 아이템 개수 계산 (children에서 직접 계산)
-  useEffect(() => {
-    const count = Array.isArray(children) ? children.length : 1
-    setItemCount(count)
-  }, [children])
 
   return (
     <div

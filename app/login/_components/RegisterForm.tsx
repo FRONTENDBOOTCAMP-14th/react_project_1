@@ -124,9 +124,10 @@ export function RegisterForm() {
         return
       }
 
-      // 회원가입 완료 후 Credentials Provider로 즉시 로그인
+      // 회원가입 완료 후 Credentials Provider로 즉시 로그인 (서명 토큰 검증)
       const signInResult = await signIn('register-complete', {
         userId: result.data?.userId,
+        registrationToken: result.data?.registrationToken,
         callbackUrl: '/',
         redirect: true,
       })

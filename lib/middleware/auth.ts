@@ -221,7 +221,7 @@ export async function authMiddleware(
  */
 export async function getSession(): Promise<CustomSession | null> {
   const session = await getServerSession(authOptions)
-  return session as CustomSession | null
+  return session
 }
 
 /**

@@ -124,11 +124,11 @@ describe('API Helpers', () => {
       expect(result).toBe(false)
     })
 
-    it('파라미터가 없으면 null을 반환해야 함', () => {
+    it('파라미터가 없으면 undefined를 반환해야 함', () => {
       const searchParams = new URLSearchParams('')
       const result = getBooleanParam(searchParams, 'active')
 
-      expect(result).toBe(null)
+      expect(result).toBe(undefined)
     })
   })
 
@@ -140,18 +140,18 @@ describe('API Helpers', () => {
       expect(result).toBe('test')
     })
 
-    it('파라미터가 없으면 null을 반환해야 함', () => {
+    it('파라미터가 없으면 undefined를 반환해야 함', () => {
       const searchParams = new URLSearchParams('')
       const result = getStringParam(searchParams, 'name')
 
-      expect(result).toBe(null)
+      expect(result).toBe(undefined)
     })
 
-    it('빈 문자열도 반환해야 함', () => {
+    it('빈 문자열이면 undefined를 반환해야 함', () => {
       const searchParams = new URLSearchParams('?name=')
       const result = getStringParam(searchParams, 'name')
 
-      expect(result).toBe('')
+      expect(result).toBe(undefined)
     })
   })
 

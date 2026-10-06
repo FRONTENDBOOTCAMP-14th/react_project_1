@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  reactCompiler: true,
   // 이미지 설정
   images: {
     // // kakaocdn의 경우, domains 추가 필요 (프로토콜 제외)
@@ -16,9 +17,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  eslint: {
-    // ignoreDuringBuilds: true,
-  },
+
   typescript: {
     // ignoreBuildErrors: true,
   },

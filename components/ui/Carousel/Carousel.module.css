@@ -19,3 +19,8 @@
 .container::-webkit-scrollbar {
   display: none;
 }
+
+.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+}

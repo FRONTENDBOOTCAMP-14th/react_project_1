@@ -87,7 +87,7 @@ function getTimezoneDisplayName(timezone: string, offsetString: string): string 
  */
 export function toLocalTime(utcDate: Date | string): Date {
   const date = typeof utcDate === 'string' ? new Date(utcDate) : utcDate
-  return new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000)
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
 }
 
 /**
@@ -95,7 +95,7 @@ export function toLocalTime(utcDate: Date | string): Date {
  */
 export function toUTCTime(localDate: Date | string): Date {
   const date = typeof localDate === 'string' ? new Date(localDate) : localDate
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+  return new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000)
 }
 
 /**

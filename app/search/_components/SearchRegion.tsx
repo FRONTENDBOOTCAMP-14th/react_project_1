@@ -61,7 +61,7 @@ export default function SearchRegion({
 
   useEffect(() => {
     import('@/lib/json/region.json').then(regionJson => {
-      setRegions(regionJson.default as Region[])
+      setRegions(regionJson.default)
     })
   }, [])
 

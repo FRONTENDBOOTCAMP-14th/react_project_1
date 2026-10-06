@@ -85,7 +85,7 @@ export function parseApiErrorSync(
       return {
         type: getErrorTypeFromSupabaseCode(supabaseError.code),
         message: supabaseError.message || fallbackMessage,
-        originalError: supabaseError as unknown,
+        originalError: supabaseError,
       }
     }
   }

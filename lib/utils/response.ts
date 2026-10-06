@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export type ApiResponse<T> =
-  | { success: true; data: T }
-  | { success: false; error: string; code?: string; details?: unknown }
+  { success: true; data: T } | { success: false; error: string; code?: string; details?: unknown }
 
 export function createSuccessResponse<T>(data: T, status = 200) {
   return NextResponse.json({ success: true, data }, { status })

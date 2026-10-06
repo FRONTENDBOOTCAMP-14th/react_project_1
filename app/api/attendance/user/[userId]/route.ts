@@ -48,11 +48,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
     const attendanceType = searchParams.get('attendanceType') as
-      | 'present'
-      | 'absent'
-      | 'late'
-      | 'excused'
-      | null
+      'present' | 'absent' | 'late' | 'excused' | null
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const clubId = searchParams.get('clubId')

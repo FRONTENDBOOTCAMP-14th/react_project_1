@@ -56,7 +56,7 @@ describe('Timezone Utils', () => {
       const localDate = toLocalTime(utcDate)
 
       expect(localDate).toBeInstanceOf(Date)
-      // 실제 변환은 브라우저/환경에 따라 다름
+      expect(localDate.getTime()).toBe(utcDate.getTime() - utcDate.getTimezoneOffset() * 60 * 1000)
     })
 
     it('문자열 UTC 시간을 로컬 시간으로 변환', () => {

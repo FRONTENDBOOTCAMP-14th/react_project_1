@@ -43,7 +43,7 @@ export async function updateCommunityAction(
       })
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
-      revalidateTag(REVALIDATE_TAGS.COMMUNITIES)
+      revalidateTag(REVALIDATE_TAGS.COMMUNITIES, 'max')
     },
     { errorMessage: MESSAGES.ERROR.COMMUNITY_UPDATE_FAILED }
   )
@@ -68,7 +68,7 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
       })
 
       revalidatePath('/community')
-      revalidateTag('communities')
+      revalidateTag('communities', 'max')
     },
     { errorMessage: '커뮤니티 삭제에 실패했습니다' }
   )
@@ -108,7 +108,7 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
       })
 
       revalidatePath(`/community/${clubId}`)
-      revalidateTag('communities')
+      revalidateTag('communities', 'max')
     },
     { errorMessage: '커뮤니티 가입에 실패했습니다' }
   )
@@ -171,7 +171,7 @@ export async function uploadCommunityImageAction(
       })
 
       revalidatePath(`/community/${clubId}`)
-      revalidateTag('communities')
+      revalidateTag('communities', 'max')
       return { imageUrl }
     },
     { errorMessage: '이미지 업로드에 실패했습니다' }

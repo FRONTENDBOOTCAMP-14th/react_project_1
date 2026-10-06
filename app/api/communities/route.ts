@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
     })
 
     // 커뮤니티 목록 캐시 무효화
-    revalidateTag('communities')
+    revalidateTag('communities', 'max')
 
     return createSuccessResponse(created, 201)
   } catch (err: unknown) {

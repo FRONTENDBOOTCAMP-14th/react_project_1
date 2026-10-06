@@ -1,37 +1,46 @@
-import { FlatCompat } from '@eslint/eslintrc'
+import nextConfig from 'eslint-config-next'
+import prettierConfig from 'eslint-config-prettier'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
 import importPlugin from 'eslint-plugin-import'
 import prettier from 'eslint-plugin-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
+import reactCompiler from 'eslint-plugin-react-compiler'
 import globals from 'globals'
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 const isProductionMode = process.env.NODE_ENV === 'production'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
 
 const eslintConfig = [
-  // Next.js 및 TypeScript 관련 규칙 확장
-  ...compat.extends(
-    'next/core-web-vitals',
-    'next/typescript',
-    'prettier' // Prettier와 충돌하는 ESLint 규칙 비활성화
+  // Next.js 및 Prettier Flat Config 확장
+  ...nextConfig.map(config =>
+    config.name === 'next'
+      ? {
+          ...config,
+          languageOptions: {
+            ...config.languageOptions,
+            parser: undefined,
+          },
+          settings: {
+            ...config.settings,
+            react: {
+              version: '19.3.0',
+            },
+          },
+        }
+      : config
   ),
+  prettierConfig,
 
   // 모든 파일에 적용되는 공통 규칙
   {
     plugins: {
       import: importPlugin,
       'react-hooks': reactHooks,
+      'react-compiler': reactCompiler,
       prettier,
     },
     rules: {
+      'react-compiler/react-compiler': 'error',
       // 일관된 코드 스타일
       'arrow-body-style': 'off',
       'prefer-arrow-callback': 'error',
@@ -56,6 +65,7 @@ const eslintConfig = [
       // React Hooks 관련 규칙
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
 
       // 오류 방지 규칙
       'no-duplicate-imports': 'off',
@@ -64,7 +74,7 @@ const eslintConfig = [
         : ['warn', { allow: ['log', 'warn', 'error'] }],
 
       // Prettier 통합
-      'prettier/prettier': 'error',
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
 
       // // import 순서 관련 규칙
       // 'import/order': [

@@ -40,11 +40,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50')))
     const attendanceType = searchParams.get('attendanceType') as
-      | 'present'
-      | 'absent'
-      | 'late'
-      | 'excused'
-      | null
+      'present' | 'absent' | 'late' | 'excused' | null
 
     // 라운드 정보와 멤버십 권한 확인
     const round = await prisma.round.findFirst({

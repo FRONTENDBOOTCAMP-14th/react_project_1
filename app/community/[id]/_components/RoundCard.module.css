@@ -69,6 +69,11 @@
   outline: none;
 }
 
+.edit-field input:focus-visible {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(52, 104, 192, 0.2);
+}
+
 .round-edit-actions {
   display: flex;
   gap: var(--spacing-sm);

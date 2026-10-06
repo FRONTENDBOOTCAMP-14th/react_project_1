@@ -55,36 +55,23 @@
 - **위치**: 각 컴포넌트/페이지 옆에 `*.module.css` (colocation)
 - **클래스 네이밍**: 로컬 스코프이므로 **간결한 이름** 사용
   - 블록/요소/상태 느낌을 살린 단순 패턴 권장: `container`, `title`, `subtitle`, `actions`, `is-active` 등
-  - 변형은 별도 클래스 조합: `<div className={`${styles.card} ${styles.danger}`}/>`
-- **토큰/전역 유틸**: 전역 색/간격 등은 `styles/tokens.css`에 CSS 변수로 정의하고, 필요한 항목만 `app/globals.css`에서 import
-  - 네이밍 규칙: `--color-<name>`, `--space-<step>`, `--font-<usage>` 등 기능 중심으로 구성
-  - 예:
-
-    ```css
-    :root {
-      --color-primary: #0ea5e9;
-      --space-4: 1rem;
-      --font-body: var(--pretendard);
-    }
-    ```
-
+  - 변형은 별도 클래스 조합 또는 CSS Modules `composes` 활용: `<div className={`${styles.card} ${styles.danger}`}/>`
+- **토큰/전역 유틸**: 전역 색상, 간격, 폰트 토큰은 `styles/common/variable.css`에 CSS 커스텀 속성(`--*`)으로 정의하고 `styles/globals.css`에서 import
+  - 핵심 팔레트: `--primary-color`, `--secondary-color`, `--accent-color`, `--third-color`
+  - 시맨틱 별칭: `--bg-color`, `--text-color`, `--text-color-secondary`, `--border-color`, `--font-family`
+  - 접근성 포커스: 인터랙티브 요소는 `:focus-visible`로 가시성 있는 포커스 링 보장
+- **공통 컴포넌트 스타일 재사용**: 유사 변형(Button/Link 계열)은 `button-base.module.css` 등의 공통 베이스 모듈을 정의하고 각 모듈에서 `composes`를 사용하여 중복 선언을 방지
 - **미디어쿼리/반응형**: 필요 시 컴포넌트 모듈 내부에서 최소한으로 처리
 - **서드파티**: 전역 프레임워크(PureCSS)는 `app/layout.tsx`에서 import (이미 적용)
 
 > 토큰 파일 변경 시 릴리즈 노트에 주요 변경 사항을 남겨 디자인/개발 간 싱크를 맞춥니다.
 
-예시
+예시 (공통 베이스 합성 패턴)
 
 ```css
-/* Button.module.css */
-.button {
-  /* 기본 스타일 */
-}
-.secondary {
-  /* 변형 */
-}
-.is-loading {
-  /* 상태 */
+/* AccentButton.module.css */
+.accent-button {
+  composes: base-button accent from './button-base.module.css';
 }
 ```
 

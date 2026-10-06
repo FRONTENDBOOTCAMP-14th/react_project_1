@@ -4,6 +4,7 @@ import tsparser from '@typescript-eslint/parser'
 import importPlugin from 'eslint-plugin-import'
 import prettier from 'eslint-plugin-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
+import reactCompiler from 'eslint-plugin-react-compiler'
 import globals from 'globals'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -29,9 +30,11 @@ const eslintConfig = [
     plugins: {
       import: importPlugin,
       'react-hooks': reactHooks,
+      'react-compiler': reactCompiler,
       prettier,
     },
     rules: {
+      'react-compiler/react-compiler': 'error',
       // 일관된 코드 스타일
       'arrow-body-style': 'off',
       'prefer-arrow-callback': 'error',

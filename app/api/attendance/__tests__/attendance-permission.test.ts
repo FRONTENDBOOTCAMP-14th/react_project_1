@@ -113,4 +113,114 @@ describe('POST /api/attendance Non-member Permission Guard', () => {
     expect(json.error).toBe('해당 모임의 멤버만 출석을 등록할 수 있습니다.')
     expect(prisma.attendance.create).not.toHaveBeenCalled()
   })
+
+  it('멤버가 라운드 진행 시간 외에 출석을 등록하려고 하면 400을 반환해야 한다', async () => {
+    ;(requireAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'user-member-id',
+      error: null,
+    })
+    const now = new Date('2026-10-07T15:00:00Z')
+    ;(prisma.round.findUnique as jest.Mock).mockResolvedValue({
+      roundId: 'round-1',
+      clubId: 'club-1',
+      startDate: new Date('2026-10-07T10:00:00Z'),
+      endDate: new Date('2026-10-07T12:00:00Z'),
+    })
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      userId: 'user-member-id',
+    })
+    ;(getUserRole as jest.Mock).mockResolvedValue({ role: 'member' })
+    ;(prisma.attendance.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const req = new NextRequest('http://localhost:3000/api/attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roundId: 'round-1',
+        userId: 'user-member-id',
+        attendanceType: 'present',
+        attendanceDate: now.toISOString(),
+      }),
+    })
+
+    const res = await createAttendance(req)
+    const json = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(json.error).toBe('출석 가능 시간이 아닙니다')
+    expect(prisma.attendance.create).not.toHaveBeenCalled()
+  })
+
+  it('멤버가 본인 출석을 absent로 등록 시도 시 400을 반환해야 한다 (C-A06)', async () => {
+    ;(requireAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'user-member-id',
+      error: null,
+    })
+    ;(prisma.round.findUnique as jest.Mock).mockResolvedValue({
+      roundId: 'round-1',
+      clubId: 'club-1',
+      startDate: new Date('2026-10-07T10:00:00Z'),
+      endDate: new Date('2026-10-07T12:00:00Z'),
+    })
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      userId: 'user-member-id',
+    })
+    ;(getUserRole as jest.Mock).mockResolvedValue({ role: 'member' })
+    ;(prisma.attendance.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const req = new NextRequest('http://localhost:3000/api/attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roundId: 'round-1',
+        userId: 'user-member-id',
+        attendanceType: 'absent',
+      }),
+    })
+
+    const res = await createAttendance(req)
+    const json = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(json.error).toBe('본인 출석은 출석(present)만 등록 가능합니다.')
+    expect(prisma.attendance.create).not.toHaveBeenCalled()
+  })
+
+  it('관리자는 타인의 출석을 absent로 대리 등록할 수 있어야 한다 (C-A07)', async () => {
+    ;(requireAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'admin-user-id',
+      error: null,
+    })
+    ;(prisma.round.findUnique as jest.Mock).mockResolvedValue({
+      roundId: 'round-1',
+      clubId: 'club-1',
+      startDate: new Date('2026-10-07T10:00:00Z'),
+      endDate: new Date('2026-10-07T12:00:00Z'),
+    })
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      userId: 'target-member-id',
+    })
+    ;(getUserRole as jest.Mock).mockImplementation((userId: string) => {
+      if (userId === 'admin-user-id') return Promise.resolve({ role: 'admin' })
+      return Promise.resolve({ role: 'member' })
+    })
+    ;(prisma.attendance.findUnique as jest.Mock).mockResolvedValue(null)
+    ;(prisma.attendance.create as jest.Mock).mockResolvedValue({
+      attendanceId: 'att-created',
+    })
+
+    const req = new NextRequest('http://localhost:3000/api/attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roundId: 'round-1',
+        userId: 'target-member-id',
+        attendanceType: 'absent',
+      }),
+    })
+
+    const res = await createAttendance(req)
+    expect(res.status).toBe(201)
+    expect(prisma.attendance.create).toHaveBeenCalled()
+  })
 })

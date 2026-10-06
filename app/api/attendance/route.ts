@@ -1,8 +1,13 @@
 import prisma from '@/lib/prisma'
 import type { CreateAttendanceInput } from '@/lib/types/attendance'
-import { buildAttendanceWhereClause, buildAttendanceCreateData } from '@/lib/utils/attendance'
+import {
+  buildAttendanceWhereClause,
+  buildAttendanceCreateData,
+  canManageAttendance,
+} from '@/lib/utils/attendance'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { requireAuthUser } from '@/lib/utils/api-auth'
+import { getUserRole } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -150,6 +155,12 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return createErrorResponse('존재하지 않는 사용자입니다.', 404)
+    }
+
+    // 출석 등록 권한 확인 (본인이거나 모임 운영진이어야 함)
+    const membership = await getUserRole(currentUserId, round.clubId)
+    if (!canManageAttendance(currentUserId, userId, membership?.role)) {
+      return createErrorResponse('출석을 등록할 권한이 없습니다.', 403)
     }
 
     // 이미 출석이 있는지 확인

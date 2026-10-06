@@ -8,6 +8,7 @@ import {
   buildAttendanceWhereClause,
   calculateAttendanceStats,
   formatAttendanceGroupByStats,
+  canManageAttendance,
 } from '../attendance'
 
 describe('attendance utilities', () => {
@@ -401,6 +402,24 @@ describe('attendance utilities', () => {
         late: 0,
         excused: 0,
       })
+    })
+  })
+
+  describe('canManageAttendance', () => {
+    it('본인 계정의 출석인 경우 참을 반환해야 함', () => {
+      expect(canManageAttendance('user-1', 'user-1', 'member')).toBe(true)
+      expect(canManageAttendance('user-1', 'user-1', null)).toBe(true)
+    })
+
+    it('타인 출석이라도 admin 또는 owner인 경우 참을 반환해야 함', () => {
+      expect(canManageAttendance('user-admin', 'user-target', 'admin')).toBe(true)
+      expect(canManageAttendance('user-owner', 'user-target', 'owner')).toBe(true)
+    })
+
+    it('타인 출석이고 일반 member이거나 권한이 없으면 거짓을 반환해야 함', () => {
+      expect(canManageAttendance('user-caller', 'user-target', 'member')).toBe(false)
+      expect(canManageAttendance('user-caller', 'user-target', null)).toBe(false)
+      expect(canManageAttendance('user-caller', 'user-target', undefined)).toBe(false)
     })
   })
 })

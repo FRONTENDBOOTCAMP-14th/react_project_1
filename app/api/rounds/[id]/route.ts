@@ -8,7 +8,7 @@
  */
 
 import prisma from '@/lib/prisma'
-import { roundSelect, roundDetailSelect } from '@/lib/queries'
+import { roundDetailSelect } from '@/lib/queries'
 import type { UpdateRoundRequest } from '@/lib/types/round'
 import type { NextRequest } from 'next/server'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
@@ -58,7 +58,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         roundId: id,
         deletedAt: null,
       },
-      select: roundSelect,
+      select: {
+        roundId: true,
+        clubId: true,
+      },
     })
 
     if (!existingRound) {
@@ -120,7 +123,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           deletedAt: null,
         },
         data: updateData,
-        select: roundSelect,
       })
 
       return createSuccessResponse(updatedRound)
@@ -154,7 +156,10 @@ export async function DELETE(
         roundId: id,
         deletedAt: null,
       },
-      select: roundSelect,
+      select: {
+        roundId: true,
+        clubId: true,
+      },
     })
 
     if (!existingRound) {

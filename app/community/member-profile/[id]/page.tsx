@@ -82,14 +82,12 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     return <div className={styles.empty}>{MESSAGES.ERROR.MEMBER_NOT_FOUND}</div>
   }
 
-  const attendanceCount = await prisma.attendance
-    .findMany({
-      where: {
-        userId: member.user.userId,
-        deletedAt: null,
-      },
-    })
-    .then(attendance => attendance.length)
+  const attendanceCount = await prisma.attendance.count({
+    where: {
+      userId: member.user.userId,
+      deletedAt: null,
+    },
+  })
 
   return (
     <div className={styles.container}>

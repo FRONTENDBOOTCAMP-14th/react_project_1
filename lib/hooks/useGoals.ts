@@ -29,11 +29,18 @@ const INITIAL_GOALS: GoalsState = { team: [], personal: [] }
  * 목표 데이터를 병렬로 가져오는 커스텀 훅
  * @param clubId - 클럽 ID
  * @param roundId - 라운드 ID (선택, 없으면 전체 목표 조회)
+ * @param options - 옵션 객체 (enabled 등)
  * @returns 목표 데이터, 로딩 상태, 에러, 재조회 함수
  */
-export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
+export const useGoals = (
+  clubId: string,
+  roundId?: string,
+  options?: { enabled?: boolean }
+): UseGoalsData => {
+  const isEnabled = options?.enabled ?? true
+
   const fetchGoals = useCallback(async (): Promise<GoalsState> => {
-    if (!clubId) {
+    if (!clubId || !isEnabled) {
       return INITIAL_GOALS
     }
 
@@ -77,7 +84,7 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
       console.error('Failed to fetch goals:', err)
       throw new Error(MESSAGES.ERROR.FAILED_TO_LOAD_GOALS)
     }
-  }, [clubId, roundId])
+  }, [clubId, roundId, isEnabled])
 
   const {
     data: goals,
@@ -86,7 +93,7 @@ export const useGoals = (clubId: string, roundId?: string): UseGoalsData => {
     refetch,
   } = useAsyncData(fetchGoals, {
     initialData: INITIAL_GOALS,
-    enabled: Boolean(clubId),
+    enabled: Boolean(clubId) && isEnabled,
   })
 
   /**

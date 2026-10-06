@@ -93,6 +93,35 @@ export const roundSelect = {
 } satisfies Prisma.RoundSelect
 
 /**
+ * 다가오는 Round 경량 Select (캘린더용 - 불필요한 user 깊은 관계 제외)
+ */
+export const upcomingRoundSelect = {
+  roundId: true,
+  clubId: true,
+  roundNumber: true,
+  startDate: true,
+  endDate: true,
+  location: true,
+  createdAt: true,
+  updatedAt: true,
+  _count: {
+    select: {
+      attendance: true,
+    },
+  },
+  attendance: {
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      attendanceId: true,
+      userId: true,
+      attendanceType: true,
+    },
+  },
+} satisfies Prisma.RoundSelect
+
+/**
  * Round 상세 Select (관계 포함)
  */
 export const roundDetailSelect = {

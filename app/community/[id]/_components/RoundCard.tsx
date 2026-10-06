@@ -83,7 +83,7 @@ export default function RoundCard({
         onDelete={handleDelete}
         onRefetch={onRefetch}
       />
-      <RoundCardBody roundId={round?.roundId} isOpen={isOpen} />
+      {isOpen && <RoundCardBody roundId={round?.roundId} />}
     </article>
   )
 }
@@ -373,10 +373,6 @@ interface RoundCardBodyProps {
    * 현재 라운드 식별자 (선택)
    */
   roundId?: string
-  /**
-   * 라운드 카드가 열려있는지 여부
-   */
-  isOpen: boolean
 }
 
 /**
@@ -385,7 +381,7 @@ interface RoundCardBodyProps {
  * - 선언적 조건부 렌더링
  * @param props - RoundCardBodyProps
  */
-function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
+function RoundCardBody({ roundId }: RoundCardBodyProps) {
   // Context에서 커뮤니티 정보 가져오기
   const { clubId } = useCommunityContext()
   const { data: session } = useSession()
@@ -474,7 +470,7 @@ function RoundCardBody({ roundId, isOpen }: RoundCardBodyProps) {
         onAddGoal={handleAddGoal}
         onEdit={handleEditGoal}
         onDelete={handleDeleteGoal}
-        isOpen={isOpen}
+        isOpen={true}
       />
     )
   )

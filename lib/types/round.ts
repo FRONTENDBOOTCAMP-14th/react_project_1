@@ -22,7 +22,7 @@ export interface Round {
     attendanceId: string
     userId: string
     attendanceType: string
-    user: {
+    user?: {
       userId: string
       username: string
       nickname: string | null

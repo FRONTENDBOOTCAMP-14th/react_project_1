@@ -28,6 +28,7 @@ export default async function DashboardPage() {
   if (!user?.deletedAt) {
     // 커뮤니티 데이터 페칭
     const subscribedCommunities = await prisma.community.findMany({
+      relationLoadStrategy: 'join',
       where: {
         deletedAt: null,
         communityMembers: {

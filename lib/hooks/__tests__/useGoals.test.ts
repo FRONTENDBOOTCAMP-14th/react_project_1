@@ -93,4 +93,12 @@ describe('useGoals', () => {
     expect(result.current.goals).toEqual({ team: [], personal: [] })
     expect(fetch).not.toHaveBeenCalled()
   })
+
+  it('enabled가 false이면 clubId가 있어도 fetch를 호출하지 않고 대기한다', async () => {
+    const { result } = renderHook(() => useGoals('club-1', undefined, { enabled: false }))
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.goals).toEqual({ team: [], personal: [] })
+    expect(fetch).not.toHaveBeenCalled()
+  })
 })

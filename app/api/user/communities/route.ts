@@ -7,7 +7,11 @@
 
 import { MESSAGES } from '@/constants/messages'
 import prisma from '@/lib/prisma'
-import { roundSelect, upcomingRoundsWhere, userSubscribedCommunitiesWhere } from '@/lib/queries'
+import {
+  upcomingRoundSelect,
+  upcomingRoundsWhere,
+  userSubscribedCommunitiesWhere,
+} from '@/lib/queries'
 import type { Round } from '@/lib/types/round'
 import type { Community } from '@/lib/types/community'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
@@ -126,7 +130,7 @@ export async function GET(request: NextRequest) {
               },
               ...upcomingRoundsWhere(),
             },
-            select: roundSelect,
+            select: upcomingRoundSelect,
             orderBy: { startDate: 'asc' },
           })
         : []

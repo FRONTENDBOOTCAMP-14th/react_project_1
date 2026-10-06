@@ -112,8 +112,7 @@ NextAuth의 JWT 전략을 사용하여 빠르고 효율적인 인증을 제공�
 
 **역할 계층:**
 
-- `owner` (팀장): 모든 권한
-- `admin` (관리자): 멤버 관리 및 콘텐츠 수정
+- `admin` (팀장/관리자): 멤버 관리 및 콘텐츠 수정/삭제 등 모든 관리 권한
 - `member` (멤버): 기본 읽기 및 참여
 
 ### 4. 성능 최적화
@@ -173,7 +172,7 @@ import { createSuccessResponse } from '@/lib/utils/response'
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   // 인증 + 팀장 권한 확인
-  const { userId, role, error } = await requireAuthAndAccess(params.id, 'owner')
+  const { userId, role, error } = await requireAuthAndAccess(params.id, 'admin')
   if (error) return error
 
   // 삭제 로직...
@@ -294,8 +293,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   }
 
   // 3. 팀장 권한 확인
-  const isOwner = await hasPermission(userId!, round.clubId, 'owner')
-  if (!isOwner) {
+  const isLeader = await hasPermission(userId!, round.clubId, 'admin')
+  if (!isLeader) {
     return createErrorResponse('팀장만 라운드를 삭제할 수 있습니다.', 403)
   }
 

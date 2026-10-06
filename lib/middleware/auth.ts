@@ -70,27 +70,17 @@ export async function requireAuth(): Promise<AuthResult> {
   return { error: null, userId }
 }
 
+import { getCommunityMembership } from '@/lib/auth/permissions'
+
 /**
- * CommunityMember 조회 공통 헬퍼 함수
+ * CommunityMember 조회 공통 헬퍼 함수 (permissions SSOT 위임)
  * @param userId - 사용자 ID
  * @param clubId - 커뮤니티 ID
  * @param role - 특정 역할 필터 (선택)
  * @returns 멤버십 정보
  */
 async function findMembership(userId: string, clubId: string, role?: string) {
-  return await prisma.communityMember.findFirst({
-    where: {
-      userId,
-      clubId,
-      deletedAt: null,
-      ...(role && { role }),
-    },
-    select: {
-      id: true,
-      role: true,
-      joinedAt: true,
-    },
-  })
+  return await getCommunityMembership(userId, clubId, role)
 }
 
 /**

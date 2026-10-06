@@ -3,7 +3,7 @@
  * 일관된 에러 처리, 응답 형식, 로깅을 제공합니다.
  */
 
-import { getCurrentUserId } from '@/lib/auth'
+import { getCurrentUserId, getCommunityMembership } from '@/lib/auth'
 import { tryCatchAsync, type AsyncResult } from '@/lib/errors/result'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/utils/logger'
@@ -133,14 +133,11 @@ export async function checkPermission(
   clubId: string,
   requiredRole: 'admin' | 'member' = 'member'
 ): Promise<void> {
-  const member = await prisma.communityMember.findFirst({
-    where: {
-      clubId,
-      userId,
-      deletedAt: null, // 삭제된 멤버십 제외
-      ...(requiredRole === 'admin' && { role: 'admin' }),
-    },
-  })
+  const member = await getCommunityMembership(
+    userId,
+    clubId,
+    requiredRole === 'admin' ? 'admin' : undefined
+  )
 
   if (!member) {
     throw new ServerActionError(

@@ -1,4 +1,4 @@
-import regionData from './region.json'
+import regionData from '@/lib/json/region.json'
 import type { Region } from '@/lib/types/common'
 import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 

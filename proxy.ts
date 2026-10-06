@@ -16,7 +16,7 @@ import { NextResponse } from 'next/server'
 /**
  * 공개 API 엔드포인트 (인증 불필요)
  */
-const PUBLIC_API_ROUTES = ['/api/auth', '/api/health', '/api/region', '/api/login-kakao']
+const PUBLIC_API_ROUTES = ['/api/auth', '/api/health', '/api/region']
 
 /**
  * 인증이 필요한 API 엔드포인트 (GET 요청도 포함)

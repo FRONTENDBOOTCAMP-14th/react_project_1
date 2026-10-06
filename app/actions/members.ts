@@ -16,7 +16,7 @@ import {
 import { revalidatePath } from 'next/cache'
 
 /**
- * Server Action: 멤버 추가 (커뮤니티 가입 - Imperative Shell)
+ * Server Action: 멤버 추가 (커뮤니티 가입)
  */
 export async function createMemberAction(data: CreateMemberRequest): Promise<ServerActionResponse> {
   return withServerAction(
@@ -26,13 +26,11 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
 
       const { clubId, role = 'member' } = data
 
-      // 1. I/O: 커뮤니티 존재 확인
       const club = await prisma.community.findFirst({
         where: { clubId, deletedAt: null },
         select: { clubId: true },
       })
 
-      // 2. I/O: 이미 멤버인지 확인
       const existingMember = await prisma.communityMember.findFirst({
         where: {
           clubId,
@@ -41,7 +39,6 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
         },
       })
 
-      // 3. Functional Core: 가입 요청 데이터 유효성 검증
       const validation = validateMemberCreation({
         clubId,
         userId,
@@ -53,12 +50,10 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
         throw validation.error
       }
 
-      // 4. I/O: 멤버 생성
       const newMember = await prisma.communityMember.create({
         data: validation.value,
       })
 
-      // 5. Side Effects: 캐시 무효화
       revalidatePath(`/community/${clubId}`)
       return newMember
     },
@@ -67,7 +62,7 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
 }
 
 /**
- * Server Action: 멤버 역할 수정 (Imperative Shell)
+ * Server Action: 멤버 역할 수정
  */
 export async function updateMemberAction(
   memberId: string,
@@ -78,18 +73,15 @@ export async function updateMemberAction(
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      // 1. I/O: 멤버 정보 조회
       const existingMember = await prisma.communityMember.findFirst({
         where: { id: memberId, deletedAt: null },
         select: { clubId: true, userId: true },
       })
 
-      // 2. I/O: 팀장 권한 확인
       const hasAdminPermission = existingMember
         ? await hasPermission(userId, existingMember.clubId, 'admin')
         : false
 
-      // 3. Functional Core: 역할 수정 검증
       const validation = validateMemberRoleUpdate({
         hasAdminPermission,
         memberExists: Boolean(existingMember),
@@ -99,7 +91,6 @@ export async function updateMemberAction(
         throw validation.error
       }
 
-      // 4. I/O: 멤버 업데이트
       const updatedMember = await prisma.communityMember.update({
         where: {
           id: memberId,
@@ -108,7 +99,6 @@ export async function updateMemberAction(
         data: validation.value,
       })
 
-      // 5. Side Effects: 캐시 무효화
       if (existingMember) {
         revalidatePath(`/community/${existingMember.clubId}`)
       }
@@ -119,7 +109,7 @@ export async function updateMemberAction(
 }
 
 /**
- * Server Action: 멤버 삭제 (커뮤니티 탈퇴/강퇴 - Imperative Shell)
+ * Server Action: 멤버 삭제 (커뮤니티 탈퇴/강퇴)
  */
 export async function deleteMemberAction(memberId: string): Promise<ServerActionResponse> {
   return withServerAction(
@@ -127,19 +117,16 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      // 1. I/O: 멤버 정보 조회
       const existingMember = await prisma.communityMember.findFirst({
         where: { id: memberId, deletedAt: null },
         select: { clubId: true, userId: true },
       })
 
-      // 2. I/O: 권한 확인 (본인 또는 팀장)
       const isSelf = existingMember?.userId === userId
       const hasAdminPermission = existingMember
         ? await hasPermission(userId, existingMember.clubId, 'admin')
         : false
 
-      // 3. Functional Core: 삭제 자격 검증
       const validation = canDeleteMember({
         memberExists: Boolean(existingMember),
         isSelf,
@@ -149,7 +136,6 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
         throw validation.error
       }
 
-      // 4. I/O: 소프트 삭제 처리
       await prisma.communityMember.update({
         where: {
           id: memberId,
@@ -158,7 +144,6 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
         data: { deletedAt: new Date() },
       })
 
-      // 5. Side Effects: 캐시 무효화
       if (existingMember) {
         revalidatePath(`/community/${existingMember.clubId}`)
       }

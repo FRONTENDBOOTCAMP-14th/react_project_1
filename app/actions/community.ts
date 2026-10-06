@@ -21,7 +21,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 /**
- * Server Action: 커뮤니티 정보 업데이트 (Imperative Shell)
+ * Server Action: 커뮤니티 정보 업데이트
  */
 export async function updateCommunityAction(
   clubId: string,
@@ -32,22 +32,18 @@ export async function updateCommunityAction(
       const userId = await getCurrentUserId()
       assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 1. 관리자 권한 확인 (I/O)
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 2. Functional Core: 입력 데이터 유효성 검증 및 정제
       const prepared = prepareCommunityUpdate(input)
       if (prepared.isErr()) {
         throw prepared.error
       }
 
-      // 3. I/O: 커뮤니티 업데이트
       await prisma.community.update({
         where: { clubId },
         data: prepared.value,
       })
 
-      // 4. Side Effects: 캐시 무효화
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
       revalidateTag(REVALIDATE_TAGS.COMMUNITIES, 'max')
     },
@@ -56,7 +52,7 @@ export async function updateCommunityAction(
 }
 
 /**
- * Server Action: 커뮤니티 삭제 (Imperative Shell)
+ * Server Action: 커뮤니티 삭제
  */
 export async function deleteCommunityAction(clubId: string): Promise<ServerActionResponse> {
   const result = await withServerAction(
@@ -64,7 +60,6 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
       const userId = await getCurrentUserId()
       assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 1. I/O: 현재 클럽 상태 조회 및 권한 확인
       const community = await prisma.community.findUnique({
         where: { clubId },
         select: { deletedAt: true },
@@ -73,7 +68,6 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
 
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 2. Functional Core: 삭제 가능 조건 검증
       const validation = canDeleteCommunity({
         userId,
         isAdmin: true,
@@ -83,13 +77,11 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
         throw validation.error
       }
 
-      // 3. I/O: 소프트 삭제 처리
       await prisma.community.update({
         where: { clubId, deletedAt: null },
         data: { deletedAt: new Date() },
       })
 
-      // 4. Side Effects: 캐시 무효화
       revalidatePath('/community')
       revalidateTag('communities', 'max')
     },
@@ -104,7 +96,7 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
 }
 
 /**
- * Server Action: 커뮤니티 가입 (Imperative Shell)
+ * Server Action: 커뮤니티 가입
  */
 export async function joinCommunityAction(clubId: string): Promise<ServerActionResponse> {
   return withServerAction(
@@ -112,12 +104,10 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
       const userId = await getCurrentUserId()
       assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 1. I/O: 기존 가입 여부 확인
       const existingMember = await prisma.communityMember.findFirst({
         where: { clubId, userId, deletedAt: null },
       })
 
-      // 2. Functional Core: 가입 자격 판별
       const joinDecision = canJoinCommunity({
         userId,
         isExistingMember: Boolean(existingMember),
@@ -126,7 +116,6 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
         throw joinDecision.error
       }
 
-      // 3. I/O: 멤버 추가
       await prisma.communityMember.create({
         data: {
           clubId,
@@ -135,7 +124,6 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
         },
       })
 
-      // 4. Side Effects: 캐시 무효화
       revalidatePath(`/community/${clubId}`)
       revalidateTag('communities', 'max')
     },
@@ -144,7 +132,7 @@ export async function joinCommunityAction(clubId: string): Promise<ServerActionR
 }
 
 /**
- * Server Action: 커뮤니티 이미지 업로드 (Imperative Shell)
+ * Server Action: 커뮤니티 이미지 업로드
  */
 export async function uploadCommunityImageAction(
   clubId: string,
@@ -155,7 +143,6 @@ export async function uploadCommunityImageAction(
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      // 1. I/O: 관리자 권한 확인
       await checkPermission(userId, clubId, 'admin')
 
       const file = formData.get('image') as File | null
@@ -163,7 +150,6 @@ export async function uploadCommunityImageAction(
         throw new Error('이미지 파일이 없습니다')
       }
 
-      // 2. Functional Core: 이미지 메타데이터 검증 및 고유 파일명/경로 결정
       const uploadPreparation = prepareImageUpload(
         {
           fileName: file.name,
@@ -178,7 +164,6 @@ export async function uploadCommunityImageAction(
         throw uploadPreparation.error
       }
 
-      // 3. I/O: Supabase 스토리지 업로드
       const supabaseUrl = process.env.SUPABASE_URL
       const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
       if (!supabaseUrl || !supabaseAnonKey) {
@@ -202,13 +187,11 @@ export async function uploadCommunityImageAction(
       const { data: urlData } = supabase.storage.from('community-images').getPublicUrl(filePath)
       const imageUrl = urlData.publicUrl
 
-      // 4. I/O: DB 업데이트
       await prisma.community.update({
         where: { clubId },
         data: { imageUrl },
       })
 
-      // 5. Side Effects: 캐시 무효화
       revalidatePath(`/community/${clubId}`)
       revalidateTag('communities', 'max')
       return { imageUrl }

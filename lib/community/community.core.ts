@@ -36,8 +36,7 @@ const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif'])
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
 
 /**
- * Functional Core: 커뮤니티 가입 가능 여부 및 가입 데이터 생성
- * 순수 함수 (No DB, No I/O)
+ * 커뮤니티 가입 가능 여부 판별 및 기본 가입 데이터 반환
  */
 export function canJoinCommunity(input: CanJoinCommunityInput): Result<JoinCommunityData, Error> {
   if (!input.userId) {
@@ -55,8 +54,7 @@ export function canJoinCommunity(input: CanJoinCommunityInput): Result<JoinCommu
 }
 
 /**
- * Functional Core: 커뮤니티 업데이트 입력값 검증 및 정제
- * 순수 함수 (No DB, No I/O)
+ * 커뮤니티 수정 입력값 검증 및 정제
  */
 export function prepareCommunityUpdate(
   input: UpdateCommunityInput
@@ -99,8 +97,7 @@ export function prepareCommunityUpdate(
 }
 
 /**
- * Functional Core: 커뮤니티 삭제 자격 및 상태 검증
- * 순수 함수 (No DB, No I/O)
+ * 커뮤니티 삭제 자격 및 상태 검증
  */
 export function canDeleteCommunity(input: CanDeleteCommunityInput): Result<true, Error> {
   if (!input.userId || !input.isAdmin) {
@@ -115,8 +112,7 @@ export function canDeleteCommunity(input: CanDeleteCommunityInput): Result<true,
 }
 
 /**
- * Functional Core: 이미지 메타데이터 검증 및 스토리지 경로 생성
- * 순수 함수 (No DB, No Network, 결정론적 파일명 생성)
+ * 이미지 메타데이터 검증 및 저장 경로 생성
  */
 export function prepareImageUpload(
   input: PrepareImageUploadInput,

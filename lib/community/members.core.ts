@@ -34,8 +34,7 @@ export interface CanDeleteMemberInput {
 }
 
 /**
- * Functional Core: 멤버 생성 요청 검증 및 기본값 설정
- * 순수 함수 (No DB, No I/O)
+ * 멤버 생성 요청 검증 및 기본값 설정
  */
 export function validateMemberCreation(
   input: ValidateMemberCreationInput
@@ -62,8 +61,7 @@ export function validateMemberCreation(
 }
 
 /**
- * Functional Core: 멤버 역할 수정 검증
- * 순수 함수 (No DB, No I/O)
+ * 멤버 역할 수정 검증
  */
 export function validateMemberRoleUpdate(
   input: ValidateMemberRoleUpdateInput
@@ -86,8 +84,7 @@ export function validateMemberRoleUpdate(
 }
 
 /**
- * Functional Core: 멤버 삭제(탈퇴/강퇴) 권한 검증
- * 순수 함수 (No DB, No I/O)
+ * 멤버 삭제(탈퇴/강퇴) 권한 검증
  */
 export function canDeleteMember(input: CanDeleteMemberInput): Result<true, Error> {
   if (!input.memberExists) {

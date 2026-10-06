@@ -3,7 +3,7 @@
 import { LoadingState } from '@/components/common'
 import { MESSAGES } from '@/constants'
 import { useUserCommunities } from '@/lib/hooks'
-import { toLocalTime } from '@/lib/utils'
+import { isRoundOnLocalDate } from '@/lib/utils'
 import { useMemo, useState } from 'react'
 import { useSelectedDate } from '../_hooks/useSelectedDateContext'
 import styles from './CalendarSection.module.css'
@@ -36,16 +36,12 @@ export default function CalendarSection({ userId }: CalendarSectionProps) {
     return Array.from({ length: 3 }, (_, i) => {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
-
-      // 해당 날짜의 라운드 수 계산
-      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-      const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+      const dateKey = formatDateKey(date)
 
       // 해당 날짜의 라운드들
       const dayRounds = upcomingRounds.filter(round => {
         if (!round.startDate) return false
-        const roundDate = toLocalTime(new Date(round.startDate))
-        return roundDate >= dayStart && roundDate < dayEnd
+        return isRoundOnLocalDate(round.startDate, dateKey)
       })
 
       // 출석자 수 계산 (중복 제거)

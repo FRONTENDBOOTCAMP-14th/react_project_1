@@ -55,6 +55,42 @@ function addSoftDeleteCondition(args: Record<string, unknown>): Record<string, u
 }
 
 /**
+ * 소프트 삭제 연산 처리 헬퍼
+ */
+export async function handleSoftDeleteOperation({
+  model,
+  operation,
+  args,
+  query,
+}: {
+  model?: string
+  operation: string
+  args: Record<string, unknown>
+  query: (args: unknown) => Promise<unknown>
+}) {
+  // 소프트 삭제 대상 모델이 아닌 경우 원래대로 실행
+  if (!model || !isSoftDeleteModel(model)) {
+    return query(args)
+  }
+
+  // find 계열 쿼리에 deletedAt: null 조건 추가
+  if (operation.startsWith('find')) {
+    const modifiedArgs = addSoftDeleteCondition(args)
+    return query(modifiedArgs)
+  }
+
+  // delete 쿼리 방어: 소프트 삭제 대상 모델에 대한 물리 삭제 차단
+  if (operation === 'delete' || operation === 'deleteMany') {
+    throw new Error(
+      `Direct ${operation} is disabled for soft-delete model '${model}'. Use update with deletedAt instead.`
+    )
+  }
+
+  // 그 외 쿼리는 원래대로 실행
+  return query(args)
+}
+
+/**
  * 소프트 삭제를 위한 Prisma Extension
  */
 export const softDeleteExtension = Prisma.defineExtension({
@@ -62,26 +98,12 @@ export const softDeleteExtension = Prisma.defineExtension({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
-        // 소프트 삭제 대상 모델이 아닌 경우 원래대로 실행
-        if (!model || !isSoftDeleteModel(model)) {
-          return query(args)
-        }
-
-        // find 계열 쿼리에 deletedAt: null 조건 추가
-        if (operation.startsWith('find')) {
-          const modifiedArgs = addSoftDeleteCondition(args)
-          return query(modifiedArgs)
-        }
-
-        // delete 쿼리 방어: Prisma delete는 data 필드를 허용하지 않으므로 client update로 위임하거나 data 파라미터 제외
-        if (operation === 'delete' || operation === 'deleteMany') {
-          // 호출 측에서 update({ where, data: { deletedAt: new Date() } }) 패턴을 권장하며,
-          // 잘못된 delete 호출 시 args.data 주입으로 인한 스키마 런타임 크래시를 방지
-          return query(args)
-        }
-
-        // 그 외 쿼리는 원래대로 실행
-        return query(args)
+        return handleSoftDeleteOperation({
+          model,
+          operation,
+          args,
+          query,
+        })
       },
     },
   },

@@ -72,7 +72,7 @@ export default function CursorCommunitiesClient({
           limit: 20,
         })
         setCurrentInitialResult(result)
-        reset()
+        reset(result)
       } catch (err) {
         console.error('Initial communities error:', err)
       }

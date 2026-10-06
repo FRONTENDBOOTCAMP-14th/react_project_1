@@ -158,9 +158,17 @@ export async function POST(request: NextRequest) {
     }
 
     // 출석 등록 권한 확인 (모임 멤버 본인이거나 모임 운영진이어야 함)
-    const membership = await getUserRole(currentUserId, round.clubId)
-    if (!membership || !canManageAttendance(currentUserId, userId, membership.role)) {
+    const callerMembership = await getUserRole(currentUserId, round.clubId)
+    if (!callerMembership || !canManageAttendance(currentUserId, userId, callerMembership.role)) {
       return createErrorResponse('출석을 등록할 권한이 없습니다.', 403)
+    }
+
+    // 대상 사용자(userId)가 해당 모임의 멤버인지 확인
+    const targetMembership =
+      userId === currentUserId ? callerMembership : await getUserRole(userId, round.clubId)
+
+    if (!targetMembership) {
+      return createErrorResponse('해당 모임의 멤버만 출석을 등록할 수 있습니다.', 400)
     }
 
     // 이미 출석이 있는지 확인

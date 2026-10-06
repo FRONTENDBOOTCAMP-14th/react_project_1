@@ -96,7 +96,7 @@ export function applyCursorPagination(
       {
         [orderByField]: direction === 'forward' ? 'asc' : 'desc',
       },
-      { clubId: 'asc' }, // 동일한 시간일 경우 clubId로 정렬
+      { clubId: direction === 'forward' ? 'asc' : 'desc' }, // 동일한 시간일 경우 clubId로 정렬
     ],
   }
 

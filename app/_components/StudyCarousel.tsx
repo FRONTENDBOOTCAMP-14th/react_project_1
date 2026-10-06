@@ -3,7 +3,7 @@
 import { Carousel, CarouselItem } from '@/components/ui'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
-import { formatDateRangeUTC, getUTCDayRange } from '@/lib/utils'
+import { formatDateRangeUTC, isRoundOnLocalDate } from '@/lib/utils'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useSyncExternalStore } from 'react'
@@ -48,21 +48,9 @@ export default function StudyCarousel({
   const selectedDateRounds = (() => {
     if (!selectedDate) return []
 
-    const [yearStr, monthStr, dayStr] = selectedDate.split('-')
-    const year = parseInt(yearStr, 10)
-    const month = parseInt(monthStr, 10) - 1
-    const day = parseInt(dayStr, 10)
-
-    // UTC 기준 선택된 특정 날짜 생성
-    const targetDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0))
-
-    // UTC 기준 하루 범위 (00:00:00 ~ 23:59:59.999)
-    const { start: dayStart, end: dayEnd } = getUTCDayRange(targetDate)
-
     return upcomingRounds.filter(round => {
       if (!round.startDate) return false
-      const roundDate = new Date(round.startDate)
-      return roundDate >= dayStart && roundDate <= dayEnd
+      return isRoundOnLocalDate(round.startDate, selectedDate)
     })
   })()
 

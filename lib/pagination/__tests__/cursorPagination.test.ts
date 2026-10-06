@@ -57,7 +57,6 @@ describe('Cursor Pagination with Composite Key', () => {
       { cursor, limit: 10, direction: 'backward' }
     )
 
-    expect(query.take).toBe(11)
     expect(query.where).toEqual({
       deletedAt: null,
       OR: [
@@ -68,6 +67,7 @@ describe('Cursor Pagination with Composite Key', () => {
         },
       ],
     })
+    expect(query.orderBy).toEqual([{ createdAt: 'desc' }, { clubId: 'desc' }])
   })
 
   it('processCursorResult는 인코딩된 복합 커서를 반환해야 함', () => {

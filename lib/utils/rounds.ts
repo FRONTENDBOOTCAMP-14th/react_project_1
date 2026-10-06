@@ -49,7 +49,10 @@ export function buildRoundWhereClause(
 
   // roundNumber 필터
   if (filters.roundNumber) {
-    whereClause.roundNumber = parseInt(filters.roundNumber, 10)
+    const parsedRoundNumber = parseInt(filters.roundNumber, 10)
+    if (!Number.isNaN(parsedRoundNumber)) {
+      whereClause.roundNumber = parsedRoundNumber
+    }
   }
 
   // 날짜 범위 필터

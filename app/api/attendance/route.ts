@@ -29,11 +29,7 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId')
     const roundId = searchParams.get('roundId')
     const attendanceType = searchParams.get('attendanceType') as
-      | 'present'
-      | 'absent'
-      | 'late'
-      | 'excused'
-      | null
+      'present' | 'absent' | 'late' | 'excused' | null
 
     // 명확한 파라미터 이름 사용: attendanceDateFrom, attendanceDateTo
     const attendanceDateFrom =

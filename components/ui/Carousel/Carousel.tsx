@@ -71,13 +71,20 @@ const Carousel = ({
   const [itemCount, setItemCount] = useState(0)
   const [_isPending, startTransition] = useTransition() // 나중에 로딩 UI에 활용 가능
 
-  const { containerRef, currentIndex, canScrollLeft, canScrollRight, scrollTo, scrollToIndex } =
-    useCarouselScroll({
-      itemCount,
-      itemsPerView,
-      enableTouch,
-      swipeThreshold,
-    })
+  const {
+    containerRef,
+    currentIndex,
+    canScrollLeft,
+    canScrollRight,
+    isDragging,
+    scrollTo,
+    scrollToIndex,
+  } = useCarouselScroll({
+    itemCount,
+    itemsPerView,
+    enableTouch,
+    swipeThreshold,
+  })
 
   // 자동재생 및 무한 루프
   const { handleMouseEnter, handleMouseLeave } = useCarouselAutoPlay({
@@ -123,7 +130,7 @@ const Carousel = ({
       {/* 캐러셀 컨테이너 */}
       <div
         ref={containerRef}
-        className={styles.container}
+        className={cn(styles.container, isDragging && styles.dragging)}
         style={{
           gap: `${gap}px`,
           gridAutoColumns:

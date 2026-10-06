@@ -14,6 +14,7 @@ interface UseCarouselScrollReturn {
   currentIndex: number
   canScrollLeft: boolean
   canScrollRight: boolean
+  isDragging: boolean
   scrollTo: (direction: 'left' | 'right') => void
   scrollToIndex: (index: number) => void
 }
@@ -32,6 +33,7 @@ export function useCarouselScroll({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const scrollTimeoutRef = useRef<number | null>(null)
   const touchStartXRef = useRef<number>(0)
   const touchStartYRef = useRef<number>(0)
@@ -145,10 +147,8 @@ export function useCarouselScroll({
       // 수평 스크롤인지 수직 스크롤인지 판단
       if (diffX > diffY && diffX > 10) {
         isDraggingRef.current = true
+        setIsDragging(true)
         e.preventDefault() // 수평 스크롤일 때만 기본 동작 방지
-        // 드래그 중 텍스트 선택 방지
-        document.body.style.userSelect = 'none'
-        document.body.style.webkitUserSelect = 'none'
       }
     } else {
       // 드래그 중 계속 기본 동작 방지
@@ -172,10 +172,8 @@ export function useCarouselScroll({
         scrollTo(diff > 0 ? 'right' : 'left')
       }
 
-      // 텍스트 선택 복원
-      document.body.style.userSelect = ''
-      document.body.style.webkitUserSelect = ''
       isDraggingRef.current = false
+      setIsDragging(false)
     },
     [scrollTo, swipeThreshold]
   )

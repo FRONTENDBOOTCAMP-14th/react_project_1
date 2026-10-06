@@ -58,11 +58,7 @@ export default function CalendarSection({ userId }: CalendarSectionProps) {
         count: dayRounds.length,
         attendeeCount,
         userAttendanceStatus: userAttendanceStatus as
-          | 'present'
-          | 'absent'
-          | 'late'
-          | 'excused'
-          | null,
+          'present' | 'absent' | 'late' | 'excused' | null,
       }
     })
   }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때만 재계산

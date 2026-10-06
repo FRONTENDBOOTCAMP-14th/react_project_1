@@ -98,6 +98,17 @@ describe('attendance utilities', () => {
       })
     })
 
+    it('유효하지 않은 날짜 문자열은 attendanceDate 필터에 추가하지 않아야 함 (Invalid Date 방지)', () => {
+      const whereClause = buildAttendanceWhereClause({
+        startDate: new Date('invalid-start-date'),
+        endDate: new Date('invalid-end-date'),
+      })
+
+      expect(whereClause).toEqual({
+        deletedAt: null,
+      })
+    })
+
     it('clubId 필터를 적용해야 함', () => {
       const whereClause = buildAttendanceWhereClause({
         clubId: 'club-789',

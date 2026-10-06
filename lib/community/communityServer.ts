@@ -100,14 +100,12 @@ export async function getCommunityDetail(clubId: string): Promise<CommunityDetai
       return null
     }
 
-    // memberCount 추가
-    const communityDetail: CommunityDetail = {
-      ...community,
-      memberCount: community.communityMembers.length,
-    }
+    const { communityMembers, ...rest } = community
 
-    // communityMembers는 필요 없으므로 제거
-    delete (communityDetail as CommunityDetail & { communityMembers: unknown }).communityMembers
+    const communityDetail: CommunityDetail = {
+      ...rest,
+      memberCount: communityMembers.length,
+    }
 
     return communityDetail
   } catch (error) {

@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
       ...activeGoalWhere,
       ...(clubId && { clubId }),
       ...(roundId && { roundId }),
-      ...(isTeam !== null && { isTeam }),
-      ...(isComplete !== null && { isComplete }),
+      ...(isTeam !== undefined && { isTeam }),
+      ...(isComplete !== undefined && { isComplete }),
       ...(ownerId && { ownerId }),
     }
 

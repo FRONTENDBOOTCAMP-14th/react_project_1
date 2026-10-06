@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     // where 조건 구성
     const whereClause: CommunityWhereClause = {
       deletedAt: null,
-      ...(isPublic !== null && { isPublic }),
+      ...(isPublic !== undefined && { isPublic }),
       ...(region && { region }),
       ...(subRegion && { subRegion }),
       ...(search && {

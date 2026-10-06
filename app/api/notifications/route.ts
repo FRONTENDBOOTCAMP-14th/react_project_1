@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     const whereClause = {
       ...activeNotificationWhere,
       clubId,
-      ...(isPinned !== null && { isPinned }),
+      ...(isPinned !== undefined && { isPinned }),
     }
 
     // withPagination 유틸리티 사용

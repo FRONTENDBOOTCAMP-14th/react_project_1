@@ -56,22 +56,12 @@ export default function SearchRegion({
   loading = false,
 }: SearchRegionProps) {
   const [regions, setRegions] = useState<Region[]>([])
-  const [localRegion, setLocalRegion] = useState(region)
-  const [localSubRegion, setLocalSubRegion] = useState(subRegion)
 
   useEffect(() => {
     import('@/lib/json/region.json').then(regionJson => {
       setRegions(regionJson.default)
     })
   }, [])
-
-  useEffect(() => {
-    setLocalRegion(region)
-  }, [region])
-
-  useEffect(() => {
-    setLocalSubRegion(subRegion)
-  }, [subRegion])
 
   //첫번째 드롭다운 : region(json)
   const regionOptions = useMemo(() => {
@@ -82,12 +72,12 @@ export default function SearchRegion({
 
   //두번째 드롭다운: subregion(json)
   const subRegionOptions = useMemo(() => {
-    const found = regions.find(r => r.region === localRegion)
+    const found = regions.find(r => r.region === region)
     if (!found) return []
     const subRegionOptions = found.subRegion.map((sr: string) => ({ value: sr, label: sr }))
     subRegionOptions.unshift({ value: '', label: '전체' })
     return subRegionOptions
-  }, [regions, localRegion])
+  }, [regions, region])
 
   return (
     <section className={styles['search-section']}>
@@ -97,13 +87,13 @@ export default function SearchRegion({
       <div className={styles['search-controls']}>
         <Dropdown
           options={regionOptions}
-          value={localRegion}
+          value={region}
           onChange={onChangeRegion}
           placeholder={MESSAGES.SEARCH.REGION_PLACEHOLDER}
         />
         <Dropdown
           options={subRegionOptions}
-          value={localSubRegion}
+          value={subRegion}
           onChange={onChangeSubRegion}
           placeholder={MESSAGES.SEARCH.SUBREGION_PLACEHOLDER}
         />

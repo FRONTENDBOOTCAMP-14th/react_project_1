@@ -175,8 +175,10 @@ export const fromServerTime = (serverDate: Date) => timeSync.fromServerTime(serv
  * React Hook for time sync
  */
 export function useTimeSync() {
-  const [syncStatus, setSyncStatus] = useState<TimeSyncResult | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<TimeSyncResult | null>(() =>
+    timeSync.getCurrentSyncStatus()
+  )
+  const [loading, setLoading] = useState(() => !timeSync.getCurrentSyncStatus()?.isSynced)
 
   const sync = useCallback(async () => {
     setLoading(true)
@@ -190,10 +192,16 @@ export function useTimeSync() {
   }, [])
 
   useEffect(() => {
-    // 초기 동기화
-    sync()
+    let ignore = false
 
-    // 자동 동기화 시작
+    timeSync.syncWithServer().then(result => {
+      if (!ignore) {
+        setSyncStatus(result)
+        setLoading(false)
+      }
+    })
+
+    // 자동 동기화 타이머 시작
     timeSync.startAutoSync()
 
     // 주기적으로 상태 업데이트
@@ -201,8 +209,11 @@ export function useTimeSync() {
       setSyncStatus(timeSync.getCurrentSyncStatus())
     }, 1000)
 
-    return () => clearInterval(interval)
-  }, [sync])
+    return () => {
+      ignore = true
+      clearInterval(interval)
+    }
+  }, [])
 
   return {
     syncStatus,

@@ -3,7 +3,7 @@
 import { IconButton, TextInput } from '@/components/ui'
 import { MESSAGES } from '@/constants'
 import { Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Style from './WordSearch.module.css'
 
 interface WordSearchProps {
@@ -20,11 +20,12 @@ export default function WordSearch({
   loading = false,
 }: WordSearchProps) {
   const [localQuery, setLocalQuery] = useState(query)
+  const [prevQuery, setPrevQuery] = useState(query)
 
-  // props의 query가 변경되면 로컬 상태 동기화 (외부에서 변경된 경우)
-  useEffect(() => {
+  if (query !== prevQuery) {
+    setPrevQuery(query)
     setLocalQuery(query)
-  }, [query])
+  }
 
   // 검색 실행
   const handleLocalSearch = () => {

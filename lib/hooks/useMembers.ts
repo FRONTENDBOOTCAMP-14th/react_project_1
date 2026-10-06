@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from 'react'
-import type { CreateMemberRequest, UpdateMemberRequest } from '@/lib/types/member'
 import { API_ENDPOINTS, MESSAGES } from '@/constants'
+import type { CreateMemberRequest, UpdateMemberRequest } from '@/lib/types/member'
+import { useCallback } from 'react'
+import { useAsyncData } from './useAsyncData'
 
 /**
  * 멤버 타입 (memberDetailSelect 기반)
@@ -30,6 +31,21 @@ interface UseMembersOptions {
   role?: string
   page?: number
   limit?: number
+}
+
+interface MembersState {
+  members: Member[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  } | null
+}
+
+const INITIAL_MEMBERS: MembersState = {
+  members: [],
+  pagination: null,
 }
 
 interface UseMembersResult {
@@ -91,21 +107,14 @@ export const useMembers = ({
   page = 1,
   limit = 20,
 }: UseMembersOptions): UseMembersResult => {
-  const [members, setMembers] = useState<Member[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState<{
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  } | null>(null)
+  const isEnabled = Boolean(clubId || userId)
 
-  const fetchMembers = useCallback(async () => {
+  const fetchMembers = useCallback(async (): Promise<MembersState> => {
+    if (!clubId && !userId) {
+      return INITIAL_MEMBERS
+    }
+
     try {
-      setLoading(true)
-      setError(null)
-
       const response = await fetch(
         API_ENDPOINTS.MEMBERS.WITH_PARAMS({
           clubId,
@@ -118,28 +127,23 @@ export const useMembers = ({
       const result = await response.json()
 
       if (result.success && result.data) {
-        // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
         const membersList = Array.isArray(result.data) ? result.data : result.data.data
-        setMembers(membersList || [])
-
-        // pagination은 result.data.pagination에 있음
-        if (result.data.pagination) {
-          setPagination(result.data.pagination)
+        return {
+          members: membersList || [],
+          pagination: result.data.pagination || null,
         }
-      } else {
-        setMembers([])
-        setPagination(null)
-        setError(result.error || MESSAGES.ERROR.FAILED_TO_LOAD_MEMBERS)
       }
+      throw new Error(result.error || MESSAGES.ERROR.FAILED_TO_LOAD_MEMBERS)
     } catch (err) {
       console.error('Failed to fetch members:', err)
-      setError(MESSAGES.ERROR.FAILED_TO_LOAD_MEMBERS)
-      setMembers([])
-      setPagination(null)
-    } finally {
-      setLoading(false)
+      throw new Error(MESSAGES.ERROR.FAILED_TO_LOAD_MEMBERS)
     }
   }, [clubId, userId, role, page, limit])
+
+  const { data, loading, error, refetch } = useAsyncData(fetchMembers, {
+    initialData: INITIAL_MEMBERS,
+    enabled: isEnabled,
+  })
 
   /**
    * 특정 멤버 상세 조회
@@ -173,8 +177,7 @@ export const useMembers = ({
         const result = await createMemberAction(input)
 
         if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchMembers()
+          await refetch()
           return { success: true, data: result.data as Member }
         }
         return {
@@ -186,7 +189,7 @@ export const useMembers = ({
         return { success: false, error: MESSAGES.ERROR.FAILED_TO_CREATE_MEMBER }
       }
     },
-    [fetchMembers]
+    [refetch]
   )
 
   /**
@@ -202,8 +205,7 @@ export const useMembers = ({
         const result = await updateMemberAction(memberId, input)
 
         if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchMembers()
+          await refetch()
           return { success: true, data: result.data as Member }
         }
         return {
@@ -215,7 +217,7 @@ export const useMembers = ({
         return { success: false, error: MESSAGES.ERROR.FAILED_TO_UPDATE_MEMBER }
       }
     },
-    [fetchMembers]
+    [refetch]
   )
 
   /**
@@ -230,8 +232,7 @@ export const useMembers = ({
         const result = await deleteMemberAction(memberId)
 
         if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchMembers()
+          await refetch()
           return { success: true }
         }
         return {
@@ -243,7 +244,7 @@ export const useMembers = ({
         return { success: false, error: MESSAGES.ERROR.FAILED_TO_DELETE_MEMBER }
       }
     },
-    [fetchMembers]
+    [refetch]
   )
 
   /**
@@ -259,18 +260,12 @@ export const useMembers = ({
     [updateMember]
   )
 
-  useEffect(() => {
-    if (clubId || userId) {
-      fetchMembers()
-    }
-  }, [fetchMembers, clubId, userId])
-
   return {
-    members,
+    members: data.members,
     loading,
     error,
-    pagination,
-    refetch: fetchMembers,
+    pagination: data.pagination,
+    refetch,
     getMemberById,
     createMember,
     updateMember,

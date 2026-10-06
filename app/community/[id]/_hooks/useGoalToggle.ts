@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import type { StudyGoal } from '@/lib/types/goal'
 import { toast } from 'sonner'
 
@@ -30,11 +30,13 @@ export const useGoalToggle = (
 ): UseGoalToggleResult => {
   // 로컬 상태로 목표 관리
   const [optimisticGoals, setOptimisticGoals] = useState<GoalsState>(goals)
+  const [prevGoals, setPrevGoals] = useState<GoalsState>(goals)
 
   // 서버 데이터가 변경되면 로컬 상태 동기화
-  useEffect(() => {
+  if (goals !== prevGoals) {
+    setPrevGoals(goals)
     setOptimisticGoals(goals)
-  }, [goals])
+  }
 
   const handleToggleComplete = useCallback(
     async (goalId: string, isComplete: boolean, isTeam: boolean) => {

@@ -4,13 +4,29 @@ import type {
   Notification,
   UpdateNotificationRequest,
 } from '@/lib/types/notification'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useAsyncData } from './useAsyncData'
 
 interface UseNotificationsOptions {
   clubId: string
   isPinned?: boolean
   page?: number
   limit?: number
+}
+
+interface NotificationsState {
+  notifications: Notification[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  } | null
+}
+
+const INITIAL_NOTIFICATIONS: NotificationsState = {
+  notifications: [],
+  pagination: null,
 }
 
 interface UseNotificationsResult {
@@ -76,21 +92,12 @@ export const useNotifications = ({
   page = 1,
   limit = 20,
 }: UseNotificationsOptions): UseNotificationsResult => {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState<{
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  } | null>(null)
+  const fetchNotifications = useCallback(async (): Promise<NotificationsState> => {
+    if (!clubId) {
+      return INITIAL_NOTIFICATIONS
+    }
 
-  const fetchNotifications = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
-
       const response = await fetch(
         API_ENDPOINTS.NOTIFICATIONS.WITH_PARAMS({
           clubId,
@@ -102,28 +109,23 @@ export const useNotifications = ({
       const result = await response.json()
 
       if (result.success && result.data) {
-        // API 응답 구조: { success: true, data: { data: [], count: number, pagination: {} } }
         const notificationsList = Array.isArray(result.data) ? result.data : result.data.data
-        setNotifications(notificationsList || [])
-
-        // pagination은 result.data.pagination에 있음
-        if (result.data.pagination) {
-          setPagination(result.data.pagination)
+        return {
+          notifications: notificationsList || [],
+          pagination: result.data.pagination || null,
         }
-      } else {
-        setNotifications([])
-        setPagination(null)
-        setError(result.error || MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
       }
+      throw new Error(result.error || MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
     } catch (err) {
       console.error('Failed to fetch notifications:', err)
-      setError(MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
-      setNotifications([])
-      setPagination(null)
-    } finally {
-      setLoading(false)
+      throw new Error(MESSAGES.ERROR.FAILED_TO_LOAD_NOTIFICATIONS)
     }
   }, [clubId, isPinned, page, limit])
+
+  const { data, loading, error, refetch } = useAsyncData(fetchNotifications, {
+    initialData: INITIAL_NOTIFICATIONS,
+    enabled: Boolean(clubId),
+  })
 
   /**
    * 특정 공지사항 상세 조회
@@ -162,8 +164,7 @@ export const useNotifications = ({
         const result = await response.json()
 
         if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchNotifications()
+          await refetch()
           return { success: true, data: result.data }
         }
         return {
@@ -175,7 +176,7 @@ export const useNotifications = ({
         return { success: false, error: MESSAGES.ERROR.CREATING_NOTIFICATION_ERROR }
       }
     },
-    [clubId, fetchNotifications]
+    [clubId, refetch]
   )
 
   /**
@@ -196,8 +197,7 @@ export const useNotifications = ({
         const result = await response.json()
 
         if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchNotifications()
+          await refetch()
           return { success: true, data: result.data }
         }
         return {
@@ -209,7 +209,7 @@ export const useNotifications = ({
         return { success: false, error: MESSAGES.ERROR.UPDATING_NOTIFICATION_ERROR }
       }
     },
-    [fetchNotifications]
+    [refetch]
   )
 
   /**
@@ -227,8 +227,7 @@ export const useNotifications = ({
         const result = await response.json()
 
         if (result.success) {
-          // 성공 시 목록 재조회
-          await fetchNotifications()
+          await refetch()
           return { success: true }
         }
         return {
@@ -240,7 +239,7 @@ export const useNotifications = ({
         return { success: false, error: MESSAGES.ERROR.DELETING_NOTIFICATION_ERROR }
       }
     },
-    [fetchNotifications]
+    [refetch]
   )
 
   /**
@@ -256,22 +255,23 @@ export const useNotifications = ({
     [updateNotification]
   )
 
-  useEffect(() => {
-    fetchNotifications()
-  }, [fetchNotifications])
-
-  // 고정 공지사항과 일반 공지사항 분리
-  const pinnedNotifications = notifications.filter(n => n.isPinned)
-  const regularNotifications = notifications.filter(n => !n.isPinned)
+  const pinnedNotifications = useMemo(
+    () => data.notifications.filter(n => n.isPinned),
+    [data.notifications]
+  )
+  const regularNotifications = useMemo(
+    () => data.notifications.filter(n => !n.isPinned),
+    [data.notifications]
+  )
 
   return {
-    notifications,
+    notifications: data.notifications,
     pinnedNotifications,
     regularNotifications,
     loading,
     error,
-    pagination,
-    refetch: fetchNotifications,
+    pagination: data.pagination,
+    refetch,
     getNotificationById,
     createNotification,
     updateNotification,

@@ -3,7 +3,6 @@ import prettierConfig from 'eslint-config-prettier'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
 import importPlugin from 'eslint-plugin-import'
-import prettier from 'eslint-plugin-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactCompiler from 'eslint-plugin-react-compiler'
 import globals from 'globals'
@@ -37,7 +36,6 @@ const eslintConfig = [
       import: importPlugin,
       'react-hooks': reactHooks,
       'react-compiler': reactCompiler,
-      prettier,
     },
     rules: {
       'react-compiler/react-compiler': 'error',
@@ -72,9 +70,6 @@ const eslintConfig = [
       'no-console': isProductionMode
         ? ['error', { allow: ['warn', 'error'] }]
         : ['warn', { allow: ['log', 'warn', 'error'] }],
-
-      // Prettier 통합
-      'prettier/prettier': ['error', { endOfLine: 'auto' }],
 
       // // import 순서 관련 규칙
       // 'import/order': [

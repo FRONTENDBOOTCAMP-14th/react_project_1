@@ -2,7 +2,8 @@
  * 시간 동기화 유틸리티 테스트
  */
 
-import { timeSync } from '../timeSync'
+import { renderHook, waitFor } from '@testing-library/react'
+import { timeSync, useTimeSync } from '../timeSync'
 
 // Mock fetch
 global.fetch = jest.fn()
@@ -277,6 +278,33 @@ describe('TimeSync', () => {
       // 동기화 중이면 현재 상태를 반환해야 함
       expect(typeof result.isSynced).toBe('boolean')
       expect(typeof result.offset).toBe('number')
+    })
+  })
+
+  describe('useTimeSync', () => {
+    it('동기화되지 않은 상태에서 마운트 시 loading이 true이고 동기화 완료 후 loading이 false로 전이된다', async () => {
+      ;(timeSync as any).offset = 0
+      ;(timeSync as any).lastSync = 0
+      ;(timeSync as any).isSyncing = false
+
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          serverTime: '2023-10-31T12:30:32.000Z',
+          timestamp: Date.now(),
+        }),
+      }
+      ;(fetch as jest.Mock).mockResolvedValue(mockResponse)
+
+      const { result } = renderHook(() => useTimeSync())
+
+      expect(result.current.loading).toBe(true)
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.syncStatus?.isSynced).toBe(true)
     })
   })
 })

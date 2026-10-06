@@ -1,0 +1,143 @@
+import { err, ok, type Result } from '@/lib/errors/result'
+import type { UpdateCommunityInput } from '@/lib/types/community'
+
+export interface CanJoinCommunityInput {
+  userId: string | null | undefined
+  isExistingMember: boolean
+}
+
+export interface JoinCommunityData {
+  userId: string
+  role: 'member'
+}
+
+export interface CanDeleteCommunityInput {
+  userId: string | null | undefined
+  isAdmin: boolean
+  isDeleted: boolean
+}
+
+export interface PrepareImageUploadInput {
+  fileName: string
+  fileSize: number
+}
+
+export interface ImageUploadContext {
+  timestamp: number
+  randomSuffix: string
+}
+
+export interface PreparedImageUpload {
+  fileName: string
+  filePath: string
+}
+
+const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif'])
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
+
+/**
+ * Functional Core: 커뮤니티 가입 가능 여부 및 가입 데이터 생성
+ * 순수 함수 (No DB, No I/O)
+ */
+export function canJoinCommunity(input: CanJoinCommunityInput): Result<JoinCommunityData, Error> {
+  if (!input.userId) {
+    return err(new Error('인증이 필요합니다'))
+  }
+
+  if (input.isExistingMember) {
+    return err(new Error('이미 가입된 커뮤니티입니다'))
+  }
+
+  return ok({
+    userId: input.userId,
+    role: 'member',
+  })
+}
+
+/**
+ * Functional Core: 커뮤니티 업데이트 입력값 검증 및 정제
+ * 순수 함수 (No DB, No I/O)
+ */
+export function prepareCommunityUpdate(
+  input: UpdateCommunityInput
+): Result<Partial<UpdateCommunityInput>, Error> {
+  const sanitized: Partial<UpdateCommunityInput> = {}
+
+  if (input.name !== undefined) {
+    const trimmed = input.name.trim()
+    if (trimmed.length === 0) {
+      return err(new Error('커뮤니티 이름은 비어있을 수 없습니다'))
+    }
+    sanitized.name = trimmed
+  }
+
+  if (input.description !== undefined) {
+    sanitized.description = input.description ? input.description.trim() : input.description
+  }
+
+  if (input.region !== undefined) {
+    sanitized.region = input.region
+  }
+
+  if (input.subRegion !== undefined) {
+    sanitized.subRegion = input.subRegion
+  }
+
+  if (input.tagname !== undefined) {
+    sanitized.tagname = input.tagname
+  }
+
+  if (input.imageUrl !== undefined) {
+    sanitized.imageUrl = input.imageUrl
+  }
+
+  if (Object.keys(sanitized).length === 0) {
+    return err(new Error('수정할 내용이 없습니다'))
+  }
+
+  return ok(sanitized)
+}
+
+/**
+ * Functional Core: 커뮤니티 삭제 자격 및 상태 검증
+ * 순수 함수 (No DB, No I/O)
+ */
+export function canDeleteCommunity(input: CanDeleteCommunityInput): Result<true, Error> {
+  if (!input.userId || !input.isAdmin) {
+    return err(new Error('커뮤니티를 삭제할 권한이 없습니다'))
+  }
+
+  if (input.isDeleted) {
+    return err(new Error('이미 삭제된 커뮤니티입니다'))
+  }
+
+  return ok(true)
+}
+
+/**
+ * Functional Core: 이미지 메타데이터 검증 및 스토리지 경로 생성
+ * 순수 함수 (No DB, No Network, 결정론적 파일명 생성)
+ */
+export function prepareImageUpload(
+  input: PrepareImageUploadInput,
+  context: ImageUploadContext
+): Result<PreparedImageUpload, Error> {
+  if (input.fileSize > MAX_IMAGE_SIZE_BYTES) {
+    return err(new Error('이미지 파일 크기는 5MB를 초과할 수 없습니다'))
+  }
+
+  const parts = input.fileName.split('.')
+  const ext = parts.length > 1 ? (parts.pop() || '').toLowerCase() : ''
+
+  if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
+    return err(new Error('지원하지 않는 이미지 형식입니다'))
+  }
+
+  const generatedFileName = `${context.timestamp}-${context.randomSuffix}.${ext}`
+  const filePath = `community-images/${generatedFileName}`
+
+  return ok({
+    fileName: generatedFileName,
+    filePath,
+  })
+}

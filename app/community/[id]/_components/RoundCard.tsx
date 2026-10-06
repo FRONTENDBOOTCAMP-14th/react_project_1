@@ -7,11 +7,7 @@ import { MESSAGES } from '@/constants'
 import { useGoals } from '@/lib/hooks'
 import type { CustomSession } from '@/lib/types'
 import type { Round } from '@/lib/types/round'
-import {
-  formatDateRangeUTC,
-  fromDatetimeLocalString,
-  toDatetimeLocalString,
-} from '@/lib/utils'
+import { formatDateRangeUTC, fromDatetimeLocalString, toDatetimeLocalString } from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState, useTransition } from 'react'

@@ -15,6 +15,7 @@ import type { CustomSession } from '@/lib/types'
 import { createErrorResponse } from '@/lib/utils/response'
 import { getServerSession } from 'next-auth'
 import type { NextRequest, NextResponse } from 'next/server'
+import { getCommunityMembership } from '@/lib/auth/permissions'
 
 // 타입 인터페이스 정의
 interface AuthResult {
@@ -69,8 +70,6 @@ export async function requireAuth(): Promise<AuthResult> {
 
   return { error: null, userId }
 }
-
-import { getCommunityMembership } from '@/lib/auth/permissions'
 
 /**
  * CommunityMember 조회 공통 헬퍼 함수 (permissions SSOT 위임)

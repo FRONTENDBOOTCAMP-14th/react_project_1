@@ -3,6 +3,7 @@
 import { IconButton } from '@/components/ui'
 import { SendHorizonal } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import { MESSAGES } from '@/constants'
 import styles from './ReactionForm.module.css'
 interface ReactionFormProps {
@@ -10,6 +11,8 @@ interface ReactionFormProps {
 }
 
 export default function ReactionForm({ memberId }: ReactionFormProps) {
+  const router = useRouter()
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -37,9 +40,7 @@ export default function ReactionForm({ memberId }: ReactionFormProps) {
       if (data.success) {
         toast.dismiss()
         toast.success(MESSAGES.SUCCESS.REACTION_CREATE)
-        // Next.js 방식으로 페이지 새로고침
-        const { revalidatePath } = await import('next/cache')
-        revalidatePath(`/community/member-profile/${memberId}`)
+        router.refresh()
       } else {
         toast.dismiss()
         throw new Error(data.error)

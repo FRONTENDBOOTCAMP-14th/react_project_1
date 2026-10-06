@@ -9,7 +9,6 @@ export {
 export * from './utcHelpers'
 export * from './pathHelpers'
 export * from './validation'
-export * from './numbers'
 export * from './time'
 export * from './api'
 export * from './loading'

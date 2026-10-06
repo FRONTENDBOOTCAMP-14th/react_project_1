@@ -44,7 +44,7 @@ export async function checkEmailAction(
 
       return { available: !existingUser }
     },
-    { errorMessage: '이메일 확인에 실패했습니다' }
+    { requireAuth: false, errorMessage: '이메일 확인에 실패했습니다' }
   )
 }
 
@@ -72,7 +72,7 @@ export async function checkNicknameAction(
 
       return { available: !existingUser }
     },
-    { errorMessage: '닉네임 확인에 실패했습니다' }
+    { requireAuth: false, errorMessage: '닉네임 확인에 실패했습니다' }
   )
 }
 
@@ -137,6 +137,6 @@ export async function registerAction(
       revalidatePath('/login')
       return { userId: newUser.userId, registrationToken }
     },
-    { errorMessage: '회원가입에 실패했습니다' }
+    { requireAuth: false, errorMessage: '회원가입에 실패했습니다' }
   )
 }

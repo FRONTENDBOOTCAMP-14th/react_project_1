@@ -24,7 +24,8 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      const { clubId, role = 'member' } = data
+      const { clubId } = data
+      const role = 'member'
 
       const club = await prisma.community.findFirst({
         where: { clubId, deletedAt: null },

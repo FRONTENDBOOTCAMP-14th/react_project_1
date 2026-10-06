@@ -58,6 +58,12 @@ export async function updateRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
+      // 라운드 존재 및 모임 소속 확인
+      const existingRound = await prisma.round.findFirst({
+        where: { roundId, clubId, deletedAt: null },
+      })
+      assertExists(existingRound, MESSAGES.ERROR.ROUND_NOT_FOUND)
+
       // 라운드 업데이트
       const round = await prisma.round.update({
         where: { roundId },
@@ -95,6 +101,12 @@ export async function deleteRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
+      // 라운드 존재 및 모임 소속 확인
+      const existingRound = await prisma.round.findFirst({
+        where: { roundId, clubId, deletedAt: null },
+      })
+      assertExists(existingRound, MESSAGES.ERROR.ROUND_NOT_FOUND)
+
       // 라운드 소프트 삭제
       await prisma.round.update({
         where: { roundId, deletedAt: null },
@@ -131,9 +143,9 @@ export async function markAttendanceAction(
         throw new Error(MESSAGES.ERROR.ALREADY_ATTENDED)
       }
 
-      // 라운드 시간 확인
-      const round = await prisma.round.findUnique({
-        where: { roundId },
+      // 라운드 시간 및 모임 소속 확인
+      const round = await prisma.round.findFirst({
+        where: { roundId, clubId, deletedAt: null },
         select: { startDate: true, endDate: true },
       })
 

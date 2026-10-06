@@ -12,9 +12,18 @@ interface CalendarSectionProps {
   userId?: string | null
 }
 
+function formatDateKey(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export default function CalendarSection({ userId }: CalendarSectionProps) {
   const { setSelectedDate } = useSelectedDate()
-  const [internalSelectedDate, setInternalSelectedDate] = useState<number>(new Date().getDate())
+  const [internalSelectedDate, setInternalSelectedDate] = useState<string>(() =>
+    formatDateKey(new Date())
+  )
 
   // useUserCommunities 훅 사용 (userId가 있을 때만)
   const { upcomingRounds, loading } = useUserCommunities(userId || '')
@@ -53,6 +62,7 @@ export default function CalendarSection({ userId }: CalendarSectionProps) {
       )?.attendanceType
 
       return {
+        dateKey: formatDateKey(date),
         date: date.getDate(),
         day: dayNames[date.getDay()],
         count: dayRounds.length,
@@ -63,9 +73,9 @@ export default function CalendarSection({ userId }: CalendarSectionProps) {
     })
   }, [upcomingRounds, userId]) // upcomingRounds와 userId가 변경될 때만 재계산
 
-  const handleDateClick = (date: number) => {
-    setInternalSelectedDate(date)
-    setSelectedDate(date)
+  const handleDateClick = (dateKey: string) => {
+    setInternalSelectedDate(dateKey)
+    setSelectedDate(dateKey)
   }
 
   return (
@@ -77,8 +87,8 @@ export default function CalendarSection({ userId }: CalendarSectionProps) {
           <button
             key={i}
             type="button"
-            onClick={() => handleDateClick(d.date)}
-            className={`${styles['day-box']} ${internalSelectedDate === d.date ? styles['selected-day'] : ''}`}
+            onClick={() => handleDateClick(d.dateKey)}
+            className={`${styles['day-box']} ${internalSelectedDate === d.dateKey ? styles['selected-day'] : ''}`}
           >
             <div className={styles['date']}>{d.date}</div>
             <div className={styles['day']}>{d.day}</div>

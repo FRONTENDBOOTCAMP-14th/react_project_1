@@ -17,7 +17,7 @@ import type { CreateNotificationRequest } from '@/lib/types/notification'
 import { getBooleanParam, getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { requireAuthUser } from '@/lib/utils/api-auth'
-import { hasPermission } from '@/lib/auth'
+import { getCurrentUserId, hasPermission } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -41,6 +41,27 @@ export async function GET(request: NextRequest) {
     // clubId는 필수
     if (!clubId) {
       return createErrorResponse('clubId is required', 400)
+    }
+
+    const club = await prisma.community.findFirst({
+      where: { clubId, deletedAt: null },
+      select: { isPublic: true },
+    })
+
+    if (!club) {
+      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
+    }
+
+    if (!club.isPublic) {
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        return createErrorResponse(MESSAGES.ERROR.AUTH_REQUIRED, 401)
+      }
+
+      const isMember = await hasPermission(userId, clubId, 'member')
+      if (!isMember) {
+        return createErrorResponse(MESSAGES.ERROR.FORBIDDEN, 403)
+      }
     }
 
     const { page, limit, skip } = getPaginationParams(request)

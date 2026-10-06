@@ -3,10 +3,10 @@
 import { Carousel, CarouselItem } from '@/components/ui'
 import type { Community } from '@/lib/types/community'
 import type { Round } from '@/lib/types/round'
-import { formatDateRangeUTC, getServerTime, getUTCDayRange } from '@/lib/utils'
+import { formatDateRangeUTC, getUTCDayRange } from '@/lib/utils'
 import { CheckCircle, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { useSyncExternalStore, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useSelectedDate } from '../_hooks/useSelectedDateContext'
 import styles from './StudyCarousel.module.css'
 
@@ -36,7 +36,6 @@ export default function StudyCarousel({
   subscribedCommunities,
 }: StudyCarouselProps) {
   const { selectedDate } = useSelectedDate()
-  const [serverTime] = useState<Date>(() => getServerTime())
 
   const itemsPerView = useSyncExternalStore(
     subscribeResize,
@@ -49,10 +48,13 @@ export default function StudyCarousel({
   const selectedDateRounds = (() => {
     if (!selectedDate) return []
 
-    // UTC 기준으로 targetDate 생성
-    const targetDate = new Date(serverTime)
-    targetDate.setUTCDate(selectedDate)
-    targetDate.setUTCHours(0, 0, 0, 0)
+    const [yearStr, monthStr, dayStr] = selectedDate.split('-')
+    const year = parseInt(yearStr, 10)
+    const month = parseInt(monthStr, 10) - 1
+    const day = parseInt(dayStr, 10)
+
+    // UTC 기준 선택된 특정 날짜 생성
+    const targetDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0))
 
     // UTC 기준 하루 범위 (00:00:00 ~ 23:59:59.999)
     const { start: dayStart, end: dayEnd } = getUTCDayRange(targetDate)
@@ -64,11 +66,13 @@ export default function StudyCarousel({
     })
   })()
 
+  const displayDay = selectedDate ? parseInt(selectedDate.split('-')[2], 10) : ''
+
   return (
     <div className={styles['carousel-container']}>
-      <p>{selectedDate}일 스터디 목록</p>
+      <p>{displayDay}일 스터디 목록</p>
       {selectedDateRounds.length === 0 ? (
-        <p className={styles['carousel-none']}>{selectedDate}일에 예정된 스터디가 없습니다</p>
+        <p className={styles['carousel-none']}>{displayDay}일에 예정된 스터디가 없습니다</p>
       ) : (
         <Carousel showNavigation showIndicators itemsPerView={itemsPerView}>
           {selectedDateRounds.map(round => {

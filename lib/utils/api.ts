@@ -3,8 +3,6 @@
  * 에러 처리, 응답 변환, 타임아웃, 재시도 로직
  */
 
-import { tryCatchAsync, type AsyncResult } from '@/lib/errors/result'
-
 /**
  * API 에러 타입 정의
  */
@@ -237,71 +235,5 @@ export function isErrorResponse(
     'success' in response &&
     response.success === false &&
     'error' in response
-  )
-}
-
-/**
- * API 호출 래퍼 (에러 처리 포함)
- * @deprecated apiCallWithResult 사용을 권장
- */
-export async function withApiErrorHandling<T>(
-  apiCall: () => Promise<T>,
-  fallbackMessage?: string
-): Promise<{ success: true; data: T } | { success: false; error: ApiError }> {
-  try {
-    const data = await apiCall()
-    return { success: true, data }
-  } catch (error) {
-    const apiError = await parseApiError(error, fallbackMessage)
-    return { success: false, error: apiError }
-  }
-}
-
-/**
- * API 호출 래퍼 (Result 패턴)
- */
-export async function apiCallWithResult<T>(
-  apiCall: () => Promise<T>,
-  fallbackMessage?: string
-): AsyncResult<T, ApiError> {
-  return tryCatchAsync(apiCall, error => parseApiErrorSync(error, fallbackMessage))
-}
-
-/**
- * Fetch 요청을 Result로 래핑
- */
-export async function fetchWithResult<T>(
-  url: string,
-  options?: RequestInit,
-  fallbackMessage?: string
-): AsyncResult<T, ApiError> {
-  return tryCatchAsync(
-    async () => {
-      const response = await fetch(url, options)
-
-      if (!response.ok) {
-        const error: ApiError = {
-          type: getErrorTypeFromStatusCode(response.status),
-          message: await getErrorMessageFromResponse(response),
-          statusCode: response.status,
-        }
-        throw error
-      }
-
-      const data = await response.json()
-      return data as T
-    },
-    error => parseApiErrorSync(error, fallbackMessage)
-  )
-}
-
-/**
- * Result를 기존 success/error 형식으로 변환
- */
-export function resultToResponse<T>(
-  result: AsyncResult<T, ApiError>
-): Promise<{ success: true; data: T } | { success: false; error: ApiError }> {
-  return result.then(r =>
-    r.isOk() ? { success: true, data: r.unwrap() } : { success: false, error: r.error }
   )
 }

@@ -10,4 +10,11 @@ export {
   requireTeamLeader,
   validateCommunity,
 } from '../middleware/auth'
-export { checkIsMember, checkMembershipAndRole, checkisAdmin } from './permissions'
+export {
+  checkIsAdmin,
+  checkIsMember,
+  checkMembershipAndRole,
+  checkisAdmin,
+  getCommunityMembership,
+} from './permissions'
+export type { CommunityMembership } from './permissions'

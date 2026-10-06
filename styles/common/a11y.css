@@ -37,7 +37,7 @@
 
 .skip-link:focus {
   transform: translateY(0);
-  outline: 2px solid var(--spotify-white);
+  outline: 2px solid var(--primary-color, #ffffff);
 }
 
 .reset-style {

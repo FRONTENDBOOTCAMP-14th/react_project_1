@@ -2,6 +2,7 @@ import type { NextAuthOptions } from 'next-auth'
 import KakaoProvider from 'next-auth/providers/kakao'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import prisma from '@/lib/prisma'
+import { verifyRegistrationToken } from '@/lib/auth/token'
 import type { KakaoProfile, ExtendedToken, CustomSession } from '@/lib/types'
 
 export const authOptions: NextAuthOptions = {
@@ -11,15 +12,22 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.KAKAO_CLIENT_ID || '',
       clientSecret: process.env.KAKAO_CLIENT_SECRET || '',
     }),
+
     // 회원가입 완료 후 즉시 로그인을 위한 내부 Provider
     CredentialsProvider({
       id: 'register-complete',
       name: 'Register Complete',
       credentials: {
         userId: { label: 'User ID', type: 'text' },
+        registrationToken: { label: 'Registration Token', type: 'text' },
       },
       async authorize(credentials) {
-        if (!credentials?.userId) return null
+        if (!credentials?.userId || !credentials?.registrationToken) return null
+
+        const verified = verifyRegistrationToken(credentials.registrationToken)
+        if (verified?.userId !== credentials.userId) {
+          return null
+        }
 
         // 회원가입 직후에만 사용되므로 userId로 사용자 조회
         const user = await prisma.user.findUnique({

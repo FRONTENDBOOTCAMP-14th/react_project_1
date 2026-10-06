@@ -8,7 +8,7 @@
  */
 
 import { MESSAGES } from '@/constants/messages'
-import { hasPermission } from '@/lib/auth'
+import { getCurrentUserId, hasPermission } from '@/lib/auth'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 import { requireAuthUser } from '@/lib/utils/api-auth'
@@ -61,6 +61,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // 커뮤니티가 없거나 소프트 삭제된 경우
     if (community?.deletedAt !== null) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
+    }
+
+    // 비공개 커뮤니티 접근 제어
+    if (!community.isPublic) {
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        return createErrorResponse(MESSAGES.ERROR.AUTH_REQUIRED, 401)
+      }
+
+      const isMember = await hasPermission(userId, id, 'member')
+      if (!isMember) {
+        return createErrorResponse(MESSAGES.ERROR.FORBIDDEN, 403)
+      }
     }
 
     // deletedAt 필드 제거 후 응답 (createdAt을 string으로 변환)

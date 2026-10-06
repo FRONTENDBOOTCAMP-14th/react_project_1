@@ -43,19 +43,6 @@ export async function fetchCommunitiesWithCursor(
     ...(region && { region }),
   }
 
-  // 커서 날짜 파싱
-  let cursorDate: Date | undefined
-  if (cursor) {
-    try {
-      cursorDate = new Date(cursor)
-      if (isNaN(cursorDate.getTime())) {
-        cursorDate = undefined
-      }
-    } catch {
-      cursorDate = undefined
-    }
-  }
-
   // Prisma 쿼리에 커서 페이지네이션 적용
   const query = applyCursorPagination(
     {
@@ -90,7 +77,7 @@ export async function fetchCommunitiesWithCursor(
       },
     },
     {
-      cursor: cursorDate?.toISOString(),
+      cursor,
       limit,
       direction,
     },

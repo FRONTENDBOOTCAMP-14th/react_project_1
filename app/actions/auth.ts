@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { type ServerActionResponse, withServerAction } from '@/lib/utils/serverActions'
+import { createRegistrationToken } from '@/lib/auth/token'
 import { revalidatePath } from 'next/cache'
 
 interface CheckEmailRequest {
@@ -43,7 +44,7 @@ export async function checkEmailAction(
 
       return { available: !existingUser }
     },
-    { errorMessage: '이메일 확인에 실패했습니다' }
+    { requireAuth: false, errorMessage: '이메일 확인에 실패했습니다' }
   )
 }
 
@@ -71,7 +72,7 @@ export async function checkNicknameAction(
 
       return { available: !existingUser }
     },
-    { errorMessage: '닉네임 확인에 실패했습니다' }
+    { requireAuth: false, errorMessage: '닉네임 확인에 실패했습니다' }
   )
 }
 
@@ -80,7 +81,7 @@ export async function checkNicknameAction(
  */
 export async function registerAction(
   data: RegisterRequest
-): Promise<ServerActionResponse<{ userId: string }>> {
+): Promise<ServerActionResponse<{ userId: string; registrationToken: string }>> {
   return withServerAction(
     async () => {
       const { providerId, email, username, nickname } = data
@@ -116,10 +117,9 @@ export async function registerAction(
         throw new Error('nickname_taken')
       }
 
-      // 사용자 생성
+      // 사용자 생성 (userId는 DB 기본값 gen_random_uuid() 적용)
       const newUser = await prisma.user.create({
         data: {
-          userId: providerId,
           providerId,
           email,
           username,
@@ -129,9 +129,14 @@ export async function registerAction(
         select: { userId: true },
       })
 
+      const registrationToken = createRegistrationToken({
+        userId: newUser.userId,
+        providerId,
+      })
+
       revalidatePath('/login')
-      return { userId: newUser.userId }
+      return { userId: newUser.userId, registrationToken }
     },
-    { errorMessage: '회원가입에 실패했습니다' }
+    { requireAuth: false, errorMessage: '회원가입에 실패했습니다' }
   )
 }

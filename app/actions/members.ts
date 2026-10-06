@@ -24,7 +24,8 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      const { clubId, role = 'member' } = data
+      const { clubId } = data
+      const role = 'member'
 
       const club = await prisma.community.findFirst({
         where: { clubId, deletedAt: null },
@@ -119,7 +120,7 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
 
       const existingMember = await prisma.communityMember.findFirst({
         where: { id: memberId, deletedAt: null },
-        select: { clubId: true, userId: true },
+        select: { clubId: true, userId: true, role: true },
       })
 
       const isSelf = existingMember?.userId === userId
@@ -127,10 +128,24 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
         ? await hasPermission(userId, existingMember.clubId, 'admin')
         : false
 
+      // 대상 멤버가 관리자일 때 다른 관리자가 남아있는지 확인
+      let isSoleAdmin = false
+      if (existingMember?.role === 'admin') {
+        const adminCount = await prisma.communityMember.count({
+          where: {
+            clubId: existingMember.clubId,
+            role: 'admin',
+            deletedAt: null,
+          },
+        })
+        isSoleAdmin = adminCount <= 1
+      }
+
       const validation = canDeleteMember({
         memberExists: Boolean(existingMember),
         isSelf,
         hasAdminPermission,
+        isSoleAdmin,
       })
       if (validation.isErr()) {
         throw validation.error

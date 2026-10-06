@@ -160,3 +160,26 @@ export function useTimezone() {
     formatTimezoneInfo: () => formatTimezoneInfo(timezoneInfo),
   }
 }
+
+/**
+ * 주어진 YYYY-MM-DD 날짜의 클라이언트 로컬 기준 하루 범위 (00:00:00.000 ~ 23:59:59.999)를 반환합니다.
+ */
+export function getLocalDateRange(dateKey: string): { start: Date; end: Date } {
+  const [yearStr, monthStr, dayStr] = dateKey.split('-')
+  const year = parseInt(yearStr, 10)
+  const month = parseInt(monthStr, 10) - 1
+  const day = parseInt(dayStr, 10)
+
+  const start = new Date(year, month, day, 0, 0, 0, 0)
+  const end = new Date(year, month, day, 23, 59, 59, 999)
+  return { start, end }
+}
+
+/**
+ * 라운드 시작 일시가 특정 YYYY-MM-DD(로컬 기준) 날짜에 속하는지 판별합니다.
+ */
+export function isRoundOnLocalDate(roundStartDate: Date | string, dateKey: string): boolean {
+  const { start, end } = getLocalDateRange(dateKey)
+  const date = typeof roundStartDate === 'string' ? new Date(roundStartDate) : roundStartDate
+  return date >= start && date <= end
+}

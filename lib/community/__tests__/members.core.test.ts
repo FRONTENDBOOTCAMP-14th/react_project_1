@@ -192,5 +192,19 @@ describe('Members Functional Core (Pure Domain Logic)', () => {
         expect(result.error.message).toBe('본인 또는 팀장만 멤버를 삭제할 수 있습니다')
       }
     })
+
+    it('유일한 관리자인 경우 탈퇴 또는 삭제가 불가능해야 한다', () => {
+      const result = canDeleteMember({
+        memberExists: true,
+        isSelf: true,
+        hasAdminPermission: true,
+        isSoleAdmin: true,
+      })
+
+      expect(result.isErr()).toBe(true)
+      if (result.isErr()) {
+        expect(result.error.message).toBe('유일한 관리자는 탈퇴하거나 삭제될 수 없습니다')
+      }
+    })
   })
 })

@@ -4,7 +4,6 @@ import { MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS, REVALIDATE_TAGS, ROUTES 
 import { getCurrentUserId } from '@/lib/auth'
 import {
   canDeleteCommunity,
-  canJoinCommunity,
   prepareCommunityUpdate,
   prepareImageUpload,
 } from '@/lib/community/community.core'
@@ -92,42 +91,6 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
   }
 
   return result
-}
-
-/**
- * Server Action: 커뮤니티 가입
- */
-export async function joinCommunityAction(clubId: string): Promise<ServerActionResponse> {
-  return withServerAction(
-    async () => {
-      const userId = await getCurrentUserId()
-      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
-
-      const existingMember = await prisma.communityMember.findFirst({
-        where: { clubId, userId, deletedAt: null },
-      })
-
-      const joinDecision = canJoinCommunity({
-        userId,
-        isExistingMember: Boolean(existingMember),
-      })
-      if (joinDecision.isErr()) {
-        throw joinDecision.error
-      }
-
-      await prisma.communityMember.create({
-        data: {
-          clubId,
-          userId: joinDecision.value.userId,
-          role: joinDecision.value.role,
-        },
-      })
-
-      revalidatePath(`/community/${clubId}`)
-      revalidateTag('communities', 'max')
-    },
-    { errorMessage: '커뮤니티 가입에 실패했습니다' }
-  )
 }
 
 /**

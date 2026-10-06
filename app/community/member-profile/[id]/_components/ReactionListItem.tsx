@@ -5,6 +5,7 @@ import { MESSAGES } from '@/constants'
 import { formatDiffFromNow } from '@/lib/utils'
 import { Ellipsis } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import styles from './ReactionListItem.module.css'
 
 interface ReactionListItemProps {
@@ -22,8 +23,10 @@ export default function ReactionListItem({
   createdAt,
   reaction,
   reactionId,
-  memberId,
+  memberId: _memberId,
 }: ReactionListItemProps) {
+  const router = useRouter()
+
   const deleteReaction = async () => {
     try {
       toast.loading(MESSAGES.LOADING.REACTION_DELETING)
@@ -36,9 +39,7 @@ export default function ReactionListItem({
       if (result.success) {
         toast.dismiss()
         toast.success(MESSAGES.SUCCESS.REACTION_DELETE)
-        // Next.js 방식으로 페이지 새로고침
-        const { revalidatePath } = await import('next/cache')
-        revalidatePath(`/community/member-profile/${memberId}`)
+        router.refresh()
       } else {
         toast.dismiss()
         toast.error(result.error || MESSAGES.ERROR.REACTION_DELETE_FAILED)

@@ -4,34 +4,69 @@
 
 import prisma from '@/lib/prisma'
 
+export interface CommunityMembership {
+  id: string
+  role: string
+  joinedAt: Date
+}
+
 /**
- * 사용자가 특정 커뮤니티의 팀장인지 확인
+ * 커뮤니티 멤버십 상세 정보 조회 (권한 검사 공통 SSOT)
+ * @param userId - 사용자 ID
+ * @param clubId - 커뮤니티 ID
+ * @param role - 특정 역할 필터 (선택)
+ * @returns 멤버십 정보 또는 null
+ */
+export async function getCommunityMembership(
+  userId: string | null | undefined,
+  clubId: string,
+  role?: string
+): Promise<CommunityMembership | null> {
+  if (!userId || !clubId) return null
+
+  try {
+    return await prisma.communityMember.findFirst({
+      where: {
+        userId,
+        clubId,
+        deletedAt: null,
+        ...(role && { role }),
+      },
+      select: {
+        id: true,
+        role: true,
+        joinedAt: true,
+      },
+    })
+  } catch (error) {
+    console.error('Error finding community membership:', error)
+    return null
+  }
+}
+
+/**
+ * 사용자가 특정 커뮤니티의 팀장(admin)인지 확인
  * @param userId - 사용자 ID
  * @param clubId - 커뮤니티 ID
  * @returns 팀장 여부
  */
-export async function checkisAdmin(
+export async function checkIsAdmin(
   userId: string | null | undefined,
   clubId: string
 ): Promise<boolean> {
   if (!userId || !clubId) return false
 
   try {
-    return (
-      (await prisma.communityMember.count({
-        where: {
-          userId,
-          clubId,
-          role: 'admin',
-          deletedAt: null,
-        },
-      })) > 0
-    )
+    const membership = await getCommunityMembership(userId, clubId, 'admin')
+    return !!membership
   } catch (error) {
     console.error('Error checking team admin permission:', error)
     return false
   }
 }
+
+/** 하위 호환성을 위한 별칭 */
+export const checkisAdmin = checkIsAdmin
 
 /**
  * 사용자가 특정 커뮤니티의 멤버인지 확인
@@ -46,15 +81,8 @@ export async function checkIsMember(
   if (!userId || !clubId) return false
 
   try {
-    return (
-      (await prisma.communityMember.count({
-        where: {
-          userId,
-          clubId,
-          deletedAt: null,
-        },
-      })) > 0
-    )
+    const membership = await getCommunityMembership(userId, clubId)
+    return !!membership
   } catch (error) {
     console.error('Error checking member permission:', error)
     return false
@@ -76,16 +104,7 @@ export async function checkMembershipAndRole(
   }
 
   try {
-    const member = await prisma.communityMember.findFirst({
-      where: {
-        userId,
-        clubId,
-        deletedAt: null,
-      },
-      select: {
-        role: true,
-      },
-    })
+    const member = await getCommunityMembership(userId, clubId)
 
     if (!member) {
       return { isMember: false, isAdmin: false }

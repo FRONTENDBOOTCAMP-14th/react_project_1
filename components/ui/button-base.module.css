@@ -1,0 +1,68 @@
+/* UI Button/Link 공통 베이스 스타일 */
+.base-button {
+  display: flex;
+  padding: var(--spacing-xxs);
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  border-radius: var(--radius-sm, 8px);
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-family);
+  font-size: var(--font-sm);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  transition:
+    opacity 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
+}
+
+.accent {
+  border: 1px solid var(--accent-color);
+  background: var(--primary-color);
+  color: var(--accent-color);
+  box-shadow: 0 1px 2.4px 0 var(--accent-color);
+}
+
+.accent:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+.stroke {
+  border: 1px solid var(--third-color);
+  background: var(--primary-color);
+  color: var(--third-color);
+  box-shadow: 0 1px 2.4px 0 var(--third-color);
+}
+
+.stroke:hover {
+  opacity: 0.8;
+}
+
+.fill {
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: var(--third-color);
+  box-shadow:
+    2px 2px 3.1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  border: none;
+  color: var(--primary-color);
+}
+
+.fill:hover {
+  opacity: 0.8;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  padding: 0;
+  background: none;
+  border: none;
+}

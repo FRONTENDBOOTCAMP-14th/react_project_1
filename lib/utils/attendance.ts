@@ -162,3 +162,17 @@ export function formatAttendanceGroupByStats(
     excused: groupByResults.find(g => g.attendanceType === 'excused')?._count.attendanceId || 0,
   }
 }
+
+/**
+ * 출석 생성/수정/삭제 권한 확인 (본인 또는 클럽 운영진 여부)
+ */
+export function canManageAttendance(
+  currentUserId: string,
+  targetUserId: string,
+  callerRole?: string | null
+): boolean {
+  if (currentUserId === targetUserId) {
+    return true
+  }
+  return callerRole === 'admin' || callerRole === 'owner'
+}

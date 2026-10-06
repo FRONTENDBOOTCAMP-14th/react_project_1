@@ -3,7 +3,7 @@
  */
 
 // Mock prisma
-import { buildRoundWhereClause, createPaginationInfo } from '../rounds'
+import { buildRoundWhereClause } from '../rounds'
 
 jest.mock('@/lib/prisma', () => ({
   __esModule: true,
@@ -185,80 +185,6 @@ describe('rounds utilities', () => {
       })
 
       expect(whereClause.roundNumber).toBeUndefined()
-    })
-  })
-
-  describe('createPaginationInfo', () => {
-    it('페이지네이션 정보를 생성해야 함', () => {
-      const info = createPaginationInfo(1, 10, 100)
-
-      expect(info).toEqual({
-        page: 1,
-        limit: 10,
-        total: 100,
-        totalPages: 10,
-      })
-    })
-
-    it('총 페이지 수를 올림으로 계산해야 함', () => {
-      const info = createPaginationInfo(1, 10, 95)
-
-      expect(info.totalPages).toBe(10) // 95 / 10 = 9.5 -> 10
-    })
-
-    it('항목 수가 딱 맞아떨어지는 경우를 처리해야 함', () => {
-      const info = createPaginationInfo(2, 20, 60)
-
-      expect(info).toEqual({
-        page: 2,
-        limit: 20,
-        total: 60,
-        totalPages: 3,
-      })
-    })
-
-    it('항목이 없는 경우를 처리해야 함', () => {
-      const info = createPaginationInfo(1, 10, 0)
-
-      expect(info).toEqual({
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      })
-    })
-
-    it('항목 수가 limit보다 작은 경우를 처리해야 함', () => {
-      const info = createPaginationInfo(1, 10, 5)
-
-      expect(info).toEqual({
-        page: 1,
-        limit: 10,
-        total: 5,
-        totalPages: 1,
-      })
-    })
-
-    it('큰 페이지 번호도 처리해야 함', () => {
-      const info = createPaginationInfo(50, 20, 1000)
-
-      expect(info).toEqual({
-        page: 50,
-        limit: 20,
-        total: 1000,
-        totalPages: 50,
-      })
-    })
-
-    it('limit이 1인 경우도 처리해야 함', () => {
-      const info = createPaginationInfo(1, 1, 10)
-
-      expect(info).toEqual({
-        page: 1,
-        limit: 1,
-        total: 10,
-        totalPages: 10,
-      })
     })
   })
 })

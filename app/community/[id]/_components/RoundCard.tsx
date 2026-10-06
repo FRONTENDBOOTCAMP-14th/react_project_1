@@ -7,13 +7,7 @@ import { MESSAGES } from '@/constants'
 import { useGoals } from '@/lib/hooks'
 import type { CustomSession } from '@/lib/types'
 import type { Round } from '@/lib/types/round'
-import {
-  formatDateRangeUTC,
-  fromDatetimeLocalString,
-  renderWithError,
-  renderWithLoading,
-  toDatetimeLocalString,
-} from '@/lib/utils'
+import { formatDateRangeUTC, fromDatetimeLocalString, toDatetimeLocalString } from '@/lib/utils'
 import { ChevronDown, ChevronUp, EllipsisVertical, MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState, useTransition } from 'react'
@@ -457,21 +451,23 @@ function RoundCardBody({ roundId }: RoundCardBodyProps) {
     }
   }
 
-  return renderWithLoading(
-    loading,
-    <LoadingState message={MESSAGES.LOADING.GOALS} />,
-    renderWithError(
-      error,
-      <ErrorState message={error || MESSAGES.ERROR.FAILED_TO_LOAD_GOALS} onRetry={refetch} />,
-      <GoalsSection
-        teamGoals={optimisticGoals.team}
-        personalGoals={optimisticGoals.personal}
-        onToggle={handleToggleComplete}
-        onAddGoal={handleAddGoal}
-        onEdit={handleEditGoal}
-        onDelete={handleDeleteGoal}
-        isOpen={true}
-      />
-    )
+  if (loading) {
+    return <LoadingState message={MESSAGES.LOADING.GOALS} />
+  }
+
+  if (error) {
+    return <ErrorState message={error || MESSAGES.ERROR.FAILED_TO_LOAD_GOALS} onRetry={refetch} />
+  }
+
+  return (
+    <GoalsSection
+      teamGoals={optimisticGoals.team}
+      personalGoals={optimisticGoals.personal}
+      onToggle={handleToggleComplete}
+      onAddGoal={handleAddGoal}
+      onEdit={handleEditGoal}
+      onDelete={handleDeleteGoal}
+      isOpen={true}
+    />
   )
 }

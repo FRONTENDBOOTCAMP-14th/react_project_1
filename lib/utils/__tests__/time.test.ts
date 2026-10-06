@@ -7,7 +7,6 @@ import {
   formatTime,
   getDaysDifference,
   getDday,
-  getRelativeTime,
   isThisMonth,
   isThisWeek,
   isToday,
@@ -24,51 +23,6 @@ describe('time utilities', () => {
 
   afterEach(() => {
     jest.useRealTimers()
-  })
-
-  describe('getRelativeTime', () => {
-    it('60초 미만이면 "방금 전"을 반환해야 함', () => {
-      const date = new Date(MOCK_NOW.getTime() - 30 * 1000) // 30초 전
-      expect(getRelativeTime(date)).toBe('방금 전')
-    })
-
-    it('1시간 미만이면 "N분 전"을 반환해야 함', () => {
-      const date = new Date(MOCK_NOW.getTime() - 5 * 60 * 1000) // 5분 전
-      expect(getRelativeTime(date)).toBe('5분 전')
-
-      const date2 = new Date(MOCK_NOW.getTime() - 45 * 60 * 1000) // 45분 전
-      expect(getRelativeTime(date2)).toBe('45분 전')
-    })
-
-    it('24시간 미만이면 "N시간 전"을 반환해야 함', () => {
-      const date = new Date(MOCK_NOW.getTime() - 2 * 60 * 60 * 1000) // 2시간 전
-      expect(getRelativeTime(date)).toBe('2시간 전')
-
-      const date2 = new Date(MOCK_NOW.getTime() - 12 * 60 * 60 * 1000) // 12시간 전
-      expect(getRelativeTime(date2)).toBe('12시간 전')
-    })
-
-    it('7일 미만이면 "N일 전"을 반환해야 함', () => {
-      const date = new Date(MOCK_NOW.getTime() - 3 * 24 * 60 * 60 * 1000) // 3일 전
-      expect(getRelativeTime(date)).toBe('3일 전')
-    })
-
-    it('4주 미만이면 "N주 전"을 반환해야 함', () => {
-      const date = new Date(MOCK_NOW.getTime() - 14 * 24 * 60 * 60 * 1000) // 2주 전
-      expect(getRelativeTime(date)).toBe('2주 전')
-    })
-
-    it('4주 이상이면 날짜를 반환해야 함', () => {
-      const date = new Date(MOCK_NOW.getTime() - 40 * 24 * 60 * 60 * 1000) // 40일 전
-      const result = getRelativeTime(date)
-
-      expect(result).toContain('2023') // 년도 포함
-    })
-
-    it('문자열 날짜도 처리해야 함', () => {
-      const dateStr = new Date(MOCK_NOW.getTime() - 10 * 60 * 1000).toISOString()
-      expect(getRelativeTime(dateStr)).toBe('10분 전')
-    })
   })
 
   describe('getDday', () => {

@@ -143,11 +143,25 @@ export async function DELETE(
     // 멤버 정보 조회
     const existingMember = await prisma.communityMember.findFirst({
       where: { id, deletedAt: null },
-      select: { clubId: true, userId: true },
+      select: { clubId: true, userId: true, role: true },
     })
 
     if (!existingMember) {
       return createErrorResponse(MESSAGES.ERROR.MEMBER_NOT_FOUND, 404)
+    }
+
+    // 유일한 관리자는 탈퇴 또는 삭제 불가
+    if (existingMember.role === 'admin') {
+      const adminCount = await prisma.communityMember.count({
+        where: {
+          clubId: existingMember.clubId,
+          role: 'admin',
+          deletedAt: null,
+        },
+      })
+      if (adminCount <= 1) {
+        return createErrorResponse('유일한 관리자는 탈퇴하거나 삭제될 수 없습니다.', 400)
+      }
     }
 
     // 권한 확인: 본인 또는 팀장

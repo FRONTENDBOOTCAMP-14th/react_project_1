@@ -8,18 +8,22 @@ global.console = {
 // Mock Next.js server modules
 jest.mock('next/server', () => ({
   NextRequest: class MockNextRequest {
-    constructor(url) {
+    constructor(url, init = {}) {
       this.url = url
       this.nextUrl = {
         searchParams: new URL(url).searchParams,
       }
+      this.body = init.body
+    }
+    async json() {
+      return typeof this.body === 'string' ? JSON.parse(this.body) : this.body
     }
   },
   NextResponse: {
-    json: jest.fn(data => ({
+    json: jest.fn((data, init) => ({
       json: async () => data,
-      status: 200,
-      ok: true,
+      status: init?.status ?? 200,
+      ok: (init?.status ?? 200) >= 200 && (init?.status ?? 200) < 300,
     })),
   },
 }))

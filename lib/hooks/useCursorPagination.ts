@@ -5,7 +5,7 @@
  */
 
 import type { CursorPaginationResult } from '@/lib/pagination/cursorPagination'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 /**
  * 커서 페이지네이션 Hook 파라미터
@@ -31,7 +31,7 @@ export interface UseCursorPaginationReturn<T> {
   // 액션 함수
   loadNextPage: () => Promise<void>
   loadPreviousPage: () => Promise<void>
-  reset: () => void
+  reset: (newData?: CursorPaginationResult<T>) => void
 
   // 상태 정보
   nextCursor?: string
@@ -56,8 +56,19 @@ export function useCursorPagination<T>({
   const [isError, setIsError] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // 초기 데이터 참조 저장
-  const initialDataRef = useRef(initialData)
+  // prop 변경 시 상태 동기화
+  const [prevInitialData, setPrevInitialData] = useState(initialData)
+
+  if (initialData !== prevInitialData) {
+    setPrevInitialData(initialData)
+    if (initialData) {
+      setData(initialData.data)
+      setNextCursor(initialData.nextCursor)
+      setPrevCursor(initialData.prevCursor)
+      setHasMore(initialData.hasMore)
+      setHasPrevious(initialData.hasPrevious)
+    }
+  }
 
   /**
    * 다음 페이지 로드
@@ -118,25 +129,30 @@ export function useCursorPagination<T>({
   /**
    * 초기 상태로 리셋
    */
-  const reset = useCallback(() => {
-    if (initialDataRef.current) {
-      setData(initialDataRef.current.data)
-      setNextCursor(initialDataRef.current.nextCursor)
-      setPrevCursor(initialDataRef.current.prevCursor)
-      setHasMore(initialDataRef.current.hasMore)
-      setHasPrevious(initialDataRef.current.hasPrevious)
-    } else {
-      setData([])
-      setNextCursor(undefined)
-      setPrevCursor(undefined)
-      setHasMore(false)
-      setHasPrevious(false)
-    }
+  const reset = useCallback(
+    (newData?: CursorPaginationResult<T>) => {
+      const targetData = newData || initialData
 
-    setIsLoading(false)
-    setIsError(false)
-    setError(null)
-  }, [])
+      if (targetData) {
+        setData(targetData.data)
+        setNextCursor(targetData.nextCursor)
+        setPrevCursor(targetData.prevCursor)
+        setHasMore(targetData.hasMore)
+        setHasPrevious(targetData.hasPrevious)
+      } else {
+        setData([])
+        setNextCursor(undefined)
+        setPrevCursor(undefined)
+        setHasMore(false)
+        setHasPrevious(false)
+      }
+
+      setIsLoading(false)
+      setIsError(false)
+      setError(null)
+    },
+    [initialData]
+  )
 
   return {
     data,

@@ -55,6 +55,42 @@ function addSoftDeleteCondition(args: Record<string, unknown>): Record<string, u
 }
 
 /**
+ * 소프트 삭제 연산 처리 헬퍼
+ */
+export async function handleSoftDeleteOperation({
+  model,
+  operation,
+  args,
+  query,
+}: {
+  model?: string
+  operation: string
+  args: Record<string, unknown>
+  query: (args: unknown) => Promise<unknown>
+}) {
+  // 소프트 삭제 대상 모델이 아닌 경우 원래대로 실행
+  if (!model || !isSoftDeleteModel(model)) {
+    return query(args)
+  }
+
+  // find 계열 쿼리에 deletedAt: null 조건 추가
+  if (operation.startsWith('find')) {
+    const modifiedArgs = addSoftDeleteCondition(args)
+    return query(modifiedArgs)
+  }
+
+  // delete 쿼리 방어: 소프트 삭제 대상 모델에 대한 물리 삭제 차단
+  if (operation === 'delete' || operation === 'deleteMany') {
+    throw new Error(
+      `Direct ${operation} is disabled for soft-delete model '${model}'. Use update with deletedAt instead.`
+    )
+  }
+
+  // 그 외 쿼리는 원래대로 실행
+  return query(args)
+}
+
+/**
  * 소프트 삭제를 위한 Prisma Extension
  */
 export const softDeleteExtension = Prisma.defineExtension({
@@ -62,36 +98,12 @@ export const softDeleteExtension = Prisma.defineExtension({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
-        // 소프트 삭제 대상 모델이 아닌 경우 원래대로 실행
-        if (!model || !isSoftDeleteModel(model)) {
-          return query(args)
-        }
-
-        // find 계열 쿼리에 deletedAt: null 조건 추가
-        if (operation.startsWith('find')) {
-          const modifiedArgs = addSoftDeleteCondition(args)
-          return query(modifiedArgs)
-        }
-
-        // delete 쿼리를 소프트 삭제로 변환
-        if (operation === 'delete') {
-          // Prisma Extension 내에서는 query 함수를 사용해야 함
-          return query({
-            ...args,
-            data: { deletedAt: new Date() },
-          })
-        }
-
-        // deleteMany 쿼리를 소프트 삭제로 변환
-        if (operation === 'deleteMany') {
-          return query({
-            ...args,
-            data: { deletedAt: new Date() },
-          })
-        }
-
-        // 그 외 쿼리는 원래대로 실행
-        return query(args)
+        return handleSoftDeleteOperation({
+          model,
+          operation,
+          args,
+          query,
+        })
       },
     },
   },

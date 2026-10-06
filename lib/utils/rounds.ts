@@ -96,19 +96,3 @@ export function buildRoundWhereClause(
 
   return whereClause
 }
-
-/**
- * 페이지네이션 정보 생성
- * @param page - 현재 페이지
- * @param limit - 페이지당 항목 수
- * @param total - 전체 항목 수
- * @returns 페이지네이션 정보
- */
-export function createPaginationInfo(page: number, limit: number, total: number) {
-  return {
-    page,
-    limit,
-    total,
-    totalPages: Math.ceil(total / limit),
-  }
-}

@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
       ...activeGoalWhere,
       ...(clubId && { clubId }),
       ...(roundId && { roundId }),
-      ...(isTeam !== null && { isTeam }),
-      ...(isComplete !== null && { isComplete }),
+      ...(isTeam !== undefined && { isTeam }),
+      ...(isComplete !== undefined && { isComplete }),
       ...(ownerId && { ownerId }),
     }
 
@@ -132,6 +132,10 @@ export async function POST(request: NextRequest) {
     // 날짜 변환(문자열 → Date)
     const start = new Date(startDate)
     const end = new Date(endDate)
+
+    if (isTeam && !clubId) {
+      return createErrorResponse('팀 목표는 커뮤니티(clubId) 지정이 필수입니다.', 400)
+    }
 
     // 목표 생성
     const createData = {

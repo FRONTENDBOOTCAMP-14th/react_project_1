@@ -112,8 +112,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   }
 
   // 3. 팀장 권한 확인
-  if (membership.role !== 'owner') {
-    return NextResponse.json({ success: false, error: 'Only owner can delete' }, { status: 403 })
+  if (membership.role !== 'admin') {
+    return NextResponse.json({ success: false, error: 'Only admin can delete' }, { status: 403 })
   }
 
   // 4. 삭제 실행
@@ -139,7 +139,7 @@ import prisma from '@/lib/prisma'
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   // 인증 + 팀장 권한 확인을 한 번에 처리
-  const { userId, error } = await requireAuthAndAccess(params.id, 'owner')
+  const { userId, error } = await requireAuthAndAccess(params.id, 'admin')
   if (error) return error
 
   // 삭제 실행
@@ -196,9 +196,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  // 3. 권한 확인 (팀장 또는 관리자)
+  // 3. 권한 확인 (팀장/관리자)
   const member = round.community.communityMembers[0]
-  if (!member || (member.role !== 'owner' && member.role !== 'admin')) {
+  if (!member || member.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

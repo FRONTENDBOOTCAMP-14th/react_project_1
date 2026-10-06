@@ -3,26 +3,30 @@
 import { leaveCommunityAction } from '@/app/actions/dashboard'
 import { MESSAGES } from '@/constants'
 import { useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 export function useCommunityActions() {
-  const handleLeaveCommunity = useCallback(async (clubId: string) => {
-    try {
-      const result = await leaveCommunityAction(clubId)
+  const router = useRouter()
 
-      if (result.success) {
-        toast.success(MESSAGES.SUCCESS.COMMUNITY_LEAVE)
-        // Next.js 방식으로 페이지 새로고침
-        const { revalidatePath } = await import('next/cache')
-        revalidatePath('/dashboard')
-      } else {
-        toast.error(result.error || MESSAGES.ERROR.COMMUNITY_LEAVE_FAILED)
+  const handleLeaveCommunity = useCallback(
+    async (clubId: string) => {
+      try {
+        const result = await leaveCommunityAction(clubId)
+
+        if (result.success) {
+          toast.success(MESSAGES.SUCCESS.COMMUNITY_LEAVE)
+          router.refresh()
+        } else {
+          toast.error(result.error || MESSAGES.ERROR.COMMUNITY_LEAVE_FAILED)
+        }
+      } catch (error) {
+        console.error('Error leaving community:', error)
+        toast.error(MESSAGES.ERROR.COMMUNITY_LEAVE_ERROR)
       }
-    } catch (error) {
-      console.error('Error leaving community:', error)
-      toast.error(MESSAGES.ERROR.COMMUNITY_LEAVE_ERROR)
-    }
-  }, [])
+    },
+    [router]
+  )
 
   const confirmLeaveCommunity = useCallback(
     (clubId: string, communityName: string): Promise<void> => {

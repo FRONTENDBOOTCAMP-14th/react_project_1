@@ -3,7 +3,6 @@
 import { StrokeButton } from '@/components/ui'
 import { MESSAGES } from '@/constants'
 import type { StudyGoal } from '@/lib/types/goal'
-import { renderWithEmpty } from '@/lib/utils'
 import { memo, useState } from 'react'
 import { isGoalsEmpty } from '../_utils'
 import GoalItem from './GoalItem'
@@ -119,11 +118,11 @@ function GoalsList({
           onCancel={handleCancel}
         />
       )}
-      {renderWithEmpty(
-        isGoalsEmpty(safeGoals || []),
+      {isGoalsEmpty(safeGoals || []) ? (
         <p className={styles['goal-card']} role="status">
           {emptyMessage}
-        </p>,
+        </p>
+      ) : (
         safeGoals?.map(goal => (
           <GoalItem
             key={goal.goalId}

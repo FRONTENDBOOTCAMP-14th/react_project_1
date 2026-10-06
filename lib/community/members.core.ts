@@ -24,7 +24,7 @@ export interface ValidateMemberRoleUpdateInput {
 }
 
 export interface ValidatedMemberRoleUpdateData {
-  role?: MemberRole
+  role: MemberRole
 }
 
 export interface CanDeleteMemberInput {
@@ -74,12 +74,12 @@ export function validateMemberRoleUpdate(
     return err(new Error('팀장만 멤버 역할을 수정할 수 있습니다'))
   }
 
-  if (input.targetRole && !VALID_MEMBER_ROLES.includes(input.targetRole)) {
+  if (!input.targetRole || !VALID_MEMBER_ROLES.includes(input.targetRole)) {
     return err(new Error('유효하지 않은 역할입니다'))
   }
 
   return ok({
-    ...(input.targetRole && { role: input.targetRole }),
+    role: input.targetRole,
   })
 }
 

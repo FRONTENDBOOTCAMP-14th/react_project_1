@@ -69,7 +69,6 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
       const validation = canDeleteCommunity({
-        userId,
         isAdmin: true,
         isDeleted: community.deletedAt !== null,
       })

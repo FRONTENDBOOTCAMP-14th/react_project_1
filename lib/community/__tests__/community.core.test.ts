@@ -93,7 +93,6 @@ describe('Community Functional Core (Pure Domain Logic)', () => {
   describe('canDeleteCommunity', () => {
     it('C-03: 관리자 권한이 있고 삭제되지 않은 커뮤니티는 삭제 가능하다', () => {
       const result = canDeleteCommunity({
-        userId: 'admin-1',
         isAdmin: true,
         isDeleted: false,
       })
@@ -103,7 +102,6 @@ describe('Community Functional Core (Pure Domain Logic)', () => {
 
     it('C-03-F: 관리자 권한이 없으면 삭제할 수 없다', () => {
       const result = canDeleteCommunity({
-        userId: 'user-1',
         isAdmin: false,
         isDeleted: false,
       })
@@ -116,7 +114,6 @@ describe('Community Functional Core (Pure Domain Logic)', () => {
 
     it('C-03-F: 이미 삭제된 커뮤니티는 삭제할 수 없다', () => {
       const result = canDeleteCommunity({
-        userId: 'admin-1',
         isAdmin: true,
         isDeleted: true,
       })

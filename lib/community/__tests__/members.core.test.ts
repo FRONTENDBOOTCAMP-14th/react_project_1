@@ -131,6 +131,19 @@ describe('Members Functional Core (Pure Domain Logic)', () => {
         expect(result.error.message).toBe('유효하지 않은 역할입니다')
       }
     })
+
+    it('targetRole이 제공되지 않은 경우 에러를 반환한다', () => {
+      const result = validateMemberRoleUpdate({
+        hasAdminPermission: true,
+        memberExists: true,
+        targetRole: undefined,
+      })
+
+      expect(result.isErr()).toBe(true)
+      if (result.isErr()) {
+        expect(result.error.message).toBe('유효하지 않은 역할입니다')
+      }
+    })
   })
 
   describe('canDeleteMember', () => {

@@ -12,7 +12,6 @@ export interface JoinCommunityData {
 }
 
 export interface CanDeleteCommunityInput {
-  userId: string | null | undefined
   isAdmin: boolean
   isDeleted: boolean
 }
@@ -100,7 +99,7 @@ export function prepareCommunityUpdate(
  * 커뮤니티 삭제 자격 및 상태 검증
  */
 export function canDeleteCommunity(input: CanDeleteCommunityInput): Result<true, Error> {
-  if (!input.userId || !input.isAdmin) {
+  if (!input.isAdmin) {
     return err(new Error('커뮤니티를 삭제할 권한이 없습니다'))
   }
 

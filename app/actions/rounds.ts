@@ -2,11 +2,23 @@
 
 import { ATTENDANCE_TYPES, MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { evaluateAttendanceEligibility } from '@/lib/attendance/attendance.core'
+import {
+  createAttendanceRecord,
+  findAttendanceByRoundAndUser,
+} from '@/lib/attendance/attendance.server'
+import { validateRoundCreation, validateRoundUpdate } from '@/lib/rounds/rounds.core'
+import {
+  createRound,
+  findRoundById,
+  softDeleteRound,
+  updateRound,
+} from '@/lib/rounds/rounds.server'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import {
   assertExists,
   checkPermission,
+  ServerActionError,
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
@@ -24,16 +36,14 @@ export async function createRoundAction(data: CreateRoundRequest): Promise<Serve
       // 관리자 권한 확인
       await checkPermission(userId, data.clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 라운드 생성
-      const round = await prisma.round.create({
-        data: {
-          clubId: data.clubId,
-          roundNumber: data.roundNumber,
-          startDate: data.startDate ? new Date(data.startDate) : null,
-          endDate: data.endDate ? new Date(data.endDate) : null,
-          location: data.location || null,
-        },
-      })
+      // Core: 입력 검증
+      const validation = validateRoundCreation(data)
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
+
+      // Server I/O: 라운드 생성
+      const round = await createRound(validation.value)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(data.clubId))
       return round
@@ -58,26 +68,21 @@ export async function updateRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 라운드 존재 및 모임 소속 확인
-      const existingRound = await prisma.round.findFirst({
-        where: { roundId, clubId, deletedAt: null },
-      })
+      // Server I/O: 라운드 존재 및 모임 소속 확인
+      const existingRound = await findRoundById(roundId, clubId)
       assertExists(existingRound, MESSAGES.ERROR.ROUND_NOT_FOUND)
 
-      // 라운드 업데이트
-      const round = await prisma.round.update({
-        where: { roundId },
-        data: {
-          ...(data.roundNumber && { roundNumber: data.roundNumber }),
-          ...(data.startDate !== undefined && {
-            startDate: data.startDate ? new Date(data.startDate) : null,
-          }),
-          ...(data.endDate !== undefined && {
-            endDate: data.endDate ? new Date(data.endDate) : null,
-          }),
-          ...(data.location !== undefined && { location: data.location || null }),
-        },
+      // Core: 입력 검증 (기존 시작/종료 일시와 결합하여 불변식 검증)
+      const validation = validateRoundUpdate(data, {
+        startDate: existingRound.startDate,
+        endDate: existingRound.endDate,
       })
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
+
+      // Server I/O: 라운드 업데이트
+      const round = await updateRound(roundId, validation.value)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
       return round
@@ -101,17 +106,12 @@ export async function deleteRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 라운드 존재 및 모임 소속 확인
-      const existingRound = await prisma.round.findFirst({
-        where: { roundId, clubId, deletedAt: null },
-      })
+      // Server I/O: 라운드 존재 및 모임 소속 확인
+      const existingRound = await findRoundById(roundId, clubId)
       assertExists(existingRound, MESSAGES.ERROR.ROUND_NOT_FOUND)
 
-      // 라운드 소프트 삭제
-      await prisma.round.update({
-        where: { roundId, deletedAt: null },
-        data: { deletedAt: new Date() },
-      })
+      // Server I/O: 라운드 소프트 삭제
+      await softDeleteRound(roundId)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
     },
@@ -134,39 +134,31 @@ export async function markAttendanceAction(
       // 멤버십 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.MEMBER)
 
-      // 출석 기록 확인 (deletedAt 필터 포함)
-      const existingAttendance = await prisma.attendance.findFirst({
-        where: { roundId, userId, deletedAt: null },
-      })
-
-      if (existingAttendance) {
-        throw new Error(MESSAGES.ERROR.ALREADY_ATTENDED)
-      }
-
-      // 라운드 시간 및 모임 소속 확인
-      const round = await prisma.round.findFirst({
-        where: { roundId, clubId, deletedAt: null },
-        select: { startDate: true, endDate: true },
-      })
+      // Server I/O: 출석 기록 및 라운드 정보 확인
+      const [existingAttendance, round] = await Promise.all([
+        findAttendanceByRoundAndUser(roundId, userId),
+        findRoundById(roundId, clubId),
+      ])
 
       assertExists(round, MESSAGES.ERROR.ROUND_NOT_FOUND)
 
-      const now = new Date()
-      const isWithinWindow =
-        round.startDate && round.endDate && now >= round.startDate && now <= round.endDate
-
-      if (!isWithinWindow) {
-        throw new Error(MESSAGES.ERROR.ATTENDANCE_TIME_INVALID)
+      // Core: 출석 적격성 판별 (순수 함수)
+      const eligibility = evaluateAttendanceEligibility({
+        userId,
+        round,
+        hasExistingAttendance: Boolean(existingAttendance),
+        currentTime: new Date(),
+      })
+      if (eligibility.isErr()) {
+        throw new ServerActionError(eligibility.error.message)
       }
 
-      // 출석 생성
-      await prisma.attendance.create({
-        data: {
-          roundId,
-          userId,
-          attendanceType: ATTENDANCE_TYPES.PRESENT,
-          attendanceDate: now,
-        },
+      // Server I/O: 출석 생성
+      await createAttendanceRecord({
+        round: { connect: { roundId } },
+        user: { connect: { userId } },
+        attendanceType: ATTENDANCE_TYPES.PRESENT,
+        attendanceDate: eligibility.value.attendanceDate,
       })
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))

@@ -85,7 +85,8 @@
   --spacing-3xl: 96px;
 
   /* 타이포그래피 */
-  --font-family: var(--pretendard), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family:
+    var(--pretendard), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-xs: 0.75rem;
   --font-sm: 1rem;
   --font-md: 1.25rem;

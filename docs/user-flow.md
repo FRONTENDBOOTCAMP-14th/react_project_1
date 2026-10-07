@@ -42,35 +42,40 @@ graph TD
 #### 1.1 카카오 소셜 로그인
 
 ```
-1. 로그인 페이지 접속
+1. 로그인 페이지 접속 (/login)
 2. "카카오로 시작하기" 버튼 클릭
-3. 카카오 인증 페이지로 리다이렉트
+3. NextAuth 카카오 OAuth 인증 요청
 4. 카카오 계정 로그인 (미로그인 시)
 5. 서비스 권한 동의
-6. 토끼노트로 리다이렉트
+6. NextAuth 콜백 처리 후 사용자 가입 상태 확인:
+   - 기존 회원: 세션 생성 후 메인/대시보드로 리다이렉트
+   - 신규 회원: providerId, email과 함께 회원가입 폼으로 안내
 ```
 
-**API 흐름**:
+**인증 및 API 흐름**:
 
-- `GET /api/login-kakao/start` - 카카오 인증 시작
-- `GET /api/login-kakao/callback` - 카카오 인증 콜백
-- `GET /api/login-kakao/check-username` - 중복 확인
-- `POST /api/login-kakao/register` - 회원가입 완료
+- `POST /api/auth/signin/kakao` - NextAuth 카카오 인증 시작
+- `GET /api/auth/callback/kakao` - NextAuth OAuth 콜백 및 기존 회원 검증
+- Server Action `checkEmailAction` - 실시간 이메일 중복 확인
+- Server Action `checkNicknameAction` - 실시간 닉네임 중복 확인
+- Server Action `registerAction` - 회원가입 처리 및 서명된 일회용 등록 토큰 발급
+- NextAuth `signIn('register-complete')` - 서명 토큰 검증 후 즉시 세션 발급 및 로그인
 
 #### 1.2 신규 사용자 등록
 
 ```
-1. 카카오 인증 완료 후 자동으로 회원가입 페이지로 이동
-2. 닉네임 입력 (중복 확인)
-3. 사용자명 입력 (중복 확인)
-4. 이메일 확인 (카카오에서 자동 가져옴)
+1. 카카오 인증 완료 후 회원가입 폼 표시
+2. 닉네임 입력 (Server Action으로 실시간 중복 확인)
+3. 사용자명 입력
+4. 이메일 확인/입력 (카카오 계정 연동 및 중복 확인)
 5. "가입하기" 버튼 클릭
-6. 홈페이지로 자동 리다이렉트
+6. registerAction 실행으로 계정 생성 및 서명 토큰 발급
+7. Credentials Provider를 통해 즉시 세션 생성 후 홈('/')으로 이동
 ```
 
 ### 완료 상태
 
-- NextAuth 세션 생성
+- NextAuth JWT 세션 생성 (userId, email, name)
 - 사용자 정보 데이터베이스 저장
 - 메인 페이지 또는 대시보드로 이동
 
@@ -343,12 +348,12 @@ graph TD
 3. 변경사항 즉시 반영
 ```
 
-**API 흐름**:
+**API 및 액션 흐름**:
 
-- `POST /api/goals` - 목표 생성
+- `POST /api/goals` (또는 `createGoalAction`) - 목표 생성
 - `GET /api/goals?communityId=[id]` - 목표 목록 조회
-- `PATCH /api/goals/[id]` - 목표 수정
-- `DELETE /api/goals/[id]` - 목표 삭제
+- `PUT /api/goals/[id]` (또는 `updateGoalAction`) - 목표 수정
+- `DELETE /api/goals/[id]` (또는 `deleteGoalAction`) - 목표 삭제
 
 ---
 
@@ -421,13 +426,13 @@ graph TD
 - 회차 진행 중: 실시간 출석 체크 가능
 - 회차 종료 후: 출석 기록 확정
 
-**API 흐름**:
+**API 및 액션 흐름**:
 
 - `GET /api/rounds?communityId=[id]` - 회차 목록
 - `GET /api/rounds/[id]` - 회차 상세
-- `GET /api/attendance/round/[roundId]` - 회차별 출석 현황
-- `POST /api/attendance` - 출석 체크
-- `PATCH /api/attendance/[id]` - 출석 상태 수정
+- `GET /api/attendance/round/[roundId]` (또는 `getRoundAttendancesAction`) - 회차별 출석 현황
+- `POST /api/attendance` (또는 `markAttendanceAction` from `@/app/actions/attendance`) - 출석 체크 및 상태 기록
+- `DELETE /api/attendance/[id]` - 출석 기록 삭제/취소
 - `GET /api/attendance/user/[userId]` - 사용자별 출석 기록
 
 ---
@@ -674,11 +679,10 @@ graph TD
    - 로그인 페이지로 리다이렉트
 ```
 
-**API 흐름**:
+**API 및 액션 흐름**:
 
-- `GET /api/user` - 사용자 정보 조회
-- `PATCH /api/user` - 사용자 정보 수정
-- `DELETE /api/profile/delete` - 계정 삭제
+- `PUT /api/user` (또는 Server Action `updateProfileAction`) - 사용자 정보 수정
+- `POST /api/profile/delete` (또는 Server Action `deleteAccountAction`) - 계정 소프트 삭제
 
 ---
 

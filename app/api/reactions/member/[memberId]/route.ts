@@ -5,8 +5,10 @@
  *   - GET: 특정 멤버에 대한 리액션 목록 조회
  */
 
+import { findMemberById } from '@/lib/community/members.server'
 import prisma from '@/lib/prisma'
-import { activeReactionWhere, reactionDetailSelect } from '@/lib/queries'
+import { reactionDetailSelect } from '@/lib/queries'
+import { buildReactionWhereClause } from '@/lib/reactions/reactions.server'
 import { getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse } from '@/lib/utils/response'
 import type { NextRequest } from 'next/server'
@@ -29,22 +31,16 @@ export async function GET(
     const { page, limit, skip } = getPaginationParams(request)
 
     // 멤버 존재 확인
-    const member = await prisma.communityMember.findFirst({
-      where: { id: memberId, deletedAt: null },
-      select: { id: true },
-    })
+    const member = await findMemberById(memberId)
 
     if (!member) {
       return createErrorResponse('Member not found', 404)
     }
 
-    // where 절 구성
-    const whereClause = {
-      ...activeReactionWhere,
-      member_id: memberId,
-    }
+    // 조회 조건 구성
+    const whereClause = buildReactionWhereClause(memberId)
 
-    // withPagination 유틸리티 사용
+    // 페이지네이션 조회
     return withPagination(
       prisma.reaction.findMany({
         where: whereClause,

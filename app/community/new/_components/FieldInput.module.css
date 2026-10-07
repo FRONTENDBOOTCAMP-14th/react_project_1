@@ -1,7 +1,7 @@
 .field {
   width: 100%;
   display: flex;
-  justify-content: row;
+  justify-content: flex-start;
   align-items: center;
   gap: var(--spacing-sm);
 }

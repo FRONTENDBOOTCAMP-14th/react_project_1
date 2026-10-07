@@ -118,15 +118,22 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(totalCommunities / limit),
     }
 
-    // 2. 사용자가 속한 모든 커뮤니티의 다가오는 라운드 조회 (전체 조회)
-    const subscribedCommunityIds = subscribedCommunities.map((c: Community) => c.clubId)
+    // 2. 사용자가 속한 모든 커뮤니티의 다가오는 라운드 조회 (페이지네이션과 무관하게 전체 가입 모임 대상)
+    const allMemberships = await prisma.communityMember.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+      select: { clubId: true },
+    })
+    const allSubscribedCommunityIds = allMemberships.map(m => m.clubId)
 
     const upcomingRounds: Round[] =
-      subscribedCommunityIds.length > 0
+      allSubscribedCommunityIds.length > 0
         ? await prisma.round.findMany({
             where: {
               clubId: {
-                in: subscribedCommunityIds,
+                in: allSubscribedCommunityIds,
               },
               ...upcomingRoundsWhere(),
             },

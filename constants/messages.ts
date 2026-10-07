@@ -37,6 +37,7 @@ export const MESSAGES = {
     AUTH_REQUIRED: '인증이 필요합니다',
     ADMIN_REQUIRED: '팀장 권한이 필요합니다',
     LOGIN_REQUIRED: '로그인이 필요합니다',
+    FORBIDDEN: '접근 권한이 없습니다',
 
     // 커뮤니티 관련
     INVALID_COMMUNITY_ID: '유효한 커뮤니티 ID가 없습니다.',

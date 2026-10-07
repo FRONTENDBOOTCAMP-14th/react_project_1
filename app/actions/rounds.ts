@@ -1,12 +1,19 @@
 'use server'
 
-import { ATTENDANCE_TYPES, MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS } from '@/constants'
+import { MESSAGES, PERMISSION_LEVELS, REVALIDATE_PATHS } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { validateRoundCreation, validateRoundUpdate } from '@/lib/rounds/rounds.core'
+import {
+  createRound,
+  findRoundById,
+  softDeleteRound,
+  updateRound,
+} from '@/lib/rounds/rounds.server'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import {
   assertExists,
   checkPermission,
+  ServerActionError,
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
@@ -24,16 +31,14 @@ export async function createRoundAction(data: CreateRoundRequest): Promise<Serve
       // 관리자 권한 확인
       await checkPermission(userId, data.clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 라운드 생성
-      const round = await prisma.round.create({
-        data: {
-          clubId: data.clubId,
-          roundNumber: data.roundNumber,
-          startDate: data.startDate ? new Date(data.startDate) : null,
-          endDate: data.endDate ? new Date(data.endDate) : null,
-          location: data.location || null,
-        },
-      })
+      // Core: 입력 검증
+      const validation = validateRoundCreation(data)
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
+
+      // Server I/O: 라운드 생성
+      const round = await createRound(validation.value)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(data.clubId))
       return round
@@ -58,20 +63,21 @@ export async function updateRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 라운드 업데이트
-      const round = await prisma.round.update({
-        where: { roundId },
-        data: {
-          ...(data.roundNumber && { roundNumber: data.roundNumber }),
-          ...(data.startDate !== undefined && {
-            startDate: data.startDate ? new Date(data.startDate) : null,
-          }),
-          ...(data.endDate !== undefined && {
-            endDate: data.endDate ? new Date(data.endDate) : null,
-          }),
-          ...(data.location !== undefined && { location: data.location || null }),
-        },
+      // Server I/O: 라운드 존재 및 모임 소속 확인
+      const existingRound = await findRoundById(roundId, clubId)
+      assertExists(existingRound, MESSAGES.ERROR.ROUND_NOT_FOUND)
+
+      // Core: 입력 검증 (기존 시작/종료 일시와 결합하여 불변식 검증)
+      const validation = validateRoundUpdate(data, {
+        startDate: existingRound.startDate,
+        endDate: existingRound.endDate,
       })
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
+
+      // Server I/O: 라운드 업데이트
+      const round = await updateRound(roundId, validation.value)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
       return round
@@ -95,70 +101,15 @@ export async function deleteRoundAction(
       // 관리자 권한 확인
       await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
 
-      // 라운드 소프트 삭제
-      await prisma.round.update({
-        where: { roundId, deletedAt: null },
-        data: { deletedAt: new Date() },
-      })
+      // Server I/O: 라운드 존재 및 모임 소속 확인
+      const existingRound = await findRoundById(roundId, clubId)
+      assertExists(existingRound, MESSAGES.ERROR.ROUND_NOT_FOUND)
+
+      // Server I/O: 라운드 소프트 삭제
+      await softDeleteRound(roundId)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
     },
     { errorMessage: MESSAGES.ERROR.ROUND_DELETE_FAILED }
-  )
-}
-
-/**
- * Server Action: 출석 처리
- */
-export async function markAttendanceAction(
-  roundId: string,
-  clubId: string
-): Promise<ServerActionResponse> {
-  return withServerAction(
-    async () => {
-      const userId = await getCurrentUserId()
-      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
-
-      // 멤버십 확인
-      await checkPermission(userId, clubId, PERMISSION_LEVELS.MEMBER)
-
-      // 출석 기록 확인 (deletedAt 필터 포함)
-      const existingAttendance = await prisma.attendance.findFirst({
-        where: { roundId, userId, deletedAt: null },
-      })
-
-      if (existingAttendance) {
-        throw new Error(MESSAGES.ERROR.ALREADY_ATTENDED)
-      }
-
-      // 라운드 시간 확인
-      const round = await prisma.round.findUnique({
-        where: { roundId },
-        select: { startDate: true, endDate: true },
-      })
-
-      assertExists(round, MESSAGES.ERROR.ROUND_NOT_FOUND)
-
-      const now = new Date()
-      const isWithinWindow =
-        round.startDate && round.endDate && now >= round.startDate && now <= round.endDate
-
-      if (!isWithinWindow) {
-        throw new Error(MESSAGES.ERROR.ATTENDANCE_TIME_INVALID)
-      }
-
-      // 출석 생성
-      await prisma.attendance.create({
-        data: {
-          roundId,
-          userId,
-          attendanceType: ATTENDANCE_TYPES.PRESENT,
-          attendanceDate: now,
-        },
-      })
-
-      revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
-    },
-    { errorMessage: MESSAGES.ERROR.ATTENDANCE_FAILED }
   )
 }

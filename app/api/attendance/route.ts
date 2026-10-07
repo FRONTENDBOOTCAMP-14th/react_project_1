@@ -1,8 +1,16 @@
 import prisma from '@/lib/prisma'
 import type { CreateAttendanceInput } from '@/lib/types/attendance'
-import { buildAttendanceWhereClause, buildAttendanceCreateData } from '@/lib/utils/attendance'
+import {
+  buildAttendanceWhereClause,
+  buildAttendanceCreateData,
+} from '@/lib/attendance/attendance.server'
+import {
+  canManageAttendance,
+  validateAttendanceRegistration,
+} from '@/lib/attendance/attendance.core'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { requireAuthUser } from '@/lib/utils/api-auth'
+import { getUserRole } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 /**
@@ -152,6 +160,20 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('존재하지 않는 사용자입니다.', 404)
     }
 
+    // 출석 등록 권한 확인 (모임 멤버 본인이거나 모임 운영진이어야 함)
+    const callerMembership = await getUserRole(currentUserId, round.clubId)
+    if (!callerMembership || !canManageAttendance(currentUserId, userId, callerMembership.role)) {
+      return createErrorResponse('출석을 등록할 권한이 없습니다.', 403)
+    }
+
+    // 대상 사용자(userId)가 해당 모임의 멤버인지 확인
+    const targetMembership =
+      userId === currentUserId ? callerMembership : await getUserRole(userId, round.clubId)
+
+    if (!targetMembership) {
+      return createErrorResponse('해당 모임의 멤버만 출석을 등록할 수 있습니다.', 400)
+    }
+
     // 이미 출석이 있는지 확인
     const existingAttendance = await prisma.attendance.findUnique({
       where: {
@@ -166,13 +188,26 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('이미 해당 라운드에 출석 정보가 있습니다.', 409)
     }
 
+    // Core: 출석 등록 정책 및 불변식 검증 (권한, 타입, 시간 윈도우)
+    const validation = validateAttendanceRegistration({
+      callerRole: callerMembership.role,
+      isSelf: currentUserId === userId,
+      attendanceType,
+      round,
+      hasExistingAttendance: Boolean(existingAttendance),
+      currentTime: attendanceDate ? new Date(attendanceDate) : new Date(),
+    })
+    if (validation.isErr()) {
+      return createErrorResponse(validation.error.message, 400)
+    }
+
     // 출석 생성
     const attendance = await prisma.attendance.create({
       data: buildAttendanceCreateData({
         userId,
         roundId,
         attendanceType,
-        attendanceDate: attendanceDate ? new Date(attendanceDate) : undefined,
+        attendanceDate: validation.value.attendanceDate,
       }),
       include: {
         user: {

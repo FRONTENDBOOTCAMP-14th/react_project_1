@@ -4,32 +4,23 @@
  * - 메서드:
  *   - GET: 목록 조회(필터링 지원)
  *   - POST: 신규 리액션 생성
- *
- * 주의사항
- * - 소프트 삭제(deletedAt !== null)는 목록에서 제외합니다.
- * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
 import { MESSAGES } from '@/constants/messages'
+import { findMemberById } from '@/lib/community/members.server'
 import prisma from '@/lib/prisma'
-import { activeReactionWhere, reactionSelect } from '@/lib/queries'
+import { reactionSelect } from '@/lib/queries'
+import { validateReactionCreation } from '@/lib/reactions/reactions.core'
+import { buildReactionWhereClause, createReaction } from '@/lib/reactions/reactions.server'
 import type { CreateReactionRequest } from '@/lib/types/reaction'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import { getPaginationParams, getStringParam, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/reactions
  * - 리액션 목록을 조회합니다.
- * - 쿼리 파라미터
- *   - memberId?: string  특정 멤버 ID로 필터 (필수)
- *   - userId?: string    특정 사용자 ID로 필터
- *
- * 응답
- * - 200: { success: true, data: Reaction[], count: number, pagination: {...} }
- * - 400: { success: false, error: string }
- * - 500: { success: false, error: string, message?: string }
  */
 export async function GET(request: NextRequest) {
   try {
@@ -45,11 +36,7 @@ export async function GET(request: NextRequest) {
     const { page, limit, skip } = getPaginationParams(request)
 
     // where 절 구성
-    const whereClause = {
-      ...activeReactionWhere,
-      member_id: memberId,
-      ...(userId && { userId }),
-    }
+    const whereClause = buildReactionWhereClause(memberId, userId)
 
     // withPagination 유틸리티 사용
     return withPagination(
@@ -73,19 +60,6 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/reactions
  * - 신규 리액션을 생성합니다.
- * - 인증 필요
- *
- * 요청 Body 예시
- * {
- *   "memberId": "멤버ID(필수)",
- *   "reaction": "리액션 내용(필수)"
- * }
- *
- * 응답
- * - 201: { success: true, data: Reaction }
- * - 400: { success: false, error: 'Missing required fields' }
- * - 404: { success: false, error: 'Member not found' }
- * - 500: { success: false, error: string, message?: string }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -101,30 +75,20 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Missing required fields: memberId, reaction', 400)
     }
 
-    // 리액션 내용 검증
-    const trimmedReaction = reaction.trim()
-    if (!trimmedReaction) {
-      return createErrorResponse('Reaction cannot be empty', 400)
+    // 입력값 검증
+    const validation = validateReactionCreation(body, userId)
+    if (validation.isErr()) {
+      return createErrorResponse(validation.error.message, 400)
     }
 
-    // memberId 존재 확인
-    const member = await prisma.communityMember.findFirst({
-      where: { id: memberId, deletedAt: null },
-      select: { id: true },
-    })
-
+    // 멤버 존재 확인
+    const member = await findMemberById(validation.value.memberId)
     if (!member) {
       return createErrorResponse('Member not found', 404)
     }
 
-    const newReaction = await prisma.reaction.create({
-      data: {
-        userId,
-        member_id: memberId,
-        reaction: trimmedReaction,
-      },
-      select: reactionSelect,
-    })
+    // 리액션 생성
+    const newReaction = await createReaction(validation.value)
 
     return createSuccessResponse(newReaction, 201)
   } catch (error) {

@@ -241,6 +241,7 @@ export const communitySelect = {
   isPublic: true,
   region: true,
   subRegion: true,
+  imageUrl: true,
   createdAt: true,
   updatedAt: true,
   tagname: true,

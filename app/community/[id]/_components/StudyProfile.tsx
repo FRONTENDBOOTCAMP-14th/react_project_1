@@ -4,7 +4,7 @@ import communityCardStyles from '@/app/community/_components/CommunityCard.modul
 import { FormField, SharedForm } from '@/components/common'
 import { IconLink, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES, ROUTES, UI_CONSTANTS } from '@/constants'
-import type { CommunityDetail } from '@/lib/community/communityServer'
+import type { CommunityDetail } from '@/lib/community/community.server'
 import regions from '@/lib/json/region.json'
 import type { UpdateCommunityInput } from '@/lib/types/community'
 import { Ellipsis, MapPin, Users } from 'lucide-react'

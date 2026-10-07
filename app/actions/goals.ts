@@ -1,46 +1,41 @@
 'use server'
 
+import { MESSAGES, REVALIDATE_PATHS } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { canManageGoal, validateGoalCreation, validateGoalUpdate } from '@/lib/goals/goals.core'
+import { createGoal, findGoalById, softDeleteGoal, updateGoal } from '@/lib/goals/goals.server'
 import type { CreateGoalInput, UpdateGoalInput } from '@/lib/types/goal'
 import {
   assertExists,
+  ServerActionError,
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
-import { MESSAGES, GOAL_STATUS, REVALIDATE_PATHS } from '@/constants'
 import { revalidatePath } from 'next/cache'
 
 /**
  * Server Action: 목표 생성
  */
-export async function createGoalAction(data: CreateGoalInput): Promise<ServerActionResponse> {
+export async function createGoalAction(
+  data: Partial<CreateGoalInput>
+): Promise<ServerActionResponse> {
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
       assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 날짜 변환
-      const start = data.startDate instanceof Date ? data.startDate : new Date(data.startDate)
-      const end = data.endDate instanceof Date ? data.endDate : new Date(data.endDate)
+      // 입력값 검증
+      const validation = validateGoalCreation(data, userId)
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
 
-      const newGoal = await prisma.studyGoal.create({
-        data: {
-          ownerId: userId, // 인증된 사용자로 자동 설정
-          clubId: data.clubId || null,
-          roundId: data.roundId || null,
-          title: data.title,
-          description: data.description || null,
-          isTeam: data.isTeam || GOAL_STATUS.ACTIVE,
-          isComplete: data.isComplete || GOAL_STATUS.ACTIVE,
-          startDate: start,
-          endDate: end,
-        },
-      })
+      // 목표 생성
+      const newGoal = await createGoal(validation.value)
 
       // 연관된 경로 재검증
-      if (data.clubId) {
-        revalidatePath(REVALIDATE_PATHS.COMMUNITY(data.clubId))
+      if (validation.value.clubId) {
+        revalidatePath(REVALIDATE_PATHS.COMMUNITY(validation.value.clubId))
       }
 
       return newGoal
@@ -59,46 +54,32 @@ export async function updateGoalAction(
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 목표 존재 및 소유자 확인
-      const existingGoal = await prisma.studyGoal.findFirst({
-        where: { goalId, deletedAt: null },
-        select: { ownerId: true, clubId: true },
-      })
-
+      // 목표 존재 확인
+      const existingGoal = await findGoalById(goalId)
       assertExists(existingGoal, '목표를 찾을 수 없습니다')
 
-      if (existingGoal.ownerId !== userId) {
-        throw new Error('목표 소유자만 수정할 수 있습니다')
+      // 소유자 권한 확인
+      if (!canManageGoal(existingGoal.ownerId, userId)) {
+        throw new ServerActionError('목표 소유자만 수정할 수 있습니다', 'FORBIDDEN', 403)
       }
 
-      // 동적 업데이트 데이터 구성
-      const updateData: Record<string, unknown> = {
-        updatedAt: new Date(),
-      }
-
-      if (data.title !== undefined) updateData.title = data.title
-      if (data.description !== undefined) updateData.description = data.description
-      if (data.isTeam !== undefined) updateData.isTeam = data.isTeam
-      if (data.isComplete !== undefined) updateData.isComplete = data.isComplete
-      if (data.roundId !== undefined) updateData.roundId = data.roundId
-      if (data.startDate !== undefined) {
-        updateData.startDate =
-          data.startDate instanceof Date ? data.startDate : new Date(data.startDate)
-      }
-      if (data.endDate !== undefined) {
-        updateData.endDate = data.endDate instanceof Date ? data.endDate : new Date(data.endDate)
-      }
-
-      const updatedGoal = await prisma.studyGoal.update({
-        where: { goalId },
-        data: updateData,
+      // 수정 내용 검증
+      const validation = validateGoalUpdate(data, {
+        startDate: existingGoal.startDate ? new Date(existingGoal.startDate) : null,
+        endDate: existingGoal.endDate ? new Date(existingGoal.endDate) : null,
       })
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
+
+      // 목표 수정
+      const updatedGoal = await updateGoal(goalId, validation.value)
 
       // 연관된 경로 재검증
       if (existingGoal.clubId) {
-        revalidatePath(`/community/${existingGoal.clubId}`)
+        revalidatePath(REVALIDATE_PATHS.COMMUNITY(existingGoal.clubId))
       }
 
       return updatedGoal
@@ -114,29 +95,23 @@ export async function deleteGoalAction(goalId: string): Promise<ServerActionResp
   return withServerAction(
     async () => {
       const userId = await getCurrentUserId()
-      assertExists(userId, '인증이 필요합니다')
+      assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      // 목표 존재 및 소유자 확인
-      const existingGoal = await prisma.studyGoal.findFirst({
-        where: { goalId, deletedAt: null },
-        select: { ownerId: true, clubId: true },
-      })
-
+      // 목표 존재 확인
+      const existingGoal = await findGoalById(goalId)
       assertExists(existingGoal, '목표를 찾을 수 없습니다')
 
-      if (existingGoal.ownerId !== userId) {
-        throw new Error('목표 소유자만 삭제할 수 있습니다')
+      // 소유자 권한 확인
+      if (!canManageGoal(existingGoal.ownerId, userId)) {
+        throw new ServerActionError('목표 소유자만 삭제할 수 있습니다', 'FORBIDDEN', 403)
       }
 
-      // 소프트 삭제
-      await prisma.studyGoal.update({
-        where: { goalId, deletedAt: null },
-        data: { deletedAt: new Date() },
-      })
+      // 목표 삭제
+      await softDeleteGoal(goalId)
 
       // 연관된 경로 재검증
       if (existingGoal.clubId) {
-        revalidatePath(`/community/${existingGoal.clubId}`)
+        revalidatePath(REVALIDATE_PATHS.COMMUNITY(existingGoal.clubId))
       }
     },
     { errorMessage: '목표 삭제에 실패했습니다' }

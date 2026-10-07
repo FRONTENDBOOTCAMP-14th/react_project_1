@@ -1,8 +1,10 @@
 import prisma from '@/lib/prisma'
 import type { UpdateAttendanceInput } from '@/lib/types/attendance'
 import { requireAuthUser } from '@/lib/utils/api-auth'
-import { buildAttendanceUpdateData } from '@/lib/utils/attendance'
+import { buildAttendanceUpdateData } from '@/lib/attendance/attendance.server'
+import { canManageAttendance } from '@/lib/attendance/attendance.core'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import { getUserRole } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 interface RouteParams {
@@ -106,10 +108,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     // 출석 정보 확인
     const existingAttendance = await prisma.attendance.findUnique({
       where: { attendanceId: id },
+      include: {
+        round: {
+          select: { clubId: true },
+        },
+      },
     })
 
     if (!existingAttendance) {
       return createErrorResponse('출석 정보를 찾을 수 없습니다.', 404)
+    }
+
+    // 출석 수정 권한 확인 (본인이거나 모임 운영진이어야 함)
+    const membership = await getUserRole(currentUserId, existingAttendance.round.clubId)
+    if (!canManageAttendance(currentUserId, existingAttendance.userId, membership?.role)) {
+      return createErrorResponse('출석을 수정할 권한이 없습니다.', 403)
     }
 
     // 업데이트 데이터 구성
@@ -178,9 +191,30 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return createErrorResponse('출석 ID가 필요합니다.', 400)
     }
 
-    // 소프트 삭제 (미들웨어가 자동으로 처리)
-    await prisma.attendance.delete({
+    // 출석 정보 확인
+    const existingAttendance = await prisma.attendance.findUnique({
       where: { attendanceId: id },
+      include: {
+        round: {
+          select: { clubId: true },
+        },
+      },
+    })
+
+    if (!existingAttendance) {
+      return createErrorResponse('출석 정보를 찾을 수 없습니다.', 404)
+    }
+
+    // 출석 삭제 권한 확인 (본인이거나 모임 운영진이어야 함)
+    const membership = await getUserRole(currentUserId, existingAttendance.round.clubId)
+    if (!canManageAttendance(currentUserId, existingAttendance.userId, membership?.role)) {
+      return createErrorResponse('출석을 삭제할 권한이 없습니다.', 403)
+    }
+
+    // 소프트 삭제 (deletedAt 설정)
+    await prisma.attendance.update({
+      where: { attendanceId: id },
+      data: { deletedAt: new Date() },
     })
 
     return createSuccessResponse({ message: 'Deleted successfully' })

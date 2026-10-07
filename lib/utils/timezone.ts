@@ -1,11 +1,7 @@
-'use client'
-
 /**
  * 타임존 유틸리티
  * 사용자의 타임존을 감지하고 변환합니다.
  */
-
-import { useEffect, useState } from 'react'
 
 export interface TimezoneInfo {
   timezone: string
@@ -133,30 +129,24 @@ export function formatTimezoneInfo(info: TimezoneInfo): string {
 }
 
 /**
- * React Hook for timezone
+ * 주어진 YYYY-MM-DD 날짜의 클라이언트 로컬 기준 하루 범위 (00:00:00.000 ~ 23:59:59.999)를 반환합니다.
  */
-export function useTimezone() {
-  const [timezoneInfo, setTimezoneInfo] = useState<TimezoneInfo>(getTimezoneInfo())
+export function getLocalDateRange(dateKey: string): { start: Date; end: Date } {
+  const [yearStr, monthStr, dayStr] = dateKey.split('-')
+  const year = parseInt(yearStr, 10)
+  const month = parseInt(monthStr, 10) - 1
+  const day = parseInt(dayStr, 10)
 
-  useEffect(() => {
-    // 타임존 변경 감지 (거의 발생하지 않지만 안전하게)
-    const checkTimezone = () => {
-      const newInfo = getTimezoneInfo()
-      if (newInfo.timezone !== timezoneInfo.timezone || newInfo.offset !== timezoneInfo.offset) {
-        setTimezoneInfo(newInfo)
-      }
-    }
+  const start = new Date(year, month, day, 0, 0, 0, 0)
+  const end = new Date(year, month, day, 23, 59, 59, 999)
+  return { start, end }
+}
 
-    const interval = setInterval(checkTimezone, 60000) // 1분마다 확인
-
-    return () => clearInterval(interval)
-  }, [timezoneInfo])
-
-  return {
-    timezoneInfo,
-    toLocalTime,
-    toUTCTime,
-    toTimezone,
-    formatTimezoneInfo: () => formatTimezoneInfo(timezoneInfo),
-  }
+/**
+ * 라운드 시작 일시가 특정 YYYY-MM-DD(로컬 기준) 날짜에 속하는지 판별합니다.
+ */
+export function isRoundOnLocalDate(roundStartDate: Date | string, dateKey: string): boolean {
+  const { start, end } = getLocalDateRange(dateKey)
+  const date = typeof roundStartDate === 'string' ? new Date(roundStartDate) : roundStartDate
+  return date >= start && date <= end
 }

@@ -55,36 +55,23 @@
 - **위치**: 각 컴포넌트/페이지 옆에 `*.module.css` (colocation)
 - **클래스 네이밍**: 로컬 스코프이므로 **간결한 이름** 사용
   - 블록/요소/상태 느낌을 살린 단순 패턴 권장: `container`, `title`, `subtitle`, `actions`, `is-active` 등
-  - 변형은 별도 클래스 조합: `<div className={`${styles.card} ${styles.danger}`}/>`
-- **토큰/전역 유틸**: 전역 색/간격 등은 `styles/tokens.css`에 CSS 변수로 정의하고, 필요한 항목만 `app/globals.css`에서 import
-  - 네이밍 규칙: `--color-<name>`, `--space-<step>`, `--font-<usage>` 등 기능 중심으로 구성
-  - 예:
-
-    ```css
-    :root {
-      --color-primary: #0ea5e9;
-      --space-4: 1rem;
-      --font-body: var(--pretendard);
-    }
-    ```
-
+  - 변형은 별도 클래스 조합 또는 CSS Modules `composes` 활용: `<div className={`${styles.card} ${styles.danger}`}/>`
+- **토큰/전역 유틸**: 전역 색상, 간격, 폰트 토큰은 `styles/common/variable.css`에 CSS 커스텀 속성(`--*`)으로 정의하고 `styles/globals.css`에서 import
+  - 핵심 팔레트: `--primary-color`, `--secondary-color`, `--accent-color`, `--third-color`
+  - 시맨틱 별칭: `--bg-color`, `--text-color`, `--text-color-secondary`, `--border-color`, `--font-family`
+  - 접근성 포커스: 인터랙티브 요소는 `:focus-visible`로 가시성 있는 포커스 링 보장
+- **공통 컴포넌트 스타일 재사용**: 유사 변형(Button/Link 계열)은 `button-base.module.css` 등의 공통 베이스 모듈을 정의하고 각 모듈에서 `composes`를 사용하여 중복 선언을 방지
 - **미디어쿼리/반응형**: 필요 시 컴포넌트 모듈 내부에서 최소한으로 처리
 - **서드파티**: 전역 프레임워크(PureCSS)는 `app/layout.tsx`에서 import (이미 적용)
 
 > 토큰 파일 변경 시 릴리즈 노트에 주요 변경 사항을 남겨 디자인/개발 간 싱크를 맞춥니다.
 
-예시
+예시 (공통 베이스 합성 패턴)
 
 ```css
-/* Button.module.css */
-.button {
-  /* 기본 스타일 */
-}
-.secondary {
-  /* 변형 */
-}
-.is-loading {
-  /* 상태 */
+/* AccentButton.module.css */
+.accent-button {
+  composes: base-button accent from './button-base.module.css';
 }
 ```
 
@@ -118,7 +105,7 @@
 - **파일 위치**: `app/api/<resource>/route.ts`
 - **HTTP 규칙**: 리소스/HTTP 메서드 일관성 유지 (예: `GET /api/goals`, `POST /api/goals`)
 - **에러 처리**: `try/catch`로 캐치 후 `NextResponse.json({ success: false, error }, { status })`
-- **보안**: 현재 단계에서 미들웨어 미적용. 운영 전 보안 계층(API Key/Basic/Supabase Auth) 추가 예정
+- **보안**: Next.js 16 `proxy.ts`에서 글로벌 JWT 인증 및 라우트 가드를 적용하며, 세부 권한 검증은 `lib/middleware/auth.ts` 및 `lib/auth/permissions.ts` 인가 가드를 통해 수행합니다.
 
 ### 7.1 응답 스키마
 
@@ -275,12 +262,30 @@ export async function POST(req: Request) {
 }
 ```
 
+### 13.3 FCIS (Functional Core, Imperative Shell) 및 도메인 정렬 아키텍처
+
+- **Functional Core (`lib/*/*.core.ts`)**: I/O가 없는 순수 함수로 비즈니스 규칙 및 불변식을 검증하고 `Result<T, E>` 타입을 반환합니다. 데이터베이스나 외부 프레임워크에 대한 결합이 없어야 합니다.
+- **Data Access SSOT (`lib/*/*.server.ts`)**: 도메인 엔티티별 데이터베이스(Prisma) 접근의 단일 진실 공급원(SSOT)입니다. 중복 서버 파일(예: `communityServer.ts` 등) 작성을 금지하며, 한 도메인의 쿼리는 단일 `*.server.ts`로 수렴합니다.
+- **Imperative Shell & Server Actions (`app/actions/*.ts`, `app/api/*`)**: 네트워크 I/O, 권한 확인(`checkPermission`), 캐시 무효화(`revalidatePath`)를 담당하며 Core와 Server 계층을 조율합니다. 출석(`attendance.ts`), 회차(`rounds.ts`) 등 도메인 책임 단위로 파일을 엄격히 1:1 분리합니다.
+- **유틸리티 경계 (`lib/utils/`)**: `lib/utils/index.ts` 배럴 파일은 순수 헬퍼만 re-export합니다. 서버 전용 객체(`NextRequest`)를 포함하는 모듈(`apiHelpers.ts`)이나 React Hook은 배럴 파일에서 제외하고 각각 `@/lib/utils/apiHelpers`, `@/lib/hooks/*`에서 직접 임포트합니다.
+
 ---
 
-## 14. 향후 추가 예정
+## 14. 테스트 전략 (Jest & React Testing Library)
 
-- 테스트 전략(Jest/Playwright)과 커버리지 기준
-- 디자인 토큰 파일(`styles/tokens.css`) 정의 + 버전 관리 방법
+- **테스트 환경**: Jest 30, `@testing-library/react`, `ts-jest`
+- **단위 테스트**: Functional Core(`*.core.test.ts`), 유틸리티(`*.test.ts`)의 순수 로직 검증
+- **통합 및 인가 테스트**: Server Action(`app/actions/__tests__/*.test.ts`), API Route Handler 권한 검증 테스트
+- **명령어**:
+  - `pnpm test`: 전체 테스트 스위트 실행
+  - `pnpm test:watch`: 파일 변경 감지 테스트
+  - `pnpm test:coverage`: 테스트 커버리지 리포트 생성
+
+---
+
+## 15. 향후 추가 예정
+
+- E2E 테스트(Playwright) 시나리오 작성
 - Supabase 스키마/마이그레이션 운영 규칙(Supabase CLI)
 - 접근성 체크리스트(ARIA, 키보드 내비게이션)
 - 배포 파이프라인(Preview → Staging → Production) 운영 수칙

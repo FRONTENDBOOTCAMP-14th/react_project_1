@@ -4,33 +4,26 @@
  * - 메서드:
  *   - GET: 목록 조회(필터링 지원)
  *   - POST: 신규 공지사항 생성
- *
- * 주의사항
- * - 소프트 삭제(deletedAt !== null)는 목록에서 제외합니다.
- * - 모든 응답은 JSON 형태이며, 성공 여부(success)와 데이터/메시지를 포함합니다.
  */
 
 import { MESSAGES } from '@/constants/messages'
+import { getCurrentUserId, hasPermission } from '@/lib/auth'
+import { validateNotificationCreation } from '@/lib/notifications/notifications.core'
+import {
+  buildNotificationWhereClause,
+  createNotification,
+} from '@/lib/notifications/notifications.server'
 import prisma from '@/lib/prisma'
-import { activeNotificationWhere, notificationSelect } from '@/lib/queries'
+import { notificationSelect } from '@/lib/queries'
 import type { CreateNotificationRequest } from '@/lib/types/notification'
+import { requireAuthUser } from '@/lib/utils/api-auth'
 import { getBooleanParam, getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { requireAuthUser } from '@/lib/utils/api-auth'
-import { hasPermission } from '@/lib/auth'
 import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/notifications
  * - 공지사항 목록을 조회합니다.
- * - 쿼리 파라미터
- *   - clubId?: string  특정 커뮤니티(클럽) ID로 필터 (필수)
- *   - isPinned?: boolean  고정 공지사항만 조회
- *
- * 응답
- * - 200: { success: true, data: Notification[], count: number, pagination: {...} }
- * - 400: { success: false, error: string }
- * - 500: { success: false, error: string, message?: string }
  */
 export async function GET(request: NextRequest) {
   try {
@@ -43,14 +36,33 @@ export async function GET(request: NextRequest) {
       return createErrorResponse('clubId is required', 400)
     }
 
+    const club = await prisma.community.findFirst({
+      where: { clubId, deletedAt: null },
+      select: { isPublic: true },
+    })
+
+    if (!club) {
+      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
+    }
+
+    if (!club.isPublic) {
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        return createErrorResponse(MESSAGES.ERROR.AUTH_REQUIRED, 401)
+      }
+
+      const isMember = await hasPermission(userId, clubId, 'member')
+      if (!isMember) {
+        return createErrorResponse(MESSAGES.ERROR.FORBIDDEN, 403)
+      }
+    }
+
     const { page, limit, skip } = getPaginationParams(request)
 
     // where 절 구성
-    const whereClause = {
-      ...activeNotificationWhere,
-      clubId,
-      ...(isPinned !== null && { isPinned }),
-    }
+    const whereClause = buildNotificationWhereClause(clubId, {
+      ...(isPinned !== undefined && { isPinned }),
+    })
 
     // withPagination 유틸리티 사용
     return withPagination(
@@ -77,21 +89,6 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/notifications
  * - 신규 공지사항을 생성합니다.
- * - 권한: 커뮤니티 관리자 이상
- *
- * 요청 Body 예시
- * {
- *   "clubId": "커뮤니티ID(필수)",
- *   "title": "공지사항 제목(필수)",
- *   "content": "공지사항 내용(선택)",
- *   "isPinned": false  // 상단 고정 여부(선택, 기본값 false)
- * }
- *
- * 응답
- * - 201: { success: true, data: Notification }
- * - 400: { success: false, error: 'Missing required fields', required: [...] }
- * - 404: { success: false, error: 'Community not found' }
- * - 500: { success: false, error: string, message?: string }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -100,11 +97,17 @@ export async function POST(request: NextRequest) {
     if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const body = (await request.json()) as CreateNotificationRequest
-    const { clubId, title, content, isPinned } = body
+    const { clubId, title } = body
 
     // 필수 값 검증
     if (!clubId || !title) {
       return createErrorResponse('Missing required fields: clubId, title', 400)
+    }
+
+    // 입력값 검증
+    const validation = validateNotificationCreation(body, userId)
+    if (validation.isErr()) {
+      return createErrorResponse(validation.error.message, 400)
     }
 
     // 관리자 권한 확인
@@ -113,13 +116,7 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('관리자 이상만 공지사항을 생성할 수 있습니다.', 403)
     }
 
-    // 제목 길이 검증
-    const trimmedTitle = title.trim()
-    if (!trimmedTitle) {
-      return createErrorResponse('Title cannot be empty', 400)
-    }
-
-    // clubId 존재 확인
+    // 커뮤니티 존재 확인
     const club = await prisma.community.findFirst({
       where: { clubId, deletedAt: null },
       select: { clubId: true },
@@ -129,16 +126,8 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NOT_FOUND, 404)
     }
 
-    const newNotification = await prisma.notification.create({
-      data: {
-        clubId,
-        authorId: userId,
-        title: trimmedTitle,
-        content: content?.trim() || null,
-        isPinned: isPinned ?? false,
-      },
-      select: notificationSelect,
-    })
+    // 공지사항 생성
+    const newNotification = await createNotification(validation.value)
 
     return createSuccessResponse(newNotification, 201)
   } catch (error) {

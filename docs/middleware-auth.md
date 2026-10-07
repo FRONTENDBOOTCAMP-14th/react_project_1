@@ -35,7 +35,7 @@
 ```
 1. 사용자 요청
    ↓
-2. Next.js 미들웨어 (middleware.ts)
+2. Next.js 라우트 가드 / 프록시 (proxy.ts)
    - 경로 확인 (공개/보호)
    - JWT 토큰 검증
    ↓
@@ -53,7 +53,7 @@
 
 ```
 .
-├── middleware.ts                    # 글로벌 미들웨어
+├── proxy.ts                         # 글로벌 라우트 가드 / 미들웨어 (Next.js 16)
 ├── app/
 │   └── api/
 │       └── auth/
@@ -112,8 +112,7 @@ NextAuth의 JWT 전략을 사용하여 빠르고 효율적인 인증을 제공�
 
 **역할 계층:**
 
-- `owner` (팀장): 모든 권한
-- `admin` (관리자): 멤버 관리 및 콘텐츠 수정
+- `admin` (팀장/관리자): 멤버 관리 및 콘텐츠 수정/삭제 등 모든 관리 권한
 - `member` (멤버): 기본 읽기 및 참여
 
 ### 4. 성능 최적화
@@ -173,7 +172,7 @@ import { createSuccessResponse } from '@/lib/utils/response'
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   // 인증 + 팀장 권한 확인
-  const { userId, role, error } = await requireAuthAndAccess(params.id, 'owner')
+  const { userId, role, error } = await requireAuthAndAccess(params.id, 'admin')
   if (error) return error
 
   // 삭제 로직...
@@ -294,8 +293,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   }
 
   // 3. 팀장 권한 확인
-  const isOwner = await hasPermission(userId!, round.clubId, 'owner')
-  if (!isOwner) {
+  const isLeader = await hasPermission(userId!, round.clubId, 'admin')
+  if (!isLeader) {
     return createErrorResponse('팀장만 라운드를 삭제할 수 있습니다.', 403)
   }
 
@@ -316,7 +315,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 미들웨어에서 인증되지 않은 요청을 즉시 차단하여 불필요한 처리를 방지합니다.
 
 ```typescript
-// middleware.ts에서 자동 처리
+// proxy.ts에서 자동 처리
 if (isProtectedRoute(pathname) && !token) {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 }
@@ -422,9 +421,9 @@ REGISTER_PAGE_URL=/login?step=register
 
 ## 트러블슈팅
 
-### 미들웨어가 동작하지 않음
+### 미들웨어 / 프록시가 동작하지 않음
 
-1. `middleware.ts` 파일이 프로젝트 루트에 있는지 확인
+1. `proxy.ts` (또는 `middleware.ts`) 파일이 프로젝트 루트에 있는지 확인
 2. `config.matcher` 설정이 올바른지 확인
 3. `next-auth` 패키지가 설치되어 있는지 확인
 

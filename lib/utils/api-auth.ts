@@ -141,7 +141,7 @@ export async function requireCommunityAccess(
  * @example
  * ```typescript
  * export async function DELETE(req: Request, { params }: { params: { id: string } }) {
- *   const { userId, role, error } = await requireAuthAndAccess(params.id, 'owner')
+ *   const { userId, role, error } = await requireAuthAndAccess(params.id, 'admin')
  *   if (error) return error
  *
  *   // 팀장 권한이 확인된 경우의 로직

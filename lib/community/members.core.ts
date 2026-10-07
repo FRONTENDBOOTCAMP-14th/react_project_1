@@ -31,6 +31,7 @@ export interface CanDeleteMemberInput {
   memberExists: boolean
   isSelf: boolean
   hasAdminPermission: boolean
+  isSoleAdmin?: boolean
 }
 
 /**
@@ -89,6 +90,10 @@ export function validateMemberRoleUpdate(
 export function canDeleteMember(input: CanDeleteMemberInput): Result<true, Error> {
   if (!input.memberExists) {
     return err(new Error('멤버를 찾을 수 없습니다'))
+  }
+
+  if (input.isSoleAdmin) {
+    return err(new Error('유일한 관리자는 탈퇴하거나 삭제될 수 없습니다'))
   }
 
   if (!input.isSelf && !input.hasAdminPermission) {

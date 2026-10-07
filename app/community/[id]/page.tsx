@@ -1,7 +1,7 @@
 import { ROUTES } from '@/constants'
 import { getCurrentUserId } from '@/lib/auth'
 import { checkMembershipAndRole } from '@/lib/auth/permissions'
-import { getCommunityDetail } from '@/lib/community/communityServer'
+import { getCommunityDetail } from '@/lib/community/community.server'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import CommunityContent from './_components/CommunityContent'

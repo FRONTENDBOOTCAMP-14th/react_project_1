@@ -3,6 +3,7 @@ import {
   canJoinCommunity,
   prepareCommunityUpdate,
   prepareImageUpload,
+  validateCommunityCreation,
 } from '../community.core'
 
 describe('Community Functional Core (Pure Domain Logic)', () => {
@@ -178,6 +179,50 @@ describe('Community Functional Core (Pure Domain Logic)', () => {
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
         expect(result.error.message).toBe('이미지 파일 크기는 5MB를 초과할 수 없습니다')
+      }
+    })
+  })
+
+  describe('validateCommunityCreation', () => {
+    it('C-C01: 유효한 커뮤니티 생성 입력값을 정제하여 반환한다', () => {
+      const result = validateCommunityCreation({
+        name: '  토끼 스터디  ',
+        description: '설명',
+        region: '서울',
+        subRegion: '강남구',
+        tagname: '코딩',
+      })
+
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value.name).toBe('토끼 스터디')
+        expect(result.value.description).toBe('설명')
+        expect(result.value.isPublic).toBe(true)
+        expect(result.value.region).toBe('서울')
+        expect(result.value.subRegion).toBe('강남구')
+        expect(result.value.tagname).toEqual(['코딩'])
+      }
+    })
+
+    it('C-C02: 공백 이름은 생성을 거부한다', () => {
+      const result = validateCommunityCreation({
+        name: '   ',
+      })
+
+      expect(result.isErr()).toBe(true)
+      if (result.isErr()) {
+        expect(result.error.message).toBe('커뮤니티 이름은 비어있을 수 없습니다')
+      }
+    })
+
+    it('이름이 100자를 초과하면 생성을 거부한다', () => {
+      const result = validateCommunityCreation({
+        name: 'a'.repeat(101),
+      })
+
+      expect(result.isErr()).toBe(true)
+      if (result.isErr()) {
+        expect(result.error.message).toContain('100자 이하')
       }
     })
   })

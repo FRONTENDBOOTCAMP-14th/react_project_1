@@ -23,23 +23,24 @@ Nextjs 기반 스터디 진행 관리/커뮤니티 플랫폼입니다. 팀/개�
 
 ### Frontend
 
-- **프레임워크**: Nextjs 15 (App Router), React 19
-- **언어**: TypeScript
+- **프레임워크**: Next.js 16 (App Router), React 19.3 (React Compiler)
+- **언어**: TypeScript 6
 - **스타일링**: VanillaCSS + CSS Modules
 - **상태 관리**: Zustand
 - **UI 라이브러리**: Lucide React (Icons), Sonner (Toast Notifications)
 
 ### Backend
 
-- **데이터베이스**: Prisma + PostgreSQL (Supabase)
-- **인증**: NextAuth v4 (JWT, Kakao OAuth)
-- **미들웨어**: Next.js Middleware (Route Guards)
+- **데이터베이스**: Prisma 6 + PostgreSQL (Supabase)
+- **인증**: NextAuth v4 (JWT, Kakao OAuth, Server Actions)
+- **미들웨어 / 라우트 가드**: Next.js Proxy/Middleware (`proxy.ts`)
 
 ### DevOps & Tools
 
 - **배포**: Vercel
-- **패키지 관리자**: pnpm 9.15.9
-- **코드 품질**: ESLint (Flat Config), Prettier
+- **패키지 관리자**: pnpm 10.34.6
+- **코드 품질**: ESLint 10 (Flat Config), Prettier
+- **테스트**: Jest 30, React Testing Library, ts-jest
 - **런타임**: Node LTS
 
 ## 실행 방법
@@ -47,7 +48,7 @@ Nextjs 기반 스터디 진행 관리/커뮤니티 플랫폼입니다. 팀/개�
 ### 사전 준비
 
 - Node.js LTS 버전
-- pnpm 설치
+- pnpm 설치 (`pnpm >= 10`)
 - PostgreSQL 데이터베이스 (Supabase 권장)
 - 카카오 개발자 계정
 
@@ -77,6 +78,11 @@ DIRECT_URL=postgresql://user:password@localhost:5432/dbname
 # Supabase
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# 라우트 및 리다이렉트
+LOGIN_SUCCESS_REDIRECT=/
+REGISTER_PAGE_URL=/login
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
 ### 설치 및 실행
@@ -94,13 +100,18 @@ pnpm dev
 ### 주요 스크립트
 
 ```bash
-pnpm dev          # 개발 서버 실행
-pnpm build        # 프로덕션 빌드
-pnpm start        # 프로덕션 서버 실행
-pnpm lint         # ESLint 검사
-pnpm lint:fix     # ESLint 자동 수정
-pnpm format       # Prettier 포맷팅 적용
-pnpm typecheck    # TypeScript 타입 체크
+pnpm dev           # 개발 서버 실행
+pnpm build         # 프로덕션 빌드
+pnpm start         # 프로덕션 서버 실행
+pnpm prod          # 빌드 후 프로덕션 서버 실행
+pnpm lint          # ESLint 검사
+pnpm lint:fix      # ESLint 자동 수정
+pnpm format        # Prettier 포맷팅 적용
+pnpm format:check  # Prettier 포맷팅 검사
+pnpm typecheck     # TypeScript 타입 체크
+pnpm test          # Jest 테스트 실행
+pnpm test:watch    # Jest 변경 감지 테스트 실행
+pnpm test:coverage # Jest 테스트 커버리지 리포트
 ```
 
 ## 팀원 소개
@@ -134,8 +145,13 @@ pnpm typecheck    # TypeScript 타입 체크
 
 ## 추가 문서
 
-프로젝트의 상세한 개발 가이드는 `docs/` 폴더를 참고하세요:
+프로젝트의 상세한 개발 가이드는 `docs/` 및 `sql/` 폴더를 참고하세요:
 
 - **[conventions.md](docs/conventions.md)** - 코딩 컨벤션 및 스타일 가이드
 - **[data-model.md](docs/data-model.md)** - 데이터베이스 스키마 및 ERD
-- **[user-flow.md](docs/user-flow.md)** - 사용자 플로우
+- **[user-flow.md](docs/user-flow.md)** - 핵심 사용자 여정 및 플로우
+- **[middleware-auth.md](docs/middleware-auth.md)** - Next.js 라우트 가드 및 인증 아키텍처
+- **[testing-middleware.md](docs/testing-middleware.md)** - 인증 및 라우트 가드 테스트 시나리오
+- **[IMAGE_UPLOAD_SETUP.md](docs/IMAGE_UPLOAD_SETUP.md)** - Supabase Storage 이미지 업로드 가이드
+- **[utc-datetime-guide.md](docs/utc-datetime-guide.md)** - UTC 날짜/시간 동기화 가이드
+- **[sql/README.md](sql/README.md)** - 데이터베이스 마이그레이션 가이드 및 이력

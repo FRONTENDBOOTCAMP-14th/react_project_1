@@ -1,14 +1,9 @@
-/**
- * Rounds API 유틸리티 함수
- */
-
 import prisma from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
+import type { ValidatedRoundCreationData, ValidatedRoundUpdateData } from '@/lib/rounds/rounds.core'
 
 /**
- * RoundNumber 자동 증가 로직
- * @param clubId - 커뮤니티 ID
- * @returns 다음 roundNumber
+ * 다음 roundNumber 자동 증가 조회
  */
 export async function getNextRoundNumber(clubId: string): Promise<number> {
   const lastRound = await prisma.round.findFirst({
@@ -27,10 +22,7 @@ export async function getNextRoundNumber(clubId: string): Promise<number> {
 }
 
 /**
- * Round 필터링 where 절 생성
- * @param clubId - 커뮤니티 ID (필수)
- * @param filters - 필터 옵션
- * @returns Prisma where 조건
+ * 라운드 필터링 where 절 생성
  */
 export function buildRoundWhereClause(
   clubId: string,
@@ -47,7 +39,6 @@ export function buildRoundWhereClause(
     clubId,
   }
 
-  // roundNumber 필터
   if (filters.roundNumber) {
     const parsedRoundNumber = parseInt(filters.roundNumber, 10)
     if (!Number.isNaN(parsedRoundNumber)) {
@@ -55,7 +46,6 @@ export function buildRoundWhereClause(
     }
   }
 
-  // 날짜 범위 필터
   const dateConditions: Prisma.RoundWhereInput[] = []
 
   if (filters.startDateFrom) {
@@ -95,4 +85,42 @@ export function buildRoundWhereClause(
   }
 
   return whereClause
+}
+
+/**
+ * 활성 라운드 단건 조회 (clubId 검증 포함)
+ */
+export async function findRoundById(roundId: string, clubId: string) {
+  return prisma.round.findFirst({
+    where: { roundId, clubId, deletedAt: null },
+  })
+}
+
+/**
+ * 검증된 데이터로 라운드 생성
+ */
+export async function createRound(data: ValidatedRoundCreationData) {
+  return prisma.round.create({
+    data,
+  })
+}
+
+/**
+ * 라운드 정보 업데이트
+ */
+export async function updateRound(roundId: string, data: ValidatedRoundUpdateData) {
+  return prisma.round.update({
+    where: { roundId },
+    data,
+  })
+}
+
+/**
+ * 라운드 소프트 삭제
+ */
+export async function softDeleteRound(roundId: string) {
+  return prisma.round.update({
+    where: { roundId, deletedAt: null },
+    data: { deletedAt: new Date() },
+  })
 }

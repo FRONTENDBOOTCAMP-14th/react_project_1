@@ -3,8 +3,11 @@ import type { CreateAttendanceInput } from '@/lib/types/attendance'
 import {
   buildAttendanceWhereClause,
   buildAttendanceCreateData,
+} from '@/lib/attendance/attendance.server'
+import {
   canManageAttendance,
-} from '@/lib/utils/attendance'
+  validateAttendanceRegistration,
+} from '@/lib/attendance/attendance.core'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
 import { requireAuthUser } from '@/lib/utils/api-auth'
 import { getUserRole } from '@/lib/auth'
@@ -185,13 +188,26 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('이미 해당 라운드에 출석 정보가 있습니다.', 409)
     }
 
+    // Core: 출석 등록 정책 및 불변식 검증 (권한, 타입, 시간 윈도우)
+    const validation = validateAttendanceRegistration({
+      callerRole: callerMembership.role,
+      isSelf: currentUserId === userId,
+      attendanceType,
+      round,
+      hasExistingAttendance: Boolean(existingAttendance),
+      currentTime: attendanceDate ? new Date(attendanceDate) : new Date(),
+    })
+    if (validation.isErr()) {
+      return createErrorResponse(validation.error.message, 400)
+    }
+
     // 출석 생성
     const attendance = await prisma.attendance.create({
       data: buildAttendanceCreateData({
         userId,
         roundId,
         attendanceType,
-        attendanceDate: attendanceDate ? new Date(attendanceDate) : undefined,
+        attendanceDate: validation.value.attendanceDate,
       }),
       include: {
         user: {

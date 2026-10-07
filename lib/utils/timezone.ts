@@ -1,11 +1,7 @@
-'use client'
-
 /**
  * 타임존 유틸리티
  * 사용자의 타임존을 감지하고 변환합니다.
  */
-
-import { useEffect, useState } from 'react'
 
 export interface TimezoneInfo {
   timezone: string
@@ -130,35 +126,6 @@ export function toTimezone(date: Date, timezone: string): Date {
 export function formatTimezoneInfo(info: TimezoneInfo): string {
   const dstIndicator = info.isDST ? ' (DST)' : ''
   return `${info.name} ${info.offsetString}${dstIndicator}`
-}
-
-/**
- * React Hook for timezone
- */
-export function useTimezone() {
-  const [timezoneInfo, setTimezoneInfo] = useState<TimezoneInfo>(getTimezoneInfo())
-
-  useEffect(() => {
-    // 타임존 변경 감지 (거의 발생하지 않지만 안전하게)
-    const checkTimezone = () => {
-      const newInfo = getTimezoneInfo()
-      if (newInfo.timezone !== timezoneInfo.timezone || newInfo.offset !== timezoneInfo.offset) {
-        setTimezoneInfo(newInfo)
-      }
-    }
-
-    const interval = setInterval(checkTimezone, 60000) // 1분마다 확인
-
-    return () => clearInterval(interval)
-  }, [timezoneInfo])
-
-  return {
-    timezoneInfo,
-    toLocalTime,
-    toUTCTime,
-    toTimezone,
-    formatTimezoneInfo: () => formatTimezoneInfo(timezoneInfo),
-  }
 }
 
 /**

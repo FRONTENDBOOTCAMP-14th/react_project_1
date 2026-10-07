@@ -1,7 +1,7 @@
 'use client'
 
 import { MESSAGES, ROUTES } from '@/constants'
-import type { CommunityDetail } from '@/lib/community/communityServer'
+import type { CommunityDetail } from '@/lib/community/community.server'
 import Link from 'next/link'
 import { useCommunityContext } from '../_context/CommunityContext'
 import styles from './NotificationLink.module.css'

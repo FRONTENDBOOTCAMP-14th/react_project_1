@@ -17,7 +17,7 @@ import { roundSelect } from '@/lib/queries'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import { getPaginationParams, withPagination } from '@/lib/utils/apiHelpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
-import { buildRoundWhereClause, getNextRoundNumber } from '@/lib/utils/rounds'
+import { buildRoundWhereClause, getNextRoundNumber } from '@/lib/rounds/rounds.server'
 import { requireAuthUser } from '@/lib/utils/api-auth'
 import type { NextRequest } from 'next/server'
 

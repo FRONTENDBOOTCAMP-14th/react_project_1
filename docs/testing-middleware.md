@@ -179,7 +179,7 @@ Prisma ORM이 자동으로 매개변수화된 쿼리를 사용하므로 기본�
 미들웨어에서 디버그 로그를 추가하려면:
 
 ```typescript
-// middleware.ts
+// proxy.ts (Next.js 16) 또는 middleware.ts
 export default withAuth(
   req => {
     console.log('[Middleware] Path:', req.nextUrl.pathname)
@@ -217,10 +217,10 @@ NEXTAUTH_DEBUG=true
 
 ## 트러블슈팅
 
-### 미들웨어가 실행되지 않음
+### 미들웨어 / 라우트 가드가 실행되지 않음
 
-- `middleware.ts` 파일이 프로젝트 루트에 있는지 확인
-- 파일명이 정확한지 확인 (middleware.ts, middleware.js만 유효)
+- `proxy.ts` (Next.js 16) 또는 `middleware.ts` 파일이 프로젝트 루트에 있는지 확인
+- 파일명이 프레임워크 버전에 맞는지 확인 (Next.js 16: `proxy.ts`, 레거시: `middleware.ts`)
 - 개발 서버 재시작
 
 ### 무한 리다이렉트

@@ -17,10 +17,10 @@
 ### 1. 서버 시간 가져오기
 
 ```typescript
-import { getServerTime } from '@/lib/utils'
+import { fetchServerTime } from '@/lib/utils'
 
 // 서버의 현재 UTC 시간 가져오기
-const serverTime = await getServerTime()
+const serverTime = await fetchServerTime()
 ```
 
 ### 2. 날짜 포맷팅

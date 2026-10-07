@@ -7,13 +7,17 @@
  *   - DELETE: 특정 리액션 소프트 삭제
  */
 
-import prisma from '@/lib/prisma'
-import { reactionSelect, reactionDetailSelect } from '@/lib/queries'
-import type { UpdateReactionRequest } from '@/lib/types/reaction'
-import type { NextRequest } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/response'
 import { hasErrorCode } from '@/lib/errors'
+import { canManageReaction, validateReactionUpdate } from '@/lib/reactions/reactions.core'
+import {
+  findReactionById,
+  softDeleteReaction,
+  updateReaction,
+} from '@/lib/reactions/reactions.server'
+import type { UpdateReactionRequest } from '@/lib/types/reaction'
 import { requireAuthUser } from '@/lib/utils/api-auth'
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/response'
+import type { NextRequest } from 'next/server'
 
 /**
  * GET /api/reactions/[id]
@@ -22,14 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params
 
-    // findFirst로 소프트 삭제 조건 적용
-    const reaction = await prisma.reaction.findFirst({
-      where: {
-        reactionId: id,
-        deletedAt: null,
-      },
-      select: reactionDetailSelect,
-    })
+    const reaction = await findReactionById(id, true)
 
     if (!reaction) {
       return createErrorResponse('Reaction not found', 404)
@@ -56,53 +53,39 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     // 리액션 조회
-    const existingReaction = await prisma.reaction.findFirst({
-      where: { reactionId: id, deletedAt: null },
-      select: { userId: true },
-    })
+    const existingReaction = await findReactionById(id)
 
     if (!existingReaction) {
       return createErrorResponse('Reaction not found', 404)
     }
 
-    // 권한 확인: 작성자만 수정 가능
-    if (existingReaction.userId !== userId) {
+    // 작성자 권한 확인
+    if (!canManageReaction(existingReaction.userId, userId)) {
       return createErrorResponse('리액션 작성자만 수정할 수 있습니다.', 403)
     }
 
     const body = (await request.json()) as UpdateReactionRequest
 
-    // 리액션 내용 검증
-    if (body.reaction !== undefined) {
-      const trimmedReaction = body.reaction.trim()
-      if (!trimmedReaction) {
-        return createErrorResponse('Reaction cannot be empty', 400)
-      }
-
-      // 업데이트 실행 (race condition 방지: where에 deletedAt 조건 포함)
-      try {
-        const updatedReaction = await prisma.reaction.update({
-          where: {
-            reactionId: id,
-            deletedAt: null,
-          },
-          data: {
-            reaction: trimmedReaction,
-          },
-          select: reactionSelect,
-        })
-
-        return createSuccessResponse(updatedReaction)
-      } catch (error: unknown) {
-        // Prisma P2025: Record not found
-        if (hasErrorCode(error, 'P2025')) {
-          return createErrorResponse('Reaction not found', 404)
-        }
-        throw error
-      }
+    if (body.reaction === undefined) {
+      return createErrorResponse('No fields to update', 400)
     }
 
-    return createErrorResponse('No fields to update', 400)
+    // 수정 내용 검증
+    const validation = validateReactionUpdate(body)
+    if (validation.isErr()) {
+      return createErrorResponse(validation.error.message, 400)
+    }
+
+    // 리액션 수정 실행
+    try {
+      const updatedReaction = await updateReaction(id, validation.value)
+      return createSuccessResponse(updatedReaction)
+    } catch (error: unknown) {
+      if (hasErrorCode(error, 'P2025')) {
+        return createErrorResponse('Reaction not found', 404)
+      }
+      throw error
+    }
   } catch (error) {
     console.error('Error updating reaction:', error)
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -126,33 +109,22 @@ export async function DELETE(
     if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     // 리액션 조회
-    const existingReaction = await prisma.reaction.findFirst({
-      where: { reactionId: id, deletedAt: null },
-      select: { userId: true },
-    })
+    const existingReaction = await findReactionById(id)
 
     if (!existingReaction) {
       return createErrorResponse('Reaction not found', 404)
     }
 
-    // 권한 확인: 작성자만 삭제 가능
-    if (existingReaction.userId !== userId) {
+    // 작성자 권한 확인
+    if (!canManageReaction(existingReaction.userId, userId)) {
       return createErrorResponse('리액션 작성자만 삭제할 수 있습니다.', 403)
     }
 
-    // 소프트 삭제 수행 (race condition 방지: where에 deletedAt 조건 포함)
+    // 삭제 처리
     try {
-      await prisma.reaction.update({
-        where: {
-          reactionId: id,
-          deletedAt: null,
-        },
-        data: { deletedAt: new Date() },
-      })
-
+      await softDeleteReaction(id)
       return createSuccessResponse({ message: 'Reaction deleted successfully' })
     } catch (error: unknown) {
-      // Prisma P2025: Record not found
       if (hasErrorCode(error, 'P2025')) {
         return createErrorResponse('Reaction not found', 404)
       }

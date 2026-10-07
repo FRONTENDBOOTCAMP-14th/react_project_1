@@ -1,5 +1,5 @@
 import CommunityCard from '@/app/community/_components/CommunityCard'
-import { fetchRecommendedCommunities } from '@/lib/community/communityServer'
+import { fetchRecommendedCommunities } from '@/lib/community/community.server'
 import styles from './RecommendedStudies.module.css'
 
 export default async function RecommendedStudies() {

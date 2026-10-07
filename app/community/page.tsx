@@ -1,4 +1,4 @@
-import { fetchInitialCommunities } from '@/lib/community/cursorCommunityServer'
+import { fetchInitialCommunities } from '@/lib/community/community.server'
 import type { Metadata } from 'next'
 import CursorCommunitiesClient from './_components/CursorCommunitiesClient'
 

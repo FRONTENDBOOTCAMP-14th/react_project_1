@@ -105,7 +105,7 @@
 - **파일 위치**: `app/api/<resource>/route.ts`
 - **HTTP 규칙**: 리소스/HTTP 메서드 일관성 유지 (예: `GET /api/goals`, `POST /api/goals`)
 - **에러 처리**: `try/catch`로 캐치 후 `NextResponse.json({ success: false, error }, { status })`
-- **보안**: 현재 단계에서 미들웨어 미적용. 운영 전 보안 계층(API Key/Basic/Supabase Auth) 추가 예정
+- **보안**: Next.js 16 `proxy.ts`에서 글로벌 JWT 인증 및 라우트 가드를 적용하며, 세부 권한 검증은 `lib/middleware/auth.ts` 및 `lib/auth/permissions.ts` 인가 가드를 통해 수행합니다.
 
 ### 7.1 응답 스키마
 
@@ -262,12 +262,30 @@ export async function POST(req: Request) {
 }
 ```
 
+### 13.3 FCIS (Functional Core, Imperative Shell) 및 도메인 정렬 아키텍처
+
+- **Functional Core (`lib/*/*.core.ts`)**: I/O가 없는 순수 함수로 비즈니스 규칙 및 불변식을 검증하고 `Result<T, E>` 타입을 반환합니다. 데이터베이스나 외부 프레임워크에 대한 결합이 없어야 합니다.
+- **Data Access SSOT (`lib/*/*.server.ts`)**: 도메인 엔티티별 데이터베이스(Prisma) 접근의 단일 진실 공급원(SSOT)입니다. 중복 서버 파일(예: `communityServer.ts` 등) 작성을 금지하며, 한 도메인의 쿼리는 단일 `*.server.ts`로 수렴합니다.
+- **Imperative Shell & Server Actions (`app/actions/*.ts`, `app/api/*`)**: 네트워크 I/O, 권한 확인(`checkPermission`), 캐시 무효화(`revalidatePath`)를 담당하며 Core와 Server 계층을 조율합니다. 출석(`attendance.ts`), 회차(`rounds.ts`) 등 도메인 책임 단위로 파일을 엄격히 1:1 분리합니다.
+- **유틸리티 경계 (`lib/utils/`)**: `lib/utils/index.ts` 배럴 파일은 순수 헬퍼만 re-export합니다. 서버 전용 객체(`NextRequest`)를 포함하는 모듈(`apiHelpers.ts`)이나 React Hook은 배럴 파일에서 제외하고 각각 `@/lib/utils/apiHelpers`, `@/lib/hooks/*`에서 직접 임포트합니다.
+
 ---
 
-## 14. 향후 추가 예정
+## 14. 테스트 전략 (Jest & React Testing Library)
 
-- 테스트 전략(Jest/Playwright)과 커버리지 기준
-- 디자인 토큰 파일(`styles/tokens.css`) 정의 + 버전 관리 방법
+- **테스트 환경**: Jest 30, `@testing-library/react`, `ts-jest`
+- **단위 테스트**: Functional Core(`*.core.test.ts`), 유틸리티(`*.test.ts`)의 순수 로직 검증
+- **통합 및 인가 테스트**: Server Action(`app/actions/__tests__/*.test.ts`), API Route Handler 권한 검증 테스트
+- **명령어**:
+  - `pnpm test`: 전체 테스트 스위트 실행
+  - `pnpm test:watch`: 파일 변경 감지 테스트
+  - `pnpm test:coverage`: 테스트 커버리지 리포트 생성
+
+---
+
+## 15. 향후 추가 예정
+
+- E2E 테스트(Playwright) 시나리오 작성
 - Supabase 스키마/마이그레이션 운영 규칙(Supabase CLI)
 - 접근성 체크리스트(ARIA, 키보드 내비게이션)
 - 배포 파이프라인(Preview → Staging → Production) 운영 수칙

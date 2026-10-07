@@ -136,3 +136,63 @@ export function prepareImageUpload(
     filePath,
   })
 }
+
+export interface ValidatedCommunityCreationData {
+  name: string
+  description: string | null
+  isPublic: boolean
+  region: string | null
+  subRegion: string | null
+  tagname: string[]
+  imageUrl: string | null
+}
+
+export interface CreateCommunityDataInput {
+  name?: string
+  description?: string | null
+  is_public?: boolean
+  isPublic?: boolean
+  region?: string | null
+  subRegion?: string | null
+  tagname?: string | string[]
+  imageUrl?: string | null
+}
+
+/**
+ * 커뮤니티 생성 입력값 검증 및 정제
+ */
+export function validateCommunityCreation(
+  input: CreateCommunityDataInput
+): Result<ValidatedCommunityCreationData, Error> {
+  const name = (input?.name ?? '').trim()
+  if (!name || name.length === 0) {
+    return err(new Error('커뮤니티 이름은 비어있을 수 없습니다'))
+  }
+  if (name.length > 100) {
+    return err(new Error('커뮤니티 이름은 100자 이하여야 합니다'))
+  }
+
+  const description = (input?.description ?? '').trim() || null
+  const isPublic =
+    input.is_public !== undefined ? Boolean(input.is_public) : Boolean(input.isPublic ?? true)
+  const region = (input?.region ?? '').trim() || null
+  const subRegion = (input?.subRegion ?? '').trim() || null
+  const imageUrl = (input?.imageUrl ?? '').trim() || null
+
+  let tagname: string[] = []
+  if (Array.isArray(input.tagname)) {
+    tagname = input.tagname.map(t => t.trim()).filter(Boolean)
+  } else if (typeof input.tagname === 'string') {
+    tagname = input.tagname ? [input.tagname.trim()] : []
+  }
+
+  return ok({
+    name,
+    description,
+    isPublic,
+    region,
+    subRegion,
+    tagname,
+    imageUrl,
+  })
+}

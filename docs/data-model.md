@@ -46,6 +46,7 @@ erDiagram
         varchar[] tagname
         varchar region
         varchar sub_region
+        varchar image_url
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at
@@ -239,6 +240,7 @@ CREATE INDEX idx_reaction_active ON reactions (member_id)
 | tagname     | varchar[] | DEFAULT []                   | 커뮤니티 태그 목록              |
 | region      | varchar   | NULL                         | 지역 (시/도)                    |
 | sub_region  | varchar   | NULL                         | 세부 지역 (구/군)               |
+| image_url   | varchar   | NULL                         | 커뮤니티 대표 이미지 URL        |
 | created_at  | timestamp | NOT NULL, DEFAULT now()      | 생성일                          |
 | updated_at  | timestamp | NOT NULL, DEFAULT now()      | 수정일 (트리거로 자동 업데이트) |
 | deleted_at  | timestamp | NULL                         | 소프트 삭제 시각                |
@@ -254,7 +256,7 @@ CREATE UNIQUE INDEX uk_community_name_active ON communities (name)
 
 #### 인덱스 - Community 테이블
 
-> 공개 여부와 이름 검색, 지역 기반 검색, 활성 커뮤니티 조회를 빠르게 처리합니다.
+> 공개 여부와 이름 검색, 지역 기반 검색, 태그 기반 검색, 복합 검색 및 활성 커뮤니티 조회를 빠르게 처리합니다.
 
 ```sql
 CREATE INDEX idx_community_public ON communities (is_public);
@@ -263,6 +265,8 @@ CREATE INDEX idx_community_region ON communities (region);
 CREATE INDEX idx_community_sub_region ON communities (sub_region);
 CREATE INDEX idx_community_active ON communities (name)
     WHERE deleted_at IS NULL;
+CREATE INDEX idx_community_tagname_gin ON communities USING GIN (tagname);
+CREATE INDEX idx_community_search_composite ON communities (deleted_at, region, created_at);
 ```
 
 ### CommunityMember 테이블

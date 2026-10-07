@@ -105,7 +105,7 @@
 - **파일 위치**: `app/api/<resource>/route.ts`
 - **HTTP 규칙**: 리소스/HTTP 메서드 일관성 유지 (예: `GET /api/goals`, `POST /api/goals`)
 - **에러 처리**: `try/catch`로 캐치 후 `NextResponse.json({ success: false, error }, { status })`
-- **보안**: 현재 단계에서 미들웨어 미적용. 운영 전 보안 계층(API Key/Basic/Supabase Auth) 추가 예정
+- **보안**: Next.js 16 `proxy.ts`에서 글로벌 JWT 인증 및 라우트 가드를 적용하며, 세부 권한 검증은 `lib/middleware/auth.ts` 및 `lib/auth/permissions.ts` 인가 가드를 통해 수행합니다.
 
 ### 7.1 응답 스키마
 
@@ -262,12 +262,28 @@ export async function POST(req: Request) {
 }
 ```
 
+### 13.3 FCIS (Functional Core, Imperative Shell) 아키텍처
+
+- **Functional Core (`lib/*/*.core.ts`)**: I/O가 없는 순수 함수로 비즈니스 규칙 및 불변식을 검증하고 `Result<T, E>` 타입을 반환합니다.
+- **Imperative Shell (`lib/*/*.server.ts`, `app/actions/*.ts`)**: 데이터베이스(Prisma), 네트워크 I/O 및 세션 조회를 담당하며 Core를 호출하여 결과를 처리합니다.
+
 ---
 
-## 14. 향후 추가 예정
+## 14. 테스트 전략 (Jest & React Testing Library)
 
-- 테스트 전략(Jest/Playwright)과 커버리지 기준
-- 디자인 토큰 파일(`styles/tokens.css`) 정의 + 버전 관리 방법
+- **테스트 환경**: Jest 30, `@testing-library/react`, `ts-jest`
+- **단위 테스트**: Functional Core(`*.core.test.ts`), 유틸리티(`*.test.ts`)의 순수 로직 검증
+- **통합 및 인가 테스트**: Server Action(`app/actions/__tests__/*.test.ts`), API Route Handler 권한 검증 테스트
+- **명령어**:
+  - `pnpm test`: 전체 테스트 스위트 실행
+  - `pnpm test:watch`: 파일 변경 감지 테스트
+  - `pnpm test:coverage`: 테스트 커버리지 리포트 생성
+
+---
+
+## 15. 향후 추가 예정
+
+- E2E 테스트(Playwright) 시나리오 작성
 - Supabase 스키마/마이그레이션 운영 규칙(Supabase CLI)
 - 접근성 체크리스트(ARIA, 키보드 내비게이션)
 - 배포 파이프라인(Preview → Staging → Production) 운영 수칙

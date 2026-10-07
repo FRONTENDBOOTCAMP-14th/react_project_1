@@ -46,43 +46,30 @@ SUPABASE_ANON_KEY=your-anon-key
 
 > **중요**: 데이터베이스와 Storage는 같은 Supabase 프로젝트를 사용합니다.
 
-## 3. 데이터베이스 마이그레이션
+## 3. 데이터베이스 스키마 및 마이그레이션
 
-Prisma 스키마에 `imageUrl` 필드가 추가되었으므로 마이그레이션을 실행해야 합니다.
+커뮤니티 대표 이미지 저장을 위한 `image_url` 필드가 이미 Prisma 스키마(`prisma/schema.prisma`) 및 마이그레이션(`sql/migrations/202510281536__add_community_image_url`)에 반영되어 있습니다.
 
-### 3.1 마이그레이션 생성 및 적용
+### 3.1 신규 환경 배포 시 적용
 
 ```bash
-# Prisma Client 재생성
-pnpm prisma generate
-
-# 마이그레이션 파일 생성
-pnpm prisma migrate dev --name add_image_url_to_community
-
-# 또는 프로덕션 환경에서
+# 마이그레이션 적용
 pnpm prisma migrate deploy
+# 또는 직접 SQL 적용
+psql "$DATABASE_URL" -f sql/migrations/202510281536__add_community_image_url/migration.sql
 ```
 
-### 3.2 수동 마이그레이션 (선택사항)
+## 4. 패키지 의존성
 
-마이그레이션 도구를 사용하지 않는 경우, 다음 SQL을 직접 실행하세요:
-
-```sql
-ALTER TABLE communities
-ADD COLUMN image_url VARCHAR;
-```
-
-## 4. 패키지 설치
-
-Supabase 클라이언트 라이브러리가 필요합니다:
+`@supabase/supabase-js` 라이브러리가 이미 프로젝트 의존성(`package.json`)에 포함되어 설치되어 있습니다:
 
 ```bash
-pnpm add @supabase/supabase-js
+pnpm install
 ```
 
-## 5. 개발 서버 재시작
+## 5. 개발 서버 실행
 
-모든 설정이 완료되면 개발 서버를 재시작하세요:
+설정이 완료되면 개발 서버를 실행하세요:
 
 ```bash
 pnpm dev

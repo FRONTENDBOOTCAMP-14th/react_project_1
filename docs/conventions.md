@@ -262,10 +262,12 @@ export async function POST(req: Request) {
 }
 ```
 
-### 13.3 FCIS (Functional Core, Imperative Shell) 아키텍처
+### 13.3 FCIS (Functional Core, Imperative Shell) 및 도메인 정렬 아키텍처
 
-- **Functional Core (`lib/*/*.core.ts`)**: I/O가 없는 순수 함수로 비즈니스 규칙 및 불변식을 검증하고 `Result<T, E>` 타입을 반환합니다.
-- **Imperative Shell (`lib/*/*.server.ts`, `app/actions/*.ts`)**: 데이터베이스(Prisma), 네트워크 I/O 및 세션 조회를 담당하며 Core를 호출하여 결과를 처리합니다.
+- **Functional Core (`lib/*/*.core.ts`)**: I/O가 없는 순수 함수로 비즈니스 규칙 및 불변식을 검증하고 `Result<T, E>` 타입을 반환합니다. 데이터베이스나 외부 프레임워크에 대한 결합이 없어야 합니다.
+- **Data Access SSOT (`lib/*/*.server.ts`)**: 도메인 엔티티별 데이터베이스(Prisma) 접근의 단일 진실 공급원(SSOT)입니다. 중복 서버 파일(예: `communityServer.ts` 등) 작성을 금지하며, 한 도메인의 쿼리는 단일 `*.server.ts`로 수렴합니다.
+- **Imperative Shell & Server Actions (`app/actions/*.ts`, `app/api/*`)**: 네트워크 I/O, 권한 확인(`checkPermission`), 캐시 무효화(`revalidatePath`)를 담당하며 Core와 Server 계층을 조율합니다. 출석(`attendance.ts`), 회차(`rounds.ts`) 등 도메인 책임 단위로 파일을 엄격히 1:1 분리합니다.
+- **유틸리티 경계 (`lib/utils/`)**: `lib/utils/index.ts` 배럴 파일은 순수 헬퍼만 re-export합니다. 서버 전용 객체(`NextRequest`)를 포함하는 모듈(`apiHelpers.ts`)이나 React Hook은 배럴 파일에서 제외하고 각각 `@/lib/utils/apiHelpers`, `@/lib/hooks/*`에서 직접 임포트합니다.
 
 ---
 

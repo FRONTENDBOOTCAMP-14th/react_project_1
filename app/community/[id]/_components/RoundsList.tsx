@@ -3,7 +3,7 @@
 import { ErrorState, FormField, LoadingState, SharedForm } from '@/components/common'
 import { StrokeButton } from '@/components/ui'
 import { MESSAGES } from '@/constants'
-import type { CommunityDetail } from '@/lib/community/communityServer'
+import type { CommunityDetail } from '@/lib/community/community.server'
 import type { CreateRoundRequest } from '@/lib/types/round'
 import { toDatetimeLocalString } from '@/lib/utils'
 import { useRouter } from 'next/navigation'

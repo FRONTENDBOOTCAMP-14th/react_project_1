@@ -431,7 +431,7 @@ graph TD
 - `GET /api/rounds?communityId=[id]` - 회차 목록
 - `GET /api/rounds/[id]` - 회차 상세
 - `GET /api/attendance/round/[roundId]` (또는 `getRoundAttendancesAction`) - 회차별 출석 현황
-- `POST /api/attendance` (또는 `markAttendanceAction`) - 출석 체크 및 상태 기록
+- `POST /api/attendance` (또는 `markAttendanceAction` from `@/app/actions/attendance`) - 출석 체크 및 상태 기록
 - `DELETE /api/attendance/[id]` - 출석 기록 삭제/취소
 - `GET /api/attendance/user/[userId]` - 사용자별 출석 기록
 

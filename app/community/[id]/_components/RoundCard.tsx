@@ -1,6 +1,7 @@
 'use client'
 
-import { deleteRoundAction, markAttendanceAction, updateRoundAction } from '@/app/actions/rounds'
+import { markAttendanceAction } from '@/app/actions/attendance'
+import { deleteRoundAction, updateRoundAction } from '@/app/actions/rounds'
 import { ErrorState, LoadingState } from '@/components/common'
 import { IconButton, Popover, StrokeButton, type PopoverAction } from '@/components/ui'
 import { MESSAGES } from '@/constants'

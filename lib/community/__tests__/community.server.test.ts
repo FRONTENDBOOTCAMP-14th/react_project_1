@@ -60,6 +60,28 @@ describe('community.server', () => {
       expect(where.subRegion).toBe('강남구')
       expect(where.name).toEqual({ contains: '러닝', mode: 'insensitive' })
     })
+
+    it('유효한 createdAfter/createdBefore 날짜를 적용해야 함', () => {
+      const where = buildCommunityWhereClause({
+        createdAfter: '2026-01-01T00:00:00Z',
+        createdBefore: '2026-12-31T23:59:59Z',
+      })
+
+      expect(where.createdAt).toEqual({
+        gte: new Date('2026-01-01T00:00:00Z'),
+        lte: new Date('2026-12-31T23:59:59Z'),
+      })
+    })
+
+    it('유효하지 않은 createdAfter/createdBefore 입력 시 createdAt 조건을 생성하지 않아야 함 (Finding 2)', () => {
+      const where = buildCommunityWhereClause({
+        createdAfter: 'invalid-date',
+        createdBefore: 'not-a-date',
+      })
+
+      expect(where.createdAt).toBeUndefined()
+      expect(where.deletedAt).toBeNull()
+    })
   })
 
   describe('createCommunityWithAdmin', () => {

@@ -1,8 +1,43 @@
+/**
+ * 커뮤니티 데이터 접근 계층 (단일 진실 공급원 SSOT)
+ * - CRUD, 상세 조회, 추천 목록, 커서 기반 페이지네이션 통합
+ */
+
 import prisma from '@/lib/prisma'
-import { communityDetailSelect, communitySelect } from '@/lib/queries'
+import { communitySelect } from '@/lib/queries'
 import type { Prisma } from '@prisma/client'
 import type { ValidatedCommunityCreationData } from './community.core'
-import type { UpdateCommunityInput } from '@/lib/types/community'
+import type { Community, UpdateCommunityInput } from '@/lib/types/community'
+import type { Round } from '@/lib/types/round'
+import type {
+  CursorPaginationParams,
+  CursorPaginationResult,
+} from '@/lib/pagination/cursorPagination'
+import { applyCursorPagination, processCursorResult } from '@/lib/pagination/cursorPagination'
+
+export interface CommunityDetail extends Community {
+  rounds: Round[]
+  notifications: Array<{
+    notificationId: string
+    title: string
+    content: string | null
+    isPinned: boolean
+    createdAt: Date
+  }>
+  memberCount: number
+}
+
+export interface CursorCommunitiesParams extends CursorPaginationParams {
+  isPublic?: boolean
+  region?: string
+}
+
+export interface CursorCommunitiesResult extends CursorPaginationResult<Community> {
+  filters: {
+    isPublic?: boolean
+    region?: string
+  }
+}
 
 export interface CommunityFilterParams {
   isPublic?: boolean
@@ -46,14 +81,20 @@ export function buildCommunityWhereClause(
     }
   }
   if (filters.createdAfter) {
-    whereClause.createdAt = {
-      gte: new Date(filters.createdAfter),
+    const afterDate = new Date(filters.createdAfter)
+    if (!isNaN(afterDate.getTime())) {
+      whereClause.createdAt = {
+        gte: afterDate,
+      }
     }
   }
   if (filters.createdBefore) {
-    whereClause.createdAt = {
-      ...(typeof whereClause.createdAt === 'object' ? whereClause.createdAt : {}),
-      lte: new Date(filters.createdBefore),
+    const beforeDate = new Date(filters.createdBefore)
+    if (!isNaN(beforeDate.getTime())) {
+      whereClause.createdAt = {
+        ...(typeof whereClause.createdAt === 'object' ? whereClause.createdAt : {}),
+        lte: beforeDate,
+      }
     }
   }
   if (filters.userId) {
@@ -71,10 +112,10 @@ export function buildCommunityWhereClause(
 /**
  * 커뮤니티 단건 조회 (소프트 삭제 제외)
  */
-export async function findCommunityById(clubId: string, includeDetail = false) {
+export async function findCommunityById(clubId: string) {
   return prisma.community.findFirst({
     where: { clubId, deletedAt: null },
-    select: includeDetail ? communityDetailSelect : communitySelect,
+    select: communitySelect,
   })
 }
 
@@ -129,5 +170,183 @@ export async function softDeleteCommunity(clubId: string) {
   return prisma.community.update({
     where: { clubId, deletedAt: null },
     data: { deletedAt: new Date() },
+  })
+}
+
+/**
+ * 서버 컴포넌트용 커뮤니티 상세 정보 조회
+ * - 한 번의 쿼리로 모든 관련 데이터 조회
+ * - Soft delete 필터 적용
+ * - 호출 시점 기준 동적 시간으로 미래 라운드 필터링
+ */
+export async function getCommunityDetail(clubId: string): Promise<CommunityDetail | null> {
+  try {
+    const now = new Date()
+    const community = await prisma.community.findFirst({
+      where: { clubId, deletedAt: null },
+      select: {
+        clubId: true,
+        name: true,
+        description: true,
+        isPublic: true,
+        region: true,
+        subRegion: true,
+        imageUrl: true,
+        tagname: true,
+        createdAt: true,
+        updatedAt: true,
+        rounds: {
+          select: {
+            roundId: true,
+            clubId: true,
+            roundNumber: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            deletedAt: null,
+            startDate: {
+              gte: now,
+            },
+          },
+          orderBy: { roundNumber: 'desc' },
+        },
+        notifications: {
+          select: {
+            notificationId: true,
+            title: true,
+            content: true,
+            isPinned: true,
+            createdAt: true,
+          },
+          where: { deletedAt: null },
+          orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
+          take: 5,
+        },
+        communityMembers: {
+          select: { id: true },
+          where: { deletedAt: null },
+        },
+      },
+    })
+
+    if (!community) {
+      return null
+    }
+
+    const { communityMembers, ...rest } = community
+
+    const communityDetail: CommunityDetail = {
+      ...rest,
+      memberCount: communityMembers.length,
+    }
+
+    return communityDetail
+  } catch (error) {
+    console.error('커뮤니티 상세 정보 조회 실패:', error)
+    return null
+  }
+}
+
+/**
+ * 추천 커뮤니티 목록 조회 (서버 컴포넌트용)
+ * - 공개 커뮤니티만 조회
+ * - 최신순 정렬
+ */
+export async function fetchRecommendedCommunities(
+  limit = 10,
+  isPublic = true
+): Promise<Community[]> {
+  const communities = await prisma.community.findMany({
+    where: {
+      deletedAt: null,
+      isPublic,
+    },
+    take: limit,
+    orderBy: { createdAt: 'desc' },
+    select: communitySelect,
+  })
+
+  return communities
+}
+
+/**
+ * 커서 기반 커뮤니티 목록 조회
+ */
+export async function fetchCommunitiesWithCursor(
+  params: CursorCommunitiesParams = {}
+): Promise<CursorCommunitiesResult> {
+  const { cursor, limit = 20, direction = 'forward', isPublic, region } = params
+
+  const where = {
+    deletedAt: null,
+    ...(isPublic !== undefined && { isPublic }),
+    ...(region && { region }),
+  }
+
+  const query = applyCursorPagination(
+    {
+      where,
+      select: {
+        clubId: true,
+        name: true,
+        description: true,
+        isPublic: true,
+        region: true,
+        subRegion: true,
+        tagname: true,
+        createdAt: true,
+        imageUrl: true,
+        rounds: {
+          select: {
+            roundId: true,
+            roundNumber: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+          },
+          where: {
+            deletedAt: null,
+            startDate: {
+              gte: new Date(),
+            },
+          },
+          orderBy: { roundNumber: 'desc' },
+          take: 3,
+        },
+      },
+    },
+    {
+      cursor,
+      limit,
+      direction,
+    },
+    'createdAt'
+  )
+
+  const communities = await prisma.community.findMany(query)
+  const result = processCursorResult(communities as unknown as Community[], limit, direction)
+
+  return {
+    ...result,
+    filters: {
+      isPublic,
+      region,
+    },
+  }
+}
+
+/**
+ * 초기 커뮤니티 목록 조회
+ */
+export async function fetchInitialCommunities(
+  params: Omit<CursorCommunitiesParams, 'cursor' | 'direction'> = {}
+): Promise<CursorCommunitiesResult> {
+  return fetchCommunitiesWithCursor({
+    ...params,
+    direction: 'forward',
   })
 }

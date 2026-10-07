@@ -11,8 +11,8 @@ import { useInfiniteCursorPagination } from '@/lib/hooks/useCursorPagination'
 import {
   fetchInitialCommunities,
   fetchCommunitiesWithCursor,
-} from '@/lib/community/cursorCommunityServer'
-import type { CursorCommunitiesResult } from '@/lib/community/cursorCommunityServer'
+} from '@/lib/community/community.server'
+import type { CursorCommunitiesResult } from '@/lib/community/community.server'
 import { FillButton } from '@/components/ui'
 import CommunityCard from './CommunityCard'
 

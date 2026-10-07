@@ -1,10 +1,17 @@
 'use server'
 
 import { getCurrentUserId } from '@/lib/auth'
+import { canDeleteMember } from '@/lib/community/members.core'
+import {
+  countAdminsInClub,
+  findMemberByUserAndClub,
+  softDeleteMemberRecord,
+} from '@/lib/community/members.server'
 import { prisma } from '@/lib/prisma'
 import type { CommunityInfo } from '@/lib/types/community'
 import {
   assertExists,
+  ServerActionError,
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
@@ -19,43 +26,30 @@ export async function leaveCommunityAction(clubId: string): Promise<ServerAction
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      // 멤버 정보 조회
-      const existingMember = await prisma.communityMember.findFirst({
-        where: {
-          clubId,
-          userId,
-          deletedAt: null,
-        },
-      })
-
-      if (!existingMember) {
-        throw new Error('멤버를 찾을 수 없습니다')
-      }
+      // 멤버 정보 조회 (Server I/O)
+      const existingMember = await findMemberByUserAndClub(userId, clubId)
+      assertExists(existingMember, '멤버를 찾을 수 없습니다')
 
       // 관리자인 경우 다른 관리자가 있는지 확인
+      let isSoleAdmin = false
       if (existingMember.role === 'admin') {
-        const otherAdmins = await prisma.communityMember.findMany({
-          where: {
-            clubId,
-            role: 'admin',
-            userId: { not: userId },
-            deletedAt: null,
-          },
-        })
-
-        if (otherAdmins.length === 0) {
-          throw new Error('팀장은 커뮤니티에 다른 팀장이 있는 경우에만 탈퇴할 수 있습니다')
-        }
+        const adminCount = await countAdminsInClub(clubId)
+        isSoleAdmin = adminCount <= 1
       }
 
-      // 소프트 삭제
-      await prisma.communityMember.update({
-        where: {
-          id: existingMember.id,
-          deletedAt: null,
-        },
-        data: { deletedAt: new Date() },
+      // Core: 탈퇴 불변식 판별 (INV-M02)
+      const validation = canDeleteMember({
+        memberExists: Boolean(existingMember),
+        isSelf: true,
+        hasAdminPermission: false,
+        isSoleAdmin,
       })
+      if (validation.isErr()) {
+        throw new ServerActionError(validation.error.message)
+      }
+
+      // Server I/O: 소프트 삭제
+      await softDeleteMemberRecord(existingMember.id)
 
       revalidatePath('/dashboard')
     },

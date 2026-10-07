@@ -1,12 +1,20 @@
 'use server'
 
 import { getCurrentUserId, hasPermission } from '@/lib/auth'
+import { findCommunityById } from '@/lib/community/community.server'
 import {
   canDeleteMember,
   validateMemberCreation,
   validateMemberRoleUpdate,
 } from '@/lib/community/members.core'
-import { prisma } from '@/lib/prisma'
+import {
+  countAdminsInClub,
+  createMemberRecord,
+  findMemberById,
+  findMemberByUserAndClub,
+  softDeleteMemberRecord,
+  updateMemberRoleRecord,
+} from '@/lib/community/members.server'
 import type { CreateMemberRequest, UpdateMemberRequest } from '@/lib/types/member'
 import {
   assertExists,
@@ -27,18 +35,10 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
       const { clubId } = data
       const role = 'member'
 
-      const club = await prisma.community.findFirst({
-        where: { clubId, deletedAt: null },
-        select: { clubId: true },
-      })
-
-      const existingMember = await prisma.communityMember.findFirst({
-        where: {
-          clubId,
-          userId,
-          deletedAt: null,
-        },
-      })
+      const [club, existingMember] = await Promise.all([
+        findCommunityById(clubId),
+        findMemberByUserAndClub(userId, clubId),
+      ])
 
       const validation = validateMemberCreation({
         clubId,
@@ -51,9 +51,7 @@ export async function createMemberAction(data: CreateMemberRequest): Promise<Ser
         throw validation.error
       }
 
-      const newMember = await prisma.communityMember.create({
-        data: validation.value,
-      })
+      const newMember = await createMemberRecord(validation.value)
 
       revalidatePath(`/community/${clubId}`)
       return newMember
@@ -74,10 +72,7 @@ export async function updateMemberAction(
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      const existingMember = await prisma.communityMember.findFirst({
-        where: { id: memberId, deletedAt: null },
-        select: { clubId: true, userId: true },
-      })
+      const existingMember = await findMemberById(memberId)
 
       const hasAdminPermission = existingMember
         ? await hasPermission(userId, existingMember.clubId, 'admin')
@@ -92,13 +87,7 @@ export async function updateMemberAction(
         throw validation.error
       }
 
-      const updatedMember = await prisma.communityMember.update({
-        where: {
-          id: memberId,
-          deletedAt: null,
-        },
-        data: validation.value,
-      })
+      const updatedMember = await updateMemberRoleRecord(memberId, validation.value.role)
 
       if (existingMember) {
         revalidatePath(`/community/${existingMember.clubId}`)
@@ -118,10 +107,7 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
       const userId = await getCurrentUserId()
       assertExists(userId, '인증이 필요합니다')
 
-      const existingMember = await prisma.communityMember.findFirst({
-        where: { id: memberId, deletedAt: null },
-        select: { clubId: true, userId: true, role: true },
-      })
+      const existingMember = await findMemberById(memberId)
 
       const isSelf = existingMember?.userId === userId
       const hasAdminPermission = existingMember
@@ -131,13 +117,7 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
       // 대상 멤버가 관리자일 때 다른 관리자가 남아있는지 확인
       let isSoleAdmin = false
       if (existingMember?.role === 'admin') {
-        const adminCount = await prisma.communityMember.count({
-          where: {
-            clubId: existingMember.clubId,
-            role: 'admin',
-            deletedAt: null,
-          },
-        })
+        const adminCount = await countAdminsInClub(existingMember.clubId)
         isSoleAdmin = adminCount <= 1
       }
 
@@ -151,13 +131,7 @@ export async function deleteMemberAction(memberId: string): Promise<ServerAction
         throw validation.error
       }
 
-      await prisma.communityMember.update({
-        where: {
-          id: memberId,
-          deletedAt: null,
-        },
-        data: { deletedAt: new Date() },
-      })
+      await softDeleteMemberRecord(memberId)
 
       if (existingMember) {
         revalidatePath(`/community/${existingMember.clubId}`)

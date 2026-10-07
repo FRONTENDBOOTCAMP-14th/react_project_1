@@ -7,10 +7,14 @@
  */
 
 import { MESSAGES } from '@/constants/messages'
+import { validateCommunityCreation } from '@/lib/community/community.core'
+import {
+  buildCommunityWhereClause,
+  createCommunityWithAdmin,
+} from '@/lib/community/community.server'
 import { getErrorMessage, hasErrorCode } from '@/lib/errors'
 import { requireAuth } from '@/lib/middleware/auth'
 import prisma from '@/lib/prisma'
-import type { CommunityWhereClause } from '@/lib/types/community'
 import {
   getBooleanParam,
   getPaginationParams,
@@ -24,81 +28,22 @@ import type { NextRequest } from 'next/server'
 /**
  * GET /api/communities
  * - 커뮤니티 목록을 조회합니다.
- * - 쿼리 파라미터
- *   - page?: number (기본값: 1)
- *   - limit?: number (기본값: 10, 최대: 100)
- *   - isPublic?: 'true'|'false' 공개 여부로 필터
- *   - search?: string 커뮤니티 이름으로 검색
- *   - searchTags?: string[] 태그로 검색 (다중 가능)
- *   - region?: string 지역으로 필터
- *   - subRegion?: string 세부 지역으로 필터
- *   - createdAfter?: string (ISO 8601) 생성일 이후로 필터
- *   - createdBefore?: string (ISO 8601) 생성일 이전으로 필터
- *   - userId?: string userId로 필터
- *
- * 응답
- * - 200: { success: true, data: Community[], count: number, pagination: PaginationInfo }
- * - 500: { success: false, error: string }
  */
 export async function GET(request: NextRequest) {
   try {
     const { page, limit, skip } = getPaginationParams(request)
     const searchParams = request.nextUrl.searchParams
 
-    // 필터링 파라미터
-    const isPublic = getBooleanParam(searchParams, 'isPublic')
-    const search = getStringParam(searchParams, 'search')
-    const searchTags = searchParams.getAll('searchTags').filter(Boolean)
-    const createdAfter = getStringParam(searchParams, 'createdAfter')
-    const createdBefore = getStringParam(searchParams, 'createdBefore')
-    const userId = getStringParam(searchParams, 'userId')
-    const region = getStringParam(searchParams, 'region')
-    const subRegion = getStringParam(searchParams, 'subRegion')
-
-    // where 조건 구성
-    const whereClause: CommunityWhereClause = {
-      deletedAt: null,
-      ...(isPublic !== undefined && { isPublic }),
-      ...(region && { region }),
-      ...(subRegion && { subRegion }),
-      ...(search && {
-        name: {
-          contains: search,
-          mode: 'insensitive' as const,
-        },
-      }),
-      ...(searchTags.length > 0 && {
-        tagname: {
-          hasSome: searchTags,
-        },
-      }),
-      ...(createdAfter && {
-        createdAt: {
-          gte: new Date(createdAfter),
-        },
-      }),
-      ...(createdBefore && {
-        createdAt: {
-          lte: new Date(createdBefore),
-        },
-      }),
-      ...(userId && {
-        communityMembers: {
-          some: {
-            userId,
-            deletedAt: null,
-          },
-        },
-      }),
-    }
-
-    // where 조건에 날짜 범위가 있는 경우 AND로 결합
-    if (createdAfter && createdBefore) {
-      whereClause.createdAt = {
-        gte: new Date(createdAfter),
-        lte: new Date(createdBefore),
-      }
-    }
+    const whereClause = buildCommunityWhereClause({
+      isPublic: getBooleanParam(searchParams, 'isPublic'),
+      search: getStringParam(searchParams, 'search'),
+      searchTags: searchParams.getAll('searchTags').filter(Boolean),
+      createdAfter: getStringParam(searchParams, 'createdAfter'),
+      createdBefore: getStringParam(searchParams, 'createdBefore'),
+      userId: getStringParam(searchParams, 'userId'),
+      region: getStringParam(searchParams, 'region'),
+      subRegion: getStringParam(searchParams, 'subRegion'),
+    })
 
     // withPagination 유틸리티 사용
     return withPagination(
@@ -128,7 +73,7 @@ export async function GET(request: NextRequest) {
             where: {
               deletedAt: null,
               startDate: {
-                gte: new Date(), // 현재 날짜 이후의 라운드만
+                gte: new Date(),
               },
             },
             orderBy: { roundNumber: 'desc' },
@@ -150,23 +95,6 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/communities
  * - 신규 커뮤니티를 생성합니다.
- * - 미들웨어가 이미 인증을 확인하므로 간단한 헬퍼 사용
- *
- * 요청 Body
- * {
- *   "name": "커뮤니티 이름(필수)",
- *   "description": "설명(선택)",
- *   "isPublic": true,
- *   "region": "지역(선택)",
- *   "subRegion": "세부 지역(선택)",
- *   "tagname": "태그(선택)"
- * }
- *
- * 응답
- * - 201: { success: true, data: Community }
- * - 400: { success: false, error: string }
- * - 401: { success: false, error: string }
- * - 500: { success: false, error: string }
  */
 export async function POST(req: NextRequest) {
   try {
@@ -175,73 +103,15 @@ export async function POST(req: NextRequest) {
     if (authError || !userId) return authError || createErrorResponse('인증이 필요합니다.', 401)
 
     const body = await req.json()
-    const name = (body?.name ?? '').trim()
-    const description = (body?.description ?? '').trim() || null
-    const isPublic = Boolean(body?.is_public ?? body?.isPublic ?? true)
-    const region = (body?.region ?? '').trim() || null
-    const subRegion = (body?.subRegion ?? body?.subRegion ?? '').trim() || null
-    const tagname = body?.tagname ? [body.tagname] : []
-    const imageUrl = (body?.imageUrl ?? '').trim() || null
 
-    // 필수 값 검증
-    if (!name) {
-      return createErrorResponse(MESSAGES.ERROR.COMMUNITY_NAME_REQUIRED, 400)
+    // 입력값 검증
+    const validation = validateCommunityCreation(body)
+    if (validation.isErr()) {
+      return createErrorResponse(validation.error.message, 400)
     }
 
-    // 트랜잭션으로 커뮤니티 생성 및 생성자를 멤버로 추가
-    const created = await prisma.$transaction(async tx => {
-      // 1. 커뮤니티 생성
-      const community = await tx.community.create({
-        data: {
-          name,
-          description,
-          isPublic,
-          region,
-          subRegion,
-          tagname,
-          imageUrl,
-        },
-        select: {
-          clubId: true,
-          name: true,
-          description: true,
-          isPublic: true,
-          region: true,
-          subRegion: true,
-          imageUrl: true,
-          createdAt: true,
-          updatedAt: true,
-          tagname: true,
-          rounds: {
-            select: {
-              roundId: true,
-              roundNumber: true,
-              startDate: true,
-              endDate: true,
-              location: true,
-            },
-            where: {
-              deletedAt: null,
-              startDate: {
-                gte: new Date(),
-              },
-            },
-            orderBy: { roundNumber: 'desc' },
-          },
-        },
-      })
-
-      // 2. 생성자를 admin 멤버로 추가
-      await tx.communityMember.create({
-        data: {
-          clubId: community.clubId,
-          userId,
-          role: 'admin',
-        },
-      })
-
-      return community
-    })
+    // 커뮤니티 생성 및 관리자 멤버 등록
+    const created = await createCommunityWithAdmin(validation.value, userId)
 
     // 커뮤니티 목록 캐시 무효화
     revalidateTag('communities', 'max')

@@ -7,11 +7,17 @@ import {
   prepareCommunityUpdate,
   prepareImageUpload,
 } from '@/lib/community/community.core'
-import { prisma } from '@/lib/prisma'
+import {
+  findCommunityById,
+  softDeleteCommunity,
+  updateCommunity,
+} from '@/lib/community/community.server'
 import type { UpdateCommunityInput } from '@/lib/types/community'
+import { hasPermission } from '@/lib/middleware/auth'
 import {
   assertExists,
   checkPermission,
+  ServerActionError,
   type ServerActionResponse,
   withServerAction,
 } from '@/lib/utils/serverActions'
@@ -38,10 +44,7 @@ export async function updateCommunityAction(
         throw prepared.error
       }
 
-      await prisma.community.update({
-        where: { clubId },
-        data: prepared.value,
-      })
+      await updateCommunity(clubId, prepared.value)
 
       revalidatePath(REVALIDATE_PATHS.COMMUNITY(clubId))
       revalidateTag(REVALIDATE_TAGS.COMMUNITIES, 'max')
@@ -59,26 +62,24 @@ export async function deleteCommunityAction(clubId: string): Promise<ServerActio
       const userId = await getCurrentUserId()
       assertExists(userId, MESSAGES.ERROR.AUTH_REQUIRED)
 
-      const community = await prisma.community.findUnique({
-        where: { clubId },
-        select: { deletedAt: true },
-      })
+      const community = await findCommunityById(clubId)
       assertExists(community, '커뮤니티를 찾을 수 없습니다')
 
-      await checkPermission(userId, clubId, PERMISSION_LEVELS.ADMIN)
+      const isAdmin = await hasPermission(userId, clubId, 'admin')
 
       const validation = canDeleteCommunity({
-        isAdmin: true,
-        isDeleted: community.deletedAt !== null,
+        isAdmin,
+        isDeleted: false,
       })
       if (validation.isErr()) {
-        throw validation.error
+        throw new ServerActionError(
+          validation.error.message,
+          !isAdmin ? 'FORBIDDEN' : 'BAD_REQUEST',
+          !isAdmin ? 403 : 400
+        )
       }
 
-      await prisma.community.update({
-        where: { clubId, deletedAt: null },
-        data: { deletedAt: new Date() },
-      })
+      await softDeleteCommunity(clubId)
 
       revalidatePath('/community')
       revalidateTag('communities', 'max')
@@ -149,10 +150,7 @@ export async function uploadCommunityImageAction(
       const { data: urlData } = supabase.storage.from('community-images').getPublicUrl(filePath)
       const imageUrl = urlData.publicUrl
 
-      await prisma.community.update({
-        where: { clubId },
-        data: { imageUrl },
-      })
+      await updateCommunity(clubId, { imageUrl })
 
       revalidatePath(`/community/${clubId}`)
       revalidateTag('communities', 'max')
